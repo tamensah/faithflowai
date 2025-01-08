@@ -1,0 +1,41 @@
+generator client {
+	provider = "prisma-client-js"
+}
+
+datasource db {
+	provider = "postgresql"
+	url      = env("DATABASE_URL")
+}
+
+model Church {
+	id          String   @id @default(cuid())
+	createdAt   DateTime @default(now())
+	updatedAt   DateTime @updatedAt
+	name        String
+	slug        String   @unique
+	domain      String?  @unique
+	timezone    String   @default("UTC")
+	
+	// Relations
+	members     Member[]
+	events      Event[]
+	
+	@@index([slug])
+	@@index([domain])
+}
+
+model Member {
+	id          String   @id @default(cuid())
+	churchId    String
+	createdAt   DateTime @default(now())
+	updatedAt   DateTime @updatedAt
+	firstName   String
+	lastName    String
+	email       String?
+	
+	// Relations
+	church      Church   @relation(fields: [churchId], references: [id])
+	
+	@@index([churchId])
+	@@index([email])
+}
