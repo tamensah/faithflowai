@@ -44,6 +44,16 @@ This file is the running operations log for implementation details, runtime cons
   - `CLERK_SECRET_KEY`
 - Remaining go-live action:
   - Replace Clerk placeholder values on both projects with real keys.
+  - Current policy: development Clerk keys are allowed only in `development`/`preview`; `production` must use production Clerk keys.
+
+### Clerk auth rollout note
+
+- Frontends now support optional Clerk JWT template tokens via `NEXT_PUBLIC_CLERK_JWT_TEMPLATE`.
+- If `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` is unset, frontends use default `getToken()` behavior.
+- Render API currently validates Clerk JWT signature via `CLERK_JWT_KEY` + `CLERK_JWT_ISSUER`.
+- Keep `CLERK_JWT_AUDIENCE` unset until JWT template audience is finalized; then set both:
+  - Clerk template audience
+  - Render `CLERK_JWT_AUDIENCE`
 
 ### Billing and subscriptions
 
