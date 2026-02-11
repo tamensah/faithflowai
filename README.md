@@ -196,6 +196,11 @@ Currently emitting:
 ## Brand Guide
 See `/Users/tamensah/aihub/faithflow_ai/docs/BRAND_GUIDE.md`.
 
+## Deployment
+- Full deployment runbook: `/Users/tamensah/aihub/faithflow_ai/docs/DEPLOYMENT_MANUAL.md`
+- Provider setup checklist: `/Users/tamensah/aihub/faithflow_ai/docs/THIRDPARTY_CONFIG.md`
+- Scheduler profiles: `/Users/tamensah/aihub/faithflow_ai/docs/SCHEDULER_PROFILES.md`
+
 ## Next Focus Areas
 - Payments refinements (refunds, disputes, multi-account routing)
 - Communications orchestration (Resend + Twilio/WhatsApp)
