@@ -99,6 +99,7 @@ Required env:
 - `NEXT_PUBLIC_API_URL` = Render API URL
 - `NEXT_PUBLIC_WEB_URL` = public web URL
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` (optional; required only if using Clerk custom JWT template)
 - `CLERK_SECRET_KEY`
 
 ### Project B: Admin app
@@ -112,6 +113,7 @@ Required env:
 - `NEXT_PUBLIC_API_URL` = Render API URL
 - `NEXT_PUBLIC_ADMIN_URL` = public admin URL
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` (optional; required only if using Clerk custom JWT template)
 - `CLERK_SECRET_KEY`
 
 ### Monorepo deploy command profile (Codex/Vercel CLI)

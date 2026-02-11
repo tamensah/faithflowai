@@ -9,6 +9,12 @@ This doc lists the required provider‑side configuration to run the alpha. Once
 - Create a Clerk application.
 - Enable Organizations.
 - Configure JWTs for backend validation.
+- Create a JWT template (recommended name: `faithflow-api`) for frontend token minting.
+  - Suggested custom claims:
+    - `org_id`: `{{organization.id}}`
+    - `org_slug`: `{{organization.slug}}`
+    - `email`: `{{user.primary_email_address.email_address}}`
+  - Set template audience to `faithflow-api` if you want strict audience validation.
 - Create a webhook and set endpoint:
   - `POST /webhooks/clerk`
   - Events: `organization.created`
@@ -16,6 +22,7 @@ This doc lists the required provider‑side configuration to run the alpha. Once
   - `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`
   - `CLERK_JWT_KEY`, `CLERK_JWT_ISSUER`, `CLERK_JWT_AUDIENCE`
   - `CLERK_WEBHOOK_SECRET`
+  - `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` (web/admin, if using custom JWT template)
 
 ## 2. Stripe (USD Giving + Payouts)
 

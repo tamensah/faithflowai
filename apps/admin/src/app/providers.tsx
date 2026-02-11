@@ -9,6 +9,7 @@ import { trpc } from '../lib/trpc';
 
 function TrpcProvider({ children }: { children: React.ReactNode }) {
   const { getToken } = useAuth();
+  const tokenTemplate = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
     trpc.createClient({
@@ -17,7 +18,7 @@ function TrpcProvider({ children }: { children: React.ReactNode }) {
           url: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/trpc',
           transformer: superjson,
           headers: async () => {
-            const token = await getToken();
+            const token = await getToken(tokenTemplate ? { template: tokenTemplate } : undefined);
             return token ? { Authorization: `Bearer ${token}` } : {};
           },
         }),
