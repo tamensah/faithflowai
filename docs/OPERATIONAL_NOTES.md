@@ -10,6 +10,23 @@ This file is the running operations log for implementation details, runtime cons
 
 ## Snapshot (2026-02-11)
 
+### Deployment state (Render hybrid backend)
+
+- Workspace: `tea-csuufv56l47c7382nnrg` (`My Workspace`)
+- API service: `faithflow-api` (`srv-d66giolum26s738rsus0`)
+- API URL: `https://faithflow-api.onrender.com`
+- Postgres: `faithflow-postgres` (`dpg-d66gic14tr6s73alhg10-a`)
+- Cron jobs:
+  - `faithflow-support-sla-sweep` (`crn-d66giv24d50c738rcpv0`)
+  - `faithflow-tenant-ops-automate` (`crn-d66givp4tr6s73alhuqg`)
+  - `faithflow-subscription-metadata-backfill` (`crn-d66gj0ili9vc739t6mg0`)
+- Latest deploy status check:
+  - API deploy `dep-d66giotum26s738rsv6g`: `live` (`deploy_ended` -> `succeeded`)
+  - Cron deploys: all `live`; manual trigger test runs completed `successful`
+- Health and logs:
+  - `GET /docs` on API URL returns `200`
+  - Render error log query in first 30 minutes after deploy: `0` error logs
+
 ### Billing and subscriptions
 
 - Tenant self-serve billing is implemented (`billing.*` router + `/billing` page).
