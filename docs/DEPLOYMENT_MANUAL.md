@@ -114,6 +114,21 @@ Required env:
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
 
+### Monorepo deploy command profile (Codex/Vercel CLI)
+
+For this workspace, use prebuilt deploys from repo root with project-specific settings:
+
+- Web:
+  - `npx vercel@latest build --prod --yes`
+  - `npx vercel@latest deploy --prebuilt --prod --yes`
+  - with project settings: `rootDirectory=apps/web`, `buildCommand=pnpm --filter @faithflow-ai/web build`
+- Admin:
+  - `npx vercel@latest build --prod --yes`
+  - `npx vercel@latest deploy --prebuilt --prod --yes`
+  - with project settings: `rootDirectory=apps/admin`, `buildCommand=pnpm --filter @faithflow-ai/admin build`
+
+Using `--prebuilt` avoids workspace protocol install failures on direct app-folder deploys.
+
 ### Cross-origin rule
 
 `ALLOWED_ORIGINS` in Render API must include both Vercel app origins.
@@ -195,4 +210,3 @@ If MCP is unavailable, use Dashboard Blueprint deploy with `/Users/tamensah/aihu
 - Add uptime checks for API and scheduled task endpoints.
 - Enable centralized logging/metrics and error alert routing.
 - Add DB backup retention policy and restore test.
-

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 
@@ -10,7 +11,7 @@ const providerOptions = [
 ];
 const paystackCurrencyOptions = ['GHS', 'NGN', 'KES', 'ZAR', 'USD', 'XOF'];
 
-export default function GivePage() {
+function GivePageContent() {
   const params = useSearchParams();
   const [churchSlug, setChurchSlug] = useState('demo-church');
   const [amount, setAmount] = useState('50');
@@ -197,5 +198,13 @@ export default function GivePage() {
         </Card>
       </div>
     </main>
+  );
+}
+
+export default function GivePage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-background px-6 py-12" />}>
+      <GivePageContent />
+    </Suspense>
   );
 }

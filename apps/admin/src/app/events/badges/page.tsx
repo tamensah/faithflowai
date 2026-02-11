@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import QRCode from 'qrcode';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
 import { trpc } from '../../../lib/trpc';
 
-export default function EventBadgesPage() {
+function EventBadgesPageContent() {
   const searchParams = useSearchParams();
   const eventId = searchParams.get('eventId') ?? '';
   const { data: event } = trpc.event.detail.useQuery(
@@ -117,5 +117,13 @@ export default function EventBadgesPage() {
         </div>
       </div>
     </Shell>
+  );
+}
+
+export default function EventBadgesPage() {
+  return (
+    <Suspense fallback={<Shell><div className="space-y-6" /></Shell>}>
+      <EventBadgesPageContent />
+    </Suspense>
   );
 }

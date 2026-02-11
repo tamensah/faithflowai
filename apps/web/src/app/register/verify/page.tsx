@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, Badge, Button } from '@faithflow-ai/ui';
 import { trpc } from '../../../lib/trpc';
 
-export default function VerifyRegistrationPage() {
+function VerifyRegistrationPageContent() {
   const searchParams = useSearchParams();
   const registrationId = searchParams.get('registrationId') ?? '';
   const token = searchParams.get('token') ?? '';
@@ -49,5 +49,13 @@ export default function VerifyRegistrationPage() {
         )}
       </Card>
     </div>
+  );
+}
+
+export default function VerifyRegistrationPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-xl p-8" />}>
+      <VerifyRegistrationPageContent />
+    </Suspense>
   );
 }

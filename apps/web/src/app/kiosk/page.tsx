@@ -1,11 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { trpc } from '../../lib/trpc';
 
-export default function KioskPage() {
+function KioskPageContent() {
   const searchParams = useSearchParams();
   const eventId = searchParams.get('eventId') ?? '';
   const code = searchParams.get('code') ?? '';
@@ -106,5 +106,13 @@ export default function KioskPage() {
         </div>
       </Card>
     </div>
+  );
+}
+
+export default function KioskPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-5xl p-8" />}>
+      <KioskPageContent />
+    </Suspense>
   );
 }

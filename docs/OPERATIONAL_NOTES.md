@@ -27,6 +27,24 @@ This file is the running operations log for implementation details, runtime cons
   - `GET /docs` on API URL returns `200`
   - Render error log query in first 30 minutes after deploy: `0` error logs
 
+### Deployment state (Vercel frontend)
+
+- Web project: `tamensahs-projects/web`
+  - Alias URL: `https://web-nu-eight-62.vercel.app`
+- Admin project: `tamensahs-projects/admin`
+  - Alias URL: `https://admin-gamma-beryl.vercel.app`
+- Build/deploy method:
+  - Local prebuild with `vercel@50.15.1` + `--prebuilt` deploy
+  - Monorepo build settings pinned per project (`apps/web`, `apps/admin`)
+- Vercel env placeholders configured for `production`, `preview`, `development`:
+  - `NEXT_PUBLIC_API_URL`
+  - `NEXT_PUBLIC_WEB_URL`
+  - `NEXT_PUBLIC_ADMIN_URL`
+  - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+  - `CLERK_SECRET_KEY`
+- Remaining go-live action:
+  - Replace Clerk placeholder values on both projects with real keys.
+
 ### Billing and subscriptions
 
 - Tenant self-serve billing is implemented (`billing.*` router + `/billing` page).

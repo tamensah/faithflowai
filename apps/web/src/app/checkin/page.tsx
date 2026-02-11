@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { trpc } from '../../lib/trpc';
@@ -11,7 +12,7 @@ type BarcodeDetectorConstructor = new (options?: { formats: string[] }) => {
   detect: (video: HTMLVideoElement) => Promise<{ rawValue?: string }[]>;
 };
 
-export default function MobileCheckInPage() {
+function MobileCheckInPageContent() {
   const searchParams = useSearchParams();
   const initialEventId = searchParams.get('eventId') ?? '';
   const initialCode = searchParams.get('code') ?? '';
@@ -235,5 +236,13 @@ export default function MobileCheckInPage() {
         </Card>
       ) : null}
     </div>
+  );
+}
+
+export default function MobileCheckInPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-4xl p-6" />}>
+      <MobileCheckInPageContent />
+    </Suspense>
   );
 }
