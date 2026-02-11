@@ -1,0 +1,25 @@
+{
+  "name": "faithflow_ai",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test:e2e:api": "pnpm --filter @faithflow-ai/api-server test:e2e",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:push": "pnpm --filter @faithflow-ai/database exec prisma db push",
+    "db:migrate": "pnpm --filter @faithflow-ai/database exec prisma migrate dev",
+    "db:seed": "pnpm --filter @faithflow-ai/database exec prisma db seed"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.1",
+    "turbo": "^2.8.3",
+    "typescript": "^5.9.3"
+  }
+}

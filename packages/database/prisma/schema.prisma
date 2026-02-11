@@ -1,0 +1,2642 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  VOLUNTEER
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum MemberGender {
+  MALE
+  FEMALE
+  OTHER
+  UNSPECIFIED
+}
+
+enum MemberMaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+  SEPARATED
+  OTHER
+  UNSPECIFIED
+}
+
+enum MemberMilestoneType {
+  BAPTISM
+  CONFIRMATION
+  MEMBERSHIP
+  SALVATION
+  FIRST_COMMUNION
+  OTHER
+}
+
+enum GroupType {
+  SMALL_GROUP
+  MINISTRY
+  TEAM
+  CLASS
+}
+
+enum GroupStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum GroupMemberRole {
+  LEADER
+  CO_LEADER
+  MEMBER
+  ASSISTANT
+}
+
+enum VolunteerRoleStatus {
+  OPEN
+  PAUSED
+  CLOSED
+}
+
+enum VolunteerAssignmentStatus {
+  ACTIVE
+  INACTIVE
+  COMPLETED
+}
+
+enum VolunteerShiftAssignmentStatus {
+  SCHEDULED
+  CONFIRMED
+  CANCELED
+  COMPLETED
+  NO_SHOW
+}
+
+enum MemberDirectoryVisibility {
+  PUBLIC
+  MEMBERS_ONLY
+  LEADERS_ONLY
+  PRIVATE
+}
+
+enum MemberRelationshipType {
+  SPOUSE
+  PARENT
+  CHILD
+  SIBLING
+  GUARDIAN
+  MENTOR
+  DISCIPLE
+  FRIEND
+  CAREGIVER
+  EMERGENCY_CONTACT
+  OTHER
+}
+
+enum AccessRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+enum StaffInviteStatus {
+  PENDING
+  ACCEPTED
+  CANCELED
+  EXPIRED
+}
+
+enum PlatformRole {
+  SUPER_ADMIN
+  PLATFORM_ADMIN
+  OPERATIONS_MANAGER
+  SUPPORT_MANAGER
+  SUPPORT_AGENT
+  SECURITY_ADMIN
+  COMPLIANCE_OFFICER
+  BILLING_ADMIN
+  ANALYTICS_ADMIN
+}
+
+enum PlatformUserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+  CUSTOM
+}
+
+enum TenantSubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  PAUSED
+  CANCELED
+  EXPIRED
+}
+
+enum SubscriptionProvider {
+  MANUAL
+  STRIPE
+  PAYSTACK
+}
+
+enum TenantDomainStatus {
+  PENDING_VERIFICATION
+  VERIFIED
+  ACTIVE
+  FAILED
+}
+
+enum TenantSslStatus {
+  PENDING
+  PROVISIONED
+  EXPIRING_SOON
+  EXPIRED
+  FAILED
+}
+
+enum HealthCheckType {
+  API
+  DATABASE
+  WEBHOOK
+  EMAIL
+  SMS
+  STORAGE
+  WORKER
+}
+
+enum HealthCheckStatus {
+  HEALTHY
+  DEGRADED
+  OUTAGE
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum SupportTicketSource {
+  IN_APP
+  EMAIL
+  CHAT
+  PHONE
+}
+
+enum SupportMessageAuthorType {
+  PLATFORM_USER
+  TENANT_USER
+  SYSTEM
+}
+
+enum LiveStreamProvider {
+  YOUTUBE
+  FACEBOOK
+  VIMEO
+  CUSTOM_RTMP
+}
+
+enum LiveStreamStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELED
+}
+
+enum LiveModerationLevel {
+  OPEN
+  FILTERED
+  STRICT
+}
+
+enum FacilityType {
+  SANCTUARY
+  CLASSROOM
+  OFFICE
+  HALL
+  OUTDOOR
+  OTHER
+}
+
+enum FacilityBookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+  COMPLETED
+}
+
+enum CareRequestStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  CLOSED
+  ARCHIVED
+}
+
+enum CareRequestPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum CareRequestChannel {
+  WEB
+  MOBILE
+  STAFF
+  REFERRAL
+}
+
+enum SermonStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentResourceType {
+  DOCUMENT
+  VIDEO
+  AUDIO
+  LINK
+  IMAGE
+  OTHER
+}
+
+enum ContentResourceVisibility {
+  PUBLIC
+  MEMBERS_ONLY
+  LEADERS_ONLY
+  PRIVATE
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH
+}
+
+enum NotificationCategory {
+  GENERAL
+  MESSAGE
+  EVENT
+  VOLUNTEER
+  GIVING
+  ANNOUNCEMENT
+  SYSTEM
+}
+
+enum DevicePlatform {
+  WEB
+  IOS
+  ANDROID
+}
+
+enum ConversationType {
+  DIRECT
+  GROUP
+}
+
+enum ConversationMemberRole {
+  ADMIN
+  MEMBER
+}
+
+enum MessageSenderType {
+  MEMBER
+  STAFF
+  SYSTEM
+}
+
+enum EventRsvpStatus {
+  GOING
+  INTERESTED
+  DECLINED
+}
+
+enum EventType {
+  SERVICE
+  BIBLE_STUDY
+  FUNDRAISER
+  CEREMONY
+  MEETING
+  CONFERENCE
+  OTHER
+}
+
+enum EventFormat {
+  IN_PERSON
+  ONLINE
+  HYBRID
+}
+
+enum EventVisibility {
+  PUBLIC
+  MEMBERS_ONLY
+  LEADERS_ONLY
+}
+
+enum EventRegistrationStatus {
+  REGISTERED
+  WAITLISTED
+  CANCELED
+  ATTENDED
+  NO_SHOW
+}
+
+enum EventAssignmentRole {
+  SPEAKER
+  HOST
+  WORSHIP_LEADER
+  VOLUNTEER
+  TECH
+  OTHER
+}
+
+enum EventMediaType {
+  PHOTO
+  VIDEO
+  SERMON
+  DOCUMENT
+  OTHER
+}
+
+enum EventBadgeStatus {
+  ACTIVE
+  REVOKED
+  USED
+}
+
+enum EventRecurrenceFrequency {
+  WEEKLY
+  MONTHLY
+}
+
+enum TicketOrderStatus {
+  PENDING
+  PAID
+  CANCELED
+  REFUNDED
+}
+
+enum RegistrationStatus {
+  PENDING
+  VERIFIED
+  EXPIRED
+}
+
+enum OnboardingWorkflowStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum OnboardingStepType {
+  WELCOME_CALL
+  CLASS
+  PROFILE_SETUP
+  GROUP_ASSIGNMENT
+  VOLUNTEER_ONBOARDING
+  OTHER
+}
+
+enum OnboardingTaskStatus {
+  PENDING
+  COMPLETED
+  SKIPPED
+}
+
+enum SurveyStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum SurveyQuestionType {
+  SINGLE_CHOICE
+  MULTI_CHOICE
+  TEXT
+  RATING
+}
+
+enum DonationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  MANUAL
+  STRIPE
+  PAYSTACK
+}
+
+enum StorageProvider {
+  S3
+  GCS
+}
+
+enum PaymentIntentStatus {
+  REQUIRES_ACTION
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+enum CampaignStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum RecurringInterval {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum RecurringStatus {
+  ACTIVE
+  PAUSED
+  CANCELED
+}
+
+enum PledgeStatus {
+  ACTIVE
+  FULFILLED
+  CANCELED
+}
+
+enum ExpenseStatus {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PAID
+}
+
+enum BudgetStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum ReceiptStatus {
+  ISSUED
+  VOIDED
+}
+
+enum FundraiserStatus {
+  ACTIVE
+  PAUSED
+  ENDED
+}
+
+enum AuditActorType {
+  USER
+  SYSTEM
+  WEBHOOK
+}
+
+enum CommunicationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+enum CommunicationProvider {
+  RESEND
+  TWILIO
+}
+
+enum CommunicationStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+enum CommunicationScheduleStatus {
+  QUEUED
+  SENT
+  FAILED
+  CANCELED
+}
+
+enum DripCampaignStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum DripEnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELED
+}
+
+enum DisputeEvidenceType {
+  UNCATEGORIZED
+  RECEIPT
+  CUSTOMER_COMMUNICATION
+  PRODUCT_DESCRIPTION
+  REFUND_POLICY
+  CUSTOMER_EMAIL
+  CUSTOMER_NAME
+  SHIPPING_DOCUMENTATION
+  SHIPPING_TRACKING
+  SHIPPING_DATE
+  SERVICE_DOCUMENTATION
+  SERVICE_DATE
+}
+
+enum DisputeEvidenceStatus {
+  PENDING
+  SUBMITTED
+  FAILED
+}
+
+enum WebhookProvider {
+  STRIPE
+  PAYSTACK
+  STRIPE_PLATFORM
+  PAYSTACK_PLATFORM
+}
+
+enum WebhookEventStatus {
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+model Tenant {
+  id               String       @id @default(cuid())
+  name             String
+  slug             String       @unique
+  clerkOrgId       String       @unique
+  status           TenantStatus @default(ACTIVE)
+  suspendedAt      DateTime?
+  suspensionReason String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  organizations      Organization[]
+  auditLogs          AuditLog[]
+  payouts            Payout[]
+  payoutTransactions PayoutTransaction[]
+  subscriptions      TenantSubscription[]
+  domains            TenantDomain[]
+  healthChecks       TenantHealthCheck[]
+  securityPolicy     TenantSecurityPolicy?
+  supportTickets     SupportTicket[]
+  webhookEvents      WebhookEvent[]
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant  Tenant @relation(fields: [tenantId], references: [id])
+  churches Church[]
+
+  @@index([tenantId])
+}
+
+model Church {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  slug           String
+  countryCode    String?  @default("US")
+  timezone       String   @default("UTC")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  campuses     Campus[]
+  households   Household[]
+  members      Member[]
+  memberTags   MemberTag[]
+  groups       Group[]
+  volunteerRoles VolunteerRole[]
+  volunteerShifts VolunteerShift[]
+  volunteerAvailability VolunteerAvailability[]
+  surveys Survey[]
+  onboardingWorkflows OnboardingWorkflow[]
+  events       Event[]
+  eventSeries  EventSeries[]
+  donations    Donation[]
+  payoutTransactions PayoutTransaction[]
+  funds        Fund[]
+  campaigns    Campaign[]
+  fundraiserPages FundraiserPage[]
+  paymentIntents PaymentIntent[]
+  pledges      Pledge[]
+  recurringDonations RecurringDonation[]
+  expenseCategories ExpenseCategory[]
+  expenses     Expense[]
+  budgets      Budget[]
+  receipts     DonationReceipt[]
+  textToGiveNumbers TextToGiveNumber[]
+  textToGiveMessages TextToGiveMessage[]
+  payouts     Payout[]
+  refunds     Refund[]
+  disputes    Dispute[]
+  communicationTemplates CommunicationTemplate[]
+  communicationMessages CommunicationMessage[]
+  communicationSchedules CommunicationSchedule[]
+  dripCampaigns CommunicationDripCampaign[]
+  dripEnrollments CommunicationDripEnrollment[]
+  conversations Conversation[]
+  notifications InAppNotification[]
+  memberRegistrations MemberRegistration[]
+  auditLogs    AuditLog[]
+  staffMemberships StaffMembership[]
+  memberRelationships MemberRelationship[]
+  mediaAssets MediaAsset[]
+  eventMedia EventMedia[]
+  memberAccessRequests MemberAccessRequest[]
+  staffInvites StaffInvite[]
+  facilities Facility[]
+  facilityBookings FacilityBooking[]
+  careRequests CareRequest[]
+  sermons Sermon[]
+  contentResources ContentResource[]
+  liveStreamChannels LiveStreamChannel[]
+  liveStreamSessions LiveStreamSession[]
+  supportTickets SupportTicket[]
+  webhookEvents WebhookEvent[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+}
+
+model Campus {
+  id        String   @id @default(cuid())
+  churchId  String
+  name      String
+  timezone  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  events Event[]
+  eventSeries EventSeries[]
+  facilities Facility[]
+  careRequests CareRequest[]
+  sermons Sermon[]
+  contentResources ContentResource[]
+  liveStreamChannels LiveStreamChannel[]
+
+  @@index([churchId])
+}
+
+model Household {
+  id        String   @id @default(cuid())
+  churchId  String
+  name      String?
+  primaryMemberId String? @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  church  Church @relation(fields: [churchId], references: [id])
+  primaryMember Member? @relation("HouseholdPrimary", fields: [primaryMemberId], references: [id])
+  members Member[] @relation("HouseholdMembers")
+
+  @@index([churchId])
+  @@index([primaryMemberId])
+}
+
+model Member {
+  id          String       @id @default(cuid())
+  churchId    String
+  householdId String?
+  firstName   String
+  middleName  String?
+  lastName    String
+  preferredName String?
+  email       String?
+  clerkUserId String? @unique
+  phone       String?
+  status      MemberStatus @default(ACTIVE)
+  gender      MemberGender @default(UNSPECIFIED)
+  maritalStatus MemberMaritalStatus @default(UNSPECIFIED)
+  directoryVisibility MemberDirectoryVisibility @default(MEMBERS_ONLY)
+  showEmailInDirectory Boolean @default(false)
+  showPhoneInDirectory Boolean @default(false)
+  showAddressInDirectory Boolean @default(false)
+  showPhotoInDirectory Boolean @default(true)
+  dateOfBirth DateTime?
+  joinDate    DateTime?
+  baptismDate DateTime?
+  confirmationDate DateTime?
+  avatarUrl   String?
+  addressLine1 String?
+  addressLine2 String?
+  city        String?
+  state       String?
+  postalCode  String?
+  country     String?
+  emergencyContactName String?
+  emergencyContactPhone String?
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  church     Church @relation(fields: [churchId], references: [id])
+  household  Household? @relation("HouseholdMembers", fields: [householdId], references: [id])
+  primaryHousehold Household? @relation("HouseholdPrimary")
+  attendance Attendance[]
+  donations  Donation[]
+  paymentIntents PaymentIntent[]
+  pledges    Pledge[]
+  recurringDonations RecurringDonation[]
+  fundraiserPages FundraiserPage[]
+  dripEnrollments CommunicationDripEnrollment[]
+  tagAssignments MemberTagAssignment[]
+  milestones MemberMilestone[]
+  groupMemberships GroupMember[]
+  volunteerAssignments VolunteerAssignment[]
+  volunteerShiftAssignments VolunteerShiftAssignment[]
+  volunteerAvailability VolunteerAvailability[]
+  onboardingAssignments MemberOnboarding[]
+  surveyResponses SurveyResponse[]
+  relationshipsFrom MemberRelationship[] @relation("MemberRelationshipFrom")
+  relationshipsTo MemberRelationship[] @relation("MemberRelationshipTo")
+  notificationPreferences NotificationPreference[]
+  deviceTokens DeviceToken[]
+  conversationMembers ConversationMember[]
+  sentMessages Message[] @relation("MessageSenderMember")
+  inboxNotifications InAppNotification[]
+  eventRsvps EventRsvp[]
+  registrations MemberRegistration[]
+  ticketOrders EventTicketOrder[]
+  uploadedAssets MediaAsset[]
+  eventRegistrations EventRegistration[]
+  eventAssignments EventAssignment[]
+  eventBadges EventBadge[]
+  accessRequests MemberAccessRequest[]
+  careRequestsAsSubject CareRequest[] @relation("CareSubject")
+  careRequestsAsRequester CareRequest[] @relation("CareRequester")
+  careNotesAuthored CareNote[] @relation("CareNoteAuthorMember")
+
+  @@index([churchId])
+  @@index([email])
+  @@index([lastName])
+  @@index([directoryVisibility])
+}
+
+model MemberAccessRequest {
+  id          String               @id @default(cuid())
+  churchId    String
+  clerkUserId String
+  email       String?
+  name        String?
+  message     String?
+  status      AccessRequestStatus @default(PENDING)
+  memberId    String?
+  approvedAt  DateTime?
+  deniedAt    DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  member Member? @relation(fields: [memberId], references: [id])
+
+  @@unique([churchId, clerkUserId])
+  @@index([churchId])
+  @@index([status])
+}
+
+model StaffInvite {
+  id                 String            @id @default(cuid())
+  churchId           String
+  email              String
+  clerkUserId        String?
+  role               UserRole          @default(STAFF)
+  invitedByClerkUserId String?
+  clerkInvitationId  String?
+  status             StaffInviteStatus @default(PENDING)
+  acceptedAt         DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+
+  @@unique([churchId, email])
+  @@index([churchId])
+  @@index([status])
+}
+
+model PlatformUser {
+  id          String            @id @default(cuid())
+  clerkUserId String?           @unique
+  email       String            @unique
+  name        String?
+  status      PlatformUserStatus @default(ACTIVE)
+  mfaEnabled  Boolean           @default(true)
+  lastAccessAt DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  roles PlatformUserRole[]
+  tenantSubscriptionsCreated TenantSubscription[]
+  assignedSupportTickets SupportTicket[] @relation("SupportTicketAssignee")
+  authoredSupportMessages SupportTicketMessage[] @relation("SupportMessagePlatformAuthor")
+}
+
+model PlatformUserRole {
+  id             String       @id @default(cuid())
+  platformUserId String
+  role           PlatformRole
+  createdAt      DateTime     @default(now())
+
+  platformUser PlatformUser @relation(fields: [platformUserId], references: [id])
+
+  @@unique([platformUserId, role])
+  @@index([role])
+}
+
+model SubscriptionPlan {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  description String?
+  currency    String   @default("USD")
+  interval    BillingInterval @default(MONTHLY)
+  amountMinor Int      @default(0)
+  isActive    Boolean  @default(true)
+  isDefault   Boolean  @default(false)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  features SubscriptionPlanFeature[]
+  tenantSubscriptions TenantSubscription[]
+
+  @@index([isActive])
+  @@index([isDefault])
+}
+
+model SubscriptionPlanFeature {
+  id        String   @id @default(cuid())
+  planId    String
+  key       String
+  enabled   Boolean  @default(true)
+  limit     Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, key])
+  @@index([key])
+}
+
+model TenantSubscription {
+  id           String                   @id @default(cuid())
+  tenantId     String
+  planId       String
+  status       TenantSubscriptionStatus @default(ACTIVE)
+  provider     SubscriptionProvider     @default(MANUAL)
+  providerRef  String?
+  startsAt     DateTime                 @default(now())
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  trialEndsAt  DateTime?
+  canceledAt   DateTime?
+  cancelAtPeriodEnd Boolean             @default(false)
+  seatCount    Int?
+  metadata     Json?
+  createdByPlatformUserId String?
+  createdAt    DateTime                 @default(now())
+  updatedAt    DateTime                 @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+  createdByPlatformUser PlatformUser? @relation(fields: [createdByPlatformUserId], references: [id])
+
+  @@index([tenantId, status])
+  @@index([planId])
+  @@index([provider, providerRef])
+}
+
+model MemberRegistration {
+  id        String   @id @default(cuid())
+  churchId  String
+  memberId  String
+  email     String
+  tokenHash String
+  status    RegistrationStatus @default(PENDING)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  verifiedAt DateTime?
+
+  church Church @relation(fields: [churchId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@unique([memberId])
+  @@index([churchId])
+  @@index([email])
+}
+
+model MemberTag {
+  id          String   @id @default(cuid())
+  churchId    String
+  name        String
+  color       String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  assignments MemberTagAssignment[]
+
+  @@unique([churchId, name])
+  @@index([churchId])
+}
+
+model MemberTagAssignment {
+  id        String   @id @default(cuid())
+  memberId  String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  member Member @relation(fields: [memberId], references: [id])
+  tag    MemberTag @relation(fields: [tagId], references: [id])
+
+  @@unique([memberId, tagId])
+  @@index([memberId])
+  @@index([tagId])
+}
+
+model MemberMilestone {
+  id        String   @id @default(cuid())
+  memberId  String
+  type      MemberMilestoneType
+  date      DateTime
+  notes     String?
+  createdAt DateTime @default(now())
+
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@index([memberId])
+  @@index([type])
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  churchId  String
+  name      String
+  type      GroupType @default(SMALL_GROUP)
+  status    GroupStatus @default(ACTIVE)
+  description String?
+  location  String?
+  meetingSchedule String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  members GroupMember[]
+  events Event[]
+  eventSeries EventSeries[]
+
+  @@index([churchId])
+  @@index([type])
+}
+
+model OnboardingWorkflow {
+  id          String   @id @default(cuid())
+  churchId    String
+  name        String
+  status      OnboardingWorkflowStatus @default(ACTIVE)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  steps OnboardingStep[]
+  assignments MemberOnboarding[]
+
+  @@index([churchId])
+  @@index([status])
+}
+
+model OnboardingStep {
+  id          String   @id @default(cuid())
+  workflowId  String
+  name        String
+  type        OnboardingStepType @default(OTHER)
+  order       Int
+  description String?
+  dueDays     Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workflow OnboardingWorkflow @relation(fields: [workflowId], references: [id])
+  tasks MemberOnboardingTask[]
+
+  @@index([workflowId])
+  @@unique([workflowId, order])
+}
+
+model MemberOnboarding {
+  id          String   @id @default(cuid())
+  memberId    String
+  workflowId  String
+  status      OnboardingTaskStatus @default(PENDING)
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+
+  member Member @relation(fields: [memberId], references: [id])
+  workflow OnboardingWorkflow @relation(fields: [workflowId], references: [id])
+  tasks MemberOnboardingTask[]
+
+  @@index([memberId])
+  @@index([workflowId])
+}
+
+model MemberOnboardingTask {
+  id            String   @id @default(cuid())
+  onboardingId  String
+  stepId        String
+  status        OnboardingTaskStatus @default(PENDING)
+  dueDate       DateTime?
+  completedAt   DateTime?
+  notes         String?
+
+  onboarding MemberOnboarding @relation(fields: [onboardingId], references: [id])
+  step       OnboardingStep @relation(fields: [stepId], references: [id])
+
+  @@index([onboardingId])
+  @@index([stepId])
+  @@unique([onboardingId, stepId])
+}
+
+model GroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  memberId  String
+  role      GroupMemberRole @default(MEMBER)
+  joinedAt  DateTime @default(now())
+
+  group  Group @relation(fields: [groupId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@unique([groupId, memberId])
+  @@index([memberId])
+}
+
+model VolunteerRole {
+  id        String   @id @default(cuid())
+  churchId  String
+  name      String
+  description String?
+  status    VolunteerRoleStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  assignments VolunteerAssignment[]
+  availability VolunteerAvailability[]
+  shifts VolunteerShift[]
+
+  @@unique([churchId, name])
+  @@index([churchId])
+}
+
+model VolunteerShift {
+  id          String   @id @default(cuid())
+  churchId    String
+  roleId      String
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime
+  capacity    Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  role   VolunteerRole @relation(fields: [roleId], references: [id])
+  assignments VolunteerShiftAssignment[]
+
+  @@index([churchId])
+  @@index([roleId])
+  @@index([startAt])
+}
+
+model VolunteerShiftAssignment {
+  id          String   @id @default(cuid())
+  shiftId     String
+  memberId    String
+  status      VolunteerShiftAssignmentStatus @default(SCHEDULED)
+  assignedAt  DateTime @default(now())
+  lastReminderAt DateTime?
+  notes       String?
+
+  shift  VolunteerShift @relation(fields: [shiftId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@unique([shiftId, memberId])
+  @@index([memberId])
+  @@index([status])
+}
+
+model VolunteerAvailability {
+  id        String   @id @default(cuid())
+  churchId  String
+  memberId  String
+  roleId    String?
+  dayOfWeek Weekday
+  startTime String
+  endTime   String
+  timezone  String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+  role   VolunteerRole? @relation(fields: [roleId], references: [id])
+
+  @@unique([memberId, roleId, dayOfWeek, startTime, endTime])
+  @@index([churchId])
+  @@index([memberId])
+  @@index([roleId])
+}
+
+model Survey {
+  id          String   @id @default(cuid())
+  churchId    String
+  title       String
+  description String?
+  status      SurveyStatus @default(DRAFT)
+  startAt     DateTime?
+  endAt       DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  questions SurveyQuestion[]
+  responses SurveyResponse[]
+
+  @@index([churchId])
+  @@index([status])
+}
+
+model SurveyQuestion {
+  id        String   @id @default(cuid())
+  surveyId  String
+  prompt    String
+  type      SurveyQuestionType @default(TEXT)
+  order     Int
+  required  Boolean @default(false)
+  options   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  survey Survey @relation(fields: [surveyId], references: [id])
+
+  @@index([surveyId])
+  @@unique([surveyId, order])
+}
+
+model SurveyResponse {
+  id          String   @id @default(cuid())
+  surveyId    String
+  memberId    String?
+  respondentName String?
+  respondentEmail String?
+  respondentPhone String?
+  answers     Json
+  createdAt   DateTime @default(now())
+
+  survey Survey @relation(fields: [surveyId], references: [id])
+  member Member? @relation(fields: [memberId], references: [id])
+
+  @@index([surveyId])
+  @@index([memberId])
+}
+
+model VolunteerAssignment {
+  id        String   @id @default(cuid())
+  roleId    String
+  memberId  String
+  status    VolunteerAssignmentStatus @default(ACTIVE)
+  assignedAt DateTime @default(now())
+  notes     String?
+
+  role   VolunteerRole @relation(fields: [roleId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@unique([roleId, memberId])
+  @@index([memberId])
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  churchId  String
+  campusId  String?
+  groupId   String?
+  eventSeriesId String?
+  title     String
+  description String?
+  type      EventType @default(SERVICE)
+  format    EventFormat @default(IN_PERSON)
+  visibility EventVisibility @default(PUBLIC)
+  startAt   DateTime
+  endAt     DateTime
+  location  String?
+  meetingUrl String?
+  coverImageUrl String?
+  capacity  Int?
+  requiresRsvp Boolean @default(false)
+  registrationEnabled Boolean @default(false)
+  registrationLimit Int?
+  waitlistEnabled Boolean @default(false)
+  registrationFields Json?
+  allowGuestRegistration Boolean @default(true)
+  checkInEnabled Boolean @default(false)
+  checkInCode String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  church     Church @relation(fields: [churchId], references: [id])
+  campus     Campus? @relation(fields: [campusId], references: [id])
+  group      Group? @relation(fields: [groupId], references: [id])
+  series     EventSeries? @relation(fields: [eventSeriesId], references: [id])
+  attendance Attendance[]
+  rsvps      EventRsvp[]
+  registrations EventRegistration[]
+  assignments EventAssignment[]
+  media EventMedia[]
+  badges EventBadge[]
+  ticketTypes EventTicketType[]
+  ticketOrders EventTicketOrder[]
+  facilityBookings FacilityBooking[]
+  sermons Sermon[]
+  liveStreamSessions LiveStreamSession[]
+
+  @@index([churchId])
+  @@index([groupId])
+  @@index([startAt])
+}
+
+model EventSeries {
+  id        String   @id @default(cuid())
+  churchId  String
+  campusId  String?
+  groupId   String?
+  title     String
+  description String?
+  type      EventType @default(SERVICE)
+  format    EventFormat @default(IN_PERSON)
+  visibility EventVisibility @default(PUBLIC)
+  location  String?
+  meetingUrl String?
+  coverImageUrl String?
+  startDate DateTime
+  endDate   DateTime?
+  startTime String
+  endTime   String
+  timezone  String?
+  frequency EventRecurrenceFrequency
+  interval  Int @default(1)
+  weekdays  Weekday[]
+  dayOfMonth Int?
+  requiresRsvp Boolean @default(false)
+  registrationEnabled Boolean @default(false)
+  registrationLimit Int?
+  waitlistEnabled Boolean @default(false)
+  registrationFields Json?
+  allowGuestRegistration Boolean @default(true)
+  capacity  Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  campus Campus? @relation(fields: [campusId], references: [id])
+  group  Group? @relation(fields: [groupId], references: [id])
+  events Event[]
+
+  @@index([churchId])
+}
+
+model EventRsvp {
+  id        String   @id @default(cuid())
+  eventId   String
+  memberId  String
+  status    EventRsvpStatus @default(GOING)
+  guestCount Int @default(0)
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event  Event  @relation(fields: [eventId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@unique([eventId, memberId])
+  @@index([eventId])
+  @@index([memberId])
+}
+
+model EventBadge {
+  id           String   @id @default(cuid())
+  eventId      String
+  memberId     String?
+  registrationId String?
+  ticketOrderId String?
+  badgeCode    String   @unique
+  sequence     Int?
+  status       EventBadgeStatus @default(ACTIVE)
+  issuedAt     DateTime @default(now())
+  usedAt       DateTime?
+
+  event        Event @relation(fields: [eventId], references: [id])
+  member       Member? @relation(fields: [memberId], references: [id])
+  registration EventRegistration? @relation(fields: [registrationId], references: [id])
+  ticketOrder  EventTicketOrder? @relation(fields: [ticketOrderId], references: [id])
+
+  @@index([eventId])
+  @@index([memberId])
+  @@index([registrationId])
+  @@index([ticketOrderId])
+  @@index([status])
+}
+
+model EventRegistration {
+  id        String   @id @default(cuid())
+  eventId   String
+  memberId  String?
+  status    EventRegistrationStatus @default(REGISTERED)
+  guestName String?
+  guestEmail String?
+  guestPhone String?
+  responses Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event  Event  @relation(fields: [eventId], references: [id])
+  member Member? @relation(fields: [memberId], references: [id])
+  badges EventBadge[]
+
+  @@unique([eventId, memberId])
+  @@index([eventId])
+  @@index([memberId])
+  @@index([guestEmail])
+}
+
+model EventAssignment {
+  id        String   @id @default(cuid())
+  eventId   String
+  memberId  String?
+  role      EventAssignmentRole
+  displayName String?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  event  Event  @relation(fields: [eventId], references: [id])
+  member Member? @relation(fields: [memberId], references: [id])
+
+  @@index([eventId])
+  @@index([memberId])
+}
+
+model EventMedia {
+  id        String   @id @default(cuid())
+  churchId  String
+  eventId   String
+  assetId   String
+  type      EventMediaType @default(PHOTO)
+  title     String?
+  description String?
+  isPublic  Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  church Church @relation(fields: [churchId], references: [id])
+  event  Event  @relation(fields: [eventId], references: [id])
+  asset  MediaAsset @relation(fields: [assetId], references: [id])
+
+  @@index([eventId])
+  @@index([assetId])
+  @@index([churchId])
+}
+
+model EventTicketType {
+  id        String   @id @default(cuid())
+  eventId   String
+  name      String
+  price     Decimal
+  currency  String @default("USD")
+  capacity  Int?
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id])
+  orders EventTicketOrder[]
+
+  @@index([eventId])
+}
+
+model EventTicketOrder {
+  id        String   @id @default(cuid())
+  eventId   String
+  ticketTypeId String?
+  memberId  String?
+  quantity  Int @default(1)
+  amount    Decimal
+  currency  String @default("USD")
+  provider  PaymentProvider
+  providerRef String?
+  paymentIntentId String? @unique
+  status    TicketOrderStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id])
+  ticketType EventTicketType? @relation(fields: [ticketTypeId], references: [id])
+  member Member? @relation(fields: [memberId], references: [id])
+  paymentIntent PaymentIntent? @relation(fields: [paymentIntentId], references: [id])
+  badges EventBadge[]
+
+  @@index([eventId])
+  @@index([memberId])
+  @@index([paymentIntentId])
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  churchId  String
+  type      ConversationType
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  church   Church @relation(fields: [churchId], references: [id])
+  members  ConversationMember[]
+  messages Message[]
+
+  @@index([churchId])
+}
+
+model ConversationMember {
+  id             String   @id @default(cuid())
+  conversationId String
+  memberId       String
+  role           ConversationMemberRole @default(MEMBER)
+  joinedAt       DateTime @default(now())
+  lastReadAt     DateTime?
+  typingAt       DateTime?
+  muted          Boolean  @default(false)
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  member       Member       @relation(fields: [memberId], references: [id])
+
+  @@unique([conversationId, memberId])
+  @@index([memberId])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderType     MessageSenderType
+  senderMemberId String?
+  senderUserId   String?
+  body           String
+  attachments    Json?
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  senderMember Member? @relation("MessageSenderMember", fields: [senderMemberId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderMemberId])
+}
+
+model MediaAsset {
+  id              String          @id @default(cuid())
+  churchId        String
+  uploaderMemberId String?
+  uploaderUserId  String?
+  provider        StorageProvider
+  bucket          String
+  key             String
+  url             String
+  filename        String?
+  contentType     String?
+  size            Int?
+  createdAt       DateTime        @default(now())
+
+  church         Church  @relation(fields: [churchId], references: [id])
+  uploaderMember Member? @relation(fields: [uploaderMemberId], references: [id])
+  eventMedia EventMedia[]
+  sermons Sermon[]
+  resources ContentResource[]
+
+  @@index([churchId])
+  @@index([uploaderMemberId])
+  @@index([provider])
+}
+
+model NotificationPreference {
+  id        String   @id @default(cuid())
+  memberId  String
+  channel   NotificationChannel
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@unique([memberId, channel])
+  @@index([memberId])
+}
+
+model InAppNotification {
+  id        String   @id @default(cuid())
+  churchId  String
+  memberId  String
+  category  NotificationCategory @default(GENERAL)
+  title     String
+  body      String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  church Church @relation(fields: [churchId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@index([churchId])
+  @@index([memberId])
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  memberId  String
+  platform  DevicePlatform
+  provider  String?
+  token     String
+  lastSeenAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@unique([memberId, token])
+  @@index([memberId])
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  eventId   String
+  memberId  String
+  status    String   @default("CHECKED_IN")
+  checkInAt DateTime?
+  checkOutAt DateTime?
+  createdAt DateTime @default(now())
+
+  event  Event  @relation(fields: [eventId], references: [id])
+  member Member @relation(fields: [memberId], references: [id])
+
+  @@index([eventId])
+  @@index([memberId])
+  @@unique([eventId, memberId])
+}
+
+model MemberRelationship {
+  id        String   @id @default(cuid())
+  churchId  String
+  fromMemberId String
+  toMemberId String
+  type      MemberRelationshipType
+  label     String?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  church     Church  @relation(fields: [churchId], references: [id])
+  fromMember Member  @relation("MemberRelationshipFrom", fields: [fromMemberId], references: [id])
+  toMember   Member  @relation("MemberRelationshipTo", fields: [toMemberId], references: [id])
+
+  @@unique([fromMemberId, toMemberId, type])
+  @@index([churchId])
+  @@index([fromMemberId])
+  @@index([toMemberId])
+}
+
+model Donation {
+  id          String         @id @default(cuid())
+  churchId    String
+  memberId    String?
+  fundId      String?
+  campaignId  String?
+  fundraiserPageId String?
+  paymentIntentId String? @unique
+  pledgeId    String?
+  recurringDonationId String?
+  amount      Decimal
+  currency    String         @default("USD")
+  status      DonationStatus @default(PENDING)
+  provider    PaymentProvider
+  providerRef String
+  isAnonymous Boolean @default(false)
+  donorName   String?
+  donorEmail  String?
+  donorPhone  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  member Member? @relation(fields: [memberId], references: [id])
+  fund   Fund? @relation(fields: [fundId], references: [id])
+  campaign Campaign? @relation(fields: [campaignId], references: [id])
+  fundraiserPage FundraiserPage? @relation(fields: [fundraiserPageId], references: [id])
+  paymentIntent PaymentIntent? @relation(fields: [paymentIntentId], references: [id])
+  pledge Pledge? @relation(fields: [pledgeId], references: [id])
+  recurringDonation RecurringDonation? @relation(fields: [recurringDonationId], references: [id])
+  receipt DonationReceipt?
+  payoutTransactions PayoutTransaction[]
+  refunds     Refund[]
+  disputes    Dispute[]
+
+  @@index([churchId])
+  @@index([memberId])
+  @@index([fundId])
+  @@index([campaignId])
+  @@index([fundraiserPageId])
+  @@index([paymentIntentId])
+  @@index([pledgeId])
+  @@index([recurringDonationId])
+  @@index([status])
+}
+
+model Fund {
+  id          String   @id @default(cuid())
+  churchId    String
+  name        String
+  description String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church    Church @relation(fields: [churchId], references: [id])
+  donations Donation[]
+  textToGiveNumbers TextToGiveNumber[]
+
+  @@unique([churchId, name])
+  @@index([churchId])
+}
+
+model Campaign {
+  id           String         @id @default(cuid())
+  churchId     String
+  name         String
+  description  String?
+  targetAmount Decimal?
+  currency     String?
+  startAt      DateTime?
+  endAt        DateTime?
+  status       CampaignStatus @default(ACTIVE)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  church    Church @relation(fields: [churchId], references: [id])
+  donations Donation[]
+  fundraiserPages FundraiserPage[]
+  textToGiveNumbers TextToGiveNumber[]
+
+  @@unique([churchId, name])
+  @@index([churchId])
+  @@index([status])
+}
+
+model PaymentIntent {
+  id          String             @id @default(cuid())
+  churchId    String
+  memberId    String?
+  amount      Decimal
+  currency    String             @default("USD")
+  provider    PaymentProvider
+  providerRef String
+  status      PaymentIntentStatus @default(REQUIRES_ACTION)
+  checkoutUrl String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church   Church @relation(fields: [churchId], references: [id])
+  member   Member? @relation(fields: [memberId], references: [id])
+  donation Donation?
+  ticketOrder EventTicketOrder?
+
+  @@index([churchId])
+  @@index([memberId])
+  @@index([provider, providerRef])
+  @@index([status])
+}
+
+model DonationReceipt {
+  id            String        @id @default(cuid())
+  donationId    String        @unique
+  churchId      String
+  receiptNumber String        @unique
+  voidReason    String?
+  status        ReceiptStatus @default(ISSUED)
+  issuedAt      DateTime      @default(now())
+  metadata      Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  donation Donation @relation(fields: [donationId], references: [id])
+  church   Church   @relation(fields: [churchId], references: [id])
+
+  @@index([churchId])
+}
+
+model TextToGiveNumber {
+  id            String   @id @default(cuid())
+  churchId      String
+  phoneNumber   String   @unique
+  provider      PaymentProvider @default(STRIPE)
+  defaultCurrency String @default("USD")
+  fundId        String?
+  campaignId    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  church   Church @relation(fields: [churchId], references: [id])
+  fund     Fund?  @relation(fields: [fundId], references: [id])
+  campaign Campaign? @relation(fields: [campaignId], references: [id])
+  messages TextToGiveMessage[]
+
+  @@index([churchId])
+  @@index([provider])
+}
+
+model TextToGiveMessage {
+  id          String   @id @default(cuid())
+  churchId    String?
+  numberId    String?
+  messageSid  String?
+  fromNumber  String
+  toNumber    String
+  body        String
+  amount      Decimal?
+  currency    String?
+  provider    PaymentProvider?
+  status      String   @default("RECEIVED")
+  checkoutUrl String?
+  error       String?
+  createdAt   DateTime @default(now())
+
+  church Church? @relation(fields: [churchId], references: [id])
+  number TextToGiveNumber? @relation(fields: [numberId], references: [id])
+
+  @@index([churchId])
+  @@index([numberId])
+  @@index([status])
+}
+
+model Payout {
+  id          String   @id @default(cuid())
+  provider    PaymentProvider
+  providerRef String
+  tenantId    String?
+  churchId    String?
+  currency    String
+  amount      Decimal
+  status      String
+  arrivalDate DateTime?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+  church Church? @relation(fields: [churchId], references: [id])
+  transactions PayoutTransaction[]
+
+  @@unique([provider, providerRef])
+  @@index([tenantId])
+  @@index([churchId])
+  @@index([provider])
+}
+
+model PayoutTransaction {
+  id          String   @id @default(cuid())
+  payoutId    String
+  tenantId    String?
+  churchId    String?
+  donationId  String?
+  providerRef String
+  sourceRef   String?
+  type        String?
+  amount      Decimal
+  fee         Decimal?
+  net         Decimal?
+  currency    String
+  description String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  payout  Payout  @relation(fields: [payoutId], references: [id])
+  tenant  Tenant? @relation(fields: [tenantId], references: [id])
+  church  Church? @relation(fields: [churchId], references: [id])
+  donation Donation? @relation(fields: [donationId], references: [id])
+
+  @@index([payoutId])
+  @@index([tenantId])
+  @@index([churchId])
+  @@index([donationId])
+  @@index([providerRef])
+  @@index([sourceRef])
+  @@unique([payoutId, providerRef])
+}
+
+model Refund {
+  id          String   @id @default(cuid())
+  churchId    String
+  donationId  String
+  provider    PaymentProvider
+  providerRef String
+  amount      Decimal
+  currency    String
+  status      String
+  reason      String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church   Church   @relation(fields: [churchId], references: [id])
+  donation Donation @relation(fields: [donationId], references: [id])
+
+  @@unique([provider, providerRef])
+  @@index([churchId])
+  @@index([donationId])
+  @@index([status])
+}
+
+model Dispute {
+  id          String   @id @default(cuid())
+  churchId    String
+  donationId  String?
+  provider    PaymentProvider
+  providerRef String
+  amount      Decimal?
+  currency    String?
+  status      String
+  reason      String?
+  evidenceDueBy DateTime?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church   Church   @relation(fields: [churchId], references: [id])
+  donation Donation? @relation(fields: [donationId], references: [id])
+  evidence DisputeEvidence[]
+
+  @@unique([provider, providerRef])
+  @@index([churchId])
+  @@index([donationId])
+  @@index([status])
+}
+
+model DisputeEvidence {
+  id          String   @id @default(cuid())
+  disputeId   String
+  type        DisputeEvidenceType
+  status      DisputeEvidenceStatus @default(PENDING)
+  description String?
+  text        String?
+  filePath    String?
+  fileName    String?
+  fileMime    String?
+  fileSize    Int?
+  providerRef String?
+  error       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  dispute Dispute @relation(fields: [disputeId], references: [id])
+
+  @@index([disputeId])
+  @@index([status])
+  @@index([type])
+}
+
+model CommunicationSchedule {
+  id          String   @id @default(cuid())
+  churchId    String
+  templateId  String?
+  dripEnrollmentId String?
+  dripStepId  String?
+  channel     CommunicationChannel
+  provider    CommunicationProvider
+  to          String
+  subject     String?
+  body        String
+  sendAt      DateTime
+  status      CommunicationScheduleStatus @default(QUEUED)
+  error       String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  sentAt      DateTime?
+
+  church   Church @relation(fields: [churchId], references: [id])
+  template CommunicationTemplate? @relation(fields: [templateId], references: [id])
+  dripEnrollment CommunicationDripEnrollment? @relation(fields: [dripEnrollmentId], references: [id])
+  dripStep CommunicationDripStep? @relation(fields: [dripStepId], references: [id])
+
+  @@index([churchId])
+  @@index([templateId])
+  @@index([dripEnrollmentId])
+  @@index([dripStepId])
+  @@index([status])
+  @@index([sendAt])
+}
+
+model CommunicationDripCampaign {
+  id          String   @id @default(cuid())
+  churchId    String
+  name        String
+  description String?
+  status      DripCampaignStatus @default(ACTIVE)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church      Church @relation(fields: [churchId], references: [id])
+  steps       CommunicationDripStep[]
+  enrollments CommunicationDripEnrollment[]
+
+  @@unique([churchId, name])
+  @@index([churchId])
+  @@index([status])
+}
+
+model CommunicationDripStep {
+  id          String   @id @default(cuid())
+  campaignId  String
+  stepOrder   Int
+  delayHours  Int
+  channel     CommunicationChannel
+  templateId  String?
+  subject     String?
+  body        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  campaign CommunicationDripCampaign @relation(fields: [campaignId], references: [id])
+  template CommunicationTemplate? @relation(fields: [templateId], references: [id])
+  schedules CommunicationSchedule[]
+
+  @@unique([campaignId, stepOrder])
+  @@index([campaignId])
+}
+
+model CommunicationDripEnrollment {
+  id          String   @id @default(cuid())
+  campaignId  String
+  churchId    String
+  recipient   String
+  memberId    String?
+  donorEmail  String?
+  donorPhone  String?
+  status      DripEnrollmentStatus @default(ACTIVE)
+  enrolledAt  DateTime @default(now())
+  completedAt DateTime?
+
+  campaign CommunicationDripCampaign @relation(fields: [campaignId], references: [id])
+  church   Church @relation(fields: [churchId], references: [id])
+  member   Member? @relation(fields: [memberId], references: [id])
+  schedules CommunicationSchedule[]
+
+  @@index([campaignId])
+  @@index([churchId])
+  @@index([status])
+}
+
+model CommunicationTemplate {
+  id        String   @id @default(cuid())
+  churchId  String
+  name      String
+  channel   CommunicationChannel
+  subject   String?
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  church   Church @relation(fields: [churchId], references: [id])
+  messages CommunicationMessage[]
+  schedules CommunicationSchedule[]
+  dripSteps CommunicationDripStep[]
+
+  @@unique([churchId, name, channel])
+  @@index([churchId])
+  @@index([channel])
+}
+
+model CommunicationMessage {
+  id          String   @id @default(cuid())
+  churchId    String
+  templateId  String?
+  channel     CommunicationChannel
+  provider    CommunicationProvider
+  to          String
+  subject     String?
+  body        String
+  status      CommunicationStatus @default(QUEUED)
+  error       String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  sentAt      DateTime?
+
+  church   Church @relation(fields: [churchId], references: [id])
+  template CommunicationTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([churchId])
+  @@index([templateId])
+  @@index([channel])
+  @@index([provider])
+  @@index([status])
+}
+
+model FundraiserPage {
+  id          String           @id @default(cuid())
+  churchId    String
+  memberId    String?
+  campaignId  String?
+  slug        String
+  name        String
+  goalAmount  Decimal?
+  currency    String           @default("USD")
+  message     String?
+  status      FundraiserStatus @default(ACTIVE)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  church    Church    @relation(fields: [churchId], references: [id])
+  member    Member?   @relation(fields: [memberId], references: [id])
+  campaign  Campaign? @relation(fields: [campaignId], references: [id])
+  donations Donation[]
+
+  @@unique([churchId, slug])
+  @@index([churchId])
+  @@index([campaignId])
+  @@index([status])
+}
+
+model Pledge {
+  id        String       @id @default(cuid())
+  churchId  String
+  memberId  String?
+  amount    Decimal
+  currency  String       @default("USD")
+  status    PledgeStatus @default(ACTIVE)
+  dueDate   DateTime?
+  notes     String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  member Member? @relation(fields: [memberId], references: [id])
+  donations Donation[]
+
+  @@index([churchId])
+  @@index([memberId])
+}
+
+model RecurringDonation {
+  id          String           @id @default(cuid())
+  churchId    String
+  memberId    String?
+  amount      Decimal
+  currency    String           @default("USD")
+  interval    RecurringInterval
+  status      RecurringStatus  @default(ACTIVE)
+  provider    PaymentProvider
+  providerRef String?
+  startAt     DateTime         @default(now())
+  nextChargeAt DateTime?
+  lastChargeAt DateTime?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  member Member? @relation(fields: [memberId], references: [id])
+  donations Donation[]
+
+  @@index([churchId])
+  @@index([memberId])
+  @@index([status])
+}
+
+model ExpenseCategory {
+  id          String   @id @default(cuid())
+  churchId    String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  church   Church @relation(fields: [churchId], references: [id])
+  expenses Expense[]
+  budgetItems BudgetItem[]
+
+  @@unique([churchId, name])
+  @@index([churchId])
+}
+
+model Expense {
+  id            String        @id @default(cuid())
+  churchId      String
+  categoryId    String?
+  amount        Decimal
+  currency      String        @default("USD")
+  status        ExpenseStatus @default(SUBMITTED)
+  description   String?
+  vendor        String?
+  occurredAt    DateTime?
+  submittedById String?
+  approvedById  String?
+  approvedAt    DateTime?
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  church   Church @relation(fields: [churchId], references: [id])
+  category ExpenseCategory? @relation(fields: [categoryId], references: [id])
+  submittedBy User? @relation("ExpenseSubmittedBy", fields: [submittedById], references: [id])
+  approvedBy User? @relation("ExpenseApprovedBy", fields: [approvedById], references: [id])
+
+  @@index([churchId])
+  @@index([categoryId])
+  @@index([status])
+}
+
+model Budget {
+  id        String       @id @default(cuid())
+  churchId  String
+  name      String
+  startAt   DateTime
+  endAt     DateTime
+  status    BudgetStatus @default(DRAFT)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id])
+  items  BudgetItem[]
+
+  @@index([churchId])
+  @@index([status])
+}
+
+model BudgetItem {
+  id          String   @id @default(cuid())
+  budgetId    String
+  categoryId  String?
+  name        String
+  allocatedAmount Decimal
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  budget   Budget @relation(fields: [budgetId], references: [id])
+  category ExpenseCategory? @relation(fields: [categoryId], references: [id])
+
+  @@index([budgetId])
+  @@index([categoryId])
+}
+
+model AuditLog {
+  id         String        @id @default(cuid())
+  tenantId   String?
+  churchId   String?
+  actorType  AuditActorType @default(SYSTEM)
+  actorId    String?
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime      @default(now())
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+  church Church? @relation(fields: [churchId], references: [id])
+
+  @@index([tenantId])
+  @@index([churchId])
+  @@index([actorId])
+  @@index([targetType, targetId])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  clerkUserId  String   @unique
+  email        String
+  name         String?
+  role         UserRole @default(STAFF)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships StaffMembership[]
+  expensesSubmitted Expense[] @relation("ExpenseSubmittedBy")
+  expensesApproved Expense[] @relation("ExpenseApprovedBy")
+  facilityBookings FacilityBooking[]
+  careAssignments CareRequest[] @relation("CareAssignee")
+  careNotesAuthored CareNote[] @relation("CareNoteAuthorUser")
+}
+
+model StaffMembership {
+  id        String   @id @default(cuid())
+  userId    String
+  churchId  String
+  role      UserRole @default(STAFF)
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  church Church @relation(fields: [churchId], references: [id])
+
+  @@unique([userId, churchId])
+  @@index([churchId])
+}
+
+model Facility {
+  id          String       @id @default(cuid())
+  churchId    String
+  campusId    String?
+  name        String
+  type        FacilityType @default(OTHER)
+  description String?
+  capacity    Int?
+  location    String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  church   Church @relation(fields: [churchId], references: [id])
+  campus   Campus? @relation(fields: [campusId], references: [id])
+  bookings FacilityBooking[]
+
+  @@unique([churchId, name])
+  @@index([churchId])
+  @@index([campusId])
+  @@index([type])
+}
+
+model FacilityBooking {
+  id             String                @id @default(cuid())
+  churchId       String
+  facilityId     String
+  eventId        String?
+  bookedByUserId String?
+  title          String
+  description    String?
+  startAt        DateTime
+  endAt          DateTime
+  status         FacilityBookingStatus @default(CONFIRMED)
+  notes          String?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  church   Church   @relation(fields: [churchId], references: [id])
+  facility Facility @relation(fields: [facilityId], references: [id])
+  event    Event?   @relation(fields: [eventId], references: [id])
+  bookedBy User?    @relation(fields: [bookedByUserId], references: [id])
+
+  @@index([churchId])
+  @@index([facilityId, startAt])
+  @@index([eventId])
+  @@index([status])
+}
+
+model CareRequest {
+  id                  String              @id @default(cuid())
+  churchId            String
+  campusId            String?
+  memberId            String?
+  requestedByMemberId String?
+  assignedToUserId    String?
+  title               String
+  details             String?
+  status              CareRequestStatus   @default(OPEN)
+  priority            CareRequestPriority @default(NORMAL)
+  channel             CareRequestChannel  @default(WEB)
+  dueAt               DateTime?
+  openedAt            DateTime            @default(now())
+  assignedAt          DateTime?
+  closedAt            DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  church            Church  @relation(fields: [churchId], references: [id])
+  campus            Campus? @relation(fields: [campusId], references: [id])
+  member            Member? @relation("CareSubject", fields: [memberId], references: [id])
+  requestedByMember Member? @relation("CareRequester", fields: [requestedByMemberId], references: [id])
+  assignedTo        User?   @relation("CareAssignee", fields: [assignedToUserId], references: [id])
+  notes             CareNote[]
+
+  @@index([churchId])
+  @@index([campusId])
+  @@index([memberId])
+  @@index([assignedToUserId])
+  @@index([status, priority])
+}
+
+model CareNote {
+  id             String   @id @default(cuid())
+  careRequestId  String
+  authorUserId   String?
+  authorMemberId String?
+  note           String
+  isPrivate      Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  careRequest  CareRequest @relation(fields: [careRequestId], references: [id], onDelete: Cascade)
+  authorUser   User?       @relation("CareNoteAuthorUser", fields: [authorUserId], references: [id])
+  authorMember Member?     @relation("CareNoteAuthorMember", fields: [authorMemberId], references: [id])
+
+  @@index([careRequestId, createdAt])
+  @@index([authorUserId])
+  @@index([authorMemberId])
+}
+
+model Sermon {
+  id              String       @id @default(cuid())
+  churchId        String
+  campusId        String?
+  eventId         String?
+  mediaAssetId    String?
+  title           String
+  speaker         String?
+  seriesName      String?
+  summary         String?
+  scriptureRefs   Json?
+  durationSeconds Int?
+  status          SermonStatus @default(DRAFT)
+  publishedAt     DateTime?
+  viewCount       Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  church     Church      @relation(fields: [churchId], references: [id])
+  campus     Campus?     @relation(fields: [campusId], references: [id])
+  event      Event?      @relation(fields: [eventId], references: [id])
+  mediaAsset MediaAsset? @relation(fields: [mediaAssetId], references: [id])
+
+  @@index([churchId])
+  @@index([campusId])
+  @@index([eventId])
+  @@index([status])
+}
+
+model ContentResource {
+  id          String                    @id @default(cuid())
+  churchId    String
+  campusId    String?
+  mediaAssetId String?
+  title       String
+  description String?
+  type        ContentResourceType       @default(DOCUMENT)
+  visibility  ContentResourceVisibility @default(MEMBERS_ONLY)
+  linkUrl     String?
+  tags        Json?
+  isFeatured  Boolean                   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+
+  church     Church      @relation(fields: [churchId], references: [id])
+  campus     Campus?     @relation(fields: [campusId], references: [id])
+  mediaAsset MediaAsset? @relation(fields: [mediaAssetId], references: [id])
+
+  @@index([churchId])
+  @@index([campusId])
+  @@index([type, visibility])
+}
+
+model TenantDomain {
+  id                String             @id @default(cuid())
+  tenantId          String
+  domain            String
+  status            TenantDomainStatus @default(PENDING_VERIFICATION)
+  verificationToken String
+  dnsTarget         String?
+  verifiedAt        DateTime?
+  sslStatus         TenantSslStatus    @default(PENDING)
+  sslExpiresAt      DateTime?
+  lastCheckedAt     DateTime?
+  notes             String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, domain])
+  @@index([status])
+  @@index([sslStatus])
+}
+
+model TenantHealthCheck {
+  id        String            @id @default(cuid())
+  tenantId  String
+  type      HealthCheckType
+  status    HealthCheckStatus @default(HEALTHY)
+  latencyMs Int?
+  details   Json?
+  checkedAt DateTime          @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, checkedAt])
+  @@index([type, status])
+}
+
+model TenantSecurityPolicy {
+  id                    String   @id @default(cuid())
+  tenantId              String   @unique
+  requireMfaForStaff    Boolean  @default(true)
+  enforceSso            Boolean  @default(false)
+  sessionTimeoutMinutes Int      @default(480)
+  dataRetentionDays     Int      @default(3650)
+  ipAllowlist           Json?
+  breachContactEmail    String?
+  updatedBy             String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model SupportTicket {
+  id                   String                @id @default(cuid())
+  tenantId             String
+  churchId             String?
+  requesterEmail       String?
+  requesterName        String?
+  subject              String
+  description          String
+  status               SupportTicketStatus   @default(OPEN)
+  priority             SupportTicketPriority @default(NORMAL)
+  source               SupportTicketSource   @default(IN_APP)
+  firstResponseDueAt   DateTime?
+  firstRespondedAt     DateTime?
+  firstResponseBreachedAt DateTime?
+  resolutionDueAt      DateTime?
+  resolutionBreachedAt DateTime?
+  lastSlaCheckAt       DateTime?
+  reopenedCount        Int                   @default(0)
+  assignedToPlatformUserId String?
+  resolvedAt           DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  church Church? @relation(fields: [churchId], references: [id], onDelete: SetNull)
+  assignedTo PlatformUser? @relation("SupportTicketAssignee", fields: [assignedToPlatformUserId], references: [id], onDelete: SetNull)
+  messages SupportTicketMessage[]
+
+  @@index([tenantId, status, priority])
+  @@index([churchId])
+  @@index([assignedToPlatformUserId])
+  @@index([status, firstResponseDueAt])
+  @@index([status, resolutionDueAt])
+}
+
+model SupportTicketMessage {
+  id                    String                   @id @default(cuid())
+  ticketId              String
+  authorType            SupportMessageAuthorType
+  authorPlatformUserId  String?
+  authorTenantUserId    String?
+  body                  String
+  isInternal            Boolean                  @default(false)
+  createdAt             DateTime                 @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorPlatformUser PlatformUser? @relation("SupportMessagePlatformAuthor", fields: [authorPlatformUserId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId, createdAt])
+  @@index([authorPlatformUserId])
+}
+
+model WebhookEvent {
+  id              String             @id @default(cuid())
+  provider        WebhookProvider
+  externalEventId String
+  eventType       String
+  payloadHash     String
+  status          WebhookEventStatus @default(PROCESSING)
+  tenantId        String?
+  churchId        String?
+  receivedAt      DateTime           @default(now())
+  processedAt     DateTime?
+  result          Json?
+  error           String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  church Church? @relation(fields: [churchId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, externalEventId])
+  @@index([status, receivedAt])
+  @@index([tenantId, receivedAt])
+  @@index([churchId, receivedAt])
+}
+
+model LiveStreamChannel {
+  id                String             @id @default(cuid())
+  churchId          String
+  campusId          String?
+  name              String
+  provider          LiveStreamProvider
+  externalChannelId String?
+  ingestUrl         String?
+  playbackUrl       String?
+  streamKey         String?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  campus Campus? @relation(fields: [campusId], references: [id], onDelete: SetNull)
+  sessions LiveStreamSession[]
+
+  @@unique([churchId, name])
+  @@index([campusId])
+  @@index([provider, isActive])
+}
+
+model LiveStreamSession {
+  id              String              @id @default(cuid())
+  churchId        String
+  channelId       String
+  eventId         String?
+  title           String
+  description     String?
+  status          LiveStreamStatus    @default(DRAFT)
+  moderationLevel LiveModerationLevel @default(FILTERED)
+  scheduledStartAt DateTime?
+  startedAt       DateTime?
+  endedAt         DateTime?
+  isRecording     Boolean             @default(true)
+  recordingUrl    String?
+  peakViewers     Int                 @default(0)
+  totalViews      Int                 @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  church Church @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  channel LiveStreamChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  event Event? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  @@index([churchId, status])
+  @@index([channelId, scheduledStartAt])
+  @@index([eventId])
+}

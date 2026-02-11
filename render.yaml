@@ -1,0 +1,166 @@
+services:
+  - type: web
+    name: faithflow-api
+    runtime: node
+    plan: starter
+    autoDeploy: true
+    healthCheckPath: /docs
+    buildCommand: corepack enable && pnpm install --frozen-lockfile
+    preDeployCommand: pnpm --filter @faithflow-ai/database exec prisma migrate deploy
+    startCommand: pnpm --filter @faithflow-ai/api-server start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: faithflow-postgres
+          property: connectionString
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: NEXT_PUBLIC_WEB_URL
+        sync: false
+      - key: NEXT_PUBLIC_ADMIN_URL
+        sync: false
+      - key: INTEGRATION_API_KEY
+        sync: false
+      - key: ENABLE_INTERNAL_SCHEDULER
+        value: "false"
+      - key: SCHEDULER_TIMEZONE
+        value: UTC
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_JWT_KEY
+        sync: false
+      - key: CLERK_JWT_ISSUER
+        sync: false
+      - key: CLERK_JWT_AUDIENCE
+        sync: false
+      - key: CLERK_WEBHOOK_SECRET
+        sync: false
+      - key: PLATFORM_ADMIN_EMAILS
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PLATFORM_STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_WEBHOOK_SECRET
+        sync: false
+      - key: PLATFORM_PAYSTACK_WEBHOOK_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_SMS_NUMBER
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        sync: false
+      - key: TWILIO_WEBHOOK_URL
+        sync: false
+      - key: FCM_SERVER_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: STORAGE_PROVIDER
+        sync: false
+      - key: UPLOAD_MAX_BYTES
+        value: "26214400"
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_PUBLIC_URL
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_PUBLIC_READ
+        sync: false
+      - key: S3_FORCE_PATH_STYLE
+        sync: false
+      - key: GCS_BUCKET
+        sync: false
+      - key: GCS_PROJECT_ID
+        sync: false
+      - key: GCS_CLIENT_EMAIL
+        sync: false
+      - key: GCS_PRIVATE_KEY
+        sync: false
+      - key: GCS_KEYFILE_PATH
+        sync: false
+      - key: GCS_PUBLIC_URL
+        sync: false
+
+  - type: cron
+    name: faithflow-support-sla-sweep
+    runtime: native
+    plan: starter
+    schedule: "*/5 * * * *"
+    envVars:
+      - key: API_BASE_URL
+        sync: false
+      - key: INTEGRATION_API_KEY
+        sync: false
+    startCommand: >
+      curl --fail --show-error --silent
+      -X POST "$API_BASE_URL/tasks/support/sla"
+      -H "x-api-key: $INTEGRATION_API_KEY"
+      -H "content-type: application/json"
+      -d '{"limit":1000,"dryRun":false}'
+
+  - type: cron
+    name: faithflow-tenant-ops-automate
+    runtime: native
+    plan: starter
+    schedule: "*/15 * * * *"
+    envVars:
+      - key: API_BASE_URL
+        sync: false
+      - key: INTEGRATION_API_KEY
+        sync: false
+    startCommand: >
+      curl --fail --show-error --silent
+      -X POST "$API_BASE_URL/tasks/tenant-ops/automate"
+      -H "x-api-key: $INTEGRATION_API_KEY"
+      -H "content-type: application/json"
+      -d '{"limit":500,"sslExpiryWarningDays":30,"dryRun":false}'
+
+  - type: cron
+    name: faithflow-subscription-metadata-backfill
+    runtime: native
+    plan: starter
+    schedule: "10 2 * * *"
+    envVars:
+      - key: API_BASE_URL
+        sync: false
+      - key: INTEGRATION_API_KEY
+        sync: false
+    startCommand: >
+      curl --fail --show-error --silent
+      -X POST "$API_BASE_URL/tasks/subscriptions/metadata-backfill"
+      -H "x-api-key: $INTEGRATION_API_KEY"
+      -H "content-type: application/json"
+      -d '{"limit":500,"dryRun":false}'
+
+databases:
+  - name: faithflow-postgres
+    plan: starter
+    databaseName: faithflowdb
+    user: faithflow

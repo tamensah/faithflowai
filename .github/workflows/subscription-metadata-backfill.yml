@@ -1,0 +1,85 @@
+name: Subscription Metadata Backfill
+
+on:
+  schedule:
+    - cron: '10 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: subscription-metadata-backfill
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: alpha-ops
+    steps:
+      - name: Trigger subscription metadata backfill with retry
+        id: trigger
+        continue-on-error: true
+        env:
+          API_BASE_URL: ${{ secrets.FAITHFLOW_API_BASE_URL }}
+          INTEGRATION_API_KEY: ${{ secrets.FAITHFLOW_INTEGRATION_API_KEY }}
+          MAX_ATTEMPTS: "3"
+        run: |
+          set -euo pipefail
+          test -n "${API_BASE_URL}"
+          test -n "${INTEGRATION_API_KEY}"
+          attempt=1
+          until [ "${attempt}" -gt "${MAX_ATTEMPTS}" ]; do
+            if curl --fail --show-error --silent \
+              -X POST "${API_BASE_URL}/tasks/subscriptions/metadata-backfill" \
+              -H "x-api-key: ${INTEGRATION_API_KEY}" \
+              -H "content-type: application/json" \
+              -d '{"limit":500,"dryRun":false}'; then
+              exit 0
+            fi
+            if [ "${attempt}" -eq "${MAX_ATTEMPTS}" ]; then
+              exit 1
+            fi
+            sleep $((attempt * 10))
+            attempt=$((attempt + 1))
+          done
+
+      - name: Notify Slack on failure
+        if: steps.trigger.outcome == 'failure'
+        env:
+          ALERT_SLACK_WEBHOOK_URL: ${{ secrets.FAITHFLOW_ALERT_SLACK_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ALERT_SLACK_WEBHOOK_URL:-}" ]; then
+            exit 0
+          fi
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          payload=$(printf '{"text":"[FaithFlow] Subscription metadata backfill failed. Run: %s"}' "${run_url}")
+          curl --fail --show-error --silent \
+            -X POST "${ALERT_SLACK_WEBHOOK_URL}" \
+            -H "content-type: application/json" \
+            -d "${payload}"
+
+      - name: Notify Email on failure
+        if: steps.trigger.outcome == 'failure'
+        env:
+          ALERT_RESEND_API_KEY: ${{ secrets.FAITHFLOW_ALERT_RESEND_API_KEY }}
+          ALERT_EMAIL_FROM: ${{ secrets.FAITHFLOW_ALERT_EMAIL_FROM }}
+          ALERT_EMAIL_TO: ${{ secrets.FAITHFLOW_ALERT_EMAIL_TO }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ALERT_RESEND_API_KEY:-}" ] || [ -z "${ALERT_EMAIL_FROM:-}" ] || [ -z "${ALERT_EMAIL_TO:-}" ]; then
+            exit 0
+          fi
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body=$(printf '{"from":"%s","to":["%s"],"subject":"FaithFlow scheduler failure: subscription-metadata-backfill","html":"<p>Subscription metadata backfill failed.</p><p>Run: <a href=\"%s\">%s</a></p>"}' "${ALERT_EMAIL_FROM}" "${ALERT_EMAIL_TO}" "${run_url}" "${run_url}")
+          curl --fail --show-error --silent \
+            -X POST "https://api.resend.com/emails" \
+            -H "Authorization: Bearer ${ALERT_RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "${body}"
+
+      - name: Fail workflow if task failed
+        if: steps.trigger.outcome == 'failure'
+        run: exit 1

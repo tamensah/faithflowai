@@ -1,0 +1,160 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { Badge, Button, Card } from '@faithflow-ai/ui';
+import { Shell } from '../../components/Shell';
+import { trpc } from '../../lib/trpc';
+
+const checkoutProviders = ['STRIPE', 'PAYSTACK'] as const;
+
+function formatPlanPrice(amountMinor: number, currency: string, interval: string) {
+  return `${currency} ${(amountMinor / 100).toFixed(2)} / ${interval.toLowerCase()}`;
+}
+
+export default function BillingPage() {
+  const utils = trpc.useUtils();
+  const [provider, setProvider] = useState<(typeof checkoutProviders)[number]>('STRIPE');
+  const [selectedPlanCode, setSelectedPlanCode] = useState('');
+
+  const { data: plans } = trpc.billing.plans.useQuery();
+  const { data: current } = trpc.billing.currentSubscription.useQuery();
+  const { data: invoices } = trpc.billing.invoices.useQuery({ provider, limit: 20 });
+
+  const selectedPlan = useMemo(
+    () => plans?.find((plan) => plan.code === selectedPlanCode) ?? null,
+    [plans, selectedPlanCode]
+  );
+
+  const { mutate: startCheckout, isPending: isStartingCheckout } = trpc.billing.startCheckout.useMutation({
+    onSuccess: (data) => {
+      if (data.checkoutUrl) window.location.href = data.checkoutUrl;
+    },
+  });
+
+  const { mutate: createPortalSession, isPending: isOpeningPortal } = trpc.billing.createPortalSession.useMutation({
+    onSuccess: (data) => {
+      if (data.url) window.location.href = data.url;
+    },
+  });
+
+  return (
+    <Shell>
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-semibold">Billing</h1>
+          <p className="mt-2 text-sm text-muted">Self-serve subscription upgrades, payment method updates, and invoice visibility.</p>
+        </div>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Current Subscription</h2>
+          {current ? (
+            <div className="mt-4 space-y-2 text-sm">
+              <p>
+                <span className="font-medium">{current.plan.name}</span> ({current.plan.code})
+              </p>
+              <p className="text-muted">
+                {current.status} · {current.provider}
+              </p>
+              <p className="text-muted">
+                Current period end:{' '}
+                {current.currentPeriodEnd ? new Date(current.currentPeriodEnd).toLocaleDateString() : 'N/A'}
+              </p>
+              <div className="mt-3 flex items-center gap-2">
+                <Button size="sm" onClick={() => createPortalSession({})} disabled={isOpeningPortal}>
+                  {isOpeningPortal ? 'Opening...' : 'Open billing portal'}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-muted">No active subscription found.</p>
+          )}
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Change Plan</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <select
+              className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+              value={selectedPlanCode}
+              onChange={(event) => setSelectedPlanCode(event.target.value)}
+            >
+              <option value="">Select plan</option>
+              {plans?.map((plan) => (
+                <option key={plan.id} value={plan.code}>
+                  {plan.name} ({plan.code})
+                </option>
+              ))}
+            </select>
+            <select
+              className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+              value={provider}
+              onChange={(event) => setProvider(event.target.value as (typeof checkoutProviders)[number])}
+            >
+              {checkoutProviders.map((entry) => (
+                <option key={entry} value={entry}>
+                  {entry}
+                </option>
+              ))}
+            </select>
+          </div>
+          {selectedPlan ? (
+            <p className="mt-3 text-sm text-muted">
+              {selectedPlan.description || 'No description'} ·{' '}
+              {formatPlanPrice(selectedPlan.amountMinor, selectedPlan.currency, selectedPlan.interval)}
+            </p>
+          ) : null}
+          <div className="mt-4">
+            <Button
+              disabled={!selectedPlanCode || isStartingCheckout}
+              onClick={() => startCheckout({ planCode: selectedPlanCode, provider })}
+            >
+              {isStartingCheckout ? 'Redirecting...' : 'Continue to checkout'}
+            </Button>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Invoices</h2>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                await utils.billing.invoices.invalidate({ provider, limit: 20 });
+              }}
+            >
+              Refresh
+            </Button>
+          </div>
+          <div className="mt-4 space-y-3">
+            {invoices?.invoices.map((invoice) => (
+              <div key={invoice.id} className="rounded-md border border-border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold">{invoice.number || invoice.id}</p>
+                  <Badge variant="default">{invoice.status || 'unknown'}</Badge>
+                </div>
+                <p className="mt-1 text-xs text-muted">
+                  {invoice.currency} {(invoice.amountPaid / 100).toFixed(2)} paid / {(invoice.amountDue / 100).toFixed(2)} due
+                </p>
+                <p className="text-xs text-muted">
+                  Created: {invoice.createdAt ? new Date(invoice.createdAt).toLocaleString() : 'N/A'}
+                </p>
+                {invoice.hostedInvoiceUrl ? (
+                  <a
+                    className="mt-2 inline-block text-xs font-medium text-primary underline-offset-4 hover:underline"
+                    href={invoice.hostedInvoiceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open invoice
+                  </a>
+                ) : null}
+              </div>
+            ))}
+            {!invoices?.invoices.length ? <p className="text-sm text-muted">No invoices available.</p> : null}
+          </div>
+        </Card>
+      </div>
+    </Shell>
+  );
+}

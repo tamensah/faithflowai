@@ -1,0 +1,39 @@
+{
+  "name": "@faithflow-ai/admin",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^6.37.3",
+    "@faithflow-ai/api": "workspace:*",
+    "@faithflow-ai/ui": "workspace:*",
+    "@tanstack/react-query": "^5.90.20",
+    "@trpc/client": "^11.9.0",
+    "@trpc/react-query": "^11.9.0",
+    "clsx": "^2.1.1",
+    "next": "^16.1.6",
+    "qrcode": "^1.5.4",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "superjson": "^2.2.6",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.2.1",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.2.13",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.24",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.6",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3"
+  }
+}

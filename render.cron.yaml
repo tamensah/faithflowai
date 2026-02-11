@@ -1,0 +1,48 @@
+services:
+  - type: cron
+    name: faithflow-support-sla-sweep
+    runtime: native
+    schedule: "*/5 * * * *"
+    envVars:
+      - key: API_BASE_URL
+        sync: false
+      - key: INTEGRATION_API_KEY
+        sync: false
+    startCommand: >
+      curl --fail --show-error --silent
+      -X POST "$API_BASE_URL/tasks/support/sla"
+      -H "x-api-key: $INTEGRATION_API_KEY"
+      -H "content-type: application/json"
+      -d '{"limit":1000,"dryRun":false}'
+
+  - type: cron
+    name: faithflow-tenant-ops-automate
+    runtime: native
+    schedule: "*/15 * * * *"
+    envVars:
+      - key: API_BASE_URL
+        sync: false
+      - key: INTEGRATION_API_KEY
+        sync: false
+    startCommand: >
+      curl --fail --show-error --silent
+      -X POST "$API_BASE_URL/tasks/tenant-ops/automate"
+      -H "x-api-key: $INTEGRATION_API_KEY"
+      -H "content-type: application/json"
+      -d '{"limit":500,"sslExpiryWarningDays":30,"dryRun":false}'
+
+  - type: cron
+    name: faithflow-subscription-metadata-backfill
+    runtime: native
+    schedule: "10 2 * * *"
+    envVars:
+      - key: API_BASE_URL
+        sync: false
+      - key: INTEGRATION_API_KEY
+        sync: false
+    startCommand: >
+      curl --fail --show-error --silent
+      -X POST "$API_BASE_URL/tasks/subscriptions/metadata-backfill"
+      -H "x-api-key: $INTEGRATION_API_KEY"
+      -H "content-type: application/json"
+      -d '{"limit":500,"dryRun":false}'
