@@ -1029,10 +1029,9 @@ export const memberRouter = router({
           return Number.isNaN(parsed.getTime()) ? undefined : parsed;
         };
 
-        let member = null;
-        if (email) {
-          member = await prisma.member.findFirst({ where: { churchId: input.churchId, email } });
-        }
+        let member = email
+          ? await prisma.member.findFirst({ where: { churchId: input.churchId, email } })
+          : null;
         if (!member && phone) {
           member = await prisma.member.findFirst({ where: { churchId: input.churchId, phone } });
         }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
@@ -179,13 +179,21 @@ function MobileCheckInPageContent() {
             <Input
               placeholder="Paste kiosk link"
               value={kioskLink}
-              onChange={(e) => {
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 setKioskLink(e.target.value);
                 handleScanValue(e.target.value);
               }}
             />
-            <Input placeholder="Event ID" value={eventId} onChange={(e) => setEventId(e.target.value)} />
-            <Input placeholder="Check-in code" value={code} onChange={(e) => setCode(e.target.value)} />
+            <Input
+              placeholder="Event ID"
+              value={eventId}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setEventId(e.target.value)}
+            />
+            <Input
+              placeholder="Check-in code"
+              value={code}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setCode(e.target.value)}
+            />
             <p className="text-xs text-muted">Ask a staff member for the QR code if you need it.</p>
           </div>
         </div>
@@ -203,7 +211,11 @@ function MobileCheckInPageContent() {
             </Badge>
           </div>
           <div className="mt-4">
-            <Input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input
+              placeholder="Search"
+              value={search}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+            />
           </div>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {filtered.map((entry) => (

@@ -8,6 +8,7 @@ import {
   CommunicationStatus,
   DripCampaignStatus,
   DripEnrollmentStatus,
+  Prisma,
   prisma,
 } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
@@ -307,7 +308,7 @@ export const communicationsRouter = router({
       throw new TRPCError({ code: 'BAD_REQUEST', message: 'No valid recipients found' });
     }
 
-    const scheduleRecords = [];
+    const scheduleRecords: Prisma.CommunicationScheduleCreateManyInput[] = [];
     for (const [recipient, context] of recipients.entries()) {
       const resolvedSubject = subject ? renderTemplate(subject, context) : undefined;
       const resolvedBody = renderTemplate(body, context);
