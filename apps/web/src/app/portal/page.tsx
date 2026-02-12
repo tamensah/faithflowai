@@ -248,6 +248,12 @@ export default function MemberPortalPage() {
   }, [conversations, selectedConversationId]);
 
   useEffect(() => {
+    if (!hasAdminAccess) return;
+    if (typeof window === 'undefined') return;
+    window.location.replace(adminBaseUrl);
+  }, [adminBaseUrl, hasAdminAccess]);
+
+  useEffect(() => {
     const previous = lastConversationRef.current;
     if (previous && previous !== selectedConversationId) {
       setTyping({ conversationId: previous, typing: false });
