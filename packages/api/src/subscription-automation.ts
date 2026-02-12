@@ -73,6 +73,29 @@ export async function runSubscriptionAutomation(options?: {
 
     if (tenant.status === TenantStatus.ACTIVE && currentSubscription?.status === TenantSubscriptionStatus.TRIALING) {
       const trialEndsAt = currentSubscription.trialEndsAt;
+      if (trialEndsAt && trialEndsAt <= new Date()) {
+        // Trial is over, but provider webhooks may not have updated status yet. Move to PAST_DUE to
+        // start dunning/suspension policies; provider webhooks can still override with ACTIVE.
+        await prisma.tenantSubscription.update({
+          where: { id: currentSubscription.id },
+          data: {
+            status: TenantSubscriptionStatus.PAST_DUE,
+            currentPeriodEnd: trialEndsAt,
+          },
+        });
+
+        await recordAuditLog({
+          tenantId: tenant.id,
+          actorType: AuditActorType.SYSTEM,
+          action: 'subscription.trial_ended_marked_past_due',
+          targetType: 'TenantSubscription',
+          targetId: currentSubscription.id,
+          metadata: {
+            trialEndsAt,
+          },
+        });
+      }
+
       if (trialEndsAt && trialEndsAt <= trialReminderCutoff && trialEndsAt > new Date()) {
         const admins = await prisma.staffMembership.findMany({
           where: {
