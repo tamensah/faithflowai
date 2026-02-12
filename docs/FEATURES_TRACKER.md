@@ -89,6 +89,11 @@ This is the live checklist for product scope, implementation status, and next st
   - Dunning preview + run workflows (platform + scheduled endpoint)
   - Webhook idempotency + replay-safe event persistence (`WebhookEvent`)
   - Subscription metadata normalization backfill (platform + scheduled task)
+- Onboarding and catalog UX hardening:
+  - Church onboarding flow (org selection, admin claim, plan checkout, admin landing)
+  - Trial-aware tier UX (Starter/Growth 14-day, Enterprise 0-day default)
+  - Baseline plan catalog auto-bootstrap in API when environments start without seeded plans
+  - Onboarding plan preselect + checkout provider (Stripe/Paystack) continuity
 - Multi-campus operations depth:
   - Campus CRUD with feature and quota enforcement
   - Headquarters and campus performance analytics APIs

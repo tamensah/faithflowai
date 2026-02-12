@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
-import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
+import { SignedIn, SignedOut, SignInButton, SignUpButton } from '@clerk/nextjs';
 
 export default function HomePage() {
   return (
@@ -10,41 +10,7 @@ export default function HomePage() {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.15),_transparent_45%),radial-gradient(circle_at_right,_rgba(14,116,144,0.18),_transparent_40%),radial-gradient(circle_at_bottom,_rgba(59,130,246,0.12),_transparent_50%)]" />
         <div className="relative mx-auto max-w-6xl px-6 py-10">
-          <header className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-white">
-                FF
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-muted">FaithFlow AI</p>
-                <p className="text-sm font-semibold text-foreground">Trustworthy. Modern. Ready.</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              <Link className="text-muted hover:text-foreground" href="/portal">
-                Member portal
-              </Link>
-              <Link className="text-muted hover:text-foreground" href="/get-started">
-                Church onboarding
-              </Link>
-              <Link className="text-muted hover:text-foreground" href="/events">
-                Events
-              </Link>
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <Button variant="outline">Sign in</Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button>Get access</Button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </div>
-          </header>
-
-          <section className="mt-16 grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+          <section className="mt-4 grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
             <div>
               <Badge variant="default">AI-powered church management</Badge>
               <h1 className="mt-5 text-5xl font-semibold text-foreground">

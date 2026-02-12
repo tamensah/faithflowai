@@ -159,11 +159,18 @@ Mapped endpoint:
 
 Implemented tenant routes:
 
+- `billing.catalog` (signed-in onboarding-safe active plans list)
 - `billing.plans`
 - `billing.currentSubscription`
 - `billing.startCheckout`
 - `billing.createPortalSession` (Stripe)
 - `billing.invoices` (Stripe/Paystack customer history)
+
+Catalog resilience behavior:
+
+- API auto-creates baseline `starter` / `growth` / `enterprise` plans (with feature presets) if those plan codes are missing.
+- This prevents blank onboarding plan dropdowns in fresh environments where DB seed was not run yet.
+- Checkout still enforces tenant admin role before creating provider checkout sessions.
 
 Platform billing ops routes:
 

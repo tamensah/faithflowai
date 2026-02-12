@@ -41,7 +41,7 @@ export default function GetStartedPage() {
   const adminBaseUrl = (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://admin-gamma-beryl.vercel.app').replace(/\/+$/, '');
 
   const { data: authSelf } = trpc.auth.self.useQuery(undefined, { enabled: Boolean(orgId) });
-  const { data: plans } = trpc.billing.plans.useQuery(undefined, { enabled: Boolean(orgId && authSelf?.isStaff) });
+  const { data: plans, isLoading: isPlansLoading } = trpc.billing.catalog.useQuery(undefined, { enabled: Boolean(orgId) });
 
   const { mutate: bootstrap, isPending: isBootstrapping } = trpc.auth.bootstrap.useMutation({
     onSuccess: async () => {
@@ -60,6 +60,19 @@ export default function GetStartedPage() {
     if (!orgId || !authSelf?.bootstrapAllowed || authSelf?.isStaff || isBootstrapping) return;
     bootstrap();
   }, [authSelf?.bootstrapAllowed, authSelf?.isStaff, bootstrap, isBootstrapping, orgId]);
+
+  useEffect(() => {
+    if (!plans?.length) return;
+    if (!selectedPlanCode) {
+      const initial = plans.find((plan) => plan.isDefault) ?? plans[0];
+      setSelectedPlanCode(initial.code);
+      return;
+    }
+    if (!plans.some((plan) => plan.code === selectedPlanCode)) {
+      const fallback = plans.find((plan) => plan.isDefault) ?? plans[0];
+      setSelectedPlanCode(fallback.code);
+    }
+  }, [plans, selectedPlanCode]);
 
   const selectedPlan = useMemo(
     () => plans?.find((plan) => plan.code === selectedPlanCode) ?? null,
@@ -141,9 +154,9 @@ export default function GetStartedPage() {
                   setLocalError(null);
                   setSelectedPlanCode(event.target.value);
                 }}
-                disabled={!authSelf?.isStaff}
+                disabled={!orgId || isPlansLoading || !plans?.length}
               >
-                <option value="">Select plan</option>
+                <option value="">{isPlansLoading ? 'Loading plans...' : 'Select plan'}</option>
                 {plans?.map((plan) => (
                   <option key={plan.id} value={plan.code}>
                     {plan.name} ({plan.code})
@@ -154,7 +167,7 @@ export default function GetStartedPage() {
                 className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
                 value={provider}
                 onChange={(event) => setProvider(event.target.value as (typeof providers)[number])}
-                disabled={!authSelf?.isStaff}
+                disabled={!orgId}
               >
                 {providers.map((entry) => (
                   <option key={entry} value={entry}>
@@ -163,6 +176,11 @@ export default function GetStartedPage() {
                 ))}
               </select>
             </div>
+            {!isPlansLoading && !plans?.length ? (
+              <p className="mt-2 text-xs text-muted">
+                No plans available yet. Ask platform support to configure plan catalog pricing.
+              </p>
+            ) : null}
             {selectedPlan ? (
               <p className="mt-3 text-sm text-muted">
                 {selectedPlan.description || 'No description'} ·{' '}
@@ -172,7 +190,7 @@ export default function GetStartedPage() {
             ) : null}
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <Button
-                disabled={!orgId || !authSelf?.isStaff || !selectedPlanCode || isStartingCheckout}
+                disabled={!orgId || !authSelf?.isStaff || !selectedPlanCode || isStartingCheckout || !plans?.length}
                 onClick={() => {
                   if (!selectedPlanCode) {
                     setLocalError('Select a plan first.');

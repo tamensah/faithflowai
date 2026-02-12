@@ -22,6 +22,99 @@ const activeStatuses = [
   TenantSubscriptionStatus.PAUSED,
 ] as const;
 
+const baselinePlans = [
+  {
+    code: 'starter',
+    name: 'Starter',
+    description: 'For small churches getting started with digital operations.',
+    currency: 'USD',
+    interval: 'MONTHLY' as const,
+    amountMinor: 4900,
+    isDefault: true,
+    metadata: {
+      target: 'small churches',
+      trialDays: 14,
+    },
+    features: [
+      { key: 'max_members', enabled: true, limit: 500 },
+      { key: 'max_campuses', enabled: true, limit: 1 },
+      { key: 'ai_insights', enabled: false, limit: null },
+      { key: 'membership_enabled', enabled: true, limit: null },
+      { key: 'events_enabled', enabled: true, limit: null },
+      { key: 'finance_enabled', enabled: true, limit: null },
+      { key: 'multi_campus_enabled', enabled: true, limit: null },
+      { key: 'facility_management_enabled', enabled: false, limit: null },
+      { key: 'pastoral_care_enabled', enabled: false, limit: null },
+      { key: 'content_library_enabled', enabled: true, limit: null },
+      { key: 'streaming_enabled', enabled: false, limit: null },
+      { key: 'support_center_enabled', enabled: true, limit: null },
+      { key: 'custom_domain_enabled', enabled: false, limit: null },
+      { key: 'max_events_monthly', enabled: true, limit: 30 },
+      { key: 'max_expenses_monthly', enabled: true, limit: 80 },
+    ],
+  },
+  {
+    code: 'growth',
+    name: 'Growth',
+    description: 'For growing churches with multiple teams and workflows.',
+    currency: 'USD',
+    interval: 'MONTHLY' as const,
+    amountMinor: 14900,
+    isDefault: false,
+    metadata: {
+      target: 'growing churches',
+      trialDays: 14,
+    },
+    features: [
+      { key: 'max_members', enabled: true, limit: 5000 },
+      { key: 'max_campuses', enabled: true, limit: 5 },
+      { key: 'ai_insights', enabled: true, limit: null },
+      { key: 'membership_enabled', enabled: true, limit: null },
+      { key: 'events_enabled', enabled: true, limit: null },
+      { key: 'finance_enabled', enabled: true, limit: null },
+      { key: 'multi_campus_enabled', enabled: true, limit: null },
+      { key: 'facility_management_enabled', enabled: true, limit: null },
+      { key: 'pastoral_care_enabled', enabled: true, limit: null },
+      { key: 'content_library_enabled', enabled: true, limit: null },
+      { key: 'streaming_enabled', enabled: true, limit: null },
+      { key: 'support_center_enabled', enabled: true, limit: null },
+      { key: 'custom_domain_enabled', enabled: true, limit: null },
+      { key: 'max_events_monthly', enabled: true, limit: 200 },
+      { key: 'max_expenses_monthly', enabled: true, limit: 500 },
+    ],
+  },
+  {
+    code: 'enterprise',
+    name: 'Enterprise',
+    description: 'For multi-campus and diaspora networks with advanced controls.',
+    currency: 'USD',
+    interval: 'MONTHLY' as const,
+    amountMinor: 0,
+    isDefault: false,
+    metadata: {
+      target: 'multi-campus and diaspora networks',
+      trialDays: 0,
+    },
+    features: [
+      { key: 'max_members', enabled: true, limit: null },
+      { key: 'max_campuses', enabled: true, limit: null },
+      { key: 'ai_insights', enabled: true, limit: null },
+      { key: 'membership_enabled', enabled: true, limit: null },
+      { key: 'events_enabled', enabled: true, limit: null },
+      { key: 'finance_enabled', enabled: true, limit: null },
+      { key: 'multi_campus_enabled', enabled: true, limit: null },
+      { key: 'facility_management_enabled', enabled: true, limit: null },
+      { key: 'pastoral_care_enabled', enabled: true, limit: null },
+      { key: 'content_library_enabled', enabled: true, limit: null },
+      { key: 'streaming_enabled', enabled: true, limit: null },
+      { key: 'support_center_enabled', enabled: true, limit: null },
+      { key: 'custom_domain_enabled', enabled: true, limit: null },
+      { key: 'max_events_monthly', enabled: true, limit: null },
+      { key: 'max_expenses_monthly', enabled: true, limit: null },
+    ],
+  },
+];
+
 const checkoutInput = z.object({
   planCode: z.string().trim().min(2).max(64),
   provider: z.nativeEnum(PaymentProvider),
@@ -162,14 +255,62 @@ async function getActiveSubscription(tenantId: string) {
   });
 }
 
+async function ensureBaselinePlans() {
+  const hasDefault = (await prisma.subscriptionPlan.count({ where: { isDefault: true } })) > 0;
+  const existingCodes = await prisma.subscriptionPlan.findMany({
+    where: { code: { in: baselinePlans.map((plan) => plan.code) } },
+    select: { code: true },
+  });
+  const codeSet = new Set(existingCodes.map((plan) => plan.code));
+  const missingPlans = baselinePlans.filter((plan) => !codeSet.has(plan.code));
+  if (!missingPlans.length) return;
+
+  await prisma.$transaction(async (tx) => {
+    let defaultAssigned = hasDefault;
+    for (const plan of missingPlans) {
+      const shouldBeDefault = plan.isDefault && !defaultAssigned;
+      const created = await tx.subscriptionPlan.create({
+        data: {
+          code: plan.code,
+          name: plan.name,
+          description: plan.description,
+          currency: plan.currency,
+          interval: plan.interval,
+          amountMinor: plan.amountMinor,
+          isActive: true,
+          isDefault: shouldBeDefault,
+          metadata: plan.metadata as Prisma.InputJsonValue,
+        },
+      });
+      if (shouldBeDefault) defaultAssigned = true;
+
+      await tx.subscriptionPlanFeature.createMany({
+        data: plan.features.map((feature) => ({
+          planId: created.id,
+          key: feature.key,
+          enabled: feature.enabled,
+          limit: feature.limit,
+        })),
+      });
+    }
+  });
+}
+
+async function listActivePlans() {
+  await ensureBaselinePlans();
+  return prisma.subscriptionPlan.findMany({
+    where: { isActive: true },
+    include: { features: { orderBy: { key: 'asc' } } },
+    orderBy: [{ amountMinor: 'asc' }, { createdAt: 'asc' }],
+  });
+}
+
 export const billingRouter = router({
+  catalog: protectedProcedure.query(async () => listActivePlans()),
+
   plans: protectedProcedure.query(async ({ ctx }) => {
     await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
-    return prisma.subscriptionPlan.findMany({
-      where: { isActive: true },
-      include: { features: { orderBy: { key: 'asc' } } },
-      orderBy: [{ amountMinor: 'asc' }, { createdAt: 'asc' }],
-    });
+    return listActivePlans();
   }),
 
   currentSubscription: protectedProcedure.query(async ({ ctx }) => {
@@ -183,6 +324,7 @@ export const billingRouter = router({
       throw new TRPCError({ code: 'BAD_REQUEST', message: 'Manual provider is not supported for billing checkout' });
     }
 
+    await ensureBaselinePlans();
     const plan = await prisma.subscriptionPlan.findUnique({
       where: { code: input.planCode },
     });
