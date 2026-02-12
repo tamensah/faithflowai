@@ -43,6 +43,10 @@ export default function MemberPortalPage() {
   const [requestName, setRequestName] = useState('');
   const [requestEmail, setRequestEmail] = useState('');
   const [requestMessage, setRequestMessage] = useState('');
+  const [requestAccessError, setRequestAccessError] = useState<string | null>(null);
+  const [registrationErrors, setRegistrationErrors] = useState<Record<string, string>>({});
+  const [surveyErrors, setSurveyErrors] = useState<Record<string, string>>({});
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingIdleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastConversationRef = useRef<string | null>(null);
@@ -123,6 +127,7 @@ export default function MemberPortalPage() {
   const { mutate: cancelShift } = trpc.volunteer.selfCancelShift.useMutation();
   const { mutate: setAvailability } = trpc.volunteer.setSelfAvailability.useMutation({
     onSuccess: async () => {
+      setAvailabilityError(null);
       setAvailabilityNotes('');
       await utils.volunteer.selfAvailability.invalidate();
     },
@@ -186,6 +191,7 @@ export default function MemberPortalPage() {
   const { mutate: submitSurvey } = trpc.survey.submitSelfResponse.useMutation();
   const { mutate: requestAccess, isPending: isRequestingAccess } = trpc.member.requestAccess.useMutation({
     onSuccess: async () => {
+      setRequestAccessError(null);
       await utils.member.myAccessRequest.invalidate();
     },
   });
@@ -379,7 +385,49 @@ export default function MemberPortalPage() {
     return date.toLocaleString();
   };
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+  const hasValue = (value: unknown) => {
+    if (typeof value === 'string') return value.trim().length > 0;
+    if (typeof value === 'number') return Number.isFinite(value);
+    if (typeof value === 'boolean') return value;
+    if (Array.isArray(value)) return value.length > 0;
+    return value !== null && value !== undefined;
+  };
+
+  const isRegistrationFieldAnswered = (field: any, value: unknown) => {
+    if (field.type === 'CHECKBOX') return value === true;
+    if (field.type === 'MULTI_SELECT') return hasValue(value);
+    return hasValue(value);
+  };
+
+  const getMissingRegistrationFields = (eventId: string, fields: any[]) => {
+    return fields
+      .filter((field) => field?.required)
+      .filter((field, idx) => {
+        const key = field.id ?? field.label ?? `field-${idx}`;
+        const value = registrationResponses[eventId]?.[key];
+        return !isRegistrationFieldAnswered(field, value);
+      })
+      .map((field, idx) => field.label ?? `Field ${idx + 1}`);
+  };
+
+  const isSurveyQuestionAnswered = (question: any, value: unknown) => {
+    if (question.type === 'RATING') {
+      const numeric = typeof value === 'string' ? Number(value) : value;
+      return Number.isFinite(numeric) && Number(numeric) >= 1 && Number(numeric) <= 5;
+    }
+    return hasValue(value);
+  };
+
   const handleAnswerChange = (surveyId: string, questionId: string, value: any) => {
+    setSurveyErrors((prev) => {
+      if (!prev[surveyId]) return prev;
+      const next = { ...prev };
+      delete next[surveyId];
+      return next;
+    });
     setAnswers((prev) => ({
       ...prev,
       [surveyId]: {
@@ -390,6 +438,12 @@ export default function MemberPortalPage() {
   };
 
   const handleRegistrationResponse = (eventId: string, fieldKey: string, value: any) => {
+    setRegistrationErrors((prev) => {
+      if (!prev[eventId]) return prev;
+      const next = { ...prev };
+      delete next[eventId];
+      return next;
+    });
     setRegistrationResponses((prev) => ({
       ...prev,
       [eventId]: {
@@ -398,6 +452,14 @@ export default function MemberPortalPage() {
       },
     }));
   };
+
+  const availabilityStartValid = timeRegex.test(availabilityStart);
+  const availabilityEndValid = timeRegex.test(availabilityEnd);
+  const availabilityWindowValid =
+    availabilityStartValid &&
+    availabilityEndValid &&
+    availabilityStart.replace(':', '') < availabilityEnd.replace(':', '');
+  const canSaveAvailability = Boolean(availabilityDay && availabilityStart && availabilityEnd && availabilityWindowValid);
 
   if (isProfileLoading) {
     return (
@@ -464,7 +526,10 @@ export default function MemberPortalPage() {
               <Input
                 placeholder="Full name"
                 value={requestName}
-                onChange={(e) => setRequestName(e.target.value)}
+                onChange={(e) => {
+                  setRequestAccessError(null);
+                  setRequestName(e.target.value);
+                }}
               />
             </div>
             <div className="space-y-1">
@@ -472,7 +537,10 @@ export default function MemberPortalPage() {
               <Input
                 placeholder="Email"
                 value={requestEmail}
-                onChange={(e) => setRequestEmail(e.target.value)}
+                onChange={(e) => {
+                  setRequestAccessError(null);
+                  setRequestEmail(e.target.value);
+                }}
               />
             </div>
             <div className="space-y-1">
@@ -480,7 +548,10 @@ export default function MemberPortalPage() {
               <select
                 className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
                 value={requestChurchId}
-                onChange={(e) => setRequestChurchId(e.target.value)}
+                onChange={(e) => {
+                  setRequestAccessError(null);
+                  setRequestChurchId(e.target.value);
+                }}
               >
                 <option value="">Select church</option>
                 {churches?.map((church) => (
@@ -501,18 +572,25 @@ export default function MemberPortalPage() {
           </div>
           <div className="mt-4">
             <Button
-              onClick={() =>
+              onClick={() => {
+                const email = requestEmail.trim();
+                if (!emailRegex.test(email)) {
+                  setRequestAccessError('Enter a valid email address.');
+                  return;
+                }
+                setRequestAccessError(null);
                 requestAccess({
                   churchId: requestChurchId,
                   name: requestName.trim() || undefined,
-                  email: requestEmail.trim() || undefined,
+                  email,
                   message: requestMessage.trim() || undefined,
-                })
-              }
+                });
+              }}
               disabled={!requestChurchId || !requestName.trim() || !requestEmail.trim() || isRequestingAccess}
             >
               {isRequestingAccess ? 'Submitting…' : 'Request access'}
             </Button>
+            {requestAccessError ? <p className="mt-2 text-xs text-destructive">{requestAccessError}</p> : null}
           </div>
         </Card>
       </div>
@@ -895,6 +973,9 @@ export default function MemberPortalPage() {
               const ticketCount = ticketOrderMap.get(event.id) ?? 0;
               const registration = registrationMap.get(event.id);
               const registrationFields = Array.isArray(event.registrationFields) ? event.registrationFields : [];
+              const missingRegistrationFields = getMissingRegistrationFields(event.id, registrationFields);
+              const canRegisterForEvent = missingRegistrationFields.length === 0;
+              const registrationError = registrationErrors[event.id];
               return (
                 <div key={event.id} className="rounded-md border border-border p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -945,6 +1026,7 @@ export default function MemberPortalPage() {
                           {registrationFields.map((field: any, idx: number) => {
                             const fieldKey = field.id ?? field.label ?? `field-${idx}`;
                             const value = registrationResponses[event.id]?.[fieldKey] ?? '';
+                            const label = `${field.label ?? `Field ${idx + 1}`}${field.required ? ' *' : ''}`;
                             if (field.type === 'SELECT' || field.type === 'MULTI_SELECT') {
                               return (
                                 <select
@@ -953,7 +1035,7 @@ export default function MemberPortalPage() {
                                   value={value}
                                   onChange={(e) => handleRegistrationResponse(event.id, fieldKey, e.target.value)}
                                 >
-                                  <option value="">Select {field.label}</option>
+                                  <option value="">Select {label}</option>
                                   {(field.options ?? []).map((option: string) => (
                                     <option key={option} value={option}>
                                       {option}
@@ -970,14 +1052,14 @@ export default function MemberPortalPage() {
                                     checked={Boolean(value)}
                                     onChange={(e) => handleRegistrationResponse(event.id, fieldKey, e.target.checked)}
                                   />
-                                  {field.label}
+                                  {label}
                                 </label>
                               );
                             }
                             return (
                               <Input
                                 key={fieldKey}
-                                placeholder={field.label}
+                                placeholder={label}
                                 type={field.type === 'NUMBER' ? 'number' : field.type === 'DATE' ? 'date' : 'text'}
                                 value={value}
                                 onChange={(e) => handleRegistrationResponse(event.id, fieldKey, e.target.value)}
@@ -998,17 +1080,36 @@ export default function MemberPortalPage() {
                         ) : (
                           <Button
                             size="sm"
-                            onClick={() =>
+                            onClick={() => {
+                              if (!canRegisterForEvent) {
+                                setRegistrationErrors((prev) => ({
+                                  ...prev,
+                                  [event.id]: `Complete required fields: ${missingRegistrationFields.join(', ')}`,
+                                }));
+                                return;
+                              }
+                              setRegistrationErrors((prev) => {
+                                const next = { ...prev };
+                                delete next[event.id];
+                                return next;
+                              });
                               registerEvent({
                                 eventId: event.id,
                                 responses: registrationResponses[event.id] ?? {},
-                              })
-                            }
+                              });
+                            }}
+                            disabled={!canRegisterForEvent}
                           >
                             {registration?.status === 'WAITLISTED' ? 'Join waitlist' : 'Register'}
                           </Button>
                         )}
                       </div>
+                      {registrationError ? <p className="text-xs text-destructive">{registrationError}</p> : null}
+                      {!registrationError && !canRegisterForEvent ? (
+                        <p className="text-xs text-muted">
+                          Required: {missingRegistrationFields.join(', ')}
+                        </p>
+                      ) : null}
                     </div>
                   ) : null}
                   {ticketTypes.length ? (
@@ -1147,14 +1248,22 @@ export default function MemberPortalPage() {
               <option value="SATURDAY">Saturday</option>
             </select>
             <Input
+              type="time"
               placeholder="Start (HH:MM)"
               value={availabilityStart}
-              onChange={(e) => setAvailabilityStart(e.target.value)}
+              onChange={(e) => {
+                setAvailabilityError(null);
+                setAvailabilityStart(e.target.value);
+              }}
             />
             <Input
+              type="time"
               placeholder="End (HH:MM)"
               value={availabilityEnd}
-              onChange={(e) => setAvailabilityEnd(e.target.value)}
+              onChange={(e) => {
+                setAvailabilityError(null);
+                setAvailabilityEnd(e.target.value);
+              }}
             />
             <Input
               placeholder="Notes (optional)"
@@ -1164,18 +1273,25 @@ export default function MemberPortalPage() {
           </div>
           <div className="mt-4">
             <Button
-              onClick={() =>
+              onClick={() => {
+                if (!canSaveAvailability) {
+                  setAvailabilityError('Enter a valid time window where start time is before end time.');
+                  return;
+                }
+                setAvailabilityError(null);
                 setAvailability({
                   roleId: availabilityRoleId || undefined,
                   dayOfWeek: availabilityDay as any,
                   startTime: availabilityStart,
                   endTime: availabilityEnd,
                   notes: availabilityNotes || undefined,
-                })
-              }
+                });
+              }}
+              disabled={!canSaveAvailability}
             >
               Save availability
             </Button>
+            {availabilityError ? <p className="mt-2 text-xs text-destructive">{availabilityError}</p> : null}
           </div>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {myAvailability?.map((slot) => (
@@ -1203,15 +1319,28 @@ export default function MemberPortalPage() {
           <div className="mt-4 space-y-6">
             {surveys?.map((survey) => (
               <div key={survey.id} className="rounded-md border border-border p-4">
+                {(() => {
+                  const questions = surveyQuestions[survey.id] ?? [];
+                  const missingRequiredQuestions = questions
+                    .filter((question: any) => question.required)
+                    .filter((question: any) => !isSurveyQuestionAnswered(question, answers[survey.id]?.[question.id]))
+                    .map((question: any) => question.prompt);
+                  const canSubmitSurvey = missingRequiredQuestions.length === 0;
+                  const surveyError = surveyErrors[survey.id];
+                  return (
+                    <>
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-semibold">{survey.title}</h3>
                   <Badge variant="default">{survey.status}</Badge>
                 </div>
                 <p className="mt-2 text-sm text-muted">{survey.description ?? 'No description.'}</p>
                 <div className="mt-4 space-y-3">
-                  {surveyQuestions[survey.id]?.map((question) => (
+                  {questions.map((question: any) => (
                     <div key={question.id} className="space-y-2">
-                      <p className="text-sm font-medium">{question.prompt}</p>
+                      <p className="text-sm font-medium">
+                        {question.prompt}
+                        {question.required ? ' *' : ''}
+                      </p>
                       {question.type === 'TEXT' ? (
                         <Input
                           placeholder="Your response"
@@ -1222,6 +1351,8 @@ export default function MemberPortalPage() {
                         <Input
                           placeholder="Rating 1-5"
                           type="number"
+                          min={1}
+                          max={5}
                           value={answers[survey.id]?.[question.id] ?? ''}
                           onChange={(e) => handleAnswerChange(survey.id, question.id, Number(e.target.value))}
                         />
@@ -1267,15 +1398,35 @@ export default function MemberPortalPage() {
                 <div className="mt-4">
                   <Button
                     onClick={() => {
+                      if (!canSubmitSurvey) {
+                        setSurveyErrors((prev) => ({
+                          ...prev,
+                          [survey.id]: `Complete required questions: ${missingRequiredQuestions.join(', ')}`,
+                        }));
+                        return;
+                      }
+                      setSurveyErrors((prev) => {
+                        const next = { ...prev };
+                        delete next[survey.id];
+                        return next;
+                      });
                       submitSurvey({
                         surveyId: survey.id,
                         answers: answers[survey.id] ?? {},
                       });
                     }}
+                    disabled={!canSubmitSurvey}
                   >
                     Submit survey
                   </Button>
+                  {surveyError ? <p className="mt-2 text-xs text-destructive">{surveyError}</p> : null}
+                  {!surveyError && !canSubmitSurvey ? (
+                    <p className="mt-2 text-xs text-muted">Required: {missingRequiredQuestions.join(', ')}</p>
+                  ) : null}
                 </div>
+                    </>
+                  );
+                })()}
               </div>
             ))}
             {!surveys?.length && <p className="text-sm text-muted">No active surveys.</p>}

@@ -69,6 +69,11 @@ export async function provisionTenant(clerkOrgId: string) {
 export async function createContext({ req }: { req: { headers: Record<string, string | string[] | undefined> } }): Promise<Context> {
   const authHeader = req.headers['authorization'];
   const token = Array.isArray(authHeader) ? authHeader[0] : authHeader;
+  const orgHeader = req.headers['x-clerk-org-id'];
+  const tenantHeader = req.headers['x-tenant-id'];
+  const parsedOrgHeader = Array.isArray(orgHeader) ? orgHeader[0] : orgHeader ?? null;
+  const parsedTenantHeader = Array.isArray(tenantHeader) ? tenantHeader[0] : tenantHeader ?? null;
+  const fallbackOrg = parsedOrgHeader ?? parsedTenantHeader;
 
   let userId: string | null = null;
   let clerkOrgId: string | null = null;
@@ -77,13 +82,11 @@ export async function createContext({ req }: { req: { headers: Record<string, st
   if (bearer) {
     const claims = await verifyClerkToken(bearer);
     userId = claims?.sub ?? null;
-    clerkOrgId = (claims?.org_id ?? claims?.orgId) ?? null;
+    clerkOrgId = (claims?.org_id ?? claims?.orgId) ?? fallbackOrg;
   } else {
     const fallbackUser = req.headers['x-user-id'];
     userId = Array.isArray(fallbackUser) ? fallbackUser[0] : fallbackUser ?? null;
-
-    const fallbackOrg = req.headers['x-tenant-id'];
-    clerkOrgId = Array.isArray(fallbackOrg) ? fallbackOrg[0] : fallbackOrg ?? null;
+    clerkOrgId = fallbackOrg;
   }
 
   const tenant = clerkOrgId ? await provisionTenant(clerkOrgId) : null;

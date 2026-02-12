@@ -14,7 +14,7 @@ function resolveTrpcUrl() {
 }
 
 function TrpcProvider({ children }: { children: React.ReactNode }) {
-  const { getToken } = useAuth();
+  const { getToken, orgId } = useAuth();
   const tokenTemplate = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
   const [queryClient] = useState(() => new QueryClient());
   const [trpcClient] = useState(() =>
@@ -25,7 +25,13 @@ function TrpcProvider({ children }: { children: React.ReactNode }) {
           transformer: superjson,
           headers: async () => {
             const token = await getToken(tokenTemplate ? { template: tokenTemplate } : undefined);
-            return token ? { Authorization: `Bearer ${token}` } : {};
+            const headers: Record<string, string> = {};
+            if (token) headers.Authorization = `Bearer ${token}`;
+            if (orgId) {
+              headers['x-clerk-org-id'] = orgId;
+              headers['x-tenant-id'] = orgId;
+            }
+            return headers;
           },
         }),
       ],

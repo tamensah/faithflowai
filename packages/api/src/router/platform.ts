@@ -146,7 +146,10 @@ export const platformRouter = router({
     const platformUser = await loadPlatformUser(ctx.userId!);
     const allowlist = parseAllowlist();
     const email = platformUser?.email ?? (await getUserEmail(ctx.userId!));
-    const bootstrapAllowed = Boolean(email && allowlist.includes(email.toLowerCase()));
+    const platformUserCount = await prisma.platformUser.count();
+    const isAllowlisted = Boolean(email && allowlist.includes(email.toLowerCase()));
+    const canFirstUserBootstrap = Boolean(email && allowlist.length === 0 && platformUserCount === 0);
+    const bootstrapAllowed = isAllowlisted || canFirstUserBootstrap;
     if (platformUser) {
       await prisma.platformUser.update({
         where: { id: platformUser.id },
@@ -166,14 +169,19 @@ export const platformRouter = router({
     .mutation(async ({ input, ctx }) => {
       const allowlist = parseAllowlist();
       const email = (input.email ?? (await getUserEmail(ctx.userId!)))?.toLowerCase();
-      if (!email || !allowlist.includes(email)) {
+      const existingByEmail = email
+        ? await prisma.platformUser.findUnique({ where: { email }, include: { roles: true } })
+        : null;
+      const platformUserCount = await prisma.platformUser.count();
+      const isAllowlisted = Boolean(email && allowlist.includes(email));
+      const canFirstUserBootstrap = Boolean(email && allowlist.length === 0 && platformUserCount === 0);
+      const canClaimByInvite = Boolean(existingByEmail);
+
+      if (!email || (!isAllowlisted && !canFirstUserBootstrap && !canClaimByInvite)) {
         throw new TRPCError({ code: 'FORBIDDEN', message: 'Not allowed to bootstrap platform access' });
       }
 
-      let platformUser = await prisma.platformUser.findFirst({
-        where: { email },
-        include: { roles: true },
-      });
+      let platformUser = existingByEmail;
 
       if (!platformUser) {
         platformUser = await prisma.platformUser.create({

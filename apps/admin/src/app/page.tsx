@@ -14,6 +14,11 @@ export default function AdminHome() {
   const [selectedChurchId, setSelectedChurchId] = useState<string | null>(null);
   const [updateCountry, setUpdateCountry] = useState('');
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [orgError, setOrgError] = useState<string | null>(null);
+  const [churchError, setChurchError] = useState<string | null>(null);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  const countryRegex = /^[A-Z]{2}$/;
 
   const { data: organizations } = trpc.organization.list.useQuery();
 
@@ -25,6 +30,7 @@ export default function AdminHome() {
 
   const { mutate: createOrganization, isPending: isCreatingOrg } = trpc.organization.create.useMutation({
     onSuccess: async (org) => {
+      setOrgError(null);
       setOrgName('');
       setOrganizationId(org.id);
       await utils.organization.list.invalidate();
@@ -44,6 +50,7 @@ export default function AdminHome() {
 
   const { mutate: createChurch, isPending: isCreatingChurch } = trpc.church.create.useMutation({
     onSuccess: async () => {
+      setChurchError(null);
       setChurchName('');
       setChurchSlug('');
       setChurchCountry('US');
@@ -53,6 +60,7 @@ export default function AdminHome() {
 
   const { mutate: updateChurch, isPending: isUpdatingChurch } = trpc.church.update.useMutation({
     onSuccess: async () => {
+      setUpdateError(null);
       await utils.church.list.invalidate();
     },
   });
@@ -89,18 +97,31 @@ export default function AdminHome() {
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <Input
-              placeholder="Organization name"
-              value={orgName}
-              onChange={(event) => setOrgName(event.target.value)}
-            />
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Organization name *</label>
+              <Input
+                placeholder="Organization name"
+                value={orgName}
+                onChange={(event) => {
+                  setOrgError(null);
+                  setOrgName(event.target.value);
+                }}
+              />
+            </div>
             <Button
-              onClick={() => createOrganization({ name: orgName })}
+              onClick={() => {
+                if (!orgName.trim()) {
+                  setOrgError('Organization name is required.');
+                  return;
+                }
+                createOrganization({ name: orgName.trim() });
+              }}
               disabled={!orgName || isCreatingOrg}
             >
               {isCreatingOrg ? 'Creating…' : 'Create organization'}
             </Button>
           </div>
+          {orgError ? <p className="mt-2 text-xs text-destructive">{orgError}</p> : null}
         </Card>
 
         <Card className="p-6">
@@ -130,55 +151,105 @@ export default function AdminHome() {
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-5">
-            <Input
-              placeholder="Church name"
-              value={churchName}
-              onChange={(event) => setChurchName(event.target.value)}
-            />
-            <Input
-              placeholder="Slug"
-              value={churchSlug}
-              onChange={(event) => setChurchSlug(event.target.value)}
-            />
-            <Input
-              placeholder="Country (ISO 2)"
-              value={churchCountry}
-              onChange={(event) => setChurchCountry(event.target.value.toUpperCase())}
-            />
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Church name *</label>
+              <Input
+                placeholder="Church name"
+                value={churchName}
+                onChange={(event) => {
+                  setChurchError(null);
+                  setChurchName(event.target.value);
+                }}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Slug *</label>
+              <Input
+                placeholder="faith-center-main"
+                value={churchSlug}
+                onChange={(event) => {
+                  setChurchError(null);
+                  setChurchSlug(event.target.value.toLowerCase().replace(/\s+/g, '-'));
+                }}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Country (ISO 2) *</label>
+              <Input
+                placeholder="US"
+                value={churchCountry}
+                onChange={(event) => {
+                  setChurchError(null);
+                  setChurchCountry(event.target.value.toUpperCase());
+                }}
+              />
+            </div>
             <Button
-              onClick={() =>
+              onClick={() => {
+                const name = churchName.trim();
+                const slug = churchSlug.trim();
+                const country = churchCountry.trim().toUpperCase();
+                if (!name || !slug || !selectedOrg) {
+                  setChurchError('Church name, slug, and organization are required.');
+                  return;
+                }
+                if (!slugRegex.test(slug)) {
+                  setChurchError('Slug must use lowercase letters, numbers, and hyphens only.');
+                  return;
+                }
+                if (country && !countryRegex.test(country)) {
+                  setChurchError('Country must be a valid 2-letter ISO code.');
+                  return;
+                }
                 createChurch({
-                  name: churchName,
-                  slug: churchSlug,
-                  organizationId: selectedOrg ?? '',
-                  countryCode: churchCountry || undefined,
-                })
-              }
+                  name,
+                  slug,
+                  organizationId: selectedOrg,
+                  countryCode: country || undefined,
+                });
+              }}
               disabled={!churchName || !churchSlug || !selectedOrg || isCreatingChurch}
             >
               {isCreatingChurch ? 'Creating…' : 'Create church'}
             </Button>
           </div>
+          {churchError ? <p className="mt-2 text-xs text-destructive">{churchError}</p> : null}
 
           <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <Input
-              placeholder="Update country (ISO 2)"
-              value={updateCountry}
-              onChange={(event) => setUpdateCountry(event.target.value.toUpperCase())}
-            />
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Update country (ISO 2) *</label>
+              <Input
+                placeholder="US"
+                value={updateCountry}
+                onChange={(event) => {
+                  setUpdateError(null);
+                  setUpdateCountry(event.target.value.toUpperCase());
+                }}
+              />
+            </div>
             <Button
               variant="outline"
-              onClick={() =>
+              onClick={() => {
+                const country = updateCountry.trim().toUpperCase();
+                if (!selectedChurchId) {
+                  setUpdateError('Select a church first.');
+                  return;
+                }
+                if (country && !countryRegex.test(country)) {
+                  setUpdateError('Country must be a valid 2-letter ISO code.');
+                  return;
+                }
                 updateChurch({
-                  id: selectedChurchId ?? '',
-                  countryCode: updateCountry || undefined,
-                })
-              }
+                  id: selectedChurchId,
+                  countryCode: country || undefined,
+                });
+              }}
               disabled={!selectedChurchId || isUpdatingChurch}
             >
               {isUpdatingChurch ? 'Updating…' : 'Update country'}
             </Button>
           </div>
+          {updateError ? <p className="mt-2 text-xs text-destructive">{updateError}</p> : null}
         </Card>
       </div>
     </Shell>

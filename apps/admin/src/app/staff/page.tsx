@@ -21,6 +21,9 @@ export default function StaffPage() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState<typeof roleOptions[number]>('STAFF');
+  const [staffFormError, setStaffFormError] = useState<string | null>(null);
+  const [inviteFormError, setInviteFormError] = useState<string | null>(null);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   useEffect(() => {
     if (!churchId && churches?.length) {
@@ -36,6 +39,7 @@ export default function StaffPage() {
 
   const { mutate: upsertStaff, isPending } = trpc.staff.upsert.useMutation({
     onSuccess: async () => {
+      setStaffFormError(null);
       setClerkUserId('');
       setEmail('');
       setName('');
@@ -58,6 +62,7 @@ export default function StaffPage() {
 
   const { mutate: inviteStaff, isPending: isInviting } = trpc.staff.invite.useMutation({
     onSuccess: async () => {
+      setInviteFormError(null);
       setInviteEmail('');
       setInviteName('');
       setInviteRole('STAFF');
@@ -95,13 +100,32 @@ export default function StaffPage() {
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Add staff member</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Input
-              placeholder="Clerk user ID"
-              value={clerkUserId}
-              onChange={(e) => setClerkUserId(e.target.value)}
-            />
-            <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <Input placeholder="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} />
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Clerk user ID *</label>
+              <Input
+                placeholder="user_..."
+                value={clerkUserId}
+                onChange={(e) => {
+                  setStaffFormError(null);
+                  setClerkUserId(e.target.value);
+                }}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Email *</label>
+              <Input
+                placeholder="staff@example.org"
+                value={email}
+                onChange={(e) => {
+                  setStaffFormError(null);
+                  setEmail(e.target.value);
+                }}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Name (optional)</label>
+              <Input placeholder="Name (optional)" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
             <select
               className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
               value={role}
@@ -128,19 +152,30 @@ export default function StaffPage() {
           </div>
           <div className="mt-4">
             <Button
-              onClick={() =>
+              onClick={() => {
+                const trimmedEmail = email.trim().toLowerCase();
+                const trimmedClerkUserId = clerkUserId.trim();
+                if (!trimmedClerkUserId || !trimmedEmail || !churchId) {
+                  setStaffFormError('Clerk user ID, email, and church are required.');
+                  return;
+                }
+                if (!emailRegex.test(trimmedEmail)) {
+                  setStaffFormError('Enter a valid email address.');
+                  return;
+                }
                 upsertStaff({
-                  clerkUserId: clerkUserId.trim(),
-                  email: email.trim(),
+                  clerkUserId: trimmedClerkUserId,
+                  email: trimmedEmail,
                   name: name.trim() || undefined,
                   churchId,
                   role,
-                })
-              }
+                });
+              }}
               disabled={!clerkUserId.trim() || !email.trim() || !churchId || isPending}
             >
               {isPending ? 'Saving…' : 'Grant access'}
             </Button>
+            {staffFormError ? <p className="mt-2 text-xs text-destructive">{staffFormError}</p> : null}
           </div>
         </Card>
 
@@ -150,16 +185,25 @@ export default function StaffPage() {
             Sends a Clerk organization invite and auto‑links staff access after acceptance.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Input
-              placeholder="Invitee email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-            />
-            <Input
-              placeholder="Name (optional)"
-              value={inviteName}
-              onChange={(e) => setInviteName(e.target.value)}
-            />
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Invitee email *</label>
+              <Input
+                placeholder="invitee@example.org"
+                value={inviteEmail}
+                onChange={(e) => {
+                  setInviteFormError(null);
+                  setInviteEmail(e.target.value);
+                }}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Name (optional)</label>
+              <Input
+                placeholder="Name (optional)"
+                value={inviteName}
+                onChange={(e) => setInviteName(e.target.value)}
+              />
+            </div>
             <select
               className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
               value={inviteRole}
@@ -186,18 +230,28 @@ export default function StaffPage() {
           </div>
           <div className="mt-4">
             <Button
-              onClick={() =>
+              onClick={() => {
+                const trimmedEmail = inviteEmail.trim().toLowerCase();
+                if (!trimmedEmail || !inviteChurchId) {
+                  setInviteFormError('Invite email and church are required.');
+                  return;
+                }
+                if (!emailRegex.test(trimmedEmail)) {
+                  setInviteFormError('Enter a valid email address.');
+                  return;
+                }
                 inviteStaff({
-                  email: inviteEmail.trim(),
+                  email: trimmedEmail,
                   name: inviteName.trim() || undefined,
                   churchId: inviteChurchId,
                   role: inviteRole,
-                })
-              }
+                });
+              }}
               disabled={!inviteEmail.trim() || !inviteChurchId || isInviting}
             >
               {isInviting ? 'Sending…' : 'Send invite'}
             </Button>
+            {inviteFormError ? <p className="mt-2 text-xs text-destructive">{inviteFormError}</p> : null}
           </div>
           <div className="mt-6 space-y-2 text-sm text-muted">
             <div className="flex items-center justify-between">
