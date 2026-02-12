@@ -9,11 +9,16 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   const { orgId } = useAuth();
   const utils = trpc.useUtils();
   const { user, isLoaded, isSignedIn } = useUser();
+  const webPortalUrl = `${(process.env.NEXT_PUBLIC_WEB_URL ?? 'https://web-nu-eight-62.vercel.app').replace(/\/+$/, '')}/portal`;
   const { data: platformSelf, isLoading: isPlatformLoading } = trpc.platform.self.useQuery(undefined, {
     enabled: Boolean(isSignedIn),
   });
   const { data, isLoading, error: authError } = trpc.auth.self.useQuery(undefined, {
     enabled: Boolean(isSignedIn),
+  });
+  const { data: memberSelf } = trpc.member.selfProfile.useQuery(undefined, {
+    enabled: Boolean(isSignedIn && orgId && !data?.isStaff && !platformSelf?.platformUser),
+    retry: false,
   });
   const [inviteAttempted, setInviteAttempted] = useState(false);
   const { mutate: bootstrap, isPending: isBootstrapping } = trpc.auth.bootstrap.useMutation({
@@ -66,6 +71,12 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setInviteAttempted(false);
   }, [orgId]);
+
+  useEffect(() => {
+    if (!memberSelf?.member) return;
+    if (typeof window === 'undefined') return;
+    window.location.replace(webPortalUrl);
+  }, [memberSelf?.member, webPortalUrl]);
 
   if (!isLoaded) {
     return (
@@ -135,6 +146,11 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
             </Button>
           </div>
         ) : null}
+        <div className="mt-3">
+          <Button variant="outline" onClick={() => (window.location.href = webPortalUrl)}>
+            Go to member portal
+          </Button>
+        </div>
       </Card>
     </div>
   );

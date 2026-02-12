@@ -24,6 +24,9 @@ export default function HomePage() {
               <Link className="text-muted hover:text-foreground" href="/portal">
                 Member portal
               </Link>
+              <Link className="text-muted hover:text-foreground" href="/get-started">
+                Church onboarding
+              </Link>
               <Link className="text-muted hover:text-foreground" href="/events">
                 Events
               </Link>
@@ -52,7 +55,9 @@ export default function HomePage() {
                 built for single locations, multi‑campus networks, and diaspora communities.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button>Request a demo</Button>
+                <Link href="/get-started">
+                  <Button>Start church onboarding</Button>
+                </Link>
                 <Link
                   className="inline-flex h-10 items-center justify-center rounded-md border border-border bg-white px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted/10"
                   href="/portal"
@@ -184,13 +189,13 @@ export default function HomePage() {
               <SignInButton mode="modal">
                 <Button variant="outline">Sign in</Button>
               </SignInButton>
-              <SignUpButton mode="modal">
+              <Link href="/get-started">
                 <Button>Get access</Button>
-              </SignUpButton>
+              </Link>
             </SignedOut>
             <SignedIn>
-              <Link className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-white" href="/portal">
-                Go to portal
+              <Link className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-white" href="/get-started">
+                Continue setup
               </Link>
             </SignedIn>
           </div>

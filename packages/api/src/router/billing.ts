@@ -61,7 +61,7 @@ function extractPaystackCustomerCode(meta: Prisma.JsonValue | null | undefined) 
 }
 
 async function requireTenantAdmin(tenantId: string, clerkUserId: string) {
-  const membership = await prisma.staffMembership.findFirst({
+  const existingMembership = await prisma.staffMembership.findFirst({
     where: {
       role: UserRole.ADMIN,
       user: { clerkUserId },
@@ -70,9 +70,62 @@ async function requireTenantAdmin(tenantId: string, clerkUserId: string) {
     include: { church: true, user: true },
   });
 
-  if (!membership) {
+  if (existingMembership) {
+    return existingMembership;
+  }
+
+  const staffCount = await prisma.staffMembership.count({
+    where: { church: { organization: { tenantId } } },
+  });
+  if (staffCount > 0) {
     throw new TRPCError({ code: 'FORBIDDEN', message: 'Tenant admin access required' });
   }
+
+  const defaultChurch = await prisma.church.findFirst({
+    where: { organization: { tenantId } },
+    orderBy: { createdAt: 'asc' },
+  });
+  if (!defaultChurch) {
+    throw new TRPCError({ code: 'NOT_FOUND', message: 'No church found for tenant' });
+  }
+
+  const email = (await getClerkPrimaryEmail(clerkUserId)) ?? `unknown+${clerkUserId}@faithflow.local`;
+  const user = await prisma.user.upsert({
+    where: { clerkUserId },
+    update: {
+      email,
+      role: UserRole.ADMIN,
+      name: email.split('@')[0],
+    },
+    create: {
+      clerkUserId,
+      email,
+      role: UserRole.ADMIN,
+      name: email.split('@')[0],
+    },
+  });
+
+  const membership = await prisma.staffMembership.upsert({
+    where: { userId_churchId: { userId: user.id, churchId: defaultChurch.id } },
+    update: { role: UserRole.ADMIN },
+    create: {
+      userId: user.id,
+      churchId: defaultChurch.id,
+      role: UserRole.ADMIN,
+    },
+    include: { church: true, user: true },
+  });
+
+  await recordAuditLog({
+    tenantId,
+    actorType: AuditActorType.USER,
+    actorId: clerkUserId,
+    action: 'billing.self_serve.bootstrap_admin',
+    targetType: 'StaffMembership',
+    targetId: membership.id,
+    metadata: { churchId: defaultChurch.id },
+  });
+
   return membership;
 }
 
