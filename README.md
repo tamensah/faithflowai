@@ -200,6 +200,7 @@ See `/Users/tamensah/aihub/faithflow_ai/docs/BRAND_GUIDE.md`.
 - Full deployment runbook: `/Users/tamensah/aihub/faithflow_ai/docs/DEPLOYMENT_MANUAL.md`
 - Provider setup checklist: `/Users/tamensah/aihub/faithflow_ai/docs/THIRDPARTY_CONFIG.md`
 - Scheduler profiles: `/Users/tamensah/aihub/faithflow_ai/docs/SCHEDULER_PROFILES.md`
+- Onboarding runbook: `/Users/tamensah/aihub/faithflow_ai/docs/ONBOARDING_MANUAL.md`
 
 ## Next Focus Areas
 - Payments refinements (refunds, disputes, multi-account routing)
