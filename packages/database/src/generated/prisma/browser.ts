@@ -83,6 +83,16 @@ export type SubscriptionPlanFeature = Prisma.SubscriptionPlanFeatureModel
  */
 export type TenantSubscription = Prisma.TenantSubscriptionModel
 /**
+ * Model ImportBatch
+ * 
+ */
+export type ImportBatch = Prisma.ImportBatchModel
+/**
+ * Model ImportBatchItem
+ * 
+ */
+export type ImportBatchItem = Prisma.ImportBatchItemModel
+/**
  * Model MemberRegistration
  * 
  */

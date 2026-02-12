@@ -517,6 +517,17 @@ export default function MembersPage() {
     },
   });
 
+  const { mutate: rollbackImport, isPending: isRollingBackImport } = trpc.member.rollbackImport.useMutation({
+    onSuccess: async (data) => {
+      setImportSummary((prev: any) => ({
+        ...(prev ?? {}),
+        rolledBack: true,
+        rollback: data,
+      }));
+      await utils.member.list.invalidate();
+    },
+  });
+
   const { mutateAsync: ensureStaffThread } = trpc.messaging.staffThread.useMutation();
   const { mutateAsync: createUpload } = trpc.storage.createUpload.useMutation();
 
@@ -859,6 +870,15 @@ export default function MembersPage() {
             >
               {isImportingMembers ? 'Importing…' : 'Import members'}
             </Button>
+            {importSummary?.batchId && importSummary?.created ? (
+              <Button
+                variant="outline"
+                onClick={() => rollbackImport({ batchId: importSummary.batchId })}
+                disabled={isRollingBackImport}
+              >
+                {isRollingBackImport ? 'Rolling back…' : 'Rollback created'}
+              </Button>
+            ) : null}
           </div>
           <div className="mt-4 text-sm text-muted">
             <pre className="rounded-md bg-muted/10 p-3 text-xs whitespace-pre-wrap">

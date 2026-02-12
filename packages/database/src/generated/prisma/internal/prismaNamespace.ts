@@ -397,6 +397,8 @@ export const ModelName = {
   SubscriptionPlan: 'SubscriptionPlan',
   SubscriptionPlanFeature: 'SubscriptionPlanFeature',
   TenantSubscription: 'TenantSubscription',
+  ImportBatch: 'ImportBatch',
+  ImportBatchItem: 'ImportBatchItem',
   MemberRegistration: 'MemberRegistration',
   MemberTag: 'MemberTag',
   MemberTagAssignment: 'MemberTagAssignment',
@@ -490,7 +492,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "organization" | "church" | "campus" | "household" | "member" | "memberAccessRequest" | "staffInvite" | "platformUser" | "platformUserRole" | "subscriptionPlan" | "subscriptionPlanFeature" | "tenantSubscription" | "memberRegistration" | "memberTag" | "memberTagAssignment" | "memberMilestone" | "group" | "onboardingWorkflow" | "onboardingStep" | "memberOnboarding" | "memberOnboardingTask" | "groupMember" | "volunteerRole" | "volunteerShift" | "volunteerShiftAssignment" | "volunteerAvailability" | "survey" | "surveyQuestion" | "surveyResponse" | "volunteerAssignment" | "event" | "eventSeries" | "eventRsvp" | "eventBadge" | "eventRegistration" | "eventAssignment" | "eventMedia" | "eventTicketType" | "eventTicketOrder" | "conversation" | "conversationMember" | "message" | "mediaAsset" | "notificationPreference" | "inAppNotification" | "deviceToken" | "attendance" | "memberRelationship" | "donation" | "fund" | "campaign" | "paymentIntent" | "donationReceipt" | "textToGiveNumber" | "textToGiveMessage" | "payout" | "payoutTransaction" | "refund" | "dispute" | "disputeEvidence" | "communicationSchedule" | "communicationDripCampaign" | "communicationDripStep" | "communicationDripEnrollment" | "communicationTemplate" | "communicationMessage" | "fundraiserPage" | "pledge" | "recurringDonation" | "expenseCategory" | "expense" | "budget" | "budgetItem" | "auditLog" | "user" | "staffMembership" | "facility" | "facilityBooking" | "careRequest" | "careNote" | "sermon" | "contentResource" | "tenantDomain" | "tenantHealthCheck" | "tenantSecurityPolicy" | "supportTicket" | "supportTicketMessage" | "webhookEvent" | "liveStreamChannel" | "liveStreamSession"
+    modelProps: "tenant" | "organization" | "church" | "campus" | "household" | "member" | "memberAccessRequest" | "staffInvite" | "platformUser" | "platformUserRole" | "subscriptionPlan" | "subscriptionPlanFeature" | "tenantSubscription" | "importBatch" | "importBatchItem" | "memberRegistration" | "memberTag" | "memberTagAssignment" | "memberMilestone" | "group" | "onboardingWorkflow" | "onboardingStep" | "memberOnboarding" | "memberOnboardingTask" | "groupMember" | "volunteerRole" | "volunteerShift" | "volunteerShiftAssignment" | "volunteerAvailability" | "survey" | "surveyQuestion" | "surveyResponse" | "volunteerAssignment" | "event" | "eventSeries" | "eventRsvp" | "eventBadge" | "eventRegistration" | "eventAssignment" | "eventMedia" | "eventTicketType" | "eventTicketOrder" | "conversation" | "conversationMember" | "message" | "mediaAsset" | "notificationPreference" | "inAppNotification" | "deviceToken" | "attendance" | "memberRelationship" | "donation" | "fund" | "campaign" | "paymentIntent" | "donationReceipt" | "textToGiveNumber" | "textToGiveMessage" | "payout" | "payoutTransaction" | "refund" | "dispute" | "disputeEvidence" | "communicationSchedule" | "communicationDripCampaign" | "communicationDripStep" | "communicationDripEnrollment" | "communicationTemplate" | "communicationMessage" | "fundraiserPage" | "pledge" | "recurringDonation" | "expenseCategory" | "expense" | "budget" | "budgetItem" | "auditLog" | "user" | "staffMembership" | "facility" | "facilityBooking" | "careRequest" | "careNote" | "sermon" | "contentResource" | "tenantDomain" | "tenantHealthCheck" | "tenantSecurityPolicy" | "supportTicket" | "supportTicketMessage" | "webhookEvent" | "liveStreamChannel" | "liveStreamSession"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1453,6 +1455,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TenantSubscriptionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TenantSubscriptionCountAggregateOutputType> | number
+        }
+      }
+    }
+    ImportBatch: {
+      payload: Prisma.$ImportBatchPayload<ExtArgs>
+      fields: Prisma.ImportBatchFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ImportBatchFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ImportBatchFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload>
+        }
+        findFirst: {
+          args: Prisma.ImportBatchFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ImportBatchFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload>
+        }
+        findMany: {
+          args: Prisma.ImportBatchFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload>[]
+        }
+        create: {
+          args: Prisma.ImportBatchCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload>
+        }
+        createMany: {
+          args: Prisma.ImportBatchCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ImportBatchCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload>[]
+        }
+        delete: {
+          args: Prisma.ImportBatchDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload>
+        }
+        update: {
+          args: Prisma.ImportBatchUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload>
+        }
+        deleteMany: {
+          args: Prisma.ImportBatchDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ImportBatchUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ImportBatchUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload>[]
+        }
+        upsert: {
+          args: Prisma.ImportBatchUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchPayload>
+        }
+        aggregate: {
+          args: Prisma.ImportBatchAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateImportBatch>
+        }
+        groupBy: {
+          args: Prisma.ImportBatchGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ImportBatchGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ImportBatchCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ImportBatchCountAggregateOutputType> | number
+        }
+      }
+    }
+    ImportBatchItem: {
+      payload: Prisma.$ImportBatchItemPayload<ExtArgs>
+      fields: Prisma.ImportBatchItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ImportBatchItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ImportBatchItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload>
+        }
+        findFirst: {
+          args: Prisma.ImportBatchItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ImportBatchItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload>
+        }
+        findMany: {
+          args: Prisma.ImportBatchItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload>[]
+        }
+        create: {
+          args: Prisma.ImportBatchItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload>
+        }
+        createMany: {
+          args: Prisma.ImportBatchItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ImportBatchItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload>[]
+        }
+        delete: {
+          args: Prisma.ImportBatchItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload>
+        }
+        update: {
+          args: Prisma.ImportBatchItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.ImportBatchItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ImportBatchItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ImportBatchItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.ImportBatchItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ImportBatchItemPayload>
+        }
+        aggregate: {
+          args: Prisma.ImportBatchItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateImportBatchItem>
+        }
+        groupBy: {
+          args: Prisma.ImportBatchItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ImportBatchItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ImportBatchItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ImportBatchItemCountAggregateOutputType> | number
         }
       }
     }
@@ -7485,6 +7635,34 @@ export const TenantSubscriptionScalarFieldEnum = {
 export type TenantSubscriptionScalarFieldEnum = (typeof TenantSubscriptionScalarFieldEnum)[keyof typeof TenantSubscriptionScalarFieldEnum]
 
 
+export const ImportBatchScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  churchId: 'churchId',
+  entityType: 'entityType',
+  status: 'status',
+  filename: 'filename',
+  rowCount: 'rowCount',
+  createdByClerkUserId: 'createdByClerkUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ImportBatchScalarFieldEnum = (typeof ImportBatchScalarFieldEnum)[keyof typeof ImportBatchScalarFieldEnum]
+
+
+export const ImportBatchItemScalarFieldEnum = {
+  id: 'id',
+  batchId: 'batchId',
+  entityType: 'entityType',
+  action: 'action',
+  entityId: 'entityId',
+  createdAt: 'createdAt'
+} as const
+
+export type ImportBatchItemScalarFieldEnum = (typeof ImportBatchItemScalarFieldEnum)[keyof typeof ImportBatchItemScalarFieldEnum]
+
+
 export const MemberRegistrationScalarFieldEnum = {
   id: 'id',
   churchId: 'churchId',
@@ -9072,6 +9250,48 @@ export type ListEnumSubscriptionProviderFieldRefInput<$PrismaModel> = FieldRefIn
 
 
 /**
+ * Reference to a field of type 'ImportEntityType'
+ */
+export type EnumImportEntityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ImportEntityType'>
+    
+
+
+/**
+ * Reference to a field of type 'ImportEntityType[]'
+ */
+export type ListEnumImportEntityTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ImportEntityType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ImportBatchStatus'
+ */
+export type EnumImportBatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ImportBatchStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'ImportBatchStatus[]'
+ */
+export type ListEnumImportBatchStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ImportBatchStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'ImportItemAction'
+ */
+export type EnumImportItemActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ImportItemAction'>
+    
+
+
+/**
+ * Reference to a field of type 'ImportItemAction[]'
+ */
+export type ListEnumImportItemActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ImportItemAction[]'>
+    
+
+
+/**
  * Reference to a field of type 'RegistrationStatus'
  */
 export type EnumRegistrationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RegistrationStatus'>
@@ -10228,6 +10448,8 @@ export type GlobalOmitConfig = {
   subscriptionPlan?: Prisma.SubscriptionPlanOmit
   subscriptionPlanFeature?: Prisma.SubscriptionPlanFeatureOmit
   tenantSubscription?: Prisma.TenantSubscriptionOmit
+  importBatch?: Prisma.ImportBatchOmit
+  importBatchItem?: Prisma.ImportBatchItemOmit
   memberRegistration?: Prisma.MemberRegistrationOmit
   memberTag?: Prisma.MemberTagOmit
   memberTagAssignment?: Prisma.MemberTagAssignmentOmit

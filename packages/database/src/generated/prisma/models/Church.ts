@@ -260,6 +260,7 @@ export type ChurchWhereInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionListRelationFilter
   supportTickets?: Prisma.SupportTicketListRelationFilter
   webhookEvents?: Prisma.WebhookEventListRelationFilter
+  importBatches?: Prisma.ImportBatchListRelationFilter
 }
 
 export type ChurchOrderByWithRelationInput = {
@@ -325,6 +326,7 @@ export type ChurchOrderByWithRelationInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionOrderByRelationAggregateInput
   supportTickets?: Prisma.SupportTicketOrderByRelationAggregateInput
   webhookEvents?: Prisma.WebhookEventOrderByRelationAggregateInput
+  importBatches?: Prisma.ImportBatchOrderByRelationAggregateInput
 }
 
 export type ChurchWhereUniqueInput = Prisma.AtLeast<{
@@ -394,6 +396,7 @@ export type ChurchWhereUniqueInput = Prisma.AtLeast<{
   liveStreamSessions?: Prisma.LiveStreamSessionListRelationFilter
   supportTickets?: Prisma.SupportTicketListRelationFilter
   webhookEvents?: Prisma.WebhookEventListRelationFilter
+  importBatches?: Prisma.ImportBatchListRelationFilter
 }, "id" | "organizationId_slug">
 
 export type ChurchOrderByWithAggregationInput = {
@@ -486,6 +489,7 @@ export type ChurchCreateInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateInput = {
@@ -550,6 +554,7 @@ export type ChurchUncheckedCreateInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUpdateInput = {
@@ -614,6 +619,7 @@ export type ChurchUpdateInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateInput = {
@@ -678,6 +684,7 @@ export type ChurchUncheckedUpdateInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateManyInput = {
@@ -880,6 +887,20 @@ export type ChurchUpdateOneRequiredWithoutStaffInvitesNestedInput = {
   upsert?: Prisma.ChurchUpsertWithoutStaffInvitesInput
   connect?: Prisma.ChurchWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ChurchUpdateToOneWithWhereWithoutStaffInvitesInput, Prisma.ChurchUpdateWithoutStaffInvitesInput>, Prisma.ChurchUncheckedUpdateWithoutStaffInvitesInput>
+}
+
+export type ChurchCreateNestedOneWithoutImportBatchesInput = {
+  create?: Prisma.XOR<Prisma.ChurchCreateWithoutImportBatchesInput, Prisma.ChurchUncheckedCreateWithoutImportBatchesInput>
+  connectOrCreate?: Prisma.ChurchCreateOrConnectWithoutImportBatchesInput
+  connect?: Prisma.ChurchWhereUniqueInput
+}
+
+export type ChurchUpdateOneRequiredWithoutImportBatchesNestedInput = {
+  create?: Prisma.XOR<Prisma.ChurchCreateWithoutImportBatchesInput, Prisma.ChurchUncheckedCreateWithoutImportBatchesInput>
+  connectOrCreate?: Prisma.ChurchCreateOrConnectWithoutImportBatchesInput
+  upsert?: Prisma.ChurchUpsertWithoutImportBatchesInput
+  connect?: Prisma.ChurchWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ChurchUpdateToOneWithWhereWithoutImportBatchesInput, Prisma.ChurchUpdateWithoutImportBatchesInput>, Prisma.ChurchUncheckedUpdateWithoutImportBatchesInput>
 }
 
 export type ChurchCreateNestedOneWithoutMemberRegistrationsInput = {
@@ -1627,6 +1648,7 @@ export type ChurchCreateWithoutOrganizationInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutOrganizationInput = {
@@ -1690,6 +1712,7 @@ export type ChurchUncheckedCreateWithoutOrganizationInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutOrganizationInput = {
@@ -1793,6 +1816,7 @@ export type ChurchCreateWithoutCampusesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutCampusesInput = {
@@ -1856,6 +1880,7 @@ export type ChurchUncheckedCreateWithoutCampusesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutCampusesInput = {
@@ -1935,6 +1960,7 @@ export type ChurchUpdateWithoutCampusesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutCampusesInput = {
@@ -1998,6 +2024,7 @@ export type ChurchUncheckedUpdateWithoutCampusesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutHouseholdsInput = {
@@ -2061,6 +2088,7 @@ export type ChurchCreateWithoutHouseholdsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutHouseholdsInput = {
@@ -2124,6 +2152,7 @@ export type ChurchUncheckedCreateWithoutHouseholdsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutHouseholdsInput = {
@@ -2203,6 +2232,7 @@ export type ChurchUpdateWithoutHouseholdsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutHouseholdsInput = {
@@ -2266,6 +2296,7 @@ export type ChurchUncheckedUpdateWithoutHouseholdsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutMembersInput = {
@@ -2329,6 +2360,7 @@ export type ChurchCreateWithoutMembersInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutMembersInput = {
@@ -2392,6 +2424,7 @@ export type ChurchUncheckedCreateWithoutMembersInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutMembersInput = {
@@ -2471,6 +2504,7 @@ export type ChurchUpdateWithoutMembersInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutMembersInput = {
@@ -2534,6 +2568,7 @@ export type ChurchUncheckedUpdateWithoutMembersInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutMemberAccessRequestsInput = {
@@ -2597,6 +2632,7 @@ export type ChurchCreateWithoutMemberAccessRequestsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutMemberAccessRequestsInput = {
@@ -2660,6 +2696,7 @@ export type ChurchUncheckedCreateWithoutMemberAccessRequestsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutMemberAccessRequestsInput = {
@@ -2739,6 +2776,7 @@ export type ChurchUpdateWithoutMemberAccessRequestsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutMemberAccessRequestsInput = {
@@ -2802,6 +2840,7 @@ export type ChurchUncheckedUpdateWithoutMemberAccessRequestsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutStaffInvitesInput = {
@@ -2865,6 +2904,7 @@ export type ChurchCreateWithoutStaffInvitesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutStaffInvitesInput = {
@@ -2928,6 +2968,7 @@ export type ChurchUncheckedCreateWithoutStaffInvitesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutStaffInvitesInput = {
@@ -3007,6 +3048,7 @@ export type ChurchUpdateWithoutStaffInvitesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutStaffInvitesInput = {
@@ -3061,6 +3103,279 @@ export type ChurchUncheckedUpdateWithoutStaffInvitesInput = {
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
   eventMedia?: Prisma.EventMediaUncheckedUpdateManyWithoutChurchNestedInput
   memberAccessRequests?: Prisma.MemberAccessRequestUncheckedUpdateManyWithoutChurchNestedInput
+  facilities?: Prisma.FacilityUncheckedUpdateManyWithoutChurchNestedInput
+  facilityBookings?: Prisma.FacilityBookingUncheckedUpdateManyWithoutChurchNestedInput
+  careRequests?: Prisma.CareRequestUncheckedUpdateManyWithoutChurchNestedInput
+  sermons?: Prisma.SermonUncheckedUpdateManyWithoutChurchNestedInput
+  contentResources?: Prisma.ContentResourceUncheckedUpdateManyWithoutChurchNestedInput
+  liveStreamChannels?: Prisma.LiveStreamChannelUncheckedUpdateManyWithoutChurchNestedInput
+  liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
+  supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
+  webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
+}
+
+export type ChurchCreateWithoutImportBatchesInput = {
+  id?: string
+  name: string
+  slug: string
+  countryCode?: string | null
+  timezone?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
+  campuses?: Prisma.CampusCreateNestedManyWithoutChurchInput
+  households?: Prisma.HouseholdCreateNestedManyWithoutChurchInput
+  members?: Prisma.MemberCreateNestedManyWithoutChurchInput
+  memberTags?: Prisma.MemberTagCreateNestedManyWithoutChurchInput
+  groups?: Prisma.GroupCreateNestedManyWithoutChurchInput
+  volunteerRoles?: Prisma.VolunteerRoleCreateNestedManyWithoutChurchInput
+  volunteerShifts?: Prisma.VolunteerShiftCreateNestedManyWithoutChurchInput
+  volunteerAvailability?: Prisma.VolunteerAvailabilityCreateNestedManyWithoutChurchInput
+  surveys?: Prisma.SurveyCreateNestedManyWithoutChurchInput
+  onboardingWorkflows?: Prisma.OnboardingWorkflowCreateNestedManyWithoutChurchInput
+  events?: Prisma.EventCreateNestedManyWithoutChurchInput
+  eventSeries?: Prisma.EventSeriesCreateNestedManyWithoutChurchInput
+  donations?: Prisma.DonationCreateNestedManyWithoutChurchInput
+  payoutTransactions?: Prisma.PayoutTransactionCreateNestedManyWithoutChurchInput
+  funds?: Prisma.FundCreateNestedManyWithoutChurchInput
+  campaigns?: Prisma.CampaignCreateNestedManyWithoutChurchInput
+  fundraiserPages?: Prisma.FundraiserPageCreateNestedManyWithoutChurchInput
+  paymentIntents?: Prisma.PaymentIntentCreateNestedManyWithoutChurchInput
+  pledges?: Prisma.PledgeCreateNestedManyWithoutChurchInput
+  recurringDonations?: Prisma.RecurringDonationCreateNestedManyWithoutChurchInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutChurchInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutChurchInput
+  budgets?: Prisma.BudgetCreateNestedManyWithoutChurchInput
+  receipts?: Prisma.DonationReceiptCreateNestedManyWithoutChurchInput
+  textToGiveNumbers?: Prisma.TextToGiveNumberCreateNestedManyWithoutChurchInput
+  textToGiveMessages?: Prisma.TextToGiveMessageCreateNestedManyWithoutChurchInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutChurchInput
+  refunds?: Prisma.RefundCreateNestedManyWithoutChurchInput
+  disputes?: Prisma.DisputeCreateNestedManyWithoutChurchInput
+  communicationTemplates?: Prisma.CommunicationTemplateCreateNestedManyWithoutChurchInput
+  communicationMessages?: Prisma.CommunicationMessageCreateNestedManyWithoutChurchInput
+  communicationSchedules?: Prisma.CommunicationScheduleCreateNestedManyWithoutChurchInput
+  dripCampaigns?: Prisma.CommunicationDripCampaignCreateNestedManyWithoutChurchInput
+  dripEnrollments?: Prisma.CommunicationDripEnrollmentCreateNestedManyWithoutChurchInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutChurchInput
+  notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
+  memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
+  memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
+  mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
+  eventMedia?: Prisma.EventMediaCreateNestedManyWithoutChurchInput
+  memberAccessRequests?: Prisma.MemberAccessRequestCreateNestedManyWithoutChurchInput
+  staffInvites?: Prisma.StaffInviteCreateNestedManyWithoutChurchInput
+  facilities?: Prisma.FacilityCreateNestedManyWithoutChurchInput
+  facilityBookings?: Prisma.FacilityBookingCreateNestedManyWithoutChurchInput
+  careRequests?: Prisma.CareRequestCreateNestedManyWithoutChurchInput
+  sermons?: Prisma.SermonCreateNestedManyWithoutChurchInput
+  contentResources?: Prisma.ContentResourceCreateNestedManyWithoutChurchInput
+  liveStreamChannels?: Prisma.LiveStreamChannelCreateNestedManyWithoutChurchInput
+  liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
+  supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
+  webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+}
+
+export type ChurchUncheckedCreateWithoutImportBatchesInput = {
+  id?: string
+  organizationId: string
+  name: string
+  slug: string
+  countryCode?: string | null
+  timezone?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
+  households?: Prisma.HouseholdUncheckedCreateNestedManyWithoutChurchInput
+  members?: Prisma.MemberUncheckedCreateNestedManyWithoutChurchInput
+  memberTags?: Prisma.MemberTagUncheckedCreateNestedManyWithoutChurchInput
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutChurchInput
+  volunteerRoles?: Prisma.VolunteerRoleUncheckedCreateNestedManyWithoutChurchInput
+  volunteerShifts?: Prisma.VolunteerShiftUncheckedCreateNestedManyWithoutChurchInput
+  volunteerAvailability?: Prisma.VolunteerAvailabilityUncheckedCreateNestedManyWithoutChurchInput
+  surveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutChurchInput
+  onboardingWorkflows?: Prisma.OnboardingWorkflowUncheckedCreateNestedManyWithoutChurchInput
+  events?: Prisma.EventUncheckedCreateNestedManyWithoutChurchInput
+  eventSeries?: Prisma.EventSeriesUncheckedCreateNestedManyWithoutChurchInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutChurchInput
+  payoutTransactions?: Prisma.PayoutTransactionUncheckedCreateNestedManyWithoutChurchInput
+  funds?: Prisma.FundUncheckedCreateNestedManyWithoutChurchInput
+  campaigns?: Prisma.CampaignUncheckedCreateNestedManyWithoutChurchInput
+  fundraiserPages?: Prisma.FundraiserPageUncheckedCreateNestedManyWithoutChurchInput
+  paymentIntents?: Prisma.PaymentIntentUncheckedCreateNestedManyWithoutChurchInput
+  pledges?: Prisma.PledgeUncheckedCreateNestedManyWithoutChurchInput
+  recurringDonations?: Prisma.RecurringDonationUncheckedCreateNestedManyWithoutChurchInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutChurchInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutChurchInput
+  budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutChurchInput
+  receipts?: Prisma.DonationReceiptUncheckedCreateNestedManyWithoutChurchInput
+  textToGiveNumbers?: Prisma.TextToGiveNumberUncheckedCreateNestedManyWithoutChurchInput
+  textToGiveMessages?: Prisma.TextToGiveMessageUncheckedCreateNestedManyWithoutChurchInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutChurchInput
+  refunds?: Prisma.RefundUncheckedCreateNestedManyWithoutChurchInput
+  disputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutChurchInput
+  communicationTemplates?: Prisma.CommunicationTemplateUncheckedCreateNestedManyWithoutChurchInput
+  communicationMessages?: Prisma.CommunicationMessageUncheckedCreateNestedManyWithoutChurchInput
+  communicationSchedules?: Prisma.CommunicationScheduleUncheckedCreateNestedManyWithoutChurchInput
+  dripCampaigns?: Prisma.CommunicationDripCampaignUncheckedCreateNestedManyWithoutChurchInput
+  dripEnrollments?: Prisma.CommunicationDripEnrollmentUncheckedCreateNestedManyWithoutChurchInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutChurchInput
+  notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
+  memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
+  memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
+  mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
+  eventMedia?: Prisma.EventMediaUncheckedCreateNestedManyWithoutChurchInput
+  memberAccessRequests?: Prisma.MemberAccessRequestUncheckedCreateNestedManyWithoutChurchInput
+  staffInvites?: Prisma.StaffInviteUncheckedCreateNestedManyWithoutChurchInput
+  facilities?: Prisma.FacilityUncheckedCreateNestedManyWithoutChurchInput
+  facilityBookings?: Prisma.FacilityBookingUncheckedCreateNestedManyWithoutChurchInput
+  careRequests?: Prisma.CareRequestUncheckedCreateNestedManyWithoutChurchInput
+  sermons?: Prisma.SermonUncheckedCreateNestedManyWithoutChurchInput
+  contentResources?: Prisma.ContentResourceUncheckedCreateNestedManyWithoutChurchInput
+  liveStreamChannels?: Prisma.LiveStreamChannelUncheckedCreateNestedManyWithoutChurchInput
+  liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
+  supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
+  webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+}
+
+export type ChurchCreateOrConnectWithoutImportBatchesInput = {
+  where: Prisma.ChurchWhereUniqueInput
+  create: Prisma.XOR<Prisma.ChurchCreateWithoutImportBatchesInput, Prisma.ChurchUncheckedCreateWithoutImportBatchesInput>
+}
+
+export type ChurchUpsertWithoutImportBatchesInput = {
+  update: Prisma.XOR<Prisma.ChurchUpdateWithoutImportBatchesInput, Prisma.ChurchUncheckedUpdateWithoutImportBatchesInput>
+  create: Prisma.XOR<Prisma.ChurchCreateWithoutImportBatchesInput, Prisma.ChurchUncheckedCreateWithoutImportBatchesInput>
+  where?: Prisma.ChurchWhereInput
+}
+
+export type ChurchUpdateToOneWithWhereWithoutImportBatchesInput = {
+  where?: Prisma.ChurchWhereInput
+  data: Prisma.XOR<Prisma.ChurchUpdateWithoutImportBatchesInput, Prisma.ChurchUncheckedUpdateWithoutImportBatchesInput>
+}
+
+export type ChurchUpdateWithoutImportBatchesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
+  campuses?: Prisma.CampusUpdateManyWithoutChurchNestedInput
+  households?: Prisma.HouseholdUpdateManyWithoutChurchNestedInput
+  members?: Prisma.MemberUpdateManyWithoutChurchNestedInput
+  memberTags?: Prisma.MemberTagUpdateManyWithoutChurchNestedInput
+  groups?: Prisma.GroupUpdateManyWithoutChurchNestedInput
+  volunteerRoles?: Prisma.VolunteerRoleUpdateManyWithoutChurchNestedInput
+  volunteerShifts?: Prisma.VolunteerShiftUpdateManyWithoutChurchNestedInput
+  volunteerAvailability?: Prisma.VolunteerAvailabilityUpdateManyWithoutChurchNestedInput
+  surveys?: Prisma.SurveyUpdateManyWithoutChurchNestedInput
+  onboardingWorkflows?: Prisma.OnboardingWorkflowUpdateManyWithoutChurchNestedInput
+  events?: Prisma.EventUpdateManyWithoutChurchNestedInput
+  eventSeries?: Prisma.EventSeriesUpdateManyWithoutChurchNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutChurchNestedInput
+  payoutTransactions?: Prisma.PayoutTransactionUpdateManyWithoutChurchNestedInput
+  funds?: Prisma.FundUpdateManyWithoutChurchNestedInput
+  campaigns?: Prisma.CampaignUpdateManyWithoutChurchNestedInput
+  fundraiserPages?: Prisma.FundraiserPageUpdateManyWithoutChurchNestedInput
+  paymentIntents?: Prisma.PaymentIntentUpdateManyWithoutChurchNestedInput
+  pledges?: Prisma.PledgeUpdateManyWithoutChurchNestedInput
+  recurringDonations?: Prisma.RecurringDonationUpdateManyWithoutChurchNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutChurchNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutChurchNestedInput
+  budgets?: Prisma.BudgetUpdateManyWithoutChurchNestedInput
+  receipts?: Prisma.DonationReceiptUpdateManyWithoutChurchNestedInput
+  textToGiveNumbers?: Prisma.TextToGiveNumberUpdateManyWithoutChurchNestedInput
+  textToGiveMessages?: Prisma.TextToGiveMessageUpdateManyWithoutChurchNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutChurchNestedInput
+  refunds?: Prisma.RefundUpdateManyWithoutChurchNestedInput
+  disputes?: Prisma.DisputeUpdateManyWithoutChurchNestedInput
+  communicationTemplates?: Prisma.CommunicationTemplateUpdateManyWithoutChurchNestedInput
+  communicationMessages?: Prisma.CommunicationMessageUpdateManyWithoutChurchNestedInput
+  communicationSchedules?: Prisma.CommunicationScheduleUpdateManyWithoutChurchNestedInput
+  dripCampaigns?: Prisma.CommunicationDripCampaignUpdateManyWithoutChurchNestedInput
+  dripEnrollments?: Prisma.CommunicationDripEnrollmentUpdateManyWithoutChurchNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutChurchNestedInput
+  notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
+  memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
+  memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
+  mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
+  eventMedia?: Prisma.EventMediaUpdateManyWithoutChurchNestedInput
+  memberAccessRequests?: Prisma.MemberAccessRequestUpdateManyWithoutChurchNestedInput
+  staffInvites?: Prisma.StaffInviteUpdateManyWithoutChurchNestedInput
+  facilities?: Prisma.FacilityUpdateManyWithoutChurchNestedInput
+  facilityBookings?: Prisma.FacilityBookingUpdateManyWithoutChurchNestedInput
+  careRequests?: Prisma.CareRequestUpdateManyWithoutChurchNestedInput
+  sermons?: Prisma.SermonUpdateManyWithoutChurchNestedInput
+  contentResources?: Prisma.ContentResourceUpdateManyWithoutChurchNestedInput
+  liveStreamChannels?: Prisma.LiveStreamChannelUpdateManyWithoutChurchNestedInput
+  liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
+  supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
+  webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+}
+
+export type ChurchUncheckedUpdateWithoutImportBatchesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
+  households?: Prisma.HouseholdUncheckedUpdateManyWithoutChurchNestedInput
+  members?: Prisma.MemberUncheckedUpdateManyWithoutChurchNestedInput
+  memberTags?: Prisma.MemberTagUncheckedUpdateManyWithoutChurchNestedInput
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutChurchNestedInput
+  volunteerRoles?: Prisma.VolunteerRoleUncheckedUpdateManyWithoutChurchNestedInput
+  volunteerShifts?: Prisma.VolunteerShiftUncheckedUpdateManyWithoutChurchNestedInput
+  volunteerAvailability?: Prisma.VolunteerAvailabilityUncheckedUpdateManyWithoutChurchNestedInput
+  surveys?: Prisma.SurveyUncheckedUpdateManyWithoutChurchNestedInput
+  onboardingWorkflows?: Prisma.OnboardingWorkflowUncheckedUpdateManyWithoutChurchNestedInput
+  events?: Prisma.EventUncheckedUpdateManyWithoutChurchNestedInput
+  eventSeries?: Prisma.EventSeriesUncheckedUpdateManyWithoutChurchNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutChurchNestedInput
+  payoutTransactions?: Prisma.PayoutTransactionUncheckedUpdateManyWithoutChurchNestedInput
+  funds?: Prisma.FundUncheckedUpdateManyWithoutChurchNestedInput
+  campaigns?: Prisma.CampaignUncheckedUpdateManyWithoutChurchNestedInput
+  fundraiserPages?: Prisma.FundraiserPageUncheckedUpdateManyWithoutChurchNestedInput
+  paymentIntents?: Prisma.PaymentIntentUncheckedUpdateManyWithoutChurchNestedInput
+  pledges?: Prisma.PledgeUncheckedUpdateManyWithoutChurchNestedInput
+  recurringDonations?: Prisma.RecurringDonationUncheckedUpdateManyWithoutChurchNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutChurchNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutChurchNestedInput
+  budgets?: Prisma.BudgetUncheckedUpdateManyWithoutChurchNestedInput
+  receipts?: Prisma.DonationReceiptUncheckedUpdateManyWithoutChurchNestedInput
+  textToGiveNumbers?: Prisma.TextToGiveNumberUncheckedUpdateManyWithoutChurchNestedInput
+  textToGiveMessages?: Prisma.TextToGiveMessageUncheckedUpdateManyWithoutChurchNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutChurchNestedInput
+  refunds?: Prisma.RefundUncheckedUpdateManyWithoutChurchNestedInput
+  disputes?: Prisma.DisputeUncheckedUpdateManyWithoutChurchNestedInput
+  communicationTemplates?: Prisma.CommunicationTemplateUncheckedUpdateManyWithoutChurchNestedInput
+  communicationMessages?: Prisma.CommunicationMessageUncheckedUpdateManyWithoutChurchNestedInput
+  communicationSchedules?: Prisma.CommunicationScheduleUncheckedUpdateManyWithoutChurchNestedInput
+  dripCampaigns?: Prisma.CommunicationDripCampaignUncheckedUpdateManyWithoutChurchNestedInput
+  dripEnrollments?: Prisma.CommunicationDripEnrollmentUncheckedUpdateManyWithoutChurchNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutChurchNestedInput
+  notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
+  memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
+  memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
+  mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
+  eventMedia?: Prisma.EventMediaUncheckedUpdateManyWithoutChurchNestedInput
+  memberAccessRequests?: Prisma.MemberAccessRequestUncheckedUpdateManyWithoutChurchNestedInput
+  staffInvites?: Prisma.StaffInviteUncheckedUpdateManyWithoutChurchNestedInput
   facilities?: Prisma.FacilityUncheckedUpdateManyWithoutChurchNestedInput
   facilityBookings?: Prisma.FacilityBookingUncheckedUpdateManyWithoutChurchNestedInput
   careRequests?: Prisma.CareRequestUncheckedUpdateManyWithoutChurchNestedInput
@@ -3133,6 +3448,7 @@ export type ChurchCreateWithoutMemberRegistrationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutMemberRegistrationsInput = {
@@ -3196,6 +3512,7 @@ export type ChurchUncheckedCreateWithoutMemberRegistrationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutMemberRegistrationsInput = {
@@ -3275,6 +3592,7 @@ export type ChurchUpdateWithoutMemberRegistrationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutMemberRegistrationsInput = {
@@ -3338,6 +3656,7 @@ export type ChurchUncheckedUpdateWithoutMemberRegistrationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutMemberTagsInput = {
@@ -3401,6 +3720,7 @@ export type ChurchCreateWithoutMemberTagsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutMemberTagsInput = {
@@ -3464,6 +3784,7 @@ export type ChurchUncheckedCreateWithoutMemberTagsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutMemberTagsInput = {
@@ -3543,6 +3864,7 @@ export type ChurchUpdateWithoutMemberTagsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutMemberTagsInput = {
@@ -3606,6 +3928,7 @@ export type ChurchUncheckedUpdateWithoutMemberTagsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutGroupsInput = {
@@ -3669,6 +3992,7 @@ export type ChurchCreateWithoutGroupsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutGroupsInput = {
@@ -3732,6 +4056,7 @@ export type ChurchUncheckedCreateWithoutGroupsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutGroupsInput = {
@@ -3811,6 +4136,7 @@ export type ChurchUpdateWithoutGroupsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutGroupsInput = {
@@ -3874,6 +4200,7 @@ export type ChurchUncheckedUpdateWithoutGroupsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutOnboardingWorkflowsInput = {
@@ -3937,6 +4264,7 @@ export type ChurchCreateWithoutOnboardingWorkflowsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutOnboardingWorkflowsInput = {
@@ -4000,6 +4328,7 @@ export type ChurchUncheckedCreateWithoutOnboardingWorkflowsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutOnboardingWorkflowsInput = {
@@ -4079,6 +4408,7 @@ export type ChurchUpdateWithoutOnboardingWorkflowsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutOnboardingWorkflowsInput = {
@@ -4142,6 +4472,7 @@ export type ChurchUncheckedUpdateWithoutOnboardingWorkflowsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutVolunteerRolesInput = {
@@ -4205,6 +4536,7 @@ export type ChurchCreateWithoutVolunteerRolesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutVolunteerRolesInput = {
@@ -4268,6 +4600,7 @@ export type ChurchUncheckedCreateWithoutVolunteerRolesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutVolunteerRolesInput = {
@@ -4347,6 +4680,7 @@ export type ChurchUpdateWithoutVolunteerRolesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutVolunteerRolesInput = {
@@ -4410,6 +4744,7 @@ export type ChurchUncheckedUpdateWithoutVolunteerRolesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutVolunteerShiftsInput = {
@@ -4473,6 +4808,7 @@ export type ChurchCreateWithoutVolunteerShiftsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutVolunteerShiftsInput = {
@@ -4536,6 +4872,7 @@ export type ChurchUncheckedCreateWithoutVolunteerShiftsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutVolunteerShiftsInput = {
@@ -4615,6 +4952,7 @@ export type ChurchUpdateWithoutVolunteerShiftsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutVolunteerShiftsInput = {
@@ -4678,6 +5016,7 @@ export type ChurchUncheckedUpdateWithoutVolunteerShiftsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutVolunteerAvailabilityInput = {
@@ -4741,6 +5080,7 @@ export type ChurchCreateWithoutVolunteerAvailabilityInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutVolunteerAvailabilityInput = {
@@ -4804,6 +5144,7 @@ export type ChurchUncheckedCreateWithoutVolunteerAvailabilityInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutVolunteerAvailabilityInput = {
@@ -4883,6 +5224,7 @@ export type ChurchUpdateWithoutVolunteerAvailabilityInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutVolunteerAvailabilityInput = {
@@ -4946,6 +5288,7 @@ export type ChurchUncheckedUpdateWithoutVolunteerAvailabilityInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutSurveysInput = {
@@ -5009,6 +5352,7 @@ export type ChurchCreateWithoutSurveysInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutSurveysInput = {
@@ -5072,6 +5416,7 @@ export type ChurchUncheckedCreateWithoutSurveysInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutSurveysInput = {
@@ -5151,6 +5496,7 @@ export type ChurchUpdateWithoutSurveysInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutSurveysInput = {
@@ -5214,6 +5560,7 @@ export type ChurchUncheckedUpdateWithoutSurveysInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutEventsInput = {
@@ -5277,6 +5624,7 @@ export type ChurchCreateWithoutEventsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutEventsInput = {
@@ -5340,6 +5688,7 @@ export type ChurchUncheckedCreateWithoutEventsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutEventsInput = {
@@ -5419,6 +5768,7 @@ export type ChurchUpdateWithoutEventsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutEventsInput = {
@@ -5482,6 +5832,7 @@ export type ChurchUncheckedUpdateWithoutEventsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutEventSeriesInput = {
@@ -5545,6 +5896,7 @@ export type ChurchCreateWithoutEventSeriesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutEventSeriesInput = {
@@ -5608,6 +5960,7 @@ export type ChurchUncheckedCreateWithoutEventSeriesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutEventSeriesInput = {
@@ -5687,6 +6040,7 @@ export type ChurchUpdateWithoutEventSeriesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutEventSeriesInput = {
@@ -5750,6 +6104,7 @@ export type ChurchUncheckedUpdateWithoutEventSeriesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutEventMediaInput = {
@@ -5813,6 +6168,7 @@ export type ChurchCreateWithoutEventMediaInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutEventMediaInput = {
@@ -5876,6 +6232,7 @@ export type ChurchUncheckedCreateWithoutEventMediaInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutEventMediaInput = {
@@ -5955,6 +6312,7 @@ export type ChurchUpdateWithoutEventMediaInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutEventMediaInput = {
@@ -6018,6 +6376,7 @@ export type ChurchUncheckedUpdateWithoutEventMediaInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutConversationsInput = {
@@ -6081,6 +6440,7 @@ export type ChurchCreateWithoutConversationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutConversationsInput = {
@@ -6144,6 +6504,7 @@ export type ChurchUncheckedCreateWithoutConversationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutConversationsInput = {
@@ -6223,6 +6584,7 @@ export type ChurchUpdateWithoutConversationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutConversationsInput = {
@@ -6286,6 +6648,7 @@ export type ChurchUncheckedUpdateWithoutConversationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutMediaAssetsInput = {
@@ -6349,6 +6712,7 @@ export type ChurchCreateWithoutMediaAssetsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutMediaAssetsInput = {
@@ -6412,6 +6776,7 @@ export type ChurchUncheckedCreateWithoutMediaAssetsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutMediaAssetsInput = {
@@ -6491,6 +6856,7 @@ export type ChurchUpdateWithoutMediaAssetsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutMediaAssetsInput = {
@@ -6554,6 +6920,7 @@ export type ChurchUncheckedUpdateWithoutMediaAssetsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutNotificationsInput = {
@@ -6617,6 +6984,7 @@ export type ChurchCreateWithoutNotificationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutNotificationsInput = {
@@ -6680,6 +7048,7 @@ export type ChurchUncheckedCreateWithoutNotificationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutNotificationsInput = {
@@ -6759,6 +7128,7 @@ export type ChurchUpdateWithoutNotificationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutNotificationsInput = {
@@ -6822,6 +7192,7 @@ export type ChurchUncheckedUpdateWithoutNotificationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutMemberRelationshipsInput = {
@@ -6885,6 +7256,7 @@ export type ChurchCreateWithoutMemberRelationshipsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutMemberRelationshipsInput = {
@@ -6948,6 +7320,7 @@ export type ChurchUncheckedCreateWithoutMemberRelationshipsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutMemberRelationshipsInput = {
@@ -7027,6 +7400,7 @@ export type ChurchUpdateWithoutMemberRelationshipsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutMemberRelationshipsInput = {
@@ -7090,6 +7464,7 @@ export type ChurchUncheckedUpdateWithoutMemberRelationshipsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutDonationsInput = {
@@ -7153,6 +7528,7 @@ export type ChurchCreateWithoutDonationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutDonationsInput = {
@@ -7216,6 +7592,7 @@ export type ChurchUncheckedCreateWithoutDonationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutDonationsInput = {
@@ -7295,6 +7672,7 @@ export type ChurchUpdateWithoutDonationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutDonationsInput = {
@@ -7358,6 +7736,7 @@ export type ChurchUncheckedUpdateWithoutDonationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutFundsInput = {
@@ -7421,6 +7800,7 @@ export type ChurchCreateWithoutFundsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutFundsInput = {
@@ -7484,6 +7864,7 @@ export type ChurchUncheckedCreateWithoutFundsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutFundsInput = {
@@ -7563,6 +7944,7 @@ export type ChurchUpdateWithoutFundsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutFundsInput = {
@@ -7626,6 +8008,7 @@ export type ChurchUncheckedUpdateWithoutFundsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutCampaignsInput = {
@@ -7689,6 +8072,7 @@ export type ChurchCreateWithoutCampaignsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutCampaignsInput = {
@@ -7752,6 +8136,7 @@ export type ChurchUncheckedCreateWithoutCampaignsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutCampaignsInput = {
@@ -7831,6 +8216,7 @@ export type ChurchUpdateWithoutCampaignsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutCampaignsInput = {
@@ -7894,6 +8280,7 @@ export type ChurchUncheckedUpdateWithoutCampaignsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutPaymentIntentsInput = {
@@ -7957,6 +8344,7 @@ export type ChurchCreateWithoutPaymentIntentsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutPaymentIntentsInput = {
@@ -8020,6 +8408,7 @@ export type ChurchUncheckedCreateWithoutPaymentIntentsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutPaymentIntentsInput = {
@@ -8099,6 +8488,7 @@ export type ChurchUpdateWithoutPaymentIntentsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutPaymentIntentsInput = {
@@ -8162,6 +8552,7 @@ export type ChurchUncheckedUpdateWithoutPaymentIntentsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutReceiptsInput = {
@@ -8225,6 +8616,7 @@ export type ChurchCreateWithoutReceiptsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutReceiptsInput = {
@@ -8288,6 +8680,7 @@ export type ChurchUncheckedCreateWithoutReceiptsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutReceiptsInput = {
@@ -8367,6 +8760,7 @@ export type ChurchUpdateWithoutReceiptsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutReceiptsInput = {
@@ -8430,6 +8824,7 @@ export type ChurchUncheckedUpdateWithoutReceiptsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutTextToGiveNumbersInput = {
@@ -8493,6 +8888,7 @@ export type ChurchCreateWithoutTextToGiveNumbersInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutTextToGiveNumbersInput = {
@@ -8556,6 +8952,7 @@ export type ChurchUncheckedCreateWithoutTextToGiveNumbersInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutTextToGiveNumbersInput = {
@@ -8635,6 +9032,7 @@ export type ChurchUpdateWithoutTextToGiveNumbersInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutTextToGiveNumbersInput = {
@@ -8698,6 +9096,7 @@ export type ChurchUncheckedUpdateWithoutTextToGiveNumbersInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutTextToGiveMessagesInput = {
@@ -8761,6 +9160,7 @@ export type ChurchCreateWithoutTextToGiveMessagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutTextToGiveMessagesInput = {
@@ -8824,6 +9224,7 @@ export type ChurchUncheckedCreateWithoutTextToGiveMessagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutTextToGiveMessagesInput = {
@@ -8903,6 +9304,7 @@ export type ChurchUpdateWithoutTextToGiveMessagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutTextToGiveMessagesInput = {
@@ -8966,6 +9368,7 @@ export type ChurchUncheckedUpdateWithoutTextToGiveMessagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutPayoutsInput = {
@@ -9029,6 +9432,7 @@ export type ChurchCreateWithoutPayoutsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutPayoutsInput = {
@@ -9092,6 +9496,7 @@ export type ChurchUncheckedCreateWithoutPayoutsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutPayoutsInput = {
@@ -9171,6 +9576,7 @@ export type ChurchUpdateWithoutPayoutsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutPayoutsInput = {
@@ -9234,6 +9640,7 @@ export type ChurchUncheckedUpdateWithoutPayoutsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutPayoutTransactionsInput = {
@@ -9297,6 +9704,7 @@ export type ChurchCreateWithoutPayoutTransactionsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutPayoutTransactionsInput = {
@@ -9360,6 +9768,7 @@ export type ChurchUncheckedCreateWithoutPayoutTransactionsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutPayoutTransactionsInput = {
@@ -9439,6 +9848,7 @@ export type ChurchUpdateWithoutPayoutTransactionsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutPayoutTransactionsInput = {
@@ -9502,6 +9912,7 @@ export type ChurchUncheckedUpdateWithoutPayoutTransactionsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutRefundsInput = {
@@ -9565,6 +9976,7 @@ export type ChurchCreateWithoutRefundsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutRefundsInput = {
@@ -9628,6 +10040,7 @@ export type ChurchUncheckedCreateWithoutRefundsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutRefundsInput = {
@@ -9707,6 +10120,7 @@ export type ChurchUpdateWithoutRefundsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutRefundsInput = {
@@ -9770,6 +10184,7 @@ export type ChurchUncheckedUpdateWithoutRefundsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutDisputesInput = {
@@ -9833,6 +10248,7 @@ export type ChurchCreateWithoutDisputesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutDisputesInput = {
@@ -9896,6 +10312,7 @@ export type ChurchUncheckedCreateWithoutDisputesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutDisputesInput = {
@@ -9975,6 +10392,7 @@ export type ChurchUpdateWithoutDisputesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutDisputesInput = {
@@ -10038,6 +10456,7 @@ export type ChurchUncheckedUpdateWithoutDisputesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutCommunicationSchedulesInput = {
@@ -10101,6 +10520,7 @@ export type ChurchCreateWithoutCommunicationSchedulesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutCommunicationSchedulesInput = {
@@ -10164,6 +10584,7 @@ export type ChurchUncheckedCreateWithoutCommunicationSchedulesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutCommunicationSchedulesInput = {
@@ -10243,6 +10664,7 @@ export type ChurchUpdateWithoutCommunicationSchedulesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutCommunicationSchedulesInput = {
@@ -10306,6 +10728,7 @@ export type ChurchUncheckedUpdateWithoutCommunicationSchedulesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutDripCampaignsInput = {
@@ -10369,6 +10792,7 @@ export type ChurchCreateWithoutDripCampaignsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutDripCampaignsInput = {
@@ -10432,6 +10856,7 @@ export type ChurchUncheckedCreateWithoutDripCampaignsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutDripCampaignsInput = {
@@ -10511,6 +10936,7 @@ export type ChurchUpdateWithoutDripCampaignsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutDripCampaignsInput = {
@@ -10574,6 +11000,7 @@ export type ChurchUncheckedUpdateWithoutDripCampaignsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutDripEnrollmentsInput = {
@@ -10637,6 +11064,7 @@ export type ChurchCreateWithoutDripEnrollmentsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutDripEnrollmentsInput = {
@@ -10700,6 +11128,7 @@ export type ChurchUncheckedCreateWithoutDripEnrollmentsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutDripEnrollmentsInput = {
@@ -10779,6 +11208,7 @@ export type ChurchUpdateWithoutDripEnrollmentsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutDripEnrollmentsInput = {
@@ -10842,6 +11272,7 @@ export type ChurchUncheckedUpdateWithoutDripEnrollmentsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutCommunicationTemplatesInput = {
@@ -10905,6 +11336,7 @@ export type ChurchCreateWithoutCommunicationTemplatesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutCommunicationTemplatesInput = {
@@ -10968,6 +11400,7 @@ export type ChurchUncheckedCreateWithoutCommunicationTemplatesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutCommunicationTemplatesInput = {
@@ -11047,6 +11480,7 @@ export type ChurchUpdateWithoutCommunicationTemplatesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutCommunicationTemplatesInput = {
@@ -11110,6 +11544,7 @@ export type ChurchUncheckedUpdateWithoutCommunicationTemplatesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutCommunicationMessagesInput = {
@@ -11173,6 +11608,7 @@ export type ChurchCreateWithoutCommunicationMessagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutCommunicationMessagesInput = {
@@ -11236,6 +11672,7 @@ export type ChurchUncheckedCreateWithoutCommunicationMessagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutCommunicationMessagesInput = {
@@ -11315,6 +11752,7 @@ export type ChurchUpdateWithoutCommunicationMessagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutCommunicationMessagesInput = {
@@ -11378,6 +11816,7 @@ export type ChurchUncheckedUpdateWithoutCommunicationMessagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutFundraiserPagesInput = {
@@ -11441,6 +11880,7 @@ export type ChurchCreateWithoutFundraiserPagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutFundraiserPagesInput = {
@@ -11504,6 +11944,7 @@ export type ChurchUncheckedCreateWithoutFundraiserPagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutFundraiserPagesInput = {
@@ -11583,6 +12024,7 @@ export type ChurchUpdateWithoutFundraiserPagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutFundraiserPagesInput = {
@@ -11646,6 +12088,7 @@ export type ChurchUncheckedUpdateWithoutFundraiserPagesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutPledgesInput = {
@@ -11709,6 +12152,7 @@ export type ChurchCreateWithoutPledgesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutPledgesInput = {
@@ -11772,6 +12216,7 @@ export type ChurchUncheckedCreateWithoutPledgesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutPledgesInput = {
@@ -11851,6 +12296,7 @@ export type ChurchUpdateWithoutPledgesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutPledgesInput = {
@@ -11914,6 +12360,7 @@ export type ChurchUncheckedUpdateWithoutPledgesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutRecurringDonationsInput = {
@@ -11977,6 +12424,7 @@ export type ChurchCreateWithoutRecurringDonationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutRecurringDonationsInput = {
@@ -12040,6 +12488,7 @@ export type ChurchUncheckedCreateWithoutRecurringDonationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutRecurringDonationsInput = {
@@ -12119,6 +12568,7 @@ export type ChurchUpdateWithoutRecurringDonationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutRecurringDonationsInput = {
@@ -12182,6 +12632,7 @@ export type ChurchUncheckedUpdateWithoutRecurringDonationsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutExpenseCategoriesInput = {
@@ -12245,6 +12696,7 @@ export type ChurchCreateWithoutExpenseCategoriesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutExpenseCategoriesInput = {
@@ -12308,6 +12760,7 @@ export type ChurchUncheckedCreateWithoutExpenseCategoriesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutExpenseCategoriesInput = {
@@ -12387,6 +12840,7 @@ export type ChurchUpdateWithoutExpenseCategoriesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutExpenseCategoriesInput = {
@@ -12450,6 +12904,7 @@ export type ChurchUncheckedUpdateWithoutExpenseCategoriesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutExpensesInput = {
@@ -12513,6 +12968,7 @@ export type ChurchCreateWithoutExpensesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutExpensesInput = {
@@ -12576,6 +13032,7 @@ export type ChurchUncheckedCreateWithoutExpensesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutExpensesInput = {
@@ -12655,6 +13112,7 @@ export type ChurchUpdateWithoutExpensesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutExpensesInput = {
@@ -12718,6 +13176,7 @@ export type ChurchUncheckedUpdateWithoutExpensesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutBudgetsInput = {
@@ -12781,6 +13240,7 @@ export type ChurchCreateWithoutBudgetsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutBudgetsInput = {
@@ -12844,6 +13304,7 @@ export type ChurchUncheckedCreateWithoutBudgetsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutBudgetsInput = {
@@ -12923,6 +13384,7 @@ export type ChurchUpdateWithoutBudgetsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutBudgetsInput = {
@@ -12986,6 +13448,7 @@ export type ChurchUncheckedUpdateWithoutBudgetsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutAuditLogsInput = {
@@ -13049,6 +13512,7 @@ export type ChurchCreateWithoutAuditLogsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutAuditLogsInput = {
@@ -13112,6 +13576,7 @@ export type ChurchUncheckedCreateWithoutAuditLogsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutAuditLogsInput = {
@@ -13191,6 +13656,7 @@ export type ChurchUpdateWithoutAuditLogsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutAuditLogsInput = {
@@ -13254,6 +13720,7 @@ export type ChurchUncheckedUpdateWithoutAuditLogsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutStaffMembershipsInput = {
@@ -13317,6 +13784,7 @@ export type ChurchCreateWithoutStaffMembershipsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutStaffMembershipsInput = {
@@ -13380,6 +13848,7 @@ export type ChurchUncheckedCreateWithoutStaffMembershipsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutStaffMembershipsInput = {
@@ -13459,6 +13928,7 @@ export type ChurchUpdateWithoutStaffMembershipsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutStaffMembershipsInput = {
@@ -13522,6 +13992,7 @@ export type ChurchUncheckedUpdateWithoutStaffMembershipsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutFacilitiesInput = {
@@ -13585,6 +14056,7 @@ export type ChurchCreateWithoutFacilitiesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutFacilitiesInput = {
@@ -13648,6 +14120,7 @@ export type ChurchUncheckedCreateWithoutFacilitiesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutFacilitiesInput = {
@@ -13727,6 +14200,7 @@ export type ChurchUpdateWithoutFacilitiesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutFacilitiesInput = {
@@ -13790,6 +14264,7 @@ export type ChurchUncheckedUpdateWithoutFacilitiesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutFacilityBookingsInput = {
@@ -13853,6 +14328,7 @@ export type ChurchCreateWithoutFacilityBookingsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutFacilityBookingsInput = {
@@ -13916,6 +14392,7 @@ export type ChurchUncheckedCreateWithoutFacilityBookingsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutFacilityBookingsInput = {
@@ -13995,6 +14472,7 @@ export type ChurchUpdateWithoutFacilityBookingsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutFacilityBookingsInput = {
@@ -14058,6 +14536,7 @@ export type ChurchUncheckedUpdateWithoutFacilityBookingsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutCareRequestsInput = {
@@ -14121,6 +14600,7 @@ export type ChurchCreateWithoutCareRequestsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutCareRequestsInput = {
@@ -14184,6 +14664,7 @@ export type ChurchUncheckedCreateWithoutCareRequestsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutCareRequestsInput = {
@@ -14263,6 +14744,7 @@ export type ChurchUpdateWithoutCareRequestsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutCareRequestsInput = {
@@ -14326,6 +14808,7 @@ export type ChurchUncheckedUpdateWithoutCareRequestsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutSermonsInput = {
@@ -14389,6 +14872,7 @@ export type ChurchCreateWithoutSermonsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutSermonsInput = {
@@ -14452,6 +14936,7 @@ export type ChurchUncheckedCreateWithoutSermonsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutSermonsInput = {
@@ -14531,6 +15016,7 @@ export type ChurchUpdateWithoutSermonsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutSermonsInput = {
@@ -14594,6 +15080,7 @@ export type ChurchUncheckedUpdateWithoutSermonsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutContentResourcesInput = {
@@ -14657,6 +15144,7 @@ export type ChurchCreateWithoutContentResourcesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutContentResourcesInput = {
@@ -14720,6 +15208,7 @@ export type ChurchUncheckedCreateWithoutContentResourcesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutContentResourcesInput = {
@@ -14799,6 +15288,7 @@ export type ChurchUpdateWithoutContentResourcesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutContentResourcesInput = {
@@ -14862,6 +15352,7 @@ export type ChurchUncheckedUpdateWithoutContentResourcesInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutSupportTicketsInput = {
@@ -14925,6 +15416,7 @@ export type ChurchCreateWithoutSupportTicketsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelCreateNestedManyWithoutChurchInput
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutSupportTicketsInput = {
@@ -14988,6 +15480,7 @@ export type ChurchUncheckedCreateWithoutSupportTicketsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelUncheckedCreateNestedManyWithoutChurchInput
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutSupportTicketsInput = {
@@ -15067,6 +15560,7 @@ export type ChurchUpdateWithoutSupportTicketsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelUpdateManyWithoutChurchNestedInput
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutSupportTicketsInput = {
@@ -15130,6 +15624,7 @@ export type ChurchUncheckedUpdateWithoutSupportTicketsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelUncheckedUpdateManyWithoutChurchNestedInput
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutWebhookEventsInput = {
@@ -15193,6 +15688,7 @@ export type ChurchCreateWithoutWebhookEventsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelCreateNestedManyWithoutChurchInput
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutWebhookEventsInput = {
@@ -15256,6 +15752,7 @@ export type ChurchUncheckedCreateWithoutWebhookEventsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelUncheckedCreateNestedManyWithoutChurchInput
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutWebhookEventsInput = {
@@ -15335,6 +15832,7 @@ export type ChurchUpdateWithoutWebhookEventsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelUpdateManyWithoutChurchNestedInput
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutWebhookEventsInput = {
@@ -15398,6 +15896,7 @@ export type ChurchUncheckedUpdateWithoutWebhookEventsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelUncheckedUpdateManyWithoutChurchNestedInput
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutLiveStreamChannelsInput = {
@@ -15461,6 +15960,7 @@ export type ChurchCreateWithoutLiveStreamChannelsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutLiveStreamChannelsInput = {
@@ -15524,6 +16024,7 @@ export type ChurchUncheckedCreateWithoutLiveStreamChannelsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutLiveStreamChannelsInput = {
@@ -15603,6 +16104,7 @@ export type ChurchUpdateWithoutLiveStreamChannelsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutLiveStreamChannelsInput = {
@@ -15666,6 +16168,7 @@ export type ChurchUncheckedUpdateWithoutLiveStreamChannelsInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateWithoutLiveStreamSessionsInput = {
@@ -15729,6 +16232,7 @@ export type ChurchCreateWithoutLiveStreamSessionsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchUncheckedCreateWithoutLiveStreamSessionsInput = {
@@ -15792,6 +16296,7 @@ export type ChurchUncheckedCreateWithoutLiveStreamSessionsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelUncheckedCreateNestedManyWithoutChurchInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
 }
 
 export type ChurchCreateOrConnectWithoutLiveStreamSessionsInput = {
@@ -15871,6 +16376,7 @@ export type ChurchUpdateWithoutLiveStreamSessionsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutLiveStreamSessionsInput = {
@@ -15934,6 +16440,7 @@ export type ChurchUncheckedUpdateWithoutLiveStreamSessionsInput = {
   liveStreamChannels?: Prisma.LiveStreamChannelUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchCreateManyOrganizationInput = {
@@ -16007,6 +16514,7 @@ export type ChurchUpdateWithoutOrganizationInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateWithoutOrganizationInput = {
@@ -16070,6 +16578,7 @@ export type ChurchUncheckedUpdateWithoutOrganizationInput = {
   liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
 }
 
 export type ChurchUncheckedUpdateManyWithoutOrganizationInput = {
@@ -16141,6 +16650,7 @@ export type ChurchCountOutputType = {
   liveStreamSessions: number
   supportTickets: number
   webhookEvents: number
+  importBatches: number
 }
 
 export type ChurchCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -16197,6 +16707,7 @@ export type ChurchCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   liveStreamSessions?: boolean | ChurchCountOutputTypeCountLiveStreamSessionsArgs
   supportTickets?: boolean | ChurchCountOutputTypeCountSupportTicketsArgs
   webhookEvents?: boolean | ChurchCountOutputTypeCountWebhookEventsArgs
+  importBatches?: boolean | ChurchCountOutputTypeCountImportBatchesArgs
 }
 
 /**
@@ -16580,6 +17091,13 @@ export type ChurchCountOutputTypeCountWebhookEventsArgs<ExtArgs extends runtime.
   where?: Prisma.WebhookEventWhereInput
 }
 
+/**
+ * ChurchCountOutputType without action
+ */
+export type ChurchCountOutputTypeCountImportBatchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ImportBatchWhereInput
+}
+
 
 export type ChurchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -16644,6 +17162,7 @@ export type ChurchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   liveStreamSessions?: boolean | Prisma.Church$liveStreamSessionsArgs<ExtArgs>
   supportTickets?: boolean | Prisma.Church$supportTicketsArgs<ExtArgs>
   webhookEvents?: boolean | Prisma.Church$webhookEventsArgs<ExtArgs>
+  importBatches?: boolean | Prisma.Church$importBatchesArgs<ExtArgs>
   _count?: boolean | Prisma.ChurchCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["church"]>
 
@@ -16738,6 +17257,7 @@ export type ChurchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   liveStreamSessions?: boolean | Prisma.Church$liveStreamSessionsArgs<ExtArgs>
   supportTickets?: boolean | Prisma.Church$supportTicketsArgs<ExtArgs>
   webhookEvents?: boolean | Prisma.Church$webhookEventsArgs<ExtArgs>
+  importBatches?: boolean | Prisma.Church$importBatchesArgs<ExtArgs>
   _count?: boolean | Prisma.ChurchCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ChurchIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -16804,6 +17324,7 @@ export type $ChurchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     liveStreamSessions: Prisma.$LiveStreamSessionPayload<ExtArgs>[]
     supportTickets: Prisma.$SupportTicketPayload<ExtArgs>[]
     webhookEvents: Prisma.$WebhookEventPayload<ExtArgs>[]
+    importBatches: Prisma.$ImportBatchPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -17262,6 +17783,7 @@ export interface Prisma__ChurchClient<T, Null = never, ExtArgs extends runtime.T
   liveStreamSessions<T extends Prisma.Church$liveStreamSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$liveStreamSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LiveStreamSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   supportTickets<T extends Prisma.Church$supportTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$supportTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupportTicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   webhookEvents<T extends Prisma.Church$webhookEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$webhookEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebhookEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  importBatches<T extends Prisma.Church$importBatchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$importBatchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ImportBatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -18964,6 +19486,30 @@ export type Church$webhookEventsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.WebhookEventScalarFieldEnum | Prisma.WebhookEventScalarFieldEnum[]
+}
+
+/**
+ * Church.importBatches
+ */
+export type Church$importBatchesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ImportBatch
+   */
+  select?: Prisma.ImportBatchSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ImportBatch
+   */
+  omit?: Prisma.ImportBatchOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ImportBatchInclude<ExtArgs> | null
+  where?: Prisma.ImportBatchWhereInput
+  orderBy?: Prisma.ImportBatchOrderByWithRelationInput | Prisma.ImportBatchOrderByWithRelationInput[]
+  cursor?: Prisma.ImportBatchWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ImportBatchScalarFieldEnum | Prisma.ImportBatchScalarFieldEnum[]
 }
 
 /**

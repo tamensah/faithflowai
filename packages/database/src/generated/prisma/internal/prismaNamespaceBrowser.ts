@@ -64,6 +64,8 @@ export const ModelName = {
   SubscriptionPlan: 'SubscriptionPlan',
   SubscriptionPlanFeature: 'SubscriptionPlanFeature',
   TenantSubscription: 'TenantSubscription',
+  ImportBatch: 'ImportBatch',
+  ImportBatchItem: 'ImportBatchItem',
   MemberRegistration: 'MemberRegistration',
   MemberTag: 'MemberTag',
   MemberTagAssignment: 'MemberTagAssignment',
@@ -376,6 +378,34 @@ export const TenantSubscriptionScalarFieldEnum = {
 } as const
 
 export type TenantSubscriptionScalarFieldEnum = (typeof TenantSubscriptionScalarFieldEnum)[keyof typeof TenantSubscriptionScalarFieldEnum]
+
+
+export const ImportBatchScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  churchId: 'churchId',
+  entityType: 'entityType',
+  status: 'status',
+  filename: 'filename',
+  rowCount: 'rowCount',
+  createdByClerkUserId: 'createdByClerkUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ImportBatchScalarFieldEnum = (typeof ImportBatchScalarFieldEnum)[keyof typeof ImportBatchScalarFieldEnum]
+
+
+export const ImportBatchItemScalarFieldEnum = {
+  id: 'id',
+  batchId: 'batchId',
+  entityType: 'entityType',
+  action: 'action',
+  entityId: 'entityId',
+  createdAt: 'createdAt'
+} as const
+
+export type ImportBatchItemScalarFieldEnum = (typeof ImportBatchItemScalarFieldEnum)[keyof typeof ImportBatchItemScalarFieldEnum]
 
 
 export const MemberRegistrationScalarFieldEnum = {

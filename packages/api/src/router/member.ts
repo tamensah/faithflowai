@@ -2,6 +2,10 @@ import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
 import {
   AccessRequestStatus,
+  AuditActorType,
+  ImportBatchStatus,
+  ImportEntityType,
+  ImportItemAction,
   MemberGender,
   MemberMaritalStatus,
   MemberStatus,
@@ -10,6 +14,7 @@ import {
 } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { ensureFeatureEnabled, ensureFeatureLimit } from '../entitlements';
+import { recordAuditLog } from '../audit';
 
 const requireStaff = async (tenantId: string, clerkUserId: string) => {
   const membership = await prisma.staffMembership.findFirst({
@@ -995,10 +1000,27 @@ export const memberRouter = router({
         skipped: 0,
         warnings: [] as string[],
         errors: [] as string[],
+        batchId: null as string | null,
       };
       let currentMemberCount = await prisma.member.count({
         where: { church: { organization: { tenantId: ctx.tenantId! } } },
       });
+
+      const batch = input.dryRun
+        ? null
+        : await prisma.importBatch.create({
+            data: {
+              tenantId: ctx.tenantId!,
+              churchId: input.churchId,
+              entityType: ImportEntityType.MEMBER,
+              filename: null,
+              rowCount: rows.length,
+              createdByClerkUserId: ctx.userId ?? undefined,
+            },
+          });
+      summary.batchId = batch?.id ?? null;
+
+      const batchItems: Array<{ entityType: ImportEntityType; action: ImportItemAction; entityId: string }> = [];
 
       for (const [index, row] of rows.entries()) {
         const rowNumber = index + 2;
@@ -1095,6 +1117,7 @@ export const memberRouter = router({
           if (member) {
             member = await prisma.member.update({ where: { id: member.id }, data });
             summary.updated += 1;
+            if (batch) batchItems.push({ entityType: ImportEntityType.MEMBER, action: ImportItemAction.UPDATED, entityId: member.id });
           } else {
             await ensureFeatureLimit(
               ctx.tenantId!,
@@ -1106,6 +1129,7 @@ export const memberRouter = router({
             member = await prisma.member.create({ data: { ...data, churchId: input.churchId } });
             summary.created += 1;
             currentMemberCount += 1;
+            if (batch) batchItems.push({ entityType: ImportEntityType.MEMBER, action: ImportItemAction.CREATED, entityId: member.id });
           }
         } catch (error) {
           summary.errors.push(`Row ${rowNumber}: Failed to save member.`);
@@ -1128,7 +1152,97 @@ export const memberRouter = router({
         }
       }
 
+      if (batch) {
+        if (batchItems.length) {
+          await prisma.importBatchItem.createMany({
+            data: batchItems.map((item) => ({
+              batchId: batch.id,
+              entityType: item.entityType,
+              action: item.action,
+              entityId: item.entityId,
+            })),
+          });
+        }
+
+        await recordAuditLog({
+          tenantId: ctx.tenantId,
+          churchId: input.churchId,
+          actorType: AuditActorType.USER,
+          actorId: ctx.userId,
+          action: 'members.import_csv_applied',
+          targetType: 'ImportBatch',
+          targetId: batch.id,
+          metadata: {
+            total: summary.total,
+            created: summary.created,
+            updated: summary.updated,
+            skipped: summary.skipped,
+            errors: summary.errors.length,
+          },
+        });
+      }
+
       return summary;
+    }),
+
+  rollbackImport: protectedProcedure
+    .input(z.object({ batchId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await ensureFeatureEnabled(
+        ctx.tenantId!,
+        'membership_enabled',
+        'Your subscription does not include membership management.'
+      );
+      if (!ctx.userId || !ctx.tenantId) {
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Not authenticated' });
+      }
+      await requireStaff(ctx.tenantId!, ctx.userId!);
+
+      const batch = await prisma.importBatch.findFirst({
+        where: {
+          id: input.batchId,
+          tenantId: ctx.tenantId!,
+          entityType: ImportEntityType.MEMBER,
+          status: ImportBatchStatus.APPLIED,
+        },
+      });
+      if (!batch) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Import batch not found or already rolled back' });
+      }
+
+      const items = await prisma.importBatchItem.findMany({
+        where: {
+          batchId: batch.id,
+          entityType: ImportEntityType.MEMBER,
+          action: ImportItemAction.CREATED,
+        },
+        select: { entityId: true },
+      });
+      const ids = items.map((row) => row.entityId);
+
+      const deleted = ids.length
+        ? await prisma.member.deleteMany({
+            where: { id: { in: ids }, churchId: batch.churchId },
+          })
+        : { count: 0 };
+
+      await prisma.importBatch.update({
+        where: { id: batch.id },
+        data: { status: 'ROLLED_BACK' },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        churchId: batch.churchId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'members.import_csv_rolled_back',
+        targetType: 'ImportBatch',
+        targetId: batch.id,
+        metadata: { deletedMembers: deleted.count },
+      });
+
+      return { ok: true, deletedMembers: deleted.count };
     }),
 
   delete: protectedProcedure

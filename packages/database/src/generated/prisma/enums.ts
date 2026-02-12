@@ -828,6 +828,31 @@ export const DripEnrollmentStatus = {
 export type DripEnrollmentStatus = (typeof DripEnrollmentStatus)[keyof typeof DripEnrollmentStatus]
 
 
+export const ImportEntityType = {
+  MEMBER: 'MEMBER',
+  HOUSEHOLD: 'HOUSEHOLD',
+  DONATION: 'DONATION'
+} as const
+
+export type ImportEntityType = (typeof ImportEntityType)[keyof typeof ImportEntityType]
+
+
+export const ImportBatchStatus = {
+  APPLIED: 'APPLIED',
+  ROLLED_BACK: 'ROLLED_BACK'
+} as const
+
+export type ImportBatchStatus = (typeof ImportBatchStatus)[keyof typeof ImportBatchStatus]
+
+
+export const ImportItemAction = {
+  CREATED: 'CREATED',
+  UPDATED: 'UPDATED'
+} as const
+
+export type ImportItemAction = (typeof ImportItemAction)[keyof typeof ImportItemAction]
+
+
 export const DisputeEvidenceType = {
   UNCATEGORIZED: 'UNCATEGORIZED',
   RECEIPT: 'RECEIPT',
