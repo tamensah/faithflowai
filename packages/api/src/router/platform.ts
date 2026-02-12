@@ -146,10 +146,11 @@ export const platformRouter = router({
     const platformUser = await loadPlatformUser(ctx.userId!);
     const allowlist = parseAllowlist();
     const email = platformUser?.email ?? (await getUserEmail(ctx.userId!));
+    const invitedUser = email ? await prisma.platformUser.findUnique({ where: { email: email.toLowerCase() } }) : null;
     const platformUserCount = await prisma.platformUser.count();
     const isAllowlisted = Boolean(email && allowlist.includes(email.toLowerCase()));
     const canFirstUserBootstrap = Boolean(email && allowlist.length === 0 && platformUserCount === 0);
-    const bootstrapAllowed = isAllowlisted || canFirstUserBootstrap;
+    const bootstrapAllowed = isAllowlisted || canFirstUserBootstrap || Boolean(invitedUser);
     if (platformUser) {
       await prisma.platformUser.update({
         where: { id: platformUser.id },
