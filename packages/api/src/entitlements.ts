@@ -14,6 +14,26 @@ export type TenantEntitlement = {
   planCode: string;
 };
 
+type FeatureKeyCache = { keys: string[]; fetchedAt: number };
+let featureKeyCache: FeatureKeyCache | null = null;
+const FEATURE_KEY_CACHE_TTL_MS = 5 * 60 * 1000;
+
+async function listFeatureKeys() {
+  if (featureKeyCache && Date.now() - featureKeyCache.fetchedAt < FEATURE_KEY_CACHE_TTL_MS) {
+    return featureKeyCache.keys;
+  }
+
+  // Distinct list of known feature keys from plans. Used to build "locked" entitlements
+  // when a tenant has a subscription history but no active subscription.
+  const rows = await prisma.subscriptionPlanFeature.findMany({
+    select: { key: true },
+    distinct: ['key'],
+  });
+  const keys = rows.map((row) => row.key).sort();
+  featureKeyCache = { keys, fetchedAt: Date.now() };
+  return keys;
+}
+
 export async function resolveTenantPlan(tenantId: string) {
   const subscription = await prisma.tenantSubscription.findFirst({
     where: { tenantId, status: { in: activeStatuses as unknown as TenantSubscriptionStatus[] } },
@@ -23,6 +43,13 @@ export async function resolveTenantPlan(tenantId: string) {
 
   if (subscription?.plan) {
     return { source: 'subscription' as const, subscription, plan: subscription.plan };
+  }
+
+  const subscriptionHistoryCount = await prisma.tenantSubscription.count({ where: { tenantId } });
+  if (subscriptionHistoryCount > 0) {
+    // Important: do NOT fall back to the default plan when a tenant has an inactive/canceled/expired
+    // subscription history. This prevents non-paying tenants from continuing to receive paid entitlements.
+    return { source: 'inactive_subscription' as const, subscription: null, plan: null };
   }
 
   const defaultPlan = await prisma.subscriptionPlan.findFirst({
@@ -39,6 +66,27 @@ export async function resolveTenantPlan(tenantId: string) {
 export async function resolveTenantEntitlements(tenantId: string) {
   const resolved = await resolveTenantPlan(tenantId);
   if (!resolved.plan) {
+    if (resolved.source === 'inactive_subscription') {
+      const keys = await listFeatureKeys();
+      const entitlements = Object.fromEntries(
+        keys.map((key) => [
+          key,
+          {
+            enabled: false,
+            limit: 0,
+            planCode: 'inactive',
+          } satisfies TenantEntitlement,
+        ])
+      ) as Record<string, TenantEntitlement>;
+
+      return {
+        source: resolved.source,
+        subscriptionId: null,
+        plan: null,
+        entitlements,
+      };
+    }
+
     return {
       source: resolved.source,
       subscriptionId: null,
