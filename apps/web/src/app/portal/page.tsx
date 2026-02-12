@@ -186,100 +186,6 @@ export default function MemberPortalPage() {
     },
   });
 
-  if (isProfileLoading) {
-    return (
-      <div className="mx-auto max-w-4xl p-8">
-        <Card className="p-6">
-          <p className="text-sm text-muted">Loading your portal…</p>
-        </Card>
-      </div>
-    );
-  }
-
-  if (selfError?.data?.code === 'UNAUTHORIZED') {
-    return (
-      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center p-8">
-        <Card className="p-6 text-center">
-          <h1 className="text-xl font-semibold">Sign in to continue</h1>
-          <p className="mt-2 text-sm text-muted">Your member portal is protected.</p>
-          <div className="mt-4">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <Button>Sign in</Button>
-              </SignInButton>
-            </SignedOut>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  if (selfError?.data?.code === 'NOT_FOUND') {
-    return (
-      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center p-8">
-        <Card className="w-full max-w-xl p-6">
-          <h1 className="text-xl font-semibold">Request member access</h1>
-          <p className="mt-2 text-sm text-muted">
-            Your account is signed in but not linked to a member record. Submit this request and we’ll notify your
-            church staff.
-          </p>
-          {accessRequest ? (
-            <div className="mt-4 rounded-md border border-border bg-muted/10 p-3 text-sm text-muted">
-              <p className="font-medium text-foreground">Request status: {accessRequest.status}</p>
-              <p className="text-xs text-muted">
-                {accessRequest.church?.name ?? 'Church'} · {accessRequest.email ?? 'No email'}
-              </p>
-            </div>
-          ) : null}
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Input
-              placeholder="Full name"
-              value={requestName}
-              onChange={(e) => setRequestName(e.target.value)}
-            />
-            <Input
-              placeholder="Email"
-              value={requestEmail}
-              onChange={(e) => setRequestEmail(e.target.value)}
-            />
-            <select
-              className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
-              value={requestChurchId}
-              onChange={(e) => setRequestChurchId(e.target.value)}
-            >
-              <option value="">Select church</option>
-              {churches?.map((church) => (
-                <option key={church.id} value={church.id}>
-                  {church.name}
-                </option>
-              ))}
-            </select>
-            <Input
-              placeholder="Message (optional)"
-              value={requestMessage}
-              onChange={(e) => setRequestMessage(e.target.value)}
-            />
-          </div>
-          <div className="mt-4">
-            <Button
-              onClick={() =>
-                requestAccess({
-                  churchId: requestChurchId,
-                  name: requestName.trim() || undefined,
-                  email: requestEmail.trim() || undefined,
-                  message: requestMessage.trim() || undefined,
-                })
-              }
-              disabled={!requestChurchId || !requestName.trim() || !requestEmail.trim() || isRequestingAccess}
-            >
-              {isRequestingAccess ? 'Submitting…' : 'Request access'}
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
   useEffect(() => {
     if (selfProfile?.member) {
       setDirectoryVisibility(selfProfile.member.directoryVisibility ?? 'MEMBERS_ONLY');
@@ -488,6 +394,100 @@ export default function MemberPortalPage() {
       },
     }));
   };
+
+  if (isProfileLoading) {
+    return (
+      <div className="mx-auto max-w-4xl p-8">
+        <Card className="p-6">
+          <p className="text-sm text-muted">Loading your portal…</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (selfError?.data?.code === 'UNAUTHORIZED') {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center p-8">
+        <Card className="p-6 text-center">
+          <h1 className="text-xl font-semibold">Sign in to continue</h1>
+          <p className="mt-2 text-sm text-muted">Your member portal is protected.</p>
+          <div className="mt-4">
+            <SignedOut>
+              <SignInButton mode="modal">
+                <Button>Sign in</Button>
+              </SignInButton>
+            </SignedOut>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (selfError?.data?.code === 'NOT_FOUND') {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center p-8">
+        <Card className="w-full max-w-xl p-6">
+          <h1 className="text-xl font-semibold">Request member access</h1>
+          <p className="mt-2 text-sm text-muted">
+            Your account is signed in but not linked to a member record. Submit this request and we’ll notify your
+            church staff.
+          </p>
+          {accessRequest ? (
+            <div className="mt-4 rounded-md border border-border bg-muted/10 p-3 text-sm text-muted">
+              <p className="font-medium text-foreground">Request status: {accessRequest.status}</p>
+              <p className="text-xs text-muted">
+                {accessRequest.church?.name ?? 'Church'} · {accessRequest.email ?? 'No email'}
+              </p>
+            </div>
+          ) : null}
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Input
+              placeholder="Full name"
+              value={requestName}
+              onChange={(e) => setRequestName(e.target.value)}
+            />
+            <Input
+              placeholder="Email"
+              value={requestEmail}
+              onChange={(e) => setRequestEmail(e.target.value)}
+            />
+            <select
+              className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+              value={requestChurchId}
+              onChange={(e) => setRequestChurchId(e.target.value)}
+            >
+              <option value="">Select church</option>
+              {churches?.map((church) => (
+                <option key={church.id} value={church.id}>
+                  {church.name}
+                </option>
+              ))}
+            </select>
+            <Input
+              placeholder="Message (optional)"
+              value={requestMessage}
+              onChange={(e) => setRequestMessage(e.target.value)}
+            />
+          </div>
+          <div className="mt-4">
+            <Button
+              onClick={() =>
+                requestAccess({
+                  churchId: requestChurchId,
+                  name: requestName.trim() || undefined,
+                  email: requestEmail.trim() || undefined,
+                  message: requestMessage.trim() || undefined,
+                })
+              }
+              disabled={!requestChurchId || !requestName.trim() || !requestEmail.trim() || isRequestingAccess}
+            >
+              {isRequestingAccess ? 'Submitting…' : 'Request access'}
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-8">

@@ -7,6 +7,12 @@ import { httpBatchLink } from '@trpc/client';
 import superjson from 'superjson';
 import { trpc } from '../lib/trpc';
 
+function resolveTrpcUrl() {
+  const raw = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/trpc').trim();
+  const normalized = raw.replace(/\/+$/, '');
+  return normalized.endsWith('/trpc') ? normalized : `${normalized}/trpc`;
+}
+
 function TrpcProvider({ children }: { children: React.ReactNode }) {
   const { getToken } = useAuth();
   const tokenTemplate = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
@@ -15,7 +21,7 @@ function TrpcProvider({ children }: { children: React.ReactNode }) {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/trpc',
+          url: resolveTrpcUrl(),
           transformer: superjson,
           headers: async () => {
             const token = await getToken(tokenTemplate ? { template: tokenTemplate } : undefined);
