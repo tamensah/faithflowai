@@ -11,21 +11,21 @@ Status legend:
 
 ## 1) Subscriptions + Billing Hardening
 
-- [ ] Admin plan change UX: upgrade/downgrade between tiers
+- [~] Admin plan change UX: upgrade/downgrade between tiers
 - [ ] Define proration rules (beta-safe default: next-cycle effective + optional immediate upgrade)
 - [ ] Add "effective next cycle" toggle + confirmation dialog (show impact)
 - [ ] Trial conversion flow:
-  - [ ] Trial ending reminders (email + in-app banner)
+  - [x] Trial ending reminders (email + in-app banner)
   - [ ] Grace period policy (e.g., 3-7 days) with clear lockout behavior
   - [ ] Post-trial enforcement (read-only mode vs. suspend) per feature key
 - [ ] Stripe:
-  - [ ] Customer Portal deep link in admin billing
+  - [x] Customer Portal deep link in admin billing
   - [ ] Subscription cancel/resume UX (if portal disabled)
 - [ ] Paystack:
   - [ ] Manage subscription guidance + cancel flow (provider-specific)
   - [ ] Ensure webhook sync covers status transitions reliably
 - [ ] Entitlements polish:
-  - [ ] "What's locked" UI across admin modules
+  - [~] "What's locked" UI across admin modules
   - [ ] Upgrade CTA with deep-link to `/billing`
 
 Deliverables:
@@ -36,13 +36,16 @@ Deliverables:
 
 ## 2) Operational Readiness (Reduce Support Load)
 
-- [ ] Admin health page: `/operations/health`
-  - [ ] DB connectivity + migration state
-  - [ ] Webhook status (Stripe/Paystack/Clerk) + last event timestamps
-  - [ ] Email provider status (Resend) + send test
-  - [ ] Storage provider status (S3/GCS) + upload test
-  - [ ] Scheduler status (Render cron / GitHub actions) + last run times
-  - [ ] Payments status + configuration checks
+- [~] Admin health page: `/operations/health`
+  - [x] DB connectivity + latency
+  - [x] Webhook status (Stripe/Paystack/etc) + last event timestamps
+  - [x] Email provider status (Resend) config check
+  - [x] Storage provider config check
+  - [x] Scheduler mode visibility (internal vs external)
+  - [x] Payments config checks
+  - [ ] Migration state visibility
+  - [ ] Send test email
+  - [ ] Upload test
 - [ ] Tenant audit timeline improvements:
   - [ ] Filter by actor/action/target
   - [ ] CSV export
@@ -114,4 +117,3 @@ Deliverables:
 
 Deliverables:
 - AI reduces work and is auditable; no “black box” decisions.
-
