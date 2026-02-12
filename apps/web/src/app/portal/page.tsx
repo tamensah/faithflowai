@@ -55,12 +55,16 @@ export default function MemberPortalPage() {
     undefined,
     { retry: false }
   );
+  const { data: authSelf } = trpc.auth.self.useQuery(undefined, { retry: false, enabled: Boolean(user) });
+  const { data: platformSelf } = trpc.platform.self.useQuery(undefined, { retry: false, enabled: Boolean(user) });
   const churchId = selfProfile?.member?.churchId;
   const showAccessRequest = selfError?.data?.code === 'NOT_FOUND';
   const missingTenantContext =
     selfError?.data?.code === 'BAD_REQUEST' &&
     (selfError.message ?? '').toLowerCase().includes('tenant');
   const canEditProfile = Boolean(selfProfile?.member);
+  const hasAdminAccess = Boolean(authSelf?.isStaff || platformSelf?.platformUser);
+  const adminBaseUrl = (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://admin-gamma-beryl.vercel.app').replace(/\/+$/, '');
 
   const { data: accessRequest } = trpc.member.myAccessRequest.useQuery(undefined, {
     enabled: Boolean(showAccessRequest),
@@ -483,6 +487,22 @@ export default function MemberPortalPage() {
                 <Button>Sign in</Button>
               </SignInButton>
             </SignedOut>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (hasAdminAccess) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center p-8">
+        <Card className="w-full max-w-xl p-6">
+          <h1 className="text-xl font-semibold">Admin account detected</h1>
+          <p className="mt-2 text-sm text-muted">
+            This account has staff/admin access. Continue in the admin console for church operations.
+          </p>
+          <div className="mt-4">
+            <Button onClick={() => (window.location.href = adminBaseUrl)}>Open admin console</Button>
           </div>
         </Card>
       </div>

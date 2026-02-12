@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
@@ -17,7 +17,8 @@ function TrpcProvider({ children }: { children: React.ReactNode }) {
   const { getToken, orgId } = useAuth();
   const tokenTemplate = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
   const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient] = useState(() =>
+  const trpcClient = useMemo(
+    () =>
     trpc.createClient({
       links: [
         httpBatchLink({
@@ -35,7 +36,8 @@ function TrpcProvider({ children }: { children: React.ReactNode }) {
           },
         }),
       ],
-    })
+    }),
+    [getToken, orgId, tokenTemplate]
   );
 
   return (
