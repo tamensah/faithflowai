@@ -13,7 +13,11 @@ export default function ContactPage() {
   const [status, setStatus] = useState<Status>('idle');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [organization, setOrganization] = useState('');
+  const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [trap] = useState(''); // Honeypot (do not render visibly).
 
   const errors = useMemo(() => {
     const next: string[] = [];
@@ -52,6 +56,27 @@ export default function ContactPage() {
           </div>
         </div>
 
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <p className="text-sm font-medium text-foreground">Organization (optional)</p>
+            <Input
+              className="mt-2"
+              value={organization}
+              onChange={(event) => setOrganization(event.target.value)}
+              placeholder="Church / ministry name"
+            />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground">Phone (optional)</p>
+            <Input
+              className="mt-2"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="+1 555 0100"
+            />
+          </div>
+        </div>
+
         <div className="mt-4">
           <p className="text-sm font-medium text-foreground">Message</p>
           <textarea
@@ -73,25 +98,43 @@ export default function ContactPage() {
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Button
             disabled={!canSend}
-            onClick={() => {
+            onClick={async () => {
+              setServerError(null);
               setStatus('sending');
-              // Alpha/beta: keep this client-side only. We'll wire Resend to an API route next.
-              window.location.href = `mailto:hello@faithflow.ai?subject=${encodeURIComponent(
-                `FaithFlow AI inquiry - ${name.trim() || 'New message'}`
-              )}&body=${encodeURIComponent(`${message}\n\nFrom: ${name}\nEmail: ${email}`)}`;
-              setStatus('sent');
+              try {
+                const res = await fetch('/api/contact', {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  body: JSON.stringify({
+                    name,
+                    email,
+                    organization,
+                    phone,
+                    message,
+                    website: trap,
+                  }),
+                });
+                const data = (await res.json()) as { ok: boolean; errors?: string[] };
+                if (!res.ok || !data.ok) {
+                  setStatus('error');
+                  setServerError(data.errors?.[0] ?? 'Could not send message.');
+                  return;
+                }
+
+                setStatus('sent');
+              } catch {
+                setStatus('error');
+                setServerError('Could not send message.');
+              }
             }}
           >
-            {status === 'sending' ? 'Opening email...' : 'Send message'}
+            {status === 'sending' ? 'Sending...' : 'Send message'}
           </Button>
-          <p className="text-xs text-muted">
-            This opens your mail client for now. We will switch to in-app delivery for beta.
-          </p>
+          {status === 'sent' ? <p className="text-xs text-emerald-700">Message sent. We will reply soon.</p> : null}
         </div>
 
-        {status === 'error' ? <p className="mt-3 text-xs text-destructive">Could not send message.</p> : null}
+        {status === 'error' ? <p className="mt-3 text-xs text-destructive">{serverError ?? 'Could not send message.'}</p> : null}
       </Card>
     </main>
   );
 }
-

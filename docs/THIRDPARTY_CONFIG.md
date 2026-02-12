@@ -65,13 +65,14 @@ This doc lists the required provider‑side configuration to run the alpha. Once
 
 ## 5. Resend (Email Delivery)
 
-**Goal**: enable receipts and outbound email communications.
+**Goal**: enable receipts, outbound email communications, and marketing contact form delivery.
 
 - Create a Resend account.
 - Verify sending domain (DNS records for DKIM/SPF).
 - Required env:
   - `RESEND_API_KEY`
   - `RESEND_FROM_EMAIL` (e.g., `FaithFlow AI <no-reply@yourdomain>`)
+  - `CONTACT_TO_EMAIL` (where marketing site contact messages should be delivered)
 
 ## 6. Push Notifications (Firebase Cloud Messaging)
 

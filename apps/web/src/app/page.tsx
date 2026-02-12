@@ -14,11 +14,11 @@ export default function HomePage() {
             <div>
               <Badge variant="default">AI-powered church management</Badge>
               <h1 className="mt-5 text-5xl font-semibold text-foreground">
-                The operating system for churches that want clarity, speed, and trust.
+                A modern operating system for church operations.
               </h1>
               <p className="mt-6 text-lg text-muted">
-                FaithFlow AI unifies finance, membership, events, and communications into a single, resilient platform
-                built for single locations, multi‑campus networks, and diaspora communities.
+                FaithFlow AI brings finance, membership, events, and communications into one platform with strong
+                tenant isolation, audit trails, and staff/member workflows designed to scale.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/get-started">
@@ -50,14 +50,14 @@ export default function HomePage() {
               <div className="relative space-y-5">
                 <div>
                   <p className="text-xs uppercase tracking-widest text-muted">Live platform preview</p>
-                  <h2 className="mt-3 text-2xl font-semibold text-foreground">What’s already working</h2>
+                  <h2 className="mt-3 text-2xl font-semibold text-foreground">What you can test today</h2>
                 </div>
                 <div className="grid gap-3">
                   {[
-                    'Giving, recurring donations, payouts, and receipts',
-                    'Membership profiles, groups, and engagement analytics',
-                    'Event registration, ticketing, and badges',
-                    'Communications: email, SMS, WhatsApp scheduling',
+                    'Giving + receipts + reconciliation (Stripe + Paystack)',
+                    'Membership profiles + groups + volunteer scheduling',
+                    'Events: registration, ticketing, check-in, badges',
+                    'Communications: templates, scheduling, delivery logs',
                   ].map((item) => (
                     <div key={item} className="flex items-start gap-2 text-sm text-muted">
                       <span className="mt-1 h-2 w-2 rounded-full bg-secondary" />
@@ -66,9 +66,9 @@ export default function HomePage() {
                   ))}
                 </div>
                 <div className="rounded-xl border border-border bg-muted/10 p-4 text-sm text-muted">
-                  <p className="font-medium text-foreground">Next build focus</p>
+                  <p className="font-medium text-foreground">Onboarding-first UX</p>
                   <p className="mt-1">
-                    Identity-driven onboarding, smart event operations, and AI-guided donor stewardship.
+                    Clear entry points for admins and members, plan selection, and frictionless admin landing.
                   </p>
                 </div>
               </div>
@@ -147,7 +147,7 @@ export default function HomePage() {
           <div>
             <h4 className="text-xl font-semibold text-foreground">Ready to see FaithFlow AI in action?</h4>
             <p className="mt-2 text-sm text-muted">
-              Test the member portal, preview events, and validate authentication with Clerk.
+              Start onboarding for your church, or sign in to the member portal.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -160,8 +160,11 @@ export default function HomePage() {
               </Link>
             </SignedOut>
             <SignedIn>
-              <Link className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-white" href="/get-started">
-                Continue setup
+              <Link
+                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-white"
+                href="/get-started"
+              >
+                Continue onboarding
               </Link>
             </SignedIn>
           </div>
