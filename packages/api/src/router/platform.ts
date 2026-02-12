@@ -64,7 +64,7 @@ const assignTenantPlanInput = z
     tenantId: z.string(),
     planId: z.string().optional(),
     planCode: z.string().trim().min(2).max(64).optional(),
-    status: z.nativeEnum(TenantSubscriptionStatus).default(TenantSubscriptionStatus.ACTIVE),
+    status: z.nativeEnum(TenantSubscriptionStatus).default(TenantSubscriptionStatus.TRIALING),
     provider: z.nativeEnum(SubscriptionProvider).default(SubscriptionProvider.MANUAL),
     providerRef: z.string().trim().max(191).optional(),
     startsAt: z.coerce.date().optional(),
@@ -87,6 +87,17 @@ const parseAllowlist = () => {
     .split(',')
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
+};
+
+const readPlanTrialDays = (metadata: Prisma.JsonValue | null | undefined) => {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
+  const raw = (metadata as Record<string, unknown>).trialDays;
+  if (typeof raw === 'number' && Number.isInteger(raw) && raw > 0) return raw;
+  if (typeof raw === 'string') {
+    const parsed = Number(raw);
+    if (Number.isInteger(parsed) && parsed > 0) return parsed;
+  }
+  return null;
 };
 
 const getUserEmail = async (clerkUserId: string) => {
@@ -293,6 +304,12 @@ export const platformRouter = router({
 
     const plan = await prisma.$transaction(async (tx) => {
       const existingByCode = await tx.subscriptionPlan.findUnique({ where: { code: input.code } });
+      const existingById = input.id ? await tx.subscriptionPlan.findUnique({ where: { id: input.id } }) : null;
+      const existingPlan = existingById ?? existingByCode;
+      const mergedMetadata =
+        input.metadata && existingPlan?.metadata && typeof existingPlan.metadata === 'object' && !Array.isArray(existingPlan.metadata)
+          ? ({ ...(existingPlan.metadata as Record<string, unknown>), ...input.metadata } as Prisma.InputJsonValue)
+          : (input.metadata as Prisma.InputJsonValue | undefined);
 
       const nextPlan =
         input.id || existingByCode
@@ -307,7 +324,7 @@ export const platformRouter = router({
                 amountMinor: input.amountMinor,
                 isActive: input.isActive,
                 isDefault: input.isDefault,
-                metadata: (input.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
+                metadata: mergedMetadata,
               },
             })
           : await tx.subscriptionPlan.create({
@@ -383,6 +400,12 @@ export const platformRouter = router({
     });
 
     const startsAt = input.startsAt ?? new Date();
+    const planTrialDays = readPlanTrialDays(plan.metadata);
+    const trialEndsAt =
+      input.status === TenantSubscriptionStatus.TRIALING
+        ? (input.trialEndsAt ?? (planTrialDays ? new Date(startsAt.getTime() + planTrialDays * 24 * 60 * 60 * 1000) : null))
+        : null;
+
     const subscription = await prisma.$transaction(async (tx) => {
       if (previous) {
         await tx.tenantSubscription.update({
@@ -405,7 +428,7 @@ export const platformRouter = router({
           startsAt,
           currentPeriodStart: input.currentPeriodStart ?? startsAt,
           currentPeriodEnd: input.currentPeriodEnd,
-          trialEndsAt: input.trialEndsAt,
+          trialEndsAt,
           canceledAt: input.status === TenantSubscriptionStatus.CANCELED ? new Date() : null,
           cancelAtPeriodEnd: input.cancelAtPeriodEnd,
           seatCount: input.seatCount,

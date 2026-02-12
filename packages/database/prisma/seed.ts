@@ -1,6 +1,14 @@
 import { Prisma } from '../src/generated/prisma/client';
 import { prisma } from '../src/client';
 
+function mergeMetadata(current: Prisma.JsonValue | null | undefined, next: Record<string, unknown>) {
+  const base =
+    current && typeof current === 'object' && !Array.isArray(current)
+      ? (current as Record<string, unknown>)
+      : {};
+  return { ...base, ...next } as Prisma.InputJsonValue;
+}
+
 async function main() {
   const clerkOrgId = 'org_demo';
 
@@ -42,7 +50,18 @@ async function main() {
       isDefault: true,
       metadata: {
         target: 'small churches',
+        trialDays: 14,
       },
+    },
+  });
+
+  await prisma.subscriptionPlan.update({
+    where: { id: starterPlan.id },
+    data: {
+      metadata: mergeMetadata(starterPlan.metadata, {
+        target: 'small churches',
+        trialDays: 14,
+      }),
     },
   });
 
@@ -95,7 +114,18 @@ async function main() {
       isDefault: false,
       metadata: {
         target: 'growing churches',
+        trialDays: 14,
       },
+    },
+  });
+
+  await prisma.subscriptionPlan.update({
+    where: { id: growthPlan.id },
+    data: {
+      metadata: mergeMetadata(growthPlan.metadata, {
+        target: 'growing churches',
+        trialDays: 14,
+      }),
     },
   });
 
@@ -148,7 +178,18 @@ async function main() {
       isDefault: false,
       metadata: {
         target: 'multi-campus and diaspora networks',
+        trialDays: 0,
       },
+    },
+  });
+
+  await prisma.subscriptionPlan.update({
+    where: { id: enterprisePlan.id },
+    data: {
+      metadata: mergeMetadata(enterprisePlan.metadata, {
+        target: 'multi-campus and diaspora networks',
+        trialDays: 0,
+      }),
     },
   });
 

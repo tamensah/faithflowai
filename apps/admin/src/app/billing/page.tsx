@@ -11,6 +11,25 @@ function formatPlanPrice(amountMinor: number, currency: string, interval: string
   return `${currency} ${(amountMinor / 100).toFixed(2)} / ${interval.toLowerCase()}`;
 }
 
+function getTrialDays(metadata: unknown) {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
+  const raw = (metadata as Record<string, unknown>).trialDays;
+  if (typeof raw === 'number' && Number.isInteger(raw) && raw > 0) return raw;
+  if (typeof raw === 'string') {
+    const parsed = Number(raw);
+    if (Number.isInteger(parsed) && parsed > 0) return parsed;
+  }
+  return null;
+}
+
+function formatTrialDaysLeft(value?: string | Date | null) {
+  if (!value) return null;
+  const end = typeof value === 'string' ? new Date(value) : value;
+  const diffMs = end.getTime() - Date.now();
+  const days = Math.max(0, Math.ceil(diffMs / (24 * 60 * 60 * 1000)));
+  return `${days} day${days === 1 ? '' : 's'} left`;
+}
+
 export default function BillingPage() {
   const utils = trpc.useUtils();
   const [provider, setProvider] = useState<(typeof checkoutProviders)[number]>('STRIPE');
@@ -55,6 +74,11 @@ export default function BillingPage() {
               <p className="text-muted">
                 {current.status} · {current.provider}
               </p>
+              {current.status === 'TRIALING' ? (
+                <p className="text-muted">
+                  Trial: {formatTrialDaysLeft(current.trialEndsAt) ?? 'active'}
+                </p>
+              ) : null}
               <p className="text-muted">
                 Current period end:{' '}
                 {current.currentPeriodEnd ? new Date(current.currentPeriodEnd).toLocaleDateString() : 'N/A'}
@@ -101,6 +125,7 @@ export default function BillingPage() {
             <p className="mt-3 text-sm text-muted">
               {selectedPlan.description || 'No description'} ·{' '}
               {formatPlanPrice(selectedPlan.amountMinor, selectedPlan.currency, selectedPlan.interval)}
+              {getTrialDays(selectedPlan.metadata) ? ` · ${getTrialDays(selectedPlan.metadata)}-day free trial` : ''}
             </p>
           ) : null}
           <div className="mt-4">

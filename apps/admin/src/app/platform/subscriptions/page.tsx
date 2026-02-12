@@ -42,6 +42,17 @@ function formatCurrencyMinor(amountMinor: number, currency: string) {
   return `${currency} ${(amountMinor / 100).toFixed(2)}`;
 }
 
+function getTrialDays(metadata: unknown) {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
+  const raw = (metadata as Record<string, unknown>).trialDays;
+  if (typeof raw === 'number' && Number.isInteger(raw) && raw >= 0) return raw;
+  if (typeof raw === 'string') {
+    const parsed = Number(raw);
+    if (Number.isInteger(parsed) && parsed >= 0) return parsed;
+  }
+  return null;
+}
+
 export default function PlatformSubscriptionsPage() {
   const utils = trpc.useUtils();
   const { data: platformSelf } = trpc.platform.self.useQuery();
@@ -60,13 +71,14 @@ export default function PlatformSubscriptionsPage() {
   const [currency, setCurrency] = useState('USD');
   const [interval, setInterval] = useState<(typeof intervalOptions)[number]>('MONTHLY');
   const [amountMinor, setAmountMinor] = useState('4900');
+  const [trialDays, setTrialDays] = useState('14');
   const [isDefault, setIsDefault] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [featuresRaw, setFeaturesRaw] = useState('max_members,true,500\nmax_campuses,true,1\nai_insights,false,');
 
   const [tenantId, setTenantId] = useState('');
   const [planCode, setPlanCode] = useState('');
-  const [status, setStatus] = useState<(typeof subscriptionStatusOptions)[number]>('ACTIVE');
+  const [status, setStatus] = useState<(typeof subscriptionStatusOptions)[number]>('TRIALING');
   const [provider, setProvider] = useState<(typeof providerOptions)[number]>('MANUAL');
   const [seatCount, setSeatCount] = useState('');
   const [reason, setReason] = useState('');
@@ -96,6 +108,7 @@ export default function PlatformSubscriptionsPage() {
       setCurrency('USD');
       setInterval('MONTHLY');
       setAmountMinor('4900');
+      setTrialDays('14');
       setIsDefault(false);
       setIsActive(true);
       setFeaturesRaw('max_members,true,500\nmax_campuses,true,1\nai_insights,false,');
@@ -174,6 +187,12 @@ export default function PlatformSubscriptionsPage() {
               value={amountMinor}
               onChange={(event) => setAmountMinor(event.target.value)}
             />
+            <Input
+              placeholder="Trial days (0 = none)"
+              type="number"
+              value={trialDays}
+              onChange={(event) => setTrialDays(event.target.value)}
+            />
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
             <label className="flex items-center gap-2">
@@ -200,6 +219,9 @@ export default function PlatformSubscriptionsPage() {
                   currency: currency.trim() || 'USD',
                   interval,
                   amountMinor: Number(amountMinor || 0),
+                  metadata: {
+                    trialDays: Number.isFinite(Number(trialDays)) ? Math.max(0, Number(trialDays)) : 0,
+                  },
                   isDefault,
                   isActive,
                   features: parseFeaturesInput(featuresRaw),
@@ -379,6 +401,9 @@ export default function PlatformSubscriptionsPage() {
                     </p>
                     <p className="text-xs text-muted">
                       {formatCurrencyMinor(plan.amountMinor, plan.currency)} / {plan.interval}
+                    </p>
+                    <p className="text-xs text-muted">
+                      Trial: {getTrialDays(plan.metadata) ?? 0} day{(getTrialDays(plan.metadata) ?? 0) === 1 ? '' : 's'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

@@ -20,6 +20,17 @@ function formatPlan(amountMinor: number, currency: string, interval: string) {
   return `${currency} ${(amountMinor / 100).toFixed(2)} / ${interval.toLowerCase()}`;
 }
 
+function getTrialDays(metadata: unknown) {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
+  const raw = (metadata as Record<string, unknown>).trialDays;
+  if (typeof raw === 'number' && Number.isInteger(raw) && raw > 0) return raw;
+  if (typeof raw === 'string') {
+    const parsed = Number(raw);
+    if (Number.isInteger(parsed) && parsed > 0) return parsed;
+  }
+  return null;
+}
+
 export default function GetStartedPage() {
   const utils = trpc.useUtils();
   const { orgId } = useAuth();
@@ -156,6 +167,7 @@ export default function GetStartedPage() {
               <p className="mt-3 text-sm text-muted">
                 {selectedPlan.description || 'No description'} ·{' '}
                 {formatPlan(selectedPlan.amountMinor, selectedPlan.currency, selectedPlan.interval)}
+                {getTrialDays(selectedPlan.metadata) ? ` · ${getTrialDays(selectedPlan.metadata)}-day free trial` : ''}
               </p>
             ) : null}
             <div className="mt-4 flex flex-wrap items-center gap-2">

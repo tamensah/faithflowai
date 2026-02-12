@@ -29,6 +29,21 @@ const checkoutInput = z.object({
   cancelUrl: z.string().url().optional(),
 });
 
+function readPlanMetaString(meta: Record<string, unknown>, key: string) {
+  const value = meta[key];
+  return typeof value === 'string' && value.trim() ? value.trim() : null;
+}
+
+function readPlanMetaInt(meta: Record<string, unknown>, key: string) {
+  const value = meta[key];
+  if (typeof value === 'number' && Number.isInteger(value) && value > 0) return value;
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    if (Number.isInteger(parsed) && parsed > 0) return parsed;
+  }
+  return null;
+}
+
 function metadataValue(meta: Prisma.JsonValue | null | undefined, key: string) {
   if (!meta || typeof meta !== 'object' || Array.isArray(meta)) return null;
   const value = (meta as Record<string, unknown>)[key];
@@ -179,6 +194,7 @@ export const billingRouter = router({
     const successUrl = input.successUrl ?? `${process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001'}/billing`;
     const cancelUrl = input.cancelUrl ?? successUrl;
     const planMeta = (plan.metadata ?? {}) as Record<string, unknown>;
+    const trialDays = readPlanMetaInt(planMeta, 'trialDays');
 
     if (input.provider === PaymentProvider.STRIPE) {
       if (!process.env.STRIPE_SECRET_KEY) {
@@ -212,16 +228,19 @@ export const billingRouter = router({
         customer_email: email ?? undefined,
         line_items: [lineItem],
         subscription_data: {
+          ...(trialDays ? { trial_period_days: trialDays } : {}),
           metadata: {
             tenantId: ctx.tenantId!,
             clerkOrgId: ctx.clerkOrgId ?? '',
             planCode: plan.code,
+            ...(trialDays ? { trialDays: String(trialDays) } : {}),
           },
         },
         metadata: {
           tenantId: ctx.tenantId!,
           clerkOrgId: ctx.clerkOrgId ?? '',
           planCode: plan.code,
+          ...(trialDays ? { trialDays: String(trialDays) } : {}),
         },
       });
 
@@ -252,11 +271,15 @@ export const billingRouter = router({
     if (!email) {
       throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Primary email is required for Paystack checkout' });
     }
-    const paystackPlanCode = typeof planMeta.paystackPlanCode === 'string' ? planMeta.paystackPlanCode : null;
+    const paystackPlanCode =
+      (trialDays ? readPlanMetaString(planMeta, 'paystackTrialPlanCode') : null) ??
+      readPlanMetaString(planMeta, 'paystackPlanCode');
     if (!paystackPlanCode) {
       throw new TRPCError({
         code: 'PRECONDITION_FAILED',
-        message: 'Plan is missing paystackPlanCode metadata',
+        message: trialDays
+          ? 'Plan is missing paystackPlanCode/paystackTrialPlanCode metadata'
+          : 'Plan is missing paystackPlanCode metadata',
       });
     }
 
@@ -276,6 +299,7 @@ export const billingRouter = router({
           tenantId: ctx.tenantId,
           clerkOrgId: ctx.clerkOrgId,
           planCode: plan.code,
+          ...(trialDays ? { trialDays, paystackTrial: true } : {}),
         },
       }),
     });

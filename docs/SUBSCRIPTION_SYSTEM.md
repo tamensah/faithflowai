@@ -16,6 +16,7 @@ Primary models in Prisma:
   - Unique `code` (for example `starter`, `growth`, `enterprise`)
   - Commercial fields: `currency`, `interval`, `amountMinor`, `isActive`, `isDefault`
   - Product metadata: `description`, `metadata`
+  - Trial metadata: `trialDays` (Starter/Growth default 14, Enterprise default 0)
 - `SubscriptionPlanFeature`
   - Per-plan feature key/value gates (`key`, `enabled`, `limit`)
   - Example keys: `max_members`, `max_campuses`, `ai_insights`
@@ -130,6 +131,13 @@ Required env placeholders:
 - `PLATFORM_STRIPE_WEBHOOK_SECRET`
 - `PLATFORM_PAYSTACK_WEBHOOK_SECRET`
 
+Checkout trial handling:
+
+- Stripe checkout sets `trial_period_days` from `plan.metadata.trialDays` when present.
+- Paystack checkout supports trial plan mapping via metadata:
+  - `paystackPlanCode` (standard recurring plan)
+  - `paystackTrialPlanCode` (optional trial-specific plan code used when `trialDays > 0`)
+
 ## Usage Metering + Automation
 
 Implemented service:
@@ -169,6 +177,12 @@ Seed creates plans and starter assignment for demo tenant:
 - `starter` (default)
 - `growth`
 - `enterprise`
+
+Trial defaults:
+
+- Starter: 14 days
+- Growth: 14 days
+- Enterprise: 0 days (sales-assisted / custom onboarding)
 
 Default feature keys seeded:
 
