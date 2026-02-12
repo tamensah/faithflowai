@@ -61,6 +61,7 @@ export default function BillingPage() {
     const ent = entitlementsStatus?.entitlements?.entitlements ?? {};
     const keys = ['membership_enabled', 'events_enabled', 'finance_enabled', 'communications_enabled', 'support_center_enabled'];
     return keys
+      .filter((key) => Boolean(ent[key]))
       .map((key) => ({ key, enabled: Boolean(ent[key]?.enabled) }))
       .filter((entry) => entry.enabled === false);
   }, [entitlementsStatus?.entitlements?.entitlements]);
