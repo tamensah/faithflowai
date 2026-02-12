@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { OrganizationSwitcher, UserButton } from '@clerk/nextjs';
 import { BillingStatusBanner } from './BillingStatusBanner';
+import { trpc } from '../lib/trpc';
 
 const nav = [
   { href: '/', label: 'Overview' },
@@ -27,7 +28,24 @@ const nav = [
   { href: '/live', label: 'Live' },
 ];
 
+const navEntitlementMap: Record<string, string> = {
+  '/members': 'membership_enabled',
+  '/events': 'events_enabled',
+  '/giving': 'finance_enabled',
+  '/finance': 'finance_enabled',
+  '/facilities': 'facility_management_enabled',
+  '/streaming': 'streaming_enabled',
+  '/support': 'support_center_enabled',
+  '/care': 'pastoral_care_enabled',
+  '/content': 'content_library_enabled',
+};
+
 export function Shell({ children }: { children: React.ReactNode }) {
+  const { data: entitlementsStatus } = trpc.billing.entitlements.useQuery(undefined, {
+    retry: false,
+  });
+  const entitlements = entitlementsStatus?.entitlements?.entitlements ?? null;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-white">
@@ -36,11 +54,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span className="text-lg font-semibold">FaithFlow AI</span>
             <OrganizationSwitcher hidePersonal afterSelectOrganizationUrl="/" afterCreateOrganizationUrl="/" />
             <nav className="flex gap-4 text-sm text-muted">
-              {nav.map((item) => (
-                <Link key={item.href} href={item.href} className="hover:text-foreground">
-                  {item.label}
-                </Link>
-              ))}
+              {nav.map((item) => {
+                const required = navEntitlementMap[item.href];
+                const isLocked = Boolean(required && entitlements?.[required] && !entitlements[required]?.enabled);
+                const href = isLocked ? `/billing?upgrade=1&feature=${encodeURIComponent(required)}` : item.href;
+                const className = isLocked ? 'opacity-60 hover:text-foreground' : 'hover:text-foreground';
+                const label = isLocked ? `${item.label} (Locked)` : item.label;
+                return (
+                  <Link key={item.href} href={href} className={className} aria-disabled={isLocked}>
+                    {label}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
           <UserButton />
