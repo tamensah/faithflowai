@@ -44,6 +44,72 @@ function readScheduleMemberId(metadata: unknown) {
   return typeof raw === 'string' && raw ? raw : null;
 }
 
+function readEnvInt(name: string, fallback: number) {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function quietHoursEnabled() {
+  // Default to enabled for SMS/WhatsApp; can be disabled explicitly via env.
+  return process.env.COMMS_QUIET_HOURS_ENABLED === 'false' ? false : true;
+}
+
+function getLocalHour(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-US', { hour: '2-digit', hour12: false, timeZone }).formatToParts(date);
+  const hour = parts.find((part) => part.type === 'hour')?.value;
+  const value = hour ? Number(hour) : NaN;
+  return Number.isFinite(value) ? value : null;
+}
+
+function isQuietHour(hour: number, startHour: number, endHour: number) {
+  // If start=21, end=7 -> quiet hours wrap overnight.
+  if (startHour === endHour) return false;
+  if (startHour < endHour) {
+    return hour >= startHour && hour < endHour;
+  }
+  return hour >= startHour || hour < endHour;
+}
+
+async function rescheduleIfQuietHours({
+  scheduleId,
+  channel,
+  churchTimeZone,
+}: {
+  scheduleId: string;
+  channel: CommunicationChannel;
+  churchTimeZone: string;
+}) {
+  if (channel === CommunicationChannel.EMAIL) return false;
+  if (!quietHoursEnabled()) return false;
+
+  const quietStart = readEnvInt('COMMS_QUIET_START_HOUR', 21);
+  const quietEnd = readEnvInt('COMMS_QUIET_END_HOUR', 7);
+  const incrementMinutes = readEnvInt('COMMS_QUIET_RESCHEDULE_INCREMENT_MINUTES', 30);
+
+  const now = new Date();
+  const localHour = getLocalHour(now, churchTimeZone);
+  if (localHour === null) return false;
+  if (!isQuietHour(localHour, quietStart, quietEnd)) return false;
+
+  // Find the next non-quiet window by stepping forward in small increments.
+  let candidate = now;
+  for (let steps = 0; steps < 48; steps += 1) {
+    const hour = getLocalHour(candidate, churchTimeZone);
+    if (hour !== null && !isQuietHour(hour, quietStart, quietEnd)) {
+      await prisma.communicationSchedule.update({
+        where: { id: scheduleId },
+        data: { sendAt: candidate },
+      });
+      return true;
+    }
+    candidate = new Date(candidate.getTime() + incrementMinutes * 60 * 1000);
+  }
+
+  return false;
+}
+
 async function sendTwilioMessage({
   to,
   body,
@@ -115,6 +181,15 @@ export async function dispatchScheduledCommunications(limit = 50) {
     take: limit,
   });
 
+  const churchIds = Array.from(new Set(due.map((schedule) => schedule.churchId)));
+  const churches = churchIds.length
+    ? await prisma.church.findMany({
+        where: { id: { in: churchIds } },
+        select: { id: true, timezone: true },
+      })
+    : [];
+  const timezoneByChurchId = new Map(churches.map((church) => [church.id, church.timezone || 'UTC']));
+
   const memberPrefRequests = due
     .map((schedule) => {
       const memberId = readScheduleMemberId(schedule.metadata);
@@ -140,6 +215,14 @@ export async function dispatchScheduledCommunications(limit = 50) {
   let failed = 0;
 
   for (const schedule of due) {
+    const tz = timezoneByChurchId.get(schedule.churchId) ?? 'UTC';
+    const rescheduled = await rescheduleIfQuietHours({
+      scheduleId: schedule.id,
+      channel: schedule.channel,
+      churchTimeZone: tz,
+    });
+    if (rescheduled) continue;
+
     const memberId = readScheduleMemberId(schedule.metadata);
     if (memberId) {
       const key = `${memberId}:${channelToPreference(schedule.channel)}`;

@@ -63,6 +63,15 @@ This doc lists the required provider‑side configuration to run the alpha. Once
   - `TWILIO_WHATSAPP_NUMBER` (for WhatsApp outbound)
   - `TWILIO_WEBHOOK_URL` (if you need strict signature validation behind a proxy)
 
+Optional communications policy env:
+
+- `COMMS_QUIET_HOURS_ENABLED` (defaults to `true`)
+- `COMMS_QUIET_START_HOUR` (defaults to `21`)
+- `COMMS_QUIET_END_HOUR` (defaults to `7`)
+- `COMMS_QUIET_RESCHEDULE_INCREMENT_MINUTES` (defaults to `30`)
+
+When enabled, queued SMS/WhatsApp messages are automatically deferred out of quiet hours using the church timezone.
+
 ## 5. Resend (Email Delivery)
 
 **Goal**: enable receipts, outbound email communications, and marketing contact form delivery.
