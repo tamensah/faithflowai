@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { OrganizationSwitcher, useUser } from '@clerk/nextjs';
 import { Card, Button } from '@faithflow-ai/ui';
 import { trpc } from '../lib/trpc';
 
@@ -9,7 +9,7 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
   const utils = trpc.useUtils();
   const { user } = useUser();
   const { data: platformSelf, isLoading: isPlatformLoading } = trpc.platform.self.useQuery();
-  const { data, isLoading } = trpc.auth.self.useQuery();
+  const { data, isLoading, error: authError } = trpc.auth.self.useQuery();
   const [inviteAttempted, setInviteAttempted] = useState(false);
   const { mutate: bootstrap, isPending: isBootstrapping } = trpc.auth.bootstrap.useMutation({
     onSuccess: async () => {
@@ -67,13 +67,25 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  const missingTenantContext =
+    authError?.data?.code === 'BAD_REQUEST' &&
+    (authError.message ?? '').toLowerCase().includes('tenant');
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
       <Card className="max-w-lg p-6">
         <h1 className="text-xl font-semibold">Access restricted</h1>
-        <p className="mt-2 text-sm text-muted">
-          This console is limited to staff and admins. Ask an admin to grant you access.
-        </p>
+        {missingTenantContext ? (
+          <div className="mt-2 space-y-3 text-sm text-muted">
+            <p>This account has no active church organization in the current session.</p>
+            <p>Select your church organization, then refresh this page.</p>
+            <OrganizationSwitcher hidePersonal afterSelectOrganizationUrl="/" afterCreateOrganizationUrl="/" />
+          </div>
+        ) : (
+          <p className="mt-2 text-sm text-muted">
+            This console is limited to staff and admins. Ask an admin to grant you access.
+          </p>
+        )}
         {data?.bootstrapAllowed ? (
           <div className="mt-4">
             <Button onClick={() => bootstrap()} disabled={isBootstrapping}>

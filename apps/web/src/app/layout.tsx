@@ -1,7 +1,15 @@
 import type { Metadata } from 'next';
 import { Sora, Source_Sans_3 } from 'next/font/google';
 import '../styles/globals.css';
-import { ClerkProvider } from '@clerk/nextjs';
+import {
+  ClerkProvider,
+  OrganizationSwitcher,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs';
 import { Providers } from './providers';
 
 const sora = Sora({ subsets: ['latin'], variable: '--font-sora' });
@@ -17,7 +25,34 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${sora.variable} ${sourceSans.variable}`}>
       <body className="font-sans">
         <ClerkProvider>
-          <Providers>{children}</Providers>
+          <Providers>
+            <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
+              <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
+                <p className="text-sm font-semibold">FaithFlow AI</p>
+                <div className="flex items-center gap-2">
+                  <SignedOut>
+                    <SignInButton mode="modal">
+                      <button className="rounded-md border border-border px-3 py-1.5 text-sm">Sign in</button>
+                    </SignInButton>
+                    <SignUpButton mode="modal">
+                      <button className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground">
+                        Sign up
+                      </button>
+                    </SignUpButton>
+                  </SignedOut>
+                  <SignedIn>
+                    <OrganizationSwitcher
+                      hidePersonal
+                      afterSelectOrganizationUrl="/portal"
+                      afterCreateOrganizationUrl="/portal"
+                    />
+                    <UserButton />
+                  </SignedIn>
+                </div>
+              </div>
+            </header>
+            {children}
+          </Providers>
         </ClerkProvider>
       </body>
     </html>

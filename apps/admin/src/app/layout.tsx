@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Sora, Source_Sans_3 } from 'next/font/google';
 import '../styles/globals.css';
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkProvider, OrganizationSwitcher, SignedIn, UserButton } from '@clerk/nextjs';
 import { Providers } from './providers';
 import { AdminGate } from '../components/AdminGate';
 
@@ -19,6 +19,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans">
         <ClerkProvider>
           <Providers>
+            <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
+              <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
+                <p className="text-sm font-semibold">FaithFlow AI Admin</p>
+                <SignedIn>
+                  <div className="flex items-center gap-2">
+                    <OrganizationSwitcher
+                      hidePersonal
+                      afterSelectOrganizationUrl="/"
+                      afterCreateOrganizationUrl="/"
+                    />
+                    <UserButton />
+                  </div>
+                </SignedIn>
+              </div>
+            </header>
             <AdminGate>{children}</AdminGate>
           </Providers>
         </ClerkProvider>

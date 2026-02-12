@@ -53,6 +53,10 @@ export default function MemberPortalPage() {
   );
   const churchId = selfProfile?.member?.churchId;
   const showAccessRequest = selfError?.data?.code === 'NOT_FOUND';
+  const missingTenantContext =
+    selfError?.data?.code === 'BAD_REQUEST' &&
+    (selfError.message ?? '').toLowerCase().includes('tenant');
+  const canEditProfile = Boolean(selfProfile?.member);
 
   const { data: accessRequest } = trpc.member.myAccessRequest.useQuery(undefined, {
     enabled: Boolean(showAccessRequest),
@@ -423,6 +427,20 @@ export default function MemberPortalPage() {
     );
   }
 
+  if (missingTenantContext) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center p-8">
+        <Card className="w-full max-w-xl p-6">
+          <h1 className="text-xl font-semibold">Select your church organization</h1>
+          <p className="mt-2 text-sm text-muted">
+            Your session is signed in, but no active organization is selected. Use the organization switcher in the
+            top bar, then reopen the portal.
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
   if (selfError?.data?.code === 'NOT_FOUND') {
     return (
       <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center p-8">
@@ -441,33 +459,45 @@ export default function MemberPortalPage() {
             </div>
           ) : null}
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Input
-              placeholder="Full name"
-              value={requestName}
-              onChange={(e) => setRequestName(e.target.value)}
-            />
-            <Input
-              placeholder="Email"
-              value={requestEmail}
-              onChange={(e) => setRequestEmail(e.target.value)}
-            />
-            <select
-              className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
-              value={requestChurchId}
-              onChange={(e) => setRequestChurchId(e.target.value)}
-            >
-              <option value="">Select church</option>
-              {churches?.map((church) => (
-                <option key={church.id} value={church.id}>
-                  {church.name}
-                </option>
-              ))}
-            </select>
-            <Input
-              placeholder="Message (optional)"
-              value={requestMessage}
-              onChange={(e) => setRequestMessage(e.target.value)}
-            />
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Full name *</label>
+              <Input
+                placeholder="Full name"
+                value={requestName}
+                onChange={(e) => setRequestName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Email *</label>
+              <Input
+                placeholder="Email"
+                value={requestEmail}
+                onChange={(e) => setRequestEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Church *</label>
+              <select
+                className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+                value={requestChurchId}
+                onChange={(e) => setRequestChurchId(e.target.value)}
+              >
+                <option value="">Select church</option>
+                {churches?.map((church) => (
+                  <option key={church.id} value={church.id}>
+                    {church.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Message (optional)</label>
+              <Input
+                placeholder="Message (optional)"
+                value={requestMessage}
+                onChange={(e) => setRequestMessage(e.target.value)}
+              />
+            </div>
           </div>
           <div className="mt-4">
             <Button
@@ -509,7 +539,7 @@ export default function MemberPortalPage() {
           <p className="mt-2 text-sm text-muted">Profile, privacy, volunteering, and surveys.</p>
         </div>
 
-        {selfError ? (
+        {selfError && !missingTenantContext ? (
           <Card className="p-6">
             <p className="text-sm text-muted">
               Your account is not linked to a member profile yet. Ask an admin to link your Clerk user to your member
@@ -544,10 +574,15 @@ export default function MemberPortalPage() {
                   country: country || undefined,
                 })
               }
-              disabled={!selfProfile?.member}
+              disabled={!canEditProfile}
             >
               Save profile
             </Button>
+            {!canEditProfile ? (
+              <p className="mt-2 text-xs text-muted">
+                Profile editing unlocks after your Clerk account is linked to a member record.
+              </p>
+            ) : null}
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             <div className="rounded-md border border-border p-3 text-sm text-muted">
@@ -622,7 +657,7 @@ export default function MemberPortalPage() {
                   showPhotoInDirectory: showPhoto,
                 })
               }
-              disabled={!selfProfile?.member}
+              disabled={!canEditProfile}
             >
               Update privacy
             </Button>
