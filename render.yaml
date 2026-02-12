@@ -73,7 +73,13 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
-      - key: GOOGLE_API_KEY
+      - key: GOOGLE_GENERATIVE_AI_API_KEY
+        sync: false
+      - key: AI_OPENAI_MODEL
+        sync: false
+      - key: AI_ANTHROPIC_MODEL
+        sync: false
+      - key: AI_GOOGLE_MODEL
         sync: false
       - key: STORAGE_PROVIDER
         sync: false
