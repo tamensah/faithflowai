@@ -82,14 +82,15 @@ Deliverables:
 ## 4) Data Import (Adoption Unlock)
 
 - [ ] CSV imports with mapping UI:
-  - [ ] Members
+  - [~] Members
   - [ ] Households
   - [ ] Donations
 - [ ] Validation + preview:
-  - [ ] Field mapping + required checks
-  - [ ] Duplicate detection
-  - [ ] Dry-run mode with summary
+  - [x] Field mapping + required checks (header aliases)
+  - [x] Duplicate detection (email/phone)
+  - [x] Dry-run mode with summary
 - [ ] Rollback strategy (batch id + revert)
+- [x] Rollback strategy (batch id + delete created members)
 - [ ] Migration assistant docs + templates:
   - [ ] Example CSV templates
   - [ ] Common ChMS export guidance
