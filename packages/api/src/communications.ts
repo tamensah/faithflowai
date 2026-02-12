@@ -3,6 +3,7 @@ import {
   CommunicationProvider,
   CommunicationScheduleStatus,
   CommunicationStatus,
+  NotificationChannel,
   prisma,
 } from '@faithflow-ai/database';
 import { sendEmail } from './email';
@@ -29,6 +30,18 @@ function getTwilioConfig() {
 
 function asWhatsappNumber(value: string) {
   return value.startsWith('whatsapp:') ? value : `whatsapp:${value}`;
+}
+
+function channelToPreference(channel: CommunicationChannel) {
+  if (channel === CommunicationChannel.EMAIL) return NotificationChannel.EMAIL;
+  if (channel === CommunicationChannel.SMS) return NotificationChannel.SMS;
+  return NotificationChannel.WHATSAPP;
+}
+
+function readScheduleMemberId(metadata: unknown) {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
+  const raw = (metadata as Record<string, unknown>).memberId;
+  return typeof raw === 'string' && raw ? raw : null;
 }
 
 async function sendTwilioMessage({
@@ -102,10 +115,47 @@ export async function dispatchScheduledCommunications(limit = 50) {
     take: limit,
   });
 
+  const memberPrefRequests = due
+    .map((schedule) => {
+      const memberId = readScheduleMemberId(schedule.metadata);
+      if (!memberId) return null;
+      return { memberId, channel: channelToPreference(schedule.channel) };
+    })
+    .filter(Boolean) as Array<{ memberId: string; channel: NotificationChannel }>;
+
+  const uniqueMemberIds = Array.from(new Set(memberPrefRequests.map((entry) => entry.memberId)));
+  const uniqueChannels = Array.from(new Set(memberPrefRequests.map((entry) => entry.channel)));
+  const preferences =
+    uniqueMemberIds.length && uniqueChannels.length
+      ? await prisma.notificationPreference.findMany({
+          where: {
+            memberId: { in: uniqueMemberIds },
+            channel: { in: uniqueChannels },
+          },
+        })
+      : [];
+  const preferenceMap = new Map(preferences.map((pref) => [`${pref.memberId}:${pref.channel}`, pref.enabled]));
+
   let sent = 0;
   let failed = 0;
 
   for (const schedule of due) {
+    const memberId = readScheduleMemberId(schedule.metadata);
+    if (memberId) {
+      const key = `${memberId}:${channelToPreference(schedule.channel)}`;
+      const enabled = preferenceMap.get(key);
+      if (enabled === false) {
+        await prisma.communicationSchedule.update({
+          where: { id: schedule.id },
+          data: {
+            status: CommunicationScheduleStatus.CANCELED,
+            error: 'Recipient opted out for this channel',
+          },
+        });
+        continue;
+      }
+    }
+
     const message = await prisma.communicationMessage.create({
       data: {
         churchId: schedule.churchId,

@@ -77,6 +77,7 @@ const enrollDripSchema = z.object({
 });
 
 type RecipientContext = {
+  memberId?: string;
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -123,6 +124,7 @@ async function resolveAudienceRecipients({
       const to =
         channel === CommunicationChannel.EMAIL ? member.email ?? '' : member.phone ?? '';
       addRecipient(to, {
+        memberId: member.id,
         firstName: member.firstName,
         lastName: member.lastName,
         email: member.email ?? undefined,
@@ -150,6 +152,7 @@ async function resolveAudienceRecipients({
           ? donation.donorEmail ?? donation.member?.email ?? ''
           : donation.donorPhone ?? donation.member?.phone ?? '';
       addRecipient(to, {
+        memberId: donation.member?.id,
         firstName: donation.member?.firstName,
         lastName: donation.member?.lastName,
         email: donation.donorEmail ?? donation.member?.email ?? undefined,
@@ -323,7 +326,7 @@ export const communicationsRouter = router({
         body: resolvedBody,
         sendAt: input.sendAt,
         status: CommunicationScheduleStatus.QUEUED,
-        metadata: { audience: input.audience ?? null },
+        metadata: { audience: input.audience ?? null, memberId: context.memberId ?? null },
       });
     }
 
@@ -562,6 +565,7 @@ export const communicationsRouter = router({
               dripCampaignId: input.campaignId,
               stepOrder: step.stepOrder,
               audience: input.audience ?? null,
+              memberId: context.memberId ?? null,
             },
           },
         });
