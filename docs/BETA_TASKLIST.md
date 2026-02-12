@@ -66,8 +66,8 @@ Deliverables:
   - [ ] Receipt resend / tithing statement notice
   - [ ] Failed payment / past-due notices
 - [ ] Messaging consent + compliance:
-  - [ ] Opt-in capture per channel (email/sms/whatsapp/push)
-  - [ ] Quiet hours per church + per member override
+  - [x] Opt-in capture per channel (email/sms/whatsapp/push)
+  - [~] Quiet hours per church + per member override
   - [ ] Suppression list and unsubscribe flows
 - [ ] Campaign scheduling UX:
   - [ ] Calendar view
