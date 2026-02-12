@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Card, Input } from '@faithflow-ai/ui';
+import Link from 'next/link';
+import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
 
@@ -38,9 +39,14 @@ export default function OperationsPage() {
   return (
     <Shell>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-semibold">Headquarters Operations</h1>
-          <p className="mt-2 text-sm text-muted">Cross-campus rollups with drill-down performance signals.</p>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-semibold">Headquarters Operations</h1>
+            <p className="mt-2 text-sm text-muted">Cross-campus rollups with drill-down performance signals.</p>
+          </div>
+          <Link href="/operations/health">
+            <Button variant="outline">Operational health</Button>
+          </Link>
         </div>
 
         <Card className="p-6">

@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { Prisma, prisma, CareRequestStatus, SermonStatus } from '@faithflow-ai/database';
+import { Prisma, prisma, CareRequestStatus, SermonStatus, TenantSubscriptionStatus } from '@faithflow-ai/database';
 import { router, protectedProcedure } from '../trpc';
 import { ensureFeatureEnabled } from '../entitlements';
+import { TRPCError } from '@trpc/server';
 
 const rangeInput = z
   .object({
@@ -20,6 +21,126 @@ const activeCareStatuses: CareRequestStatus[] = [
 ];
 
 export const operationsRouter = router({
+  health: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.userId || !ctx.tenantId) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'Tenant context required' });
+    }
+
+    const staff = await prisma.staffMembership.findFirst({
+      where: {
+        user: { clerkUserId: ctx.userId },
+        church: { organization: { tenantId: ctx.tenantId } },
+      },
+      include: { user: true, church: true },
+    });
+    if (!staff) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
+    }
+
+    const dbStart = Date.now();
+    let dbOk = true;
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+    } catch {
+      dbOk = false;
+    }
+    const dbLatencyMs = Date.now() - dbStart;
+
+    const providers = {
+      clerk: Boolean(process.env.CLERK_SECRET_KEY && process.env.CLERK_JWT_ISSUER),
+      resend: Boolean(process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL),
+      stripe: Boolean(process.env.STRIPE_SECRET_KEY),
+      paystack: Boolean(process.env.PAYSTACK_SECRET_KEY),
+      twilio: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN),
+      storage: Boolean(process.env.STORAGE_PROVIDER),
+      scheduler: Boolean(process.env.ENABLE_INTERNAL_SCHEDULER) ? 'internal' : 'external',
+    } as const;
+
+    const latestWebhookEvents = await prisma.webhookEvent.findMany({
+      where: { tenantId: ctx.tenantId },
+      orderBy: { receivedAt: 'desc' },
+      take: 25,
+      select: {
+        provider: true,
+        eventType: true,
+        status: true,
+        receivedAt: true,
+        processedAt: true,
+        error: true,
+      },
+    });
+
+    const latestByProvider = Object.fromEntries(
+      latestWebhookEvents.reduce((acc, event) => {
+        if (!acc.some((entry) => entry.provider === event.provider)) acc.push(event);
+        return acc;
+      }, [] as typeof latestWebhookEvents)
+        .map((event) => [event.provider, event])
+    ) as Record<string, (typeof latestWebhookEvents)[number]>;
+
+    const currentSubscription = await prisma.tenantSubscription.findFirst({
+      where: {
+        tenantId: ctx.tenantId,
+        status: {
+          in: [
+            TenantSubscriptionStatus.TRIALING,
+            TenantSubscriptionStatus.ACTIVE,
+            TenantSubscriptionStatus.PAST_DUE,
+            TenantSubscriptionStatus.PAUSED,
+          ],
+        },
+      },
+      include: { plan: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const lastAudit = await prisma.auditLog.findMany({
+      where: {
+        tenantId: ctx.tenantId,
+        action: { in: ['subscription.trial_reminder_queued', 'billing.dunning_queued', 'subscription.tenant_auto_suspended'] },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      select: { action: true, createdAt: true, targetType: true, targetId: true },
+    });
+
+    const lastByAction = Object.fromEntries(
+      lastAudit.reduce((acc, row) => {
+        if (!acc.some((entry) => entry.action === row.action)) acc.push(row);
+        return acc;
+      }, [] as typeof lastAudit)
+        .map((row) => [row.action, row])
+    ) as Record<string, (typeof lastAudit)[number]>;
+
+    return {
+      tenantId: ctx.tenantId,
+      db: {
+        ok: dbOk,
+        latencyMs: dbLatencyMs,
+      },
+      providers,
+      webhooks: {
+        latestByProvider,
+      },
+      subscription: currentSubscription
+        ? {
+            id: currentSubscription.id,
+            status: currentSubscription.status,
+            provider: currentSubscription.provider,
+            planCode: currentSubscription.plan.code,
+            planName: currentSubscription.plan.name,
+            currentPeriodEnd: currentSubscription.currentPeriodEnd,
+            trialEndsAt: currentSubscription.trialEndsAt,
+          }
+        : null,
+      jobs: {
+        trialReminderLast: lastByAction['subscription.trial_reminder_queued'] ?? null,
+        dunningLast: lastByAction['billing.dunning_queued'] ?? null,
+        autoSuspensionLast: lastByAction['subscription.tenant_auto_suspended'] ?? null,
+      },
+    };
+  }),
+
   headquartersSummary: protectedProcedure.input(rangeInput).query(async ({ input, ctx }) => {
     await ensureFeatureEnabled(
       ctx.tenantId!,
