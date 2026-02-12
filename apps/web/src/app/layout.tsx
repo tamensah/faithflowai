@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Sora, Source_Sans_3 } from 'next/font/google';
 import '../styles/globals.css';
 import {
@@ -11,6 +12,7 @@ import {
   UserButton,
 } from '@clerk/nextjs';
 import { Providers } from './providers';
+import { SiteNav } from '../components/site-nav';
 
 const sora = Sora({ subsets: ['latin'], variable: '--font-sora' });
 const sourceSans = Source_Sans_3({ subsets: ['latin'], variable: '--font-source-sans' });
@@ -27,8 +29,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ClerkProvider>
           <Providers>
             <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur">
-              <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
-                <p className="text-sm font-semibold">FaithFlow AI</p>
+              <div className="mx-auto flex min-h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 py-2">
+                <Link className="text-sm font-semibold" href="/">
+                  FaithFlow AI
+                </Link>
+                <SiteNav />
                 <div className="flex items-center gap-2">
                   <SignedOut>
                     <SignInButton mode="modal">
