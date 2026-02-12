@@ -7,6 +7,7 @@ import { trpc } from '../lib/trpc';
 
 const nav = [
   { href: '/', label: 'Overview' },
+  { href: '/ai', label: 'AI' },
   { href: '/members', label: 'Members' },
   { href: '/events', label: 'Events' },
   { href: '/giving', label: 'Giving' },
@@ -29,6 +30,7 @@ const nav = [
 ];
 
 const navEntitlementMap: Record<string, string> = {
+  '/ai': 'ai_insights',
   '/members': 'membership_enabled',
   '/events': 'events_enabled',
   '/giving': 'finance_enabled',

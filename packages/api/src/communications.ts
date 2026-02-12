@@ -32,6 +32,13 @@ function asWhatsappNumber(value: string) {
   return value.startsWith('whatsapp:') ? value : `whatsapp:${value}`;
 }
 
+function normalizeRecipientAddress(channel: CommunicationChannel, to: string) {
+  const value = to.trim();
+  if (!value) return '';
+  if (channel === CommunicationChannel.EMAIL) return value.toLowerCase();
+  return value.startsWith('whatsapp:') ? value.slice('whatsapp:'.length) : value;
+}
+
 function channelToPreference(channel: CommunicationChannel) {
   if (channel === CommunicationChannel.EMAIL) return NotificationChannel.EMAIL;
   if (channel === CommunicationChannel.SMS) return NotificationChannel.SMS;
@@ -185,10 +192,39 @@ export async function dispatchScheduledCommunications(limit = 50) {
   const churches = churchIds.length
     ? await prisma.church.findMany({
         where: { id: { in: churchIds } },
-        select: { id: true, timezone: true },
+        select: { id: true, timezone: true, organization: { select: { tenantId: true } } },
       })
     : [];
   const timezoneByChurchId = new Map(churches.map((church) => [church.id, church.timezone || 'UTC']));
+  const tenantByChurchId = new Map(churches.map((church) => [church.id, church.organization.tenantId]));
+
+  const suppressionRequests = due
+    .map((schedule) => {
+      const tenantId = tenantByChurchId.get(schedule.churchId);
+      if (!tenantId) return null;
+      const address = normalizeRecipientAddress(schedule.channel, schedule.to);
+      if (!address) return null;
+      return { tenantId, channel: schedule.channel, address };
+    })
+    .filter(Boolean) as Array<{ tenantId: string; channel: CommunicationChannel; address: string }>;
+
+  const suppressionTenantIds = Array.from(new Set(suppressionRequests.map((r) => r.tenantId)));
+  const suppressionChannels = Array.from(new Set(suppressionRequests.map((r) => r.channel)));
+  const suppressionAddresses = Array.from(new Set(suppressionRequests.map((r) => r.address)));
+  const suppressions =
+    suppressionTenantIds.length && suppressionChannels.length && suppressionAddresses.length
+      ? await prisma.communicationSuppression.findMany({
+          where: {
+            tenantId: { in: suppressionTenantIds },
+            channel: { in: suppressionChannels },
+            address: { in: suppressionAddresses },
+          },
+          select: { tenantId: true, channel: true, address: true, reason: true },
+        })
+      : [];
+  const suppressionSet = new Map(
+    suppressions.map((row) => [`${row.tenantId}:${row.channel}:${row.address}`, row.reason])
+  );
 
   const memberPrefRequests = due
     .map((schedule) => {
@@ -222,6 +258,23 @@ export async function dispatchScheduledCommunications(limit = 50) {
       churchTimeZone: tz,
     });
     if (rescheduled) continue;
+
+    const tenantId = tenantByChurchId.get(schedule.churchId);
+    if (tenantId) {
+      const address = normalizeRecipientAddress(schedule.channel, schedule.to);
+      const suppressionKey = `${tenantId}:${schedule.channel}:${address}`;
+      const reason = suppressionSet.get(suppressionKey);
+      if (reason) {
+        await prisma.communicationSchedule.update({
+          where: { id: schedule.id },
+          data: {
+            status: CommunicationScheduleStatus.CANCELED,
+            error: `Suppressed recipient (${reason})`,
+          },
+        });
+        continue;
+      }
+    }
 
     const memberId = readScheduleMemberId(schedule.metadata);
     if (memberId) {

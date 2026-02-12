@@ -12,18 +12,20 @@ Status legend:
 ## 1) Subscriptions + Billing Hardening
 
 - [~] Admin plan change UX: upgrade/downgrade between tiers
-- [ ] Define proration rules (beta-safe default: next-cycle effective + optional immediate upgrade)
-- [ ] Add "effective next cycle" toggle + confirmation dialog (show impact)
+  - [x] Stripe: schedule next-cycle plan changes + immediate upgrades
+  - [~] Paystack: start plan-change checkout + best-effort prevent double billing
+- [x] Define proration rules (beta-safe default: next-cycle effective + optional immediate Stripe upgrade)
+- [x] Add "effective next cycle" toggle + confirmation dialog (show impact)
 - [ ] Trial conversion flow:
   - [x] Trial ending reminders (email + in-app banner)
-  - [ ] Grace period policy (e.g., 3-7 days) with clear lockout behavior
-  - [ ] Post-trial enforcement (read-only mode vs. suspend) per feature key
+  - [~] Grace period policy (default 7 days) with clear lockout behavior (no tenant suspension)
+  - [ ] Post-trial enforcement (read-only mode vs. lock) per feature key
 - [ ] Stripe:
   - [x] Customer Portal deep link in admin billing
-  - [ ] Subscription cancel/resume UX (if portal disabled)
+  - [x] Subscription cancel/resume UX (in-app)
 - [ ] Paystack:
-  - [ ] Manage subscription guidance + cancel flow (provider-specific)
-  - [ ] Ensure webhook sync covers status transitions reliably
+  - [~] Manage subscription guidance + cancel flow (provider-specific)
+  - [~] Ensure webhook sync covers status transitions reliably
 - [ ] Entitlements polish:
   - [~] "What's locked" UI across admin modules
   - [ ] Upgrade CTA with deep-link to `/billing`
@@ -43,9 +45,9 @@ Deliverables:
   - [x] Storage provider config check
   - [x] Scheduler mode visibility (internal vs external)
   - [x] Payments config checks
-  - [ ] Migration state visibility
-  - [ ] Send test email
-  - [ ] Upload test
+  - [x] Migration state visibility
+  - [x] Send test email
+  - [x] Upload test
 - [ ] Tenant audit timeline improvements:
   - [ ] Filter by actor/action/target
   - [ ] CSV export
@@ -68,7 +70,7 @@ Deliverables:
 - [ ] Messaging consent + compliance:
   - [x] Opt-in capture per channel (email/sms/whatsapp/push)
   - [~] Quiet hours per church + per member override
-  - [ ] Suppression list and unsubscribe flows
+  - [~] Suppression list and unsubscribe flows
 - [ ] Campaign scheduling UX:
   - [ ] Calendar view
   - [ ] Draft -> review -> approve -> schedule workflow
@@ -82,14 +84,14 @@ Deliverables:
 ## 4) Data Import (Adoption Unlock)
 
 - [ ] CSV imports with mapping UI:
-  - [~] Members
-  - [ ] Households
-  - [ ] Donations
+  - [x] Members
+  - [~] Households
+  - [~] Donations
 - [ ] Validation + preview:
   - [x] Field mapping + required checks (header aliases)
   - [x] Duplicate detection (email/phone)
   - [x] Dry-run mode with summary
-- [ ] Rollback strategy (batch id + revert)
+- [ ] Rollback strategy (batch id + revert updates)
 - [x] Rollback strategy (batch id + delete created members)
 - [ ] Migration assistant docs + templates:
   - [ ] Example CSV templates
@@ -103,10 +105,10 @@ Deliverables:
 ## 5) AI Layer (Useful + Governed)
 
 - [ ] Admin “Ask FaithFlow” assistant:
-  - [ ] Tenant-scoped retrieval
-  - [ ] Citations (source records + timestamps)
+  - [~] Tenant-scoped retrieval
+  - [~] Citations (source records + timestamps)
   - [ ] Role-based access and redaction
-  - [ ] Prompt + output logging (audit)
+  - [x] Prompt + output logging (audit)
 - [ ] AI summaries:
   - [ ] Attendance trends
   - [ ] Giving anomalies

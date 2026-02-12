@@ -568,6 +568,13 @@ enum CommunicationScheduleStatus {
   CANCELED
 }
 
+enum CommunicationSuppressionReason {
+  USER_UNSUBSCRIBE
+  ADMIN_SUPPRESS
+  BOUNCE
+  COMPLAINT
+}
+
 enum DripCampaignStatus {
   ACTIVE
   PAUSED
@@ -652,6 +659,8 @@ model Tenant {
   supportTickets     SupportTicket[]
   webhookEvents      WebhookEvent[]
   importBatches      ImportBatch[]
+  communicationSuppressions CommunicationSuppression[]
+  aiInteractions     AiInteraction[]
 }
 
 model Organization {
@@ -716,6 +725,7 @@ model Church {
   notifications          InAppNotification[]
   memberRegistrations    MemberRegistration[]
   auditLogs              AuditLog[]
+  aiInteractions         AiInteraction[]
   staffMemberships       StaffMembership[]
   memberRelationships    MemberRelationship[]
   mediaAssets            MediaAsset[]
@@ -2159,6 +2169,41 @@ model CommunicationMessage {
   @@index([channel])
   @@index([provider])
   @@index([status])
+}
+
+model CommunicationSuppression {
+  id                   String                       @id @default(cuid())
+  tenantId             String
+  channel              CommunicationChannel
+  address              String
+  reason               CommunicationSuppressionReason @default(USER_UNSUBSCRIBE)
+  createdByClerkUserId String?
+  createdAt            DateTime                     @default(now())
+  updatedAt            DateTime                     @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, channel, address])
+  @@index([tenantId, channel])
+}
+
+model AiInteraction {
+  id          String   @id @default(cuid())
+  tenantId    String
+  churchId    String?
+  clerkUserId String?
+  provider    String
+  model       String
+  question    String
+  answer      String
+  sources     Json?
+  createdAt   DateTime @default(now())
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  church Church? @relation(fields: [churchId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([churchId, createdAt])
 }
 
 model FundraiserPage {

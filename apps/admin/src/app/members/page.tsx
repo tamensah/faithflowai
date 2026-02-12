@@ -80,6 +80,9 @@ export default function MembersPage() {
   const [importCsv, setImportCsv] = useState('');
   const [importFilename, setImportFilename] = useState('');
   const [importSummary, setImportSummary] = useState<any>(null);
+  const [householdImportCsv, setHouseholdImportCsv] = useState('');
+  const [householdImportFilename, setHouseholdImportFilename] = useState('');
+  const [householdImportSummary, setHouseholdImportSummary] = useState<any>(null);
   const [staffConversationId, setStaffConversationId] = useState('');
   const [staffMessageBody, setStaffMessageBody] = useState('');
   const [staffAttachmentUrl, setStaffAttachmentUrl] = useState('');
@@ -269,6 +272,17 @@ export default function MembersPage() {
     reader.readAsText(file);
   };
 
+  const handleHouseholdImportFile = (file?: File | null) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setHouseholdImportCsv(String(reader.result ?? ''));
+      setHouseholdImportFilename(file.name);
+      setHouseholdImportSummary(null);
+    };
+    reader.readAsText(file);
+  };
+
   const handleDownloadTemplate = () => {
     const template = 'firstName,lastName,email,phone,householdName,preferredName,status,tags,notes\\n';
     const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
@@ -276,6 +290,19 @@ export default function MembersPage() {
     const link = document.createElement('a');
     link.href = url;
     link.download = 'faithflow-member-import-template.csv';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadHouseholdTemplate = () => {
+    const template = 'name,primaryEmail,primaryPhone,memberEmails\\nFamily Doe,primary@example.com,+15551234567,\"member1@example.com;member2@example.com\"\\n';
+    const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'faithflow-household-import-template.csv';
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -525,6 +552,24 @@ export default function MembersPage() {
         rollback: data,
       }));
       await utils.member.list.invalidate();
+    },
+  });
+
+  const { mutate: importHouseholds, isPending: isImportingHouseholds } = trpc.household.importCsv.useMutation({
+    onSuccess: (data) => {
+      setHouseholdImportSummary(data);
+      utils.household.list.invalidate();
+    },
+  });
+
+  const { mutate: rollbackHouseholdImport, isPending: isRollingBackHouseholds } = trpc.household.rollbackImport.useMutation({
+    onSuccess: async (data) => {
+      setHouseholdImportSummary((prev: any) => ({
+        ...(prev ?? {}),
+        rolledBack: true,
+        rollback: data,
+      }));
+      await utils.household.list.invalidate();
     },
   });
 
@@ -1285,6 +1330,50 @@ export default function MembersPage() {
               Assign selected member to first household
             </Button>
           </div>
+
+          <div className="mt-8 border-t border-border pt-6">
+            <h3 className="text-base font-semibold">Household import</h3>
+            <p className="mt-1 text-sm text-muted">Import households from CSV (name, primaryEmail/primaryPhone, memberEmails).</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <Input type="file" accept=".csv" onChange={(event) => handleHouseholdImportFile(event.target.files?.[0])} />
+              <div className="flex flex-wrap items-center gap-2">
+                <Button variant="outline" onClick={handleDownloadHouseholdTemplate}>
+                  Download template
+                </Button>
+                <Badge variant="default">{householdImportFilename || 'No file selected'}</Badge>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                onClick={() => importHouseholds({ churchId, csv: householdImportCsv, dryRun: true })}
+                disabled={!churchId || !householdImportCsv || isImportingHouseholds}
+              >
+                {isImportingHouseholds ? 'Processing…' : 'Dry run'}
+              </Button>
+              <Button
+                onClick={() => importHouseholds({ churchId, csv: householdImportCsv })}
+                disabled={!churchId || !householdImportCsv || isImportingHouseholds}
+              >
+                {isImportingHouseholds ? 'Importing…' : 'Import households'}
+              </Button>
+              {householdImportSummary?.batchId && householdImportSummary?.summary?.created ? (
+                <Button
+                  variant="outline"
+                  onClick={() => rollbackHouseholdImport({ batchId: householdImportSummary.batchId })}
+                  disabled={isRollingBackHouseholds}
+                >
+                  {isRollingBackHouseholds ? 'Rolling back…' : 'Rollback created'}
+                </Button>
+              ) : null}
+            </div>
+            <div className="mt-4 text-sm text-muted">
+              <pre className="rounded-md bg-muted/10 p-3 text-xs whitespace-pre-wrap">
+                {householdImportSummary ? JSON.stringify(householdImportSummary, null, 2) : 'No household import summary yet.'}
+              </pre>
+            </div>
+          </div>
+
           <div className="mt-4 text-sm text-muted">
             <pre className="rounded-md bg-muted/10 p-3 text-xs">
               {JSON.stringify(households ?? [], null, 2)}

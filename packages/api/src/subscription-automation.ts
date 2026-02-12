@@ -4,7 +4,6 @@ import {
   CommunicationChannel,
   CommunicationProvider,
   CommunicationScheduleStatus,
-  TenantStatus,
   TenantSubscriptionStatus,
   UserRole,
 } from '@faithflow-ai/database';
@@ -28,7 +27,7 @@ type QuotaAlert = {
 
 type BillingAction = {
   tenantId: string;
-  action: 'suspended_for_past_due';
+  action: 'expired_for_past_due';
   subscriptionId: string;
 };
 
@@ -41,21 +40,21 @@ function isoDate(value: Date | null | undefined) {
 }
 
 export async function runSubscriptionAutomation(options?: {
-  suspendPastDueAfterDays?: number;
+  expirePastDueAfterDays?: number;
   limitTenants?: number;
   trialReminderDaysBeforeEnd?: number;
 }) {
-  const suspendPastDueAfterDays = options?.suspendPastDueAfterDays ?? 14;
+  const expirePastDueAfterDays = options?.expirePastDueAfterDays ?? 7;
   const trialReminderDaysBeforeEnd = options?.trialReminderDaysBeforeEnd ?? 3;
   const tenants = await prisma.tenant.findMany({
-    where: { status: { in: [TenantStatus.ACTIVE, TenantStatus.SUSPENDED] } },
+    where: {},
     orderBy: { createdAt: 'asc' },
     take: options?.limitTenants ?? 500,
   });
 
   const quotaAlerts: QuotaAlert[] = [];
   const billingActions: BillingAction[] = [];
-  const cutoff = new Date(Date.now() - suspendPastDueAfterDays * 24 * 60 * 60 * 1000);
+  const cutoff = new Date(Date.now() - expirePastDueAfterDays * 24 * 60 * 60 * 1000);
   const trialReminderCutoff = daysFromNow(trialReminderDaysBeforeEnd);
 
   for (const tenant of tenants) {
@@ -71,7 +70,7 @@ export async function runSubscriptionAutomation(options?: {
       }),
     ]);
 
-    if (tenant.status === TenantStatus.ACTIVE && currentSubscription?.status === TenantSubscriptionStatus.TRIALING) {
+    if (currentSubscription?.status === TenantSubscriptionStatus.TRIALING) {
       const trialEndsAt = currentSubscription.trialEndsAt;
       if (trialEndsAt && trialEndsAt <= new Date()) {
         // Trial is over, but provider webhooks may not have updated status yet. Move to PAST_DUE to
@@ -203,28 +202,29 @@ export async function runSubscriptionAutomation(options?: {
     }
 
     if (
-      tenant.status === TenantStatus.ACTIVE &&
       currentSubscription?.status === TenantSubscriptionStatus.PAST_DUE &&
       (currentSubscription.currentPeriodEnd ?? currentSubscription.updatedAt) < cutoff
     ) {
-      await prisma.tenant.update({
-        where: { id: tenant.id },
+      // Important: do not suspend the Tenant record for billing issues. Tenants must be able to
+      // access the admin billing page to resolve payment and re-activate.
+      await prisma.tenantSubscription.update({
+        where: { id: currentSubscription.id },
         data: {
-          status: TenantStatus.SUSPENDED,
-          suspendedAt: new Date(),
-          suspensionReason: `AUTO_PAST_DUE_${suspendPastDueAfterDays}D`,
+          status: TenantSubscriptionStatus.EXPIRED,
+          canceledAt: currentSubscription.canceledAt ?? new Date(),
+          cancelAtPeriodEnd: false,
         },
       });
 
       await recordAuditLog({
         tenantId: tenant.id,
         actorType: AuditActorType.SYSTEM,
-        action: 'subscription.tenant_auto_suspended',
+        action: 'subscription.past_due_expired',
         targetType: 'Tenant',
         targetId: tenant.id,
         metadata: {
           reason: 'past_due_grace_expired',
-          suspendPastDueAfterDays,
+          expirePastDueAfterDays,
           subscriptionId: currentSubscription.id,
           subscriptionStatus: currentSubscription.status,
           periodEnd: currentSubscription.currentPeriodEnd,
@@ -233,7 +233,7 @@ export async function runSubscriptionAutomation(options?: {
 
       billingActions.push({
         tenantId: tenant.id,
-        action: 'suspended_for_past_due',
+        action: 'expired_for_past_due',
         subscriptionId: currentSubscription.id,
       });
     }

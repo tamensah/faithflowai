@@ -132,7 +132,12 @@ Shared:
 - Create API keys for:
   - OpenAI → `OPENAI_API_KEY`
   - Anthropic → `ANTHROPIC_API_KEY`
-  - Google Gemini → `GOOGLE_API_KEY`
+  - Google Gemini → `GOOGLE_GENERATIVE_AI_API_KEY`
+
+- Optional model defaults:
+  - `AI_OPENAI_MODEL` (default: `gpt-4o-mini`)
+  - `AI_ANTHROPIC_MODEL` (default: `claude-3-5-sonnet-latest`)
+  - `AI_GOOGLE_MODEL` (default: `gemini-1.5-pro`)
 
 ## 9. Database (Postgres)
 

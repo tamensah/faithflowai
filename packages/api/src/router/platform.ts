@@ -572,7 +572,7 @@ export const platformRouter = router({
     .input(
       z
         .object({
-          suspendPastDueAfterDays: z.number().int().min(1).max(90).default(14),
+          expirePastDueAfterDays: z.number().int().min(1).max(90).default(7),
           limitTenants: z.number().int().min(1).max(1000).default(500),
         })
         .optional()
@@ -580,7 +580,7 @@ export const platformRouter = router({
     .mutation(async ({ input, ctx }) => {
       await requirePlatformRole(ctx.userId!, [PlatformRole.SUPER_ADMIN, PlatformRole.PLATFORM_ADMIN, PlatformRole.BILLING_ADMIN]);
       return runSubscriptionAutomation({
-        suspendPastDueAfterDays: input?.suspendPastDueAfterDays ?? 14,
+        expirePastDueAfterDays: input?.expirePastDueAfterDays ?? 7,
         limitTenants: input?.limitTenants ?? 500,
       });
     }),

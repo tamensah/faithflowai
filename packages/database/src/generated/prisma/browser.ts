@@ -363,6 +363,16 @@ export type CommunicationTemplate = Prisma.CommunicationTemplateModel
  */
 export type CommunicationMessage = Prisma.CommunicationMessageModel
 /**
+ * Model CommunicationSuppression
+ * 
+ */
+export type CommunicationSuppression = Prisma.CommunicationSuppressionModel
+/**
+ * Model AiInteraction
+ * 
+ */
+export type AiInteraction = Prisma.AiInteractionModel
+/**
  * Model FundraiserPage
  * 
  */

@@ -5,6 +5,7 @@ import {
   AuditActorType,
   PaymentProvider,
   Prisma,
+  SubscriptionProvider,
   TenantSubscriptionStatus,
   UserRole,
   prisma,
@@ -123,6 +124,15 @@ const checkoutInput = z.object({
   cancelUrl: z.string().url().optional(),
 });
 
+const planChangeInput = z.object({
+  planCode: z.string().trim().min(2).max(64),
+  effective: z.enum(['NEXT_CYCLE', 'IMMEDIATE']).default('NEXT_CYCLE'),
+});
+
+const cancelInput = z.object({
+  atPeriodEnd: z.boolean().default(true),
+});
+
 function readPlanMetaString(meta: Record<string, unknown>, key: string) {
   const value = meta[key];
   return typeof value === 'string' && value.trim() ? value.trim() : null;
@@ -167,6 +177,26 @@ function extractPaystackCustomerCode(meta: Prisma.JsonValue | null | undefined) 
     if (typeof code === 'string') return code;
   }
   return null;
+}
+
+function extractPaystackSubscriptionCode(meta: Prisma.JsonValue | null | undefined) {
+  const direct = metadataValue(meta, 'paystackSubscriptionCode') ?? metadataValue(meta, 'subscription_code');
+  if (direct) return direct;
+  if (!meta || typeof meta !== 'object' || Array.isArray(meta)) return null;
+  const subscription = (meta as Record<string, unknown>).subscription;
+  if (subscription && typeof subscription === 'object' && !Array.isArray(subscription)) {
+    const code = (subscription as Record<string, unknown>).subscription_code;
+    if (typeof code === 'string') return code;
+  }
+  return null;
+}
+
+function extractPaystackEmailToken(meta: Prisma.JsonValue | null | undefined) {
+  const direct = metadataValue(meta, 'paystackEmailToken') ?? metadataValue(meta, 'email_token');
+  if (direct) return direct;
+  if (!meta || typeof meta !== 'object' || Array.isArray(meta)) return null;
+  const token = (meta as Record<string, unknown>).email_token;
+  return typeof token === 'string' ? token : null;
 }
 
 async function requireTenantAdmin(tenantId: string, clerkUserId: string) {
@@ -256,6 +286,20 @@ async function getActiveSubscription(tenantId: string) {
   });
 }
 
+function requireStripeSecret() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Stripe is not configured' });
+  }
+  return process.env.STRIPE_SECRET_KEY;
+}
+
+function requirePaystackSecret() {
+  if (!process.env.PAYSTACK_SECRET_KEY) {
+    throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Paystack is not configured' });
+  }
+  return process.env.PAYSTACK_SECRET_KEY;
+}
+
 async function ensureBaselinePlans() {
   const hasDefault = (await prisma.subscriptionPlan.count({ where: { isDefault: true } })) > 0;
   const existingCodes = await prisma.subscriptionPlan.findMany({
@@ -328,6 +372,355 @@ export const billingRouter = router({
     return getActiveSubscription(ctx.tenantId!);
   }),
 
+  changePlan: protectedProcedure.input(planChangeInput).mutation(async ({ ctx, input }) => {
+    await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
+    await ensureBaselinePlans();
+
+    const targetPlan = await prisma.subscriptionPlan.findUnique({ where: { code: input.planCode } });
+    if (!targetPlan || !targetPlan.isActive) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Plan not found or inactive' });
+    }
+
+    const active = await getActiveSubscription(ctx.tenantId!);
+    if (!active) {
+      throw new TRPCError({
+        code: 'PRECONDITION_FAILED',
+        message: 'No active subscription found. Use checkout to start a new subscription.',
+      });
+    }
+    if (active.plan.code === targetPlan.code) {
+      return { ok: true, noop: true, message: 'Already on this plan.' };
+    }
+
+    if (active.provider === SubscriptionProvider.STRIPE) {
+      const stripe = new Stripe(requireStripeSecret());
+      if (!active.providerRef) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Stripe subscription reference missing. Sync webhooks first.',
+        });
+      }
+
+      const targetMeta = (targetPlan.metadata ?? {}) as Record<string, unknown>;
+      const targetPriceId = typeof targetMeta.stripePriceId === 'string' ? targetMeta.stripePriceId : null;
+      if (!targetPriceId) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Target plan is missing stripePriceId metadata. Configure the Stripe price and update the plan metadata.',
+        });
+      }
+
+      const providerSub = await stripe.subscriptions.retrieve(active.providerRef);
+      const primaryItem = providerSub.items.data[0];
+      const currentItemId = primaryItem?.id ?? null;
+      const currentPriceId = primaryItem?.price?.id ?? null;
+      if (!currentItemId || !currentPriceId) {
+        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Stripe subscription item could not be resolved.' });
+      }
+
+      // Immediate changes are only allowed for upgrades in beta. Downgrades are next-cycle only.
+      if (input.effective === 'IMMEDIATE' && targetPlan.amountMinor <= active.plan.amountMinor) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Immediate plan changes are only supported for upgrades.' });
+      }
+
+      if (input.effective === 'IMMEDIATE') {
+        await stripe.subscriptions.update(providerSub.id, {
+          items: [{ id: currentItemId, price: targetPriceId }],
+          // Beta-safe behavior: start a new billing cycle now and charge full amount; avoids proration complexity.
+          proration_behavior: 'none',
+          billing_cycle_anchor: 'now',
+          metadata: {
+            ...(providerSub.metadata ?? {}),
+            tenantId: ctx.tenantId!,
+            clerkOrgId: ctx.clerkOrgId ?? '',
+            planCode: targetPlan.code,
+          },
+        });
+
+        await recordAuditLog({
+          tenantId: ctx.tenantId,
+          actorType: AuditActorType.USER,
+          actorId: ctx.userId,
+          action: 'billing.self_serve.plan_changed',
+          targetType: 'TenantSubscription',
+          targetId: active.id,
+          metadata: {
+            provider: active.provider,
+            fromPlan: active.plan.code,
+            toPlan: targetPlan.code,
+            effective: input.effective,
+          },
+        });
+
+        return { ok: true, provider: PaymentProvider.STRIPE, mode: 'updated' as const };
+      }
+
+      const currentPeriodEnd = primaryItem.current_period_end;
+      if (!currentPeriodEnd) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Stripe current period could not be determined. Try again after the subscription is fully active.',
+        });
+      }
+
+      const scheduleId =
+        typeof providerSub.schedule === 'string'
+          ? providerSub.schedule
+          : providerSub.schedule && typeof providerSub.schedule === 'object' && 'id' in providerSub.schedule
+            ? (providerSub.schedule as { id?: string }).id ?? null
+            : null;
+
+      const phases = [
+        {
+          // When creating/updating from an existing subscription, Stripe derives the phase start.
+          // We only need to pin the end of the current phase to the current period end.
+          end_date: currentPeriodEnd,
+          items: [{ price: currentPriceId, quantity: primaryItem.quantity ?? 1 }],
+        },
+        {
+          items: [{ price: targetPriceId, quantity: primaryItem.quantity ?? 1 }],
+          metadata: {
+            tenantId: ctx.tenantId!,
+            clerkOrgId: ctx.clerkOrgId ?? '',
+            planCode: targetPlan.code,
+          },
+        },
+      ] satisfies Stripe.SubscriptionScheduleCreateParams.Phase[];
+
+      const schedule = scheduleId
+        ? await stripe.subscriptionSchedules.update(scheduleId, {
+            end_behavior: 'release',
+            phases: phases as unknown as Stripe.SubscriptionScheduleUpdateParams.Phase[],
+          })
+        : await stripe.subscriptionSchedules.create({
+            from_subscription: providerSub.id,
+            end_behavior: 'release',
+            phases,
+          });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.plan_change_scheduled',
+        targetType: 'TenantSubscription',
+        targetId: active.id,
+        metadata: {
+          provider: active.provider,
+          fromPlan: active.plan.code,
+          toPlan: targetPlan.code,
+          effective: input.effective,
+          scheduleId: schedule.id,
+          effectiveAt: new Date(currentPeriodEnd * 1000).toISOString(),
+        },
+      });
+
+      return {
+        ok: true,
+        provider: PaymentProvider.STRIPE,
+        mode: 'scheduled' as const,
+        scheduleId: schedule.id,
+        effectiveAt: new Date(currentPeriodEnd * 1000).toISOString(),
+      };
+    }
+
+    if (active.provider === SubscriptionProvider.PAYSTACK) {
+      const paystackSecret = requirePaystackSecret();
+      const email = await getClerkPrimaryEmail(ctx.userId!);
+      if (!email) {
+        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Primary email is required for Paystack checkout' });
+      }
+
+      const planMeta = (targetPlan.metadata ?? {}) as Record<string, unknown>;
+      const trialDays = readPlanMetaInt(planMeta, 'trialDays');
+      const paystackPlanCode =
+        (trialDays ? readPlanMetaString(planMeta, 'paystackTrialPlanCode') : null) ??
+        readPlanMetaString(planMeta, 'paystackPlanCode');
+      if (!paystackPlanCode) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: trialDays
+            ? 'Plan is missing paystackPlanCode/paystackTrialPlanCode metadata'
+            : 'Plan is missing paystackPlanCode metadata',
+        });
+      }
+
+      const successUrl = `${process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001'}/billing`;
+      const reference = `planchange_${ctx.tenantId}_${Date.now()}`;
+      const response = await fetch('https://api.paystack.co/transaction/initialize', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${paystackSecret}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          plan: paystackPlanCode,
+          reference,
+          callback_url: successUrl,
+          metadata: {
+            tenantId: ctx.tenantId,
+            clerkOrgId: ctx.clerkOrgId,
+            planCode: targetPlan.code,
+            planChangeFrom: active.plan.code,
+            ...(trialDays ? { trialDays, paystackTrial: true } : {}),
+          },
+        }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new TRPCError({ code: 'BAD_GATEWAY', message: `Paystack checkout failed: ${text}` });
+      }
+
+      const payload = (await response.json()) as {
+        status: boolean;
+        message: string;
+        data?: { authorization_url?: string; reference?: string };
+      };
+      if (!payload.status || !payload.data?.authorization_url) {
+        throw new TRPCError({ code: 'BAD_GATEWAY', message: payload.message || 'Paystack checkout failed' });
+      }
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.plan_change_checkout_started',
+        targetType: 'SubscriptionPlan',
+        targetId: targetPlan.id,
+        metadata: { provider: active.provider, fromPlan: active.plan.code, toPlan: targetPlan.code, reference },
+      });
+
+      return {
+        ok: true,
+        provider: PaymentProvider.PAYSTACK,
+        mode: 'checkout' as const,
+        checkoutUrl: payload.data.authorization_url,
+        reference: payload.data.reference ?? reference,
+      };
+    }
+
+    throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Unsupported billing provider for plan changes.' });
+  }),
+
+  cancelSubscription: protectedProcedure.input(cancelInput).mutation(async ({ ctx, input }) => {
+    await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
+    const active = await getActiveSubscription(ctx.tenantId!);
+    if (!active) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'No active subscription found.' });
+    }
+
+    if (active.provider === SubscriptionProvider.STRIPE) {
+      const stripe = new Stripe(requireStripeSecret());
+      if (!active.providerRef) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Stripe subscription reference missing. Sync webhooks first.',
+        });
+      }
+
+      if (input.atPeriodEnd) {
+        await stripe.subscriptions.update(active.providerRef, { cancel_at_period_end: true });
+        await prisma.tenantSubscription.update({ where: { id: active.id }, data: { cancelAtPeriodEnd: true } });
+      } else {
+        await stripe.subscriptions.cancel(active.providerRef);
+        await prisma.tenantSubscription.update({
+          where: { id: active.id },
+          data: { status: TenantSubscriptionStatus.CANCELED, canceledAt: new Date(), cancelAtPeriodEnd: false },
+        });
+      }
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.subscription_canceled',
+        targetType: 'TenantSubscription',
+        targetId: active.id,
+        metadata: { provider: active.provider, atPeriodEnd: input.atPeriodEnd },
+      });
+
+      return { ok: true, provider: PaymentProvider.STRIPE, atPeriodEnd: input.atPeriodEnd };
+    }
+
+    if (active.provider === SubscriptionProvider.PAYSTACK) {
+      const secret = requirePaystackSecret();
+      const subscriptionCode = extractPaystackSubscriptionCode(active.metadata);
+      const emailToken = extractPaystackEmailToken(active.metadata);
+      if (!subscriptionCode || !emailToken) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message:
+            'Paystack cancellation requires subscription_code and email_token. Ensure webhooks/backfill captured these fields, or cancel in Paystack dashboard.',
+        });
+      }
+
+      const response = await fetch('https://api.paystack.co/subscription/disable', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${secret}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code: subscriptionCode, token: emailToken }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new TRPCError({ code: 'BAD_GATEWAY', message: `Paystack cancel failed: ${text}` });
+      }
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.subscription_canceled',
+        targetType: 'TenantSubscription',
+        targetId: active.id,
+        metadata: { provider: active.provider, subscriptionCode },
+      });
+
+      // Webhooks will eventually sync the canceled state.
+      return { ok: true, provider: PaymentProvider.PAYSTACK, atPeriodEnd: false };
+    }
+
+    throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Unsupported billing provider.' });
+  }),
+
+  resumeSubscription: protectedProcedure.mutation(async ({ ctx }) => {
+    await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
+    const active = await getActiveSubscription(ctx.tenantId!);
+    if (!active) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'No active subscription found.' });
+    }
+    if (active.provider !== SubscriptionProvider.STRIPE) {
+      throw new TRPCError({
+        code: 'PRECONDITION_FAILED',
+        message: 'Resume is currently supported for Stripe subscriptions only.',
+      });
+    }
+    if (!active.providerRef) {
+      throw new TRPCError({
+        code: 'PRECONDITION_FAILED',
+        message: 'Stripe subscription reference missing. Sync webhooks first.',
+      });
+    }
+
+    const stripe = new Stripe(requireStripeSecret());
+    await stripe.subscriptions.update(active.providerRef, { cancel_at_period_end: false });
+    await prisma.tenantSubscription.update({ where: { id: active.id }, data: { cancelAtPeriodEnd: false } });
+
+    await recordAuditLog({
+      tenantId: ctx.tenantId,
+      actorType: AuditActorType.USER,
+      actorId: ctx.userId,
+      action: 'billing.self_serve.subscription_resumed',
+      targetType: 'TenantSubscription',
+      targetId: active.id,
+      metadata: { provider: active.provider },
+    });
+
+    return { ok: true, provider: PaymentProvider.STRIPE };
+  }),
+
   startCheckout: protectedProcedure.input(checkoutInput).mutation(async ({ ctx, input }) => {
     await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
     if (input.provider === PaymentProvider.MANUAL) {
@@ -349,11 +742,7 @@ export const billingRouter = router({
     const trialDays = readPlanMetaInt(planMeta, 'trialDays');
 
     if (input.provider === PaymentProvider.STRIPE) {
-      if (!process.env.STRIPE_SECRET_KEY) {
-        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Stripe is not configured' });
-      }
-
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+      const stripe = new Stripe(requireStripeSecret());
       const stripePriceId = typeof planMeta.stripePriceId === 'string' ? planMeta.stripePriceId : null;
 
       const lineItem = stripePriceId
@@ -417,9 +806,7 @@ export const billingRouter = router({
       };
     }
 
-    if (!process.env.PAYSTACK_SECRET_KEY) {
-      throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Paystack is not configured' });
-    }
+    const paystackSecret = requirePaystackSecret();
     if (!email) {
       throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Primary email is required for Paystack checkout' });
     }
@@ -439,7 +826,7 @@ export const billingRouter = router({
     const response = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        Authorization: `Bearer ${paystackSecret}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -491,9 +878,7 @@ export const billingRouter = router({
     .input(z.object({ returnUrl: z.string().url().optional() }))
     .mutation(async ({ ctx, input }) => {
       await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
-      if (!process.env.STRIPE_SECRET_KEY) {
-        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Stripe is not configured' });
-      }
+      const stripe = new Stripe(requireStripeSecret());
 
       const subscription = await prisma.tenantSubscription.findFirst({
         where: {
@@ -507,7 +892,6 @@ export const billingRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'No Stripe subscription found for tenant' });
       }
 
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
       let customerId = extractStripeCustomerId(subscription.metadata);
 
       if (!customerId && subscription.providerRef) {
@@ -560,10 +944,7 @@ export const billingRouter = router({
       const provider = selectedProvider ?? activeSub?.provider ?? PaymentProvider.STRIPE;
 
       if (provider === PaymentProvider.STRIPE) {
-        if (!process.env.STRIPE_SECRET_KEY) {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Stripe is not configured' });
-        }
-        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+        const stripe = new Stripe(requireStripeSecret());
         const stripeSub = await prisma.tenantSubscription.findFirst({
           where: { tenantId: ctx.tenantId!, provider: PaymentProvider.STRIPE },
           orderBy: { createdAt: 'desc' },
@@ -592,9 +973,7 @@ export const billingRouter = router({
       }
 
       if (provider === PaymentProvider.PAYSTACK) {
-        if (!process.env.PAYSTACK_SECRET_KEY) {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Paystack is not configured' });
-        }
+        const paystackSecret = requirePaystackSecret();
         const paystackSub = await prisma.tenantSubscription.findFirst({
           where: { tenantId: ctx.tenantId!, provider: PaymentProvider.PAYSTACK },
           orderBy: { createdAt: 'desc' },
@@ -606,7 +985,7 @@ export const billingRouter = router({
           `https://api.paystack.co/transaction?customer=${encodeURIComponent(customerCode)}&perPage=${limit}&page=1`,
           {
             headers: {
-              Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+              Authorization: `Bearer ${paystackSecret}`,
             },
           }
         );

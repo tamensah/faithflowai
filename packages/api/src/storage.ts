@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { Storage } from '@google-cloud/storage';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { StorageProvider } from '@faithflow-ai/database';
 
@@ -167,4 +167,58 @@ export async function createSignedUpload(input: {
   const publicUrl = buildPublicUrl(StorageProvider.GCS, bucket, key);
 
   return { provider, bucket, key, uploadUrl, publicUrl };
+}
+
+export async function runStorageSmokeTest(input: { churchId: string; provider?: StorageProvider }) {
+  const provider = resolveStorageProvider(input.provider);
+  const key = buildKey(input.churchId, 'ops-health', 'storage-health.txt');
+  const body = Buffer.from(`faithflow storage smoke test @ ${new Date().toISOString()}\n`, 'utf8');
+  const contentType = 'text/plain; charset=utf-8';
+
+  const startedAt = Date.now();
+
+  if (provider === StorageProvider.S3) {
+    const bucket = process.env.S3_BUCKET;
+    if (!bucket) {
+      throw new Error('S3 bucket is missing');
+    }
+    const client = getS3Client();
+    await client.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: body,
+        ContentType: contentType,
+        CacheControl: 'no-store',
+      })
+    );
+    await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+
+    return {
+      ok: true,
+      provider,
+      bucket,
+      key,
+      publicUrl: buildPublicUrl(StorageProvider.S3, bucket, key),
+      latencyMs: Date.now() - startedAt,
+    };
+  }
+
+  const bucket = process.env.GCS_BUCKET;
+  if (!bucket) {
+    throw new Error('GCS bucket is missing');
+  }
+  const storage = getGcsClient();
+  const file = storage.bucket(bucket).file(key);
+  await file.save(body, { contentType, resumable: false, metadata: { cacheControl: 'no-store' } });
+  await file.delete({ ignoreNotFound: true });
+
+  return {
+    ok: true,
+    provider,
+    bucket,
+    key,
+    publicUrl: buildPublicUrl(StorageProvider.GCS, bucket, key),
+    latencyMs: Date.now() - startedAt,
+  };
 }

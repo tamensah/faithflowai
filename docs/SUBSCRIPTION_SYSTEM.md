@@ -148,7 +148,8 @@ Current automation behavior:
 
 - Quota checks for `max_members`, `max_campuses`, `max_events_monthly`, `max_expenses_monthly`
 - Audit log creation for overages
-- Auto-suspend tenant after configured past-due grace period
+- Trial end detection: marks TRIALING -> PAST_DUE when trial ends and provider has not updated yet
+- Past-due expiry: after configured grace window, marks the subscription as `EXPIRED` (does **not** suspend the Tenant record so admins can still access billing to recover)
 
 Mapped endpoint:
 
@@ -163,6 +164,9 @@ Implemented tenant routes:
 - `billing.plans`
 - `billing.currentSubscription`
 - `billing.startCheckout`
+- `billing.changePlan` (Stripe: schedule next-cycle changes; optional immediate upgrades)
+- `billing.cancelSubscription` (Stripe + Paystack)
+- `billing.resumeSubscription` (Stripe)
 - `billing.createPortalSession` (Stripe)
 - `billing.invoices` (Stripe/Paystack customer history)
 
@@ -205,5 +209,5 @@ Default feature keys seeded:
 - [x] Entitlement resolution API
 - [x] Route-level entitlement enforcement in product modules
 - [x] Stripe/Paystack subscription lifecycle sync
-- [x] Usage metering + quota alerts + suspension automation
-- [ ] Billing portal/self-serve plan change UX
+- [x] Usage metering + quota alerts + post-grace lockout (subscription expiry)
+- [~] Billing portal/self-serve plan change UX (Stripe in-app; Paystack checkout-based)

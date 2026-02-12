@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
@@ -164,8 +165,18 @@ export default function CommunicationsPage() {
     <Shell>
       <div className="space-y-6">
         <Card className="p-6">
-          <h2 className="text-lg font-semibold">Communications</h2>
-          <p className="mt-1 text-sm text-muted">Create templates and send emails/SMS/WhatsApp to your community.</p>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold">Communications</h2>
+              <p className="mt-1 text-sm text-muted">Create templates and send emails/SMS/WhatsApp to your community.</p>
+            </div>
+            <Link
+              href="/communications/suppressions"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              Manage suppressions
+            </Link>
+          </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <select
               className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"

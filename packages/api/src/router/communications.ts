@@ -5,6 +5,7 @@ import {
   CommunicationChannel,
   CommunicationProvider,
   CommunicationScheduleStatus,
+  CommunicationSuppressionReason,
   CommunicationStatus,
   DripCampaignStatus,
   DripEnrollmentStatus,
@@ -85,6 +86,26 @@ type RecipientContext = {
   donorName?: string;
   churchName?: string;
 };
+
+function normalizeSuppressionAddress(channel: CommunicationChannel, value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (channel === CommunicationChannel.EMAIL) return trimmed.toLowerCase();
+  return trimmed.startsWith('whatsapp:') ? trimmed.slice('whatsapp:'.length) : trimmed;
+}
+
+async function requireTenantStaff(tenantId: string, clerkUserId: string) {
+  const staff = await prisma.staffMembership.findFirst({
+    where: {
+      user: { clerkUserId },
+      church: { organization: { tenantId } },
+    },
+  });
+  if (!staff) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
+  }
+  return staff;
+}
 
 function renderTemplate(text: string, context: RecipientContext) {
   return text.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (_, key: string) => {
@@ -167,6 +188,105 @@ async function resolveAudienceRecipients({
 }
 
 export const communicationsRouter = router({
+  suppressions: protectedProcedure
+    .input(
+      z
+        .object({
+          channel: z.nativeEnum(CommunicationChannel).optional(),
+          q: z.string().trim().max(120).optional(),
+          limit: z.number().min(1).max(200).default(50),
+        })
+        .optional()
+    )
+    .query(async ({ input, ctx }) => {
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
+      const q = input?.q?.trim().toLowerCase();
+      return prisma.communicationSuppression.findMany({
+        where: {
+          tenantId: ctx.tenantId!,
+          ...(input?.channel ? { channel: input.channel } : {}),
+          ...(q ? { address: { contains: q, mode: 'insensitive' } } : {}),
+        },
+        orderBy: { createdAt: 'desc' },
+        take: input?.limit ?? 50,
+      });
+    }),
+
+  addSuppression: protectedProcedure
+    .input(
+      z.object({
+        channel: z.nativeEnum(CommunicationChannel),
+        address: z.string().min(3).max(200),
+        reason: z.nativeEnum(CommunicationSuppressionReason).optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
+      const address = normalizeSuppressionAddress(input.channel, input.address);
+      if (!address) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid address' });
+      }
+
+      const suppression = await prisma.communicationSuppression.upsert({
+        where: {
+          tenantId_channel_address: {
+            tenantId: ctx.tenantId!,
+            channel: input.channel,
+            address,
+          },
+        },
+        update: {
+          reason: input.reason ?? CommunicationSuppressionReason.ADMIN_SUPPRESS,
+          createdByClerkUserId: ctx.userId ?? undefined,
+        },
+        create: {
+          tenantId: ctx.tenantId!,
+          channel: input.channel,
+          address,
+          reason: input.reason ?? CommunicationSuppressionReason.ADMIN_SUPPRESS,
+          createdByClerkUserId: ctx.userId ?? undefined,
+        },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'communications.suppression_added',
+        targetType: 'CommunicationSuppression',
+        targetId: suppression.id,
+        metadata: { channel: suppression.channel, address: suppression.address, reason: suppression.reason },
+      });
+
+      return suppression;
+    }),
+
+  removeSuppression: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
+      const suppression = await prisma.communicationSuppression.findFirst({
+        where: { id: input.id, tenantId: ctx.tenantId! },
+      });
+      if (!suppression) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Suppression not found' });
+      }
+
+      await prisma.communicationSuppression.delete({ where: { id: input.id } });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'communications.suppression_removed',
+        targetType: 'CommunicationSuppression',
+        targetId: input.id,
+        metadata: { channel: suppression.channel, address: suppression.address, reason: suppression.reason },
+      });
+
+      return { ok: true };
+    }),
+
   templates: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }))
     .query(async ({ input, ctx }) => {

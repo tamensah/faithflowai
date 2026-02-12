@@ -71,6 +71,10 @@ function normalizeStripeInvoiceMetadata(invoice: Stripe.Invoice) {
 function normalizePaystackMetadata(event: { event: string; data?: Record<string, any> }, fallbackRef: string) {
   const data = event.data ?? {};
   const customerCode = (data.customer as { customer_code?: string } | undefined)?.customer_code;
+  const emailToken =
+    typeof data.email_token === 'string'
+      ? data.email_token
+      : (data.subscription as { email_token?: string } | undefined)?.email_token;
   const subscriptionCode =
     typeof data.subscription === 'string'
       ? data.subscription
@@ -82,6 +86,7 @@ function normalizePaystackMetadata(event: { event: string; data?: Record<string,
     paystackSubscriptionCode: subscriptionCode ?? fallbackRef,
     ...(customerCode ? { paystackCustomerCode: customerCode } : {}),
     ...(planCode ? { paystackPlanCode: planCode } : {}),
+    ...(emailToken ? { paystackEmailToken: emailToken } : {}),
   } as Prisma.InputJsonValue;
 }
 
@@ -132,6 +137,7 @@ async function upsertSubscription(input: {
   currentPeriodEnd?: Date | null;
   trialEndsAt?: Date | null;
   canceledAt?: Date | null;
+  cancelAtPeriodEnd?: boolean | null;
   metadata?: Prisma.InputJsonValue;
 }) {
   const existing = await prisma.tenantSubscription.findFirst({
@@ -148,6 +154,7 @@ async function upsertSubscription(input: {
         currentPeriodEnd: input.currentPeriodEnd ?? undefined,
         trialEndsAt: input.trialEndsAt ?? undefined,
         canceledAt: input.canceledAt ?? undefined,
+        cancelAtPeriodEnd: input.cancelAtPeriodEnd ?? undefined,
         metadata: input.metadata,
       },
     });
@@ -165,6 +172,7 @@ async function upsertSubscription(input: {
       currentPeriodEnd: input.currentPeriodEnd ?? undefined,
       trialEndsAt: input.trialEndsAt ?? undefined,
       canceledAt: input.canceledAt ?? undefined,
+      cancelAtPeriodEnd: input.cancelAtPeriodEnd ?? false,
       metadata: input.metadata,
     },
   });
@@ -226,6 +234,7 @@ export async function handlePlatformStripeWebhook(
           currentPeriodEnd: currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null,
           trialEndsAt: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
           canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end ?? null,
           metadata: normalizeStripeSubscriptionMetadata(subscription),
         });
 
@@ -311,7 +320,7 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
   };
 
   const data = event.data ?? {};
-  const metadata = (data.metadata as Record<string, string> | undefined) ?? {};
+  const metadata = (data.metadata as Record<string, any> | undefined) ?? {};
   const subscriptionCode =
     typeof data.subscription === 'string'
       ? data.subscription
@@ -369,6 +378,80 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
           canceledAt: event.event === 'subscription.disable' ? new Date() : null,
           metadata: normalizePaystackMetadata(event, providerRef),
         });
+
+        const planChangeFrom =
+          typeof metadata.planChangeFrom === 'string' && metadata.planChangeFrom.trim().length
+            ? metadata.planChangeFrom.trim()
+            : null;
+
+        if (planChangeFrom && event.event !== 'subscription.disable') {
+          // Best-effort: if this checkout was started as a plan change, disable any older active Paystack
+          // subscriptions to prevent double billing. This requires Paystack's email_token.
+          const previousSubs = await prisma.tenantSubscription.findMany({
+            where: {
+              tenantId: tenant.id,
+              provider: SubscriptionProvider.PAYSTACK,
+              status: { in: [TenantSubscriptionStatus.TRIALING, TenantSubscriptionStatus.ACTIVE, TenantSubscriptionStatus.PAST_DUE, TenantSubscriptionStatus.PAUSED] },
+              id: { not: record.id },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 5,
+          });
+
+          for (const previous of previousSubs) {
+            const previousMeta = (previous.metadata ?? {}) as Record<string, any>;
+            const subscriptionCode = typeof previousMeta.paystackSubscriptionCode === 'string' ? previousMeta.paystackSubscriptionCode : null;
+            const emailToken = typeof previousMeta.paystackEmailToken === 'string' ? previousMeta.paystackEmailToken : null;
+            if (!subscriptionCode || !emailToken) continue;
+
+            try {
+              const response = await fetch('https://api.paystack.co/subscription/disable', {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${paystackSecret}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: subscriptionCode, token: emailToken }),
+              });
+
+              if (response.ok) {
+                await prisma.tenantSubscription.update({
+                  where: { id: previous.id },
+                  data: { status: TenantSubscriptionStatus.CANCELED, canceledAt: new Date(), cancelAtPeriodEnd: false },
+                });
+              }
+
+              await recordAuditLog({
+                tenantId: tenant.id,
+                actorType: AuditActorType.SYSTEM,
+                action: 'platform.subscription.plan_change_paystack_disable_attempt',
+                targetType: 'TenantSubscription',
+                targetId: previous.id,
+                metadata: {
+                  fromPlan: planChangeFrom,
+                  toPlan: plan.code,
+                  subscriptionCode,
+                  ok: response.ok,
+                },
+              });
+            } catch (error) {
+              await recordAuditLog({
+                tenantId: tenant.id,
+                actorType: AuditActorType.SYSTEM,
+                action: 'platform.subscription.plan_change_paystack_disable_attempt',
+                targetType: 'TenantSubscription',
+                targetId: previous.id,
+                metadata: {
+                  fromPlan: planChangeFrom,
+                  toPlan: plan.code,
+                  subscriptionCode,
+                  ok: false,
+                  error: error instanceof Error ? error.message : 'disable_failed',
+                },
+              });
+            }
+          }
+        }
 
         await recordAuditLog({
           tenantId: tenant.id,

@@ -810,6 +810,16 @@ export const CommunicationScheduleStatus = {
 export type CommunicationScheduleStatus = (typeof CommunicationScheduleStatus)[keyof typeof CommunicationScheduleStatus]
 
 
+export const CommunicationSuppressionReason = {
+  USER_UNSUBSCRIBE: 'USER_UNSUBSCRIBE',
+  ADMIN_SUPPRESS: 'ADMIN_SUPPRESS',
+  BOUNCE: 'BOUNCE',
+  COMPLAINT: 'COMPLAINT'
+} as const
+
+export type CommunicationSuppressionReason = (typeof CommunicationSuppressionReason)[keyof typeof CommunicationSuppressionReason]
+
+
 export const DripCampaignStatus = {
   ACTIVE: 'ACTIVE',
   PAUSED: 'PAUSED',

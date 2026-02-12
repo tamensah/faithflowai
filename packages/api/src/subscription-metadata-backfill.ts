@@ -111,10 +111,12 @@ function normalizePaystackMetadata(rawMetadata: unknown, providerRef?: string | 
     ['data', 'plan', 'plan_code'],
     ['plan', 'plan_code'],
   ]);
+  const emailToken = readStringFromPaths(metadata, [['paystackEmailToken'], ['email_token'], ['data', 'email_token']]);
 
   if (subscriptionCode) normalized.paystackSubscriptionCode = subscriptionCode;
   if (customerCode) normalized.paystackCustomerCode = customerCode;
   if (planCode) normalized.paystackPlanCode = planCode;
+  if (emailToken) normalized.paystackEmailToken = emailToken;
   return normalized;
 }
 
@@ -169,9 +171,11 @@ export async function runSubscriptionMetadataBackfill(options?: {
             const customerCode = readStringFromPaths(paystackSub, [['customer', 'customer_code']]);
             const planCode = readStringFromPaths(paystackSub, [['plan', 'plan_code']]);
             const subscriptionCode = readStringFromPaths(paystackSub, [['subscription_code']]);
+            const emailToken = readStringFromPaths(paystackSub, [['email_token']]);
             if (customerCode) normalized.paystackCustomerCode = customerCode;
             if (planCode) normalized.paystackPlanCode = planCode;
             if (subscriptionCode) normalized.paystackSubscriptionCode = subscriptionCode;
+            if (emailToken) normalized.paystackEmailToken = emailToken;
           }
         }
       }

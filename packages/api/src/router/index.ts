@@ -45,6 +45,7 @@ import { billingRouter } from './billing';
 import { tenantOpsRouter } from './tenant-ops';
 import { supportRouter } from './support';
 import { streamingRouter } from './streaming';
+import { aiRouter } from './ai';
 
 export const appRouter = router({
   auth: authRouter,
@@ -93,6 +94,7 @@ export const appRouter = router({
   tenantOps: tenantOpsRouter,
   support: supportRouter,
   streaming: streamingRouter,
+  ai: aiRouter,
 });
 
 export type AppRouter = typeof appRouter;

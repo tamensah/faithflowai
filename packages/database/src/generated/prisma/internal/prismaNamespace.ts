@@ -453,6 +453,8 @@ export const ModelName = {
   CommunicationDripEnrollment: 'CommunicationDripEnrollment',
   CommunicationTemplate: 'CommunicationTemplate',
   CommunicationMessage: 'CommunicationMessage',
+  CommunicationSuppression: 'CommunicationSuppression',
+  AiInteraction: 'AiInteraction',
   FundraiserPage: 'FundraiserPage',
   Pledge: 'Pledge',
   RecurringDonation: 'RecurringDonation',
@@ -492,7 +494,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "organization" | "church" | "campus" | "household" | "member" | "memberAccessRequest" | "staffInvite" | "platformUser" | "platformUserRole" | "subscriptionPlan" | "subscriptionPlanFeature" | "tenantSubscription" | "importBatch" | "importBatchItem" | "memberRegistration" | "memberTag" | "memberTagAssignment" | "memberMilestone" | "group" | "onboardingWorkflow" | "onboardingStep" | "memberOnboarding" | "memberOnboardingTask" | "groupMember" | "volunteerRole" | "volunteerShift" | "volunteerShiftAssignment" | "volunteerAvailability" | "survey" | "surveyQuestion" | "surveyResponse" | "volunteerAssignment" | "event" | "eventSeries" | "eventRsvp" | "eventBadge" | "eventRegistration" | "eventAssignment" | "eventMedia" | "eventTicketType" | "eventTicketOrder" | "conversation" | "conversationMember" | "message" | "mediaAsset" | "notificationPreference" | "inAppNotification" | "deviceToken" | "attendance" | "memberRelationship" | "donation" | "fund" | "campaign" | "paymentIntent" | "donationReceipt" | "textToGiveNumber" | "textToGiveMessage" | "payout" | "payoutTransaction" | "refund" | "dispute" | "disputeEvidence" | "communicationSchedule" | "communicationDripCampaign" | "communicationDripStep" | "communicationDripEnrollment" | "communicationTemplate" | "communicationMessage" | "fundraiserPage" | "pledge" | "recurringDonation" | "expenseCategory" | "expense" | "budget" | "budgetItem" | "auditLog" | "user" | "staffMembership" | "facility" | "facilityBooking" | "careRequest" | "careNote" | "sermon" | "contentResource" | "tenantDomain" | "tenantHealthCheck" | "tenantSecurityPolicy" | "supportTicket" | "supportTicketMessage" | "webhookEvent" | "liveStreamChannel" | "liveStreamSession"
+    modelProps: "tenant" | "organization" | "church" | "campus" | "household" | "member" | "memberAccessRequest" | "staffInvite" | "platformUser" | "platformUserRole" | "subscriptionPlan" | "subscriptionPlanFeature" | "tenantSubscription" | "importBatch" | "importBatchItem" | "memberRegistration" | "memberTag" | "memberTagAssignment" | "memberMilestone" | "group" | "onboardingWorkflow" | "onboardingStep" | "memberOnboarding" | "memberOnboardingTask" | "groupMember" | "volunteerRole" | "volunteerShift" | "volunteerShiftAssignment" | "volunteerAvailability" | "survey" | "surveyQuestion" | "surveyResponse" | "volunteerAssignment" | "event" | "eventSeries" | "eventRsvp" | "eventBadge" | "eventRegistration" | "eventAssignment" | "eventMedia" | "eventTicketType" | "eventTicketOrder" | "conversation" | "conversationMember" | "message" | "mediaAsset" | "notificationPreference" | "inAppNotification" | "deviceToken" | "attendance" | "memberRelationship" | "donation" | "fund" | "campaign" | "paymentIntent" | "donationReceipt" | "textToGiveNumber" | "textToGiveMessage" | "payout" | "payoutTransaction" | "refund" | "dispute" | "disputeEvidence" | "communicationSchedule" | "communicationDripCampaign" | "communicationDripStep" | "communicationDripEnrollment" | "communicationTemplate" | "communicationMessage" | "communicationSuppression" | "aiInteraction" | "fundraiserPage" | "pledge" | "recurringDonation" | "expenseCategory" | "expense" | "budget" | "budgetItem" | "auditLog" | "user" | "staffMembership" | "facility" | "facilityBooking" | "careRequest" | "careNote" | "sermon" | "contentResource" | "tenantDomain" | "tenantHealthCheck" | "tenantSecurityPolicy" | "supportTicket" | "supportTicketMessage" | "webhookEvent" | "liveStreamChannel" | "liveStreamSession"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -5602,6 +5604,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CommunicationSuppression: {
+      payload: Prisma.$CommunicationSuppressionPayload<ExtArgs>
+      fields: Prisma.CommunicationSuppressionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CommunicationSuppressionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CommunicationSuppressionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload>
+        }
+        findFirst: {
+          args: Prisma.CommunicationSuppressionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CommunicationSuppressionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload>
+        }
+        findMany: {
+          args: Prisma.CommunicationSuppressionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload>[]
+        }
+        create: {
+          args: Prisma.CommunicationSuppressionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload>
+        }
+        createMany: {
+          args: Prisma.CommunicationSuppressionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CommunicationSuppressionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload>[]
+        }
+        delete: {
+          args: Prisma.CommunicationSuppressionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload>
+        }
+        update: {
+          args: Prisma.CommunicationSuppressionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload>
+        }
+        deleteMany: {
+          args: Prisma.CommunicationSuppressionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CommunicationSuppressionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CommunicationSuppressionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload>[]
+        }
+        upsert: {
+          args: Prisma.CommunicationSuppressionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommunicationSuppressionPayload>
+        }
+        aggregate: {
+          args: Prisma.CommunicationSuppressionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCommunicationSuppression>
+        }
+        groupBy: {
+          args: Prisma.CommunicationSuppressionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CommunicationSuppressionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CommunicationSuppressionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CommunicationSuppressionCountAggregateOutputType> | number
+        }
+      }
+    }
+    AiInteraction: {
+      payload: Prisma.$AiInteractionPayload<ExtArgs>
+      fields: Prisma.AiInteractionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AiInteractionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AiInteractionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload>
+        }
+        findFirst: {
+          args: Prisma.AiInteractionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AiInteractionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload>
+        }
+        findMany: {
+          args: Prisma.AiInteractionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload>[]
+        }
+        create: {
+          args: Prisma.AiInteractionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload>
+        }
+        createMany: {
+          args: Prisma.AiInteractionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AiInteractionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload>[]
+        }
+        delete: {
+          args: Prisma.AiInteractionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload>
+        }
+        update: {
+          args: Prisma.AiInteractionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload>
+        }
+        deleteMany: {
+          args: Prisma.AiInteractionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AiInteractionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AiInteractionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload>[]
+        }
+        upsert: {
+          args: Prisma.AiInteractionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiInteractionPayload>
+        }
+        aggregate: {
+          args: Prisma.AiInteractionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAiInteraction>
+        }
+        groupBy: {
+          args: Prisma.AiInteractionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiInteractionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AiInteractionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiInteractionCountAggregateOutputType> | number
+        }
+      }
+    }
     FundraiserPage: {
       payload: Prisma.$FundraiserPagePayload<ExtArgs>
       fields: Prisma.FundraiserPageFieldRefs
@@ -8531,6 +8681,36 @@ export const CommunicationMessageScalarFieldEnum = {
 export type CommunicationMessageScalarFieldEnum = (typeof CommunicationMessageScalarFieldEnum)[keyof typeof CommunicationMessageScalarFieldEnum]
 
 
+export const CommunicationSuppressionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  channel: 'channel',
+  address: 'address',
+  reason: 'reason',
+  createdByClerkUserId: 'createdByClerkUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CommunicationSuppressionScalarFieldEnum = (typeof CommunicationSuppressionScalarFieldEnum)[keyof typeof CommunicationSuppressionScalarFieldEnum]
+
+
+export const AiInteractionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  churchId: 'churchId',
+  clerkUserId: 'clerkUserId',
+  provider: 'provider',
+  model: 'model',
+  question: 'question',
+  answer: 'answer',
+  sources: 'sources',
+  createdAt: 'createdAt'
+} as const
+
+export type AiInteractionScalarFieldEnum = (typeof AiInteractionScalarFieldEnum)[keyof typeof AiInteractionScalarFieldEnum]
+
+
 export const FundraiserPageScalarFieldEnum = {
   id: 'id',
   churchId: 'churchId',
@@ -9936,6 +10116,20 @@ export type ListEnumCommunicationStatusFieldRefInput<$PrismaModel> = FieldRefInp
 
 
 /**
+ * Reference to a field of type 'CommunicationSuppressionReason'
+ */
+export type EnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CommunicationSuppressionReason'>
+    
+
+
+/**
+ * Reference to a field of type 'CommunicationSuppressionReason[]'
+ */
+export type ListEnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CommunicationSuppressionReason[]'>
+    
+
+
+/**
  * Reference to a field of type 'FundraiserStatus'
  */
 export type EnumFundraiserStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FundraiserStatus'>
@@ -10504,6 +10698,8 @@ export type GlobalOmitConfig = {
   communicationDripEnrollment?: Prisma.CommunicationDripEnrollmentOmit
   communicationTemplate?: Prisma.CommunicationTemplateOmit
   communicationMessage?: Prisma.CommunicationMessageOmit
+  communicationSuppression?: Prisma.CommunicationSuppressionOmit
+  aiInteraction?: Prisma.AiInteractionOmit
   fundraiserPage?: Prisma.FundraiserPageOmit
   pledge?: Prisma.PledgeOmit
   recurringDonation?: Prisma.RecurringDonationOmit

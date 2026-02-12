@@ -648,9 +648,9 @@ async function start() {
         return;
       }
 
-      const body = (request.body ?? {}) as { suspendPastDueAfterDays?: number; limitTenants?: number };
+      const body = (request.body ?? {}) as { expirePastDueAfterDays?: number; limitTenants?: number };
       const result = await runSubscriptionAutomation({
-        suspendPastDueAfterDays: body.suspendPastDueAfterDays,
+        expirePastDueAfterDays: body.expirePastDueAfterDays,
         limitTenants: body.limitTenants,
       });
       reply.send(result);

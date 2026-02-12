@@ -1,9 +1,10 @@
 import { z } from 'zod';
-import { Prisma, prisma, CareRequestStatus, SermonStatus, TenantSubscriptionStatus } from '@faithflow-ai/database';
+import { Prisma, prisma, CareRequestStatus, SermonStatus, StorageProvider, TenantSubscriptionStatus } from '@faithflow-ai/database';
 import { router, protectedProcedure } from '../trpc';
 import { ensureFeatureEnabled } from '../entitlements';
 import { TRPCError } from '@trpc/server';
 import { sendEmail } from '../email';
+import { runStorageSmokeTest } from '../storage';
 
 const rangeInput = z
   .object({
@@ -120,7 +121,7 @@ export const operationsRouter = router({
     const lastAudit = await prisma.auditLog.findMany({
       where: {
         tenantId: ctx.tenantId,
-        action: { in: ['subscription.trial_reminder_queued', 'billing.dunning_queued', 'subscription.tenant_auto_suspended'] },
+        action: { in: ['subscription.trial_reminder_queued', 'billing.dunning_queued', 'subscription.past_due_expired'] },
       },
       orderBy: { createdAt: 'desc' },
       take: 10,
@@ -160,7 +161,7 @@ export const operationsRouter = router({
       jobs: {
         trialReminderLast: lastByAction['subscription.trial_reminder_queued'] ?? null,
         dunningLast: lastByAction['billing.dunning_queued'] ?? null,
-        autoSuspensionLast: lastByAction['subscription.tenant_auto_suspended'] ?? null,
+        pastDueExpireLast: lastByAction['subscription.past_due_expired'] ?? null,
       },
     };
   }),
@@ -196,6 +197,43 @@ export const operationsRouter = router({
       });
 
       return { ok: true, to, sentAt: now.toISOString() };
+    }),
+
+  uploadTest: protectedProcedure
+    .input(z.object({ provider: z.nativeEnum(StorageProvider).optional() }).optional())
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.userId || !ctx.tenantId) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Tenant context required' });
+      }
+
+      const staff = await prisma.staffMembership.findFirst({
+        where: {
+          user: { clerkUserId: ctx.userId },
+          church: { organization: { tenantId: ctx.tenantId } },
+        },
+        include: { user: true, church: true },
+      });
+      if (!staff) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
+      }
+
+      const church = await prisma.church.findFirst({
+        where: { organization: { tenantId: ctx.tenantId } },
+        orderBy: { createdAt: 'asc' },
+      });
+      if (!church) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'No church found for tenant.' });
+      }
+
+      try {
+        const result = await runStorageSmokeTest({ churchId: church.id, provider: input?.provider });
+        return result;
+      } catch (error) {
+        throw new TRPCError({
+          code: 'BAD_GATEWAY',
+          message: error instanceof Error ? error.message : 'Upload test failed',
+        });
+      }
     }),
 
   headquartersSummary: protectedProcedure.input(rangeInput).query(async ({ input, ctx }) => {

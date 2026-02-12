@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
 import { trpc } from '../../../lib/trpc';
@@ -12,11 +13,25 @@ function formatDate(value?: string | Date | null) {
 
 export default function OperationsHealthPage() {
   const utils = trpc.useUtils();
+  const [message, setMessage] = useState<string | null>(null);
   const { data, isLoading, error } = trpc.operations.health.useQuery(undefined, { retry: false });
   const { mutate: sendTestEmail, isPending: isSendingTestEmail } = trpc.operations.sendTestEmail.useMutation({
     onSuccess: async () => {
+      setMessage('Test email sent.');
       await utils.operations.health.invalidate();
     },
+    onError: (err) => setMessage(err.message),
+  });
+  const { mutate: runUploadTest, isPending: isRunningUploadTest } = trpc.operations.uploadTest.useMutation({
+    onSuccess: async (result) => {
+      if (result.ok) {
+        setMessage(`Storage upload test ok (${result.provider}) in ${result.latencyMs}ms.`);
+      } else {
+        setMessage('Storage upload test failed.');
+      }
+      await utils.operations.health.invalidate();
+    },
+    onError: (err) => setMessage(err.message),
   });
 
   return (
@@ -39,6 +54,20 @@ export default function OperationsHealthPage() {
 
         {isLoading ? <p className="text-sm text-muted">Loading health...</p> : null}
         {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
+        {message ? (
+          <Card className="p-4 text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <p>{message}</p>
+              <button
+                className="text-xs text-muted underline-offset-4 hover:underline"
+                onClick={() => setMessage(null)}
+                type="button"
+              >
+                Dismiss
+              </button>
+            </div>
+          </Card>
+        ) : null}
 
         {data ? (
           <div className="grid gap-5 lg:grid-cols-2">
@@ -66,7 +95,7 @@ export default function OperationsHealthPage() {
                 <p>Storage: {data.providers.storage ? 'configured' : 'missing'}</p>
                 <p>Scheduler: {data.providers.scheduler}</p>
               </div>
-              <div className="mt-4">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <Button
                   size="sm"
                   variant="outline"
@@ -74,6 +103,14 @@ export default function OperationsHealthPage() {
                   onClick={() => sendTestEmail({})}
                 >
                   {isSendingTestEmail ? 'Sending...' : 'Send test email'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={isRunningUploadTest || !data.providers.storage}
+                  onClick={() => runUploadTest({})}
+                >
+                  {isRunningUploadTest ? 'Testing...' : 'Run storage upload test'}
                 </Button>
               </div>
             </Card>
@@ -101,7 +138,10 @@ export default function OperationsHealthPage() {
               <div className="mt-3 space-y-2 text-sm text-muted">
                 <p>Trial reminders: {data.jobs.trialReminderLast ? formatDate(data.jobs.trialReminderLast.createdAt) : 'N/A'}</p>
                 <p>Dunning queued: {data.jobs.dunningLast ? formatDate(data.jobs.dunningLast.createdAt) : 'N/A'}</p>
-                <p>Auto suspensions: {data.jobs.autoSuspensionLast ? formatDate(data.jobs.autoSuspensionLast.createdAt) : 'N/A'}</p>
+                <p>
+                  Past-due expirations:{' '}
+                  {data.jobs.pastDueExpireLast ? formatDate(data.jobs.pastDueExpireLast.createdAt) : 'N/A'}
+                </p>
               </div>
             </Card>
 

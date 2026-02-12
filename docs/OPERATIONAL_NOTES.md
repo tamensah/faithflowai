@@ -60,6 +60,9 @@ This file is the running operations log for implementation details, runtime cons
 - Tenant self-serve billing is implemented (`billing.*` router + `/billing` page).
 - Stripe checkout + Stripe portal are supported for subscription self-serve.
 - Paystack checkout is supported, but requires `paystackPlanCode` in `SubscriptionPlan.metadata`.
+- Admin in-app plan changes are supported:
+  - Stripe: schedule next-cycle plan changes + optional immediate upgrades (billing cycle reset, no proration)
+  - Paystack: plan-change checkout (best-effort attempt to disable older Paystack subscriptions to prevent double billing)
 - Stripe billing portal requires a resolvable Stripe customer id from synced subscription metadata/webhook payloads.
 - Dunning is implemented via:
   - `platform.dunningPreview`
@@ -132,7 +135,7 @@ This file is the running operations log for implementation details, runtime cons
 ### 1) Billing and revenue ops hardening
 
 - [x] Add strict provider metadata normalization and backfill (`stripeCustomerId`, paystack customer reference fields).
-- [ ] Complete plan change flows (upgrade/downgrade/interval change) with safe transition rules and audit trail.
+- [~] Complete plan change flows (upgrade/downgrade/interval change) with safe transition rules and audit trail.
 - [ ] Add stronger invoice reconciliation mapping across providers and internal subscription state.
 - [x] Add idempotency + replay-safe handling across billing webhooks and checkout finalization paths.
 
@@ -168,6 +171,6 @@ This file is the running operations log for implementation details, runtime cons
 
 ### 7) Cross-cutting quality and release readiness
 
-- [ ] Add end-to-end tests for critical flows: billing checkout, webhook sync, dunning, tenant suspend/reactivate, ticket lifecycle.
+- [ ] Add end-to-end tests for critical flows: billing checkout, webhook sync, dunning, subscription expiry/recovery, ticket lifecycle.
 - [ ] Add observability baselines: structured logs, error dashboards, latency/error SLOs per critical endpoint.
 - [ ] Add release runbooks and rollback plans for billing, platform ops, streaming, and support modules.

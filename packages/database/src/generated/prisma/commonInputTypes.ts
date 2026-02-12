@@ -1412,6 +1412,23 @@ export type EnumCommunicationStatusWithAggregatesFilter<$PrismaModel = never> = 
   _max?: Prisma.NestedEnumCommunicationStatusFilter<$PrismaModel>
 }
 
+export type EnumCommunicationSuppressionReasonFilter<$PrismaModel = never> = {
+  equals?: $Enums.CommunicationSuppressionReason | Prisma.EnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.CommunicationSuppressionReason[] | Prisma.ListEnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CommunicationSuppressionReason[] | Prisma.ListEnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCommunicationSuppressionReasonFilter<$PrismaModel> | $Enums.CommunicationSuppressionReason
+}
+
+export type EnumCommunicationSuppressionReasonWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CommunicationSuppressionReason | Prisma.EnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.CommunicationSuppressionReason[] | Prisma.ListEnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CommunicationSuppressionReason[] | Prisma.ListEnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCommunicationSuppressionReasonWithAggregatesFilter<$PrismaModel> | $Enums.CommunicationSuppressionReason
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCommunicationSuppressionReasonFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCommunicationSuppressionReasonFilter<$PrismaModel>
+}
+
 export type EnumFundraiserStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.FundraiserStatus | Prisma.EnumFundraiserStatusFieldRefInput<$PrismaModel>
   in?: $Enums.FundraiserStatus[] | Prisma.ListEnumFundraiserStatusFieldRefInput<$PrismaModel>
@@ -3243,6 +3260,23 @@ export type NestedEnumCommunicationStatusWithAggregatesFilter<$PrismaModel = nev
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumCommunicationStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumCommunicationStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumCommunicationSuppressionReasonFilter<$PrismaModel = never> = {
+  equals?: $Enums.CommunicationSuppressionReason | Prisma.EnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.CommunicationSuppressionReason[] | Prisma.ListEnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CommunicationSuppressionReason[] | Prisma.ListEnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCommunicationSuppressionReasonFilter<$PrismaModel> | $Enums.CommunicationSuppressionReason
+}
+
+export type NestedEnumCommunicationSuppressionReasonWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CommunicationSuppressionReason | Prisma.EnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  in?: $Enums.CommunicationSuppressionReason[] | Prisma.ListEnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CommunicationSuppressionReason[] | Prisma.ListEnumCommunicationSuppressionReasonFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCommunicationSuppressionReasonWithAggregatesFilter<$PrismaModel> | $Enums.CommunicationSuppressionReason
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCommunicationSuppressionReasonFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCommunicationSuppressionReasonFilter<$PrismaModel>
 }
 
 export type NestedEnumFundraiserStatusFilter<$PrismaModel = never> = {

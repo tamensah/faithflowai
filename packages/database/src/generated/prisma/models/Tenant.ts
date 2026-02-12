@@ -225,6 +225,8 @@ export type TenantWhereInput = {
   supportTickets?: Prisma.SupportTicketListRelationFilter
   webhookEvents?: Prisma.WebhookEventListRelationFilter
   importBatches?: Prisma.ImportBatchListRelationFilter
+  communicationSuppressions?: Prisma.CommunicationSuppressionListRelationFilter
+  aiInteractions?: Prisma.AiInteractionListRelationFilter
 }
 
 export type TenantOrderByWithRelationInput = {
@@ -248,6 +250,8 @@ export type TenantOrderByWithRelationInput = {
   supportTickets?: Prisma.SupportTicketOrderByRelationAggregateInput
   webhookEvents?: Prisma.WebhookEventOrderByRelationAggregateInput
   importBatches?: Prisma.ImportBatchOrderByRelationAggregateInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionOrderByRelationAggregateInput
+  aiInteractions?: Prisma.AiInteractionOrderByRelationAggregateInput
 }
 
 export type TenantWhereUniqueInput = Prisma.AtLeast<{
@@ -274,6 +278,8 @@ export type TenantWhereUniqueInput = Prisma.AtLeast<{
   supportTickets?: Prisma.SupportTicketListRelationFilter
   webhookEvents?: Prisma.WebhookEventListRelationFilter
   importBatches?: Prisma.ImportBatchListRelationFilter
+  communicationSuppressions?: Prisma.CommunicationSuppressionListRelationFilter
+  aiInteractions?: Prisma.AiInteractionListRelationFilter
 }, "id" | "slug" | "clerkOrgId">
 
 export type TenantOrderByWithAggregationInput = {
@@ -327,6 +333,8 @@ export type TenantCreateInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateInput = {
@@ -350,6 +358,8 @@ export type TenantUncheckedCreateInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUpdateInput = {
@@ -373,6 +383,8 @@ export type TenantUpdateInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateInput = {
@@ -396,6 +408,8 @@ export type TenantUncheckedUpdateInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateManyInput = {
@@ -574,6 +588,34 @@ export type TenantUpdateOneWithoutPayoutTransactionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutPayoutTransactionsInput, Prisma.TenantUpdateWithoutPayoutTransactionsInput>, Prisma.TenantUncheckedUpdateWithoutPayoutTransactionsInput>
 }
 
+export type TenantCreateNestedOneWithoutCommunicationSuppressionsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutCommunicationSuppressionsInput, Prisma.TenantUncheckedCreateWithoutCommunicationSuppressionsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutCommunicationSuppressionsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutCommunicationSuppressionsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutCommunicationSuppressionsInput, Prisma.TenantUncheckedCreateWithoutCommunicationSuppressionsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutCommunicationSuppressionsInput
+  upsert?: Prisma.TenantUpsertWithoutCommunicationSuppressionsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutCommunicationSuppressionsInput, Prisma.TenantUpdateWithoutCommunicationSuppressionsInput>, Prisma.TenantUncheckedUpdateWithoutCommunicationSuppressionsInput>
+}
+
+export type TenantCreateNestedOneWithoutAiInteractionsInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutAiInteractionsInput, Prisma.TenantUncheckedCreateWithoutAiInteractionsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutAiInteractionsInput
+  connect?: Prisma.TenantWhereUniqueInput
+}
+
+export type TenantUpdateOneRequiredWithoutAiInteractionsNestedInput = {
+  create?: Prisma.XOR<Prisma.TenantCreateWithoutAiInteractionsInput, Prisma.TenantUncheckedCreateWithoutAiInteractionsInput>
+  connectOrCreate?: Prisma.TenantCreateOrConnectWithoutAiInteractionsInput
+  upsert?: Prisma.TenantUpsertWithoutAiInteractionsInput
+  connect?: Prisma.TenantWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TenantUpdateToOneWithWhereWithoutAiInteractionsInput, Prisma.TenantUpdateWithoutAiInteractionsInput>, Prisma.TenantUncheckedUpdateWithoutAiInteractionsInput>
+}
+
 export type TenantCreateNestedOneWithoutAuditLogsInput = {
   create?: Prisma.XOR<Prisma.TenantCreateWithoutAuditLogsInput, Prisma.TenantUncheckedCreateWithoutAuditLogsInput>
   connectOrCreate?: Prisma.TenantCreateOrConnectWithoutAuditLogsInput
@@ -682,6 +724,8 @@ export type TenantCreateWithoutOrganizationsInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutOrganizationsInput = {
@@ -704,6 +748,8 @@ export type TenantUncheckedCreateWithoutOrganizationsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutOrganizationsInput = {
@@ -742,6 +788,8 @@ export type TenantUpdateWithoutOrganizationsInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutOrganizationsInput = {
@@ -764,6 +812,8 @@ export type TenantUncheckedUpdateWithoutOrganizationsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSubscriptionsInput = {
@@ -786,6 +836,8 @@ export type TenantCreateWithoutSubscriptionsInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSubscriptionsInput = {
@@ -808,6 +860,8 @@ export type TenantUncheckedCreateWithoutSubscriptionsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSubscriptionsInput = {
@@ -846,6 +900,8 @@ export type TenantUpdateWithoutSubscriptionsInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSubscriptionsInput = {
@@ -868,6 +924,8 @@ export type TenantUncheckedUpdateWithoutSubscriptionsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutImportBatchesInput = {
@@ -890,6 +948,8 @@ export type TenantCreateWithoutImportBatchesInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyCreateNestedOneWithoutTenantInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutImportBatchesInput = {
@@ -912,6 +972,8 @@ export type TenantUncheckedCreateWithoutImportBatchesInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyUncheckedCreateNestedOneWithoutTenantInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutImportBatchesInput = {
@@ -950,6 +1012,8 @@ export type TenantUpdateWithoutImportBatchesInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyUpdateOneWithoutTenantNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutImportBatchesInput = {
@@ -972,6 +1036,8 @@ export type TenantUncheckedUpdateWithoutImportBatchesInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyUncheckedUpdateOneWithoutTenantNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutPayoutsInput = {
@@ -994,6 +1060,8 @@ export type TenantCreateWithoutPayoutsInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutPayoutsInput = {
@@ -1016,6 +1084,8 @@ export type TenantUncheckedCreateWithoutPayoutsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutPayoutsInput = {
@@ -1054,6 +1124,8 @@ export type TenantUpdateWithoutPayoutsInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutPayoutsInput = {
@@ -1076,6 +1148,8 @@ export type TenantUncheckedUpdateWithoutPayoutsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutPayoutTransactionsInput = {
@@ -1098,6 +1172,8 @@ export type TenantCreateWithoutPayoutTransactionsInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutPayoutTransactionsInput = {
@@ -1120,6 +1196,8 @@ export type TenantUncheckedCreateWithoutPayoutTransactionsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutPayoutTransactionsInput = {
@@ -1158,6 +1236,8 @@ export type TenantUpdateWithoutPayoutTransactionsInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutPayoutTransactionsInput = {
@@ -1180,6 +1260,232 @@ export type TenantUncheckedUpdateWithoutPayoutTransactionsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutCommunicationSuppressionsInput = {
+  id?: string
+  name: string
+  slug: string
+  clerkOrgId: string
+  status?: $Enums.TenantStatus
+  suspendedAt?: Date | string | null
+  suspensionReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organizations?: Prisma.OrganizationCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutTenantInput
+  payoutTransactions?: Prisma.PayoutTransactionCreateNestedManyWithoutTenantInput
+  subscriptions?: Prisma.TenantSubscriptionCreateNestedManyWithoutTenantInput
+  domains?: Prisma.TenantDomainCreateNestedManyWithoutTenantInput
+  healthChecks?: Prisma.TenantHealthCheckCreateNestedManyWithoutTenantInput
+  securityPolicy?: Prisma.TenantSecurityPolicyCreateNestedOneWithoutTenantInput
+  supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
+  webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutCommunicationSuppressionsInput = {
+  id?: string
+  name: string
+  slug: string
+  clerkOrgId: string
+  status?: $Enums.TenantStatus
+  suspendedAt?: Date | string | null
+  suspensionReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutTenantInput
+  payoutTransactions?: Prisma.PayoutTransactionUncheckedCreateNestedManyWithoutTenantInput
+  subscriptions?: Prisma.TenantSubscriptionUncheckedCreateNestedManyWithoutTenantInput
+  domains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutTenantInput
+  healthChecks?: Prisma.TenantHealthCheckUncheckedCreateNestedManyWithoutTenantInput
+  securityPolicy?: Prisma.TenantSecurityPolicyUncheckedCreateNestedOneWithoutTenantInput
+  supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
+  webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutCommunicationSuppressionsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutCommunicationSuppressionsInput, Prisma.TenantUncheckedCreateWithoutCommunicationSuppressionsInput>
+}
+
+export type TenantUpsertWithoutCommunicationSuppressionsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutCommunicationSuppressionsInput, Prisma.TenantUncheckedUpdateWithoutCommunicationSuppressionsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutCommunicationSuppressionsInput, Prisma.TenantUncheckedCreateWithoutCommunicationSuppressionsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutCommunicationSuppressionsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutCommunicationSuppressionsInput, Prisma.TenantUncheckedUpdateWithoutCommunicationSuppressionsInput>
+}
+
+export type TenantUpdateWithoutCommunicationSuppressionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkOrgId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organizations?: Prisma.OrganizationUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutTenantNestedInput
+  payoutTransactions?: Prisma.PayoutTransactionUpdateManyWithoutTenantNestedInput
+  subscriptions?: Prisma.TenantSubscriptionUpdateManyWithoutTenantNestedInput
+  domains?: Prisma.TenantDomainUpdateManyWithoutTenantNestedInput
+  healthChecks?: Prisma.TenantHealthCheckUpdateManyWithoutTenantNestedInput
+  securityPolicy?: Prisma.TenantSecurityPolicyUpdateOneWithoutTenantNestedInput
+  supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
+  webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutCommunicationSuppressionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkOrgId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organizations?: Prisma.OrganizationUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutTenantNestedInput
+  payoutTransactions?: Prisma.PayoutTransactionUncheckedUpdateManyWithoutTenantNestedInput
+  subscriptions?: Prisma.TenantSubscriptionUncheckedUpdateManyWithoutTenantNestedInput
+  domains?: Prisma.TenantDomainUncheckedUpdateManyWithoutTenantNestedInput
+  healthChecks?: Prisma.TenantHealthCheckUncheckedUpdateManyWithoutTenantNestedInput
+  securityPolicy?: Prisma.TenantSecurityPolicyUncheckedUpdateOneWithoutTenantNestedInput
+  supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
+  webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantCreateWithoutAiInteractionsInput = {
+  id?: string
+  name: string
+  slug: string
+  clerkOrgId: string
+  status?: $Enums.TenantStatus
+  suspendedAt?: Date | string | null
+  suspensionReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organizations?: Prisma.OrganizationCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutTenantInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutTenantInput
+  payoutTransactions?: Prisma.PayoutTransactionCreateNestedManyWithoutTenantInput
+  subscriptions?: Prisma.TenantSubscriptionCreateNestedManyWithoutTenantInput
+  domains?: Prisma.TenantDomainCreateNestedManyWithoutTenantInput
+  healthChecks?: Prisma.TenantHealthCheckCreateNestedManyWithoutTenantInput
+  securityPolicy?: Prisma.TenantSecurityPolicyCreateNestedOneWithoutTenantInput
+  supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
+  webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+}
+
+export type TenantUncheckedCreateWithoutAiInteractionsInput = {
+  id?: string
+  name: string
+  slug: string
+  clerkOrgId: string
+  status?: $Enums.TenantStatus
+  suspendedAt?: Date | string | null
+  suspensionReason?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organizations?: Prisma.OrganizationUncheckedCreateNestedManyWithoutTenantInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutTenantInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutTenantInput
+  payoutTransactions?: Prisma.PayoutTransactionUncheckedCreateNestedManyWithoutTenantInput
+  subscriptions?: Prisma.TenantSubscriptionUncheckedCreateNestedManyWithoutTenantInput
+  domains?: Prisma.TenantDomainUncheckedCreateNestedManyWithoutTenantInput
+  healthChecks?: Prisma.TenantHealthCheckUncheckedCreateNestedManyWithoutTenantInput
+  securityPolicy?: Prisma.TenantSecurityPolicyUncheckedCreateNestedOneWithoutTenantInput
+  supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
+  webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+}
+
+export type TenantCreateOrConnectWithoutAiInteractionsInput = {
+  where: Prisma.TenantWhereUniqueInput
+  create: Prisma.XOR<Prisma.TenantCreateWithoutAiInteractionsInput, Prisma.TenantUncheckedCreateWithoutAiInteractionsInput>
+}
+
+export type TenantUpsertWithoutAiInteractionsInput = {
+  update: Prisma.XOR<Prisma.TenantUpdateWithoutAiInteractionsInput, Prisma.TenantUncheckedUpdateWithoutAiInteractionsInput>
+  create: Prisma.XOR<Prisma.TenantCreateWithoutAiInteractionsInput, Prisma.TenantUncheckedCreateWithoutAiInteractionsInput>
+  where?: Prisma.TenantWhereInput
+}
+
+export type TenantUpdateToOneWithWhereWithoutAiInteractionsInput = {
+  where?: Prisma.TenantWhereInput
+  data: Prisma.XOR<Prisma.TenantUpdateWithoutAiInteractionsInput, Prisma.TenantUncheckedUpdateWithoutAiInteractionsInput>
+}
+
+export type TenantUpdateWithoutAiInteractionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkOrgId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organizations?: Prisma.OrganizationUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutTenantNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutTenantNestedInput
+  payoutTransactions?: Prisma.PayoutTransactionUpdateManyWithoutTenantNestedInput
+  subscriptions?: Prisma.TenantSubscriptionUpdateManyWithoutTenantNestedInput
+  domains?: Prisma.TenantDomainUpdateManyWithoutTenantNestedInput
+  healthChecks?: Prisma.TenantHealthCheckUpdateManyWithoutTenantNestedInput
+  securityPolicy?: Prisma.TenantSecurityPolicyUpdateOneWithoutTenantNestedInput
+  supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
+  webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+}
+
+export type TenantUncheckedUpdateWithoutAiInteractionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  clerkOrgId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumTenantStatusFieldUpdateOperationsInput | $Enums.TenantStatus
+  suspendedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  suspensionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organizations?: Prisma.OrganizationUncheckedUpdateManyWithoutTenantNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutTenantNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutTenantNestedInput
+  payoutTransactions?: Prisma.PayoutTransactionUncheckedUpdateManyWithoutTenantNestedInput
+  subscriptions?: Prisma.TenantSubscriptionUncheckedUpdateManyWithoutTenantNestedInput
+  domains?: Prisma.TenantDomainUncheckedUpdateManyWithoutTenantNestedInput
+  healthChecks?: Prisma.TenantHealthCheckUncheckedUpdateManyWithoutTenantNestedInput
+  securityPolicy?: Prisma.TenantSecurityPolicyUncheckedUpdateOneWithoutTenantNestedInput
+  supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
+  webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutAuditLogsInput = {
@@ -1202,6 +1508,8 @@ export type TenantCreateWithoutAuditLogsInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutAuditLogsInput = {
@@ -1224,6 +1532,8 @@ export type TenantUncheckedCreateWithoutAuditLogsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutAuditLogsInput = {
@@ -1262,6 +1572,8 @@ export type TenantUpdateWithoutAuditLogsInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutAuditLogsInput = {
@@ -1284,6 +1596,8 @@ export type TenantUncheckedUpdateWithoutAuditLogsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutDomainsInput = {
@@ -1306,6 +1620,8 @@ export type TenantCreateWithoutDomainsInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutDomainsInput = {
@@ -1328,6 +1644,8 @@ export type TenantUncheckedCreateWithoutDomainsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutDomainsInput = {
@@ -1366,6 +1684,8 @@ export type TenantUpdateWithoutDomainsInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutDomainsInput = {
@@ -1388,6 +1708,8 @@ export type TenantUncheckedUpdateWithoutDomainsInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutHealthChecksInput = {
@@ -1410,6 +1732,8 @@ export type TenantCreateWithoutHealthChecksInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutHealthChecksInput = {
@@ -1432,6 +1756,8 @@ export type TenantUncheckedCreateWithoutHealthChecksInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutHealthChecksInput = {
@@ -1470,6 +1796,8 @@ export type TenantUpdateWithoutHealthChecksInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutHealthChecksInput = {
@@ -1492,6 +1820,8 @@ export type TenantUncheckedUpdateWithoutHealthChecksInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSecurityPolicyInput = {
@@ -1514,6 +1844,8 @@ export type TenantCreateWithoutSecurityPolicyInput = {
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSecurityPolicyInput = {
@@ -1536,6 +1868,8 @@ export type TenantUncheckedCreateWithoutSecurityPolicyInput = {
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSecurityPolicyInput = {
@@ -1574,6 +1908,8 @@ export type TenantUpdateWithoutSecurityPolicyInput = {
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSecurityPolicyInput = {
@@ -1596,6 +1932,8 @@ export type TenantUncheckedUpdateWithoutSecurityPolicyInput = {
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutSupportTicketsInput = {
@@ -1618,6 +1956,8 @@ export type TenantCreateWithoutSupportTicketsInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyCreateNestedOneWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutSupportTicketsInput = {
@@ -1640,6 +1980,8 @@ export type TenantUncheckedCreateWithoutSupportTicketsInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyUncheckedCreateNestedOneWithoutTenantInput
   webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutSupportTicketsInput = {
@@ -1678,6 +2020,8 @@ export type TenantUpdateWithoutSupportTicketsInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyUpdateOneWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutSupportTicketsInput = {
@@ -1700,6 +2044,8 @@ export type TenantUncheckedUpdateWithoutSupportTicketsInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyUncheckedUpdateOneWithoutTenantNestedInput
   webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantCreateWithoutWebhookEventsInput = {
@@ -1722,6 +2068,8 @@ export type TenantCreateWithoutWebhookEventsInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyCreateNestedOneWithoutTenantInput
   supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutTenantInput
 }
 
 export type TenantUncheckedCreateWithoutWebhookEventsInput = {
@@ -1744,6 +2092,8 @@ export type TenantUncheckedCreateWithoutWebhookEventsInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyUncheckedCreateNestedOneWithoutTenantInput
   supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutTenantInput
   importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutTenantInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedCreateNestedManyWithoutTenantInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutTenantInput
 }
 
 export type TenantCreateOrConnectWithoutWebhookEventsInput = {
@@ -1782,6 +2132,8 @@ export type TenantUpdateWithoutWebhookEventsInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyUpdateOneWithoutTenantNestedInput
   supportTickets?: Prisma.SupportTicketUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutTenantNestedInput
 }
 
 export type TenantUncheckedUpdateWithoutWebhookEventsInput = {
@@ -1804,6 +2156,8 @@ export type TenantUncheckedUpdateWithoutWebhookEventsInput = {
   securityPolicy?: Prisma.TenantSecurityPolicyUncheckedUpdateOneWithoutTenantNestedInput
   supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutTenantNestedInput
   importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutTenantNestedInput
+  communicationSuppressions?: Prisma.CommunicationSuppressionUncheckedUpdateManyWithoutTenantNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutTenantNestedInput
 }
 
 
@@ -1822,6 +2176,8 @@ export type TenantCountOutputType = {
   supportTickets: number
   webhookEvents: number
   importBatches: number
+  communicationSuppressions: number
+  aiInteractions: number
 }
 
 export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1835,6 +2191,8 @@ export type TenantCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   supportTickets?: boolean | TenantCountOutputTypeCountSupportTicketsArgs
   webhookEvents?: boolean | TenantCountOutputTypeCountWebhookEventsArgs
   importBatches?: boolean | TenantCountOutputTypeCountImportBatchesArgs
+  communicationSuppressions?: boolean | TenantCountOutputTypeCountCommunicationSuppressionsArgs
+  aiInteractions?: boolean | TenantCountOutputTypeCountAiInteractionsArgs
 }
 
 /**
@@ -1917,6 +2275,20 @@ export type TenantCountOutputTypeCountImportBatchesArgs<ExtArgs extends runtime.
   where?: Prisma.ImportBatchWhereInput
 }
 
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountCommunicationSuppressionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CommunicationSuppressionWhereInput
+}
+
+/**
+ * TenantCountOutputType without action
+ */
+export type TenantCountOutputTypeCountAiInteractionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiInteractionWhereInput
+}
+
 
 export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1939,6 +2311,8 @@ export type TenantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   supportTickets?: boolean | Prisma.Tenant$supportTicketsArgs<ExtArgs>
   webhookEvents?: boolean | Prisma.Tenant$webhookEventsArgs<ExtArgs>
   importBatches?: boolean | Prisma.Tenant$importBatchesArgs<ExtArgs>
+  communicationSuppressions?: boolean | Prisma.Tenant$communicationSuppressionsArgs<ExtArgs>
+  aiInteractions?: boolean | Prisma.Tenant$aiInteractionsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["tenant"]>
 
@@ -1991,6 +2365,8 @@ export type TenantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   supportTickets?: boolean | Prisma.Tenant$supportTicketsArgs<ExtArgs>
   webhookEvents?: boolean | Prisma.Tenant$webhookEventsArgs<ExtArgs>
   importBatches?: boolean | Prisma.Tenant$importBatchesArgs<ExtArgs>
+  communicationSuppressions?: boolean | Prisma.Tenant$communicationSuppressionsArgs<ExtArgs>
+  aiInteractions?: boolean | Prisma.Tenant$aiInteractionsArgs<ExtArgs>
   _count?: boolean | Prisma.TenantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type TenantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2010,6 +2386,8 @@ export type $TenantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     supportTickets: Prisma.$SupportTicketPayload<ExtArgs>[]
     webhookEvents: Prisma.$WebhookEventPayload<ExtArgs>[]
     importBatches: Prisma.$ImportBatchPayload<ExtArgs>[]
+    communicationSuppressions: Prisma.$CommunicationSuppressionPayload<ExtArgs>[]
+    aiInteractions: Prisma.$AiInteractionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2426,6 +2804,8 @@ export interface Prisma__TenantClient<T, Null = never, ExtArgs extends runtime.T
   supportTickets<T extends Prisma.Tenant$supportTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$supportTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupportTicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   webhookEvents<T extends Prisma.Tenant$webhookEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$webhookEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WebhookEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   importBatches<T extends Prisma.Tenant$importBatchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$importBatchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ImportBatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  communicationSuppressions<T extends Prisma.Tenant$communicationSuppressionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$communicationSuppressionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommunicationSuppressionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiInteractions<T extends Prisma.Tenant$aiInteractionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Tenant$aiInteractionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiInteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3108,6 +3488,54 @@ export type Tenant$importBatchesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.ImportBatchScalarFieldEnum | Prisma.ImportBatchScalarFieldEnum[]
+}
+
+/**
+ * Tenant.communicationSuppressions
+ */
+export type Tenant$communicationSuppressionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CommunicationSuppression
+   */
+  select?: Prisma.CommunicationSuppressionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CommunicationSuppression
+   */
+  omit?: Prisma.CommunicationSuppressionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommunicationSuppressionInclude<ExtArgs> | null
+  where?: Prisma.CommunicationSuppressionWhereInput
+  orderBy?: Prisma.CommunicationSuppressionOrderByWithRelationInput | Prisma.CommunicationSuppressionOrderByWithRelationInput[]
+  cursor?: Prisma.CommunicationSuppressionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CommunicationSuppressionScalarFieldEnum | Prisma.CommunicationSuppressionScalarFieldEnum[]
+}
+
+/**
+ * Tenant.aiInteractions
+ */
+export type Tenant$aiInteractionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiInteraction
+   */
+  select?: Prisma.AiInteractionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiInteraction
+   */
+  omit?: Prisma.AiInteractionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiInteractionInclude<ExtArgs> | null
+  where?: Prisma.AiInteractionWhereInput
+  orderBy?: Prisma.AiInteractionOrderByWithRelationInput | Prisma.AiInteractionOrderByWithRelationInput[]
+  cursor?: Prisma.AiInteractionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiInteractionScalarFieldEnum | Prisma.AiInteractionScalarFieldEnum[]
 }
 
 /**

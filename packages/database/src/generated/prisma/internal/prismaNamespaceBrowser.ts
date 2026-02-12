@@ -120,6 +120,8 @@ export const ModelName = {
   CommunicationDripEnrollment: 'CommunicationDripEnrollment',
   CommunicationTemplate: 'CommunicationTemplate',
   CommunicationMessage: 'CommunicationMessage',
+  CommunicationSuppression: 'CommunicationSuppression',
+  AiInteraction: 'AiInteraction',
   FundraiserPage: 'FundraiserPage',
   Pledge: 'Pledge',
   RecurringDonation: 'RecurringDonation',
@@ -1274,6 +1276,36 @@ export const CommunicationMessageScalarFieldEnum = {
 } as const
 
 export type CommunicationMessageScalarFieldEnum = (typeof CommunicationMessageScalarFieldEnum)[keyof typeof CommunicationMessageScalarFieldEnum]
+
+
+export const CommunicationSuppressionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  channel: 'channel',
+  address: 'address',
+  reason: 'reason',
+  createdByClerkUserId: 'createdByClerkUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CommunicationSuppressionScalarFieldEnum = (typeof CommunicationSuppressionScalarFieldEnum)[keyof typeof CommunicationSuppressionScalarFieldEnum]
+
+
+export const AiInteractionScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  churchId: 'churchId',
+  clerkUserId: 'clerkUserId',
+  provider: 'provider',
+  model: 'model',
+  question: 'question',
+  answer: 'answer',
+  sources: 'sources',
+  createdAt: 'createdAt'
+} as const
+
+export type AiInteractionScalarFieldEnum = (typeof AiInteractionScalarFieldEnum)[keyof typeof AiInteractionScalarFieldEnum]
 
 
 export const FundraiserPageScalarFieldEnum = {

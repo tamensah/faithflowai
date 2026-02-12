@@ -245,6 +245,7 @@ export type ChurchWhereInput = {
   notifications?: Prisma.InAppNotificationListRelationFilter
   memberRegistrations?: Prisma.MemberRegistrationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  aiInteractions?: Prisma.AiInteractionListRelationFilter
   staffMemberships?: Prisma.StaffMembershipListRelationFilter
   memberRelationships?: Prisma.MemberRelationshipListRelationFilter
   mediaAssets?: Prisma.MediaAssetListRelationFilter
@@ -311,6 +312,7 @@ export type ChurchOrderByWithRelationInput = {
   notifications?: Prisma.InAppNotificationOrderByRelationAggregateInput
   memberRegistrations?: Prisma.MemberRegistrationOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  aiInteractions?: Prisma.AiInteractionOrderByRelationAggregateInput
   staffMemberships?: Prisma.StaffMembershipOrderByRelationAggregateInput
   memberRelationships?: Prisma.MemberRelationshipOrderByRelationAggregateInput
   mediaAssets?: Prisma.MediaAssetOrderByRelationAggregateInput
@@ -381,6 +383,7 @@ export type ChurchWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.InAppNotificationListRelationFilter
   memberRegistrations?: Prisma.MemberRegistrationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  aiInteractions?: Prisma.AiInteractionListRelationFilter
   staffMemberships?: Prisma.StaffMembershipListRelationFilter
   memberRelationships?: Prisma.MemberRelationshipListRelationFilter
   mediaAssets?: Prisma.MediaAssetListRelationFilter
@@ -474,6 +477,7 @@ export type ChurchCreateInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -539,6 +543,7 @@ export type ChurchUncheckedCreateInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -604,6 +609,7 @@ export type ChurchUpdateInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -669,6 +675,7 @@ export type ChurchUncheckedUpdateInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -1343,6 +1350,22 @@ export type ChurchUpdateOneRequiredWithoutCommunicationMessagesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ChurchUpdateToOneWithWhereWithoutCommunicationMessagesInput, Prisma.ChurchUpdateWithoutCommunicationMessagesInput>, Prisma.ChurchUncheckedUpdateWithoutCommunicationMessagesInput>
 }
 
+export type ChurchCreateNestedOneWithoutAiInteractionsInput = {
+  create?: Prisma.XOR<Prisma.ChurchCreateWithoutAiInteractionsInput, Prisma.ChurchUncheckedCreateWithoutAiInteractionsInput>
+  connectOrCreate?: Prisma.ChurchCreateOrConnectWithoutAiInteractionsInput
+  connect?: Prisma.ChurchWhereUniqueInput
+}
+
+export type ChurchUpdateOneWithoutAiInteractionsNestedInput = {
+  create?: Prisma.XOR<Prisma.ChurchCreateWithoutAiInteractionsInput, Prisma.ChurchUncheckedCreateWithoutAiInteractionsInput>
+  connectOrCreate?: Prisma.ChurchCreateOrConnectWithoutAiInteractionsInput
+  upsert?: Prisma.ChurchUpsertWithoutAiInteractionsInput
+  disconnect?: Prisma.ChurchWhereInput | boolean
+  delete?: Prisma.ChurchWhereInput | boolean
+  connect?: Prisma.ChurchWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ChurchUpdateToOneWithWhereWithoutAiInteractionsInput, Prisma.ChurchUpdateWithoutAiInteractionsInput>, Prisma.ChurchUncheckedUpdateWithoutAiInteractionsInput>
+}
+
 export type ChurchCreateNestedOneWithoutFundraiserPagesInput = {
   create?: Prisma.XOR<Prisma.ChurchCreateWithoutFundraiserPagesInput, Prisma.ChurchUncheckedCreateWithoutFundraiserPagesInput>
   connectOrCreate?: Prisma.ChurchCreateOrConnectWithoutFundraiserPagesInput
@@ -1633,6 +1656,7 @@ export type ChurchCreateWithoutOrganizationInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -1697,6 +1721,7 @@ export type ChurchUncheckedCreateWithoutOrganizationInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -1801,6 +1826,7 @@ export type ChurchCreateWithoutCampusesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -1865,6 +1891,7 @@ export type ChurchUncheckedCreateWithoutCampusesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -1945,6 +1972,7 @@ export type ChurchUpdateWithoutCampusesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -2009,6 +2037,7 @@ export type ChurchUncheckedUpdateWithoutCampusesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -2073,6 +2102,7 @@ export type ChurchCreateWithoutHouseholdsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -2137,6 +2167,7 @@ export type ChurchUncheckedCreateWithoutHouseholdsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -2217,6 +2248,7 @@ export type ChurchUpdateWithoutHouseholdsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -2281,6 +2313,7 @@ export type ChurchUncheckedUpdateWithoutHouseholdsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -2345,6 +2378,7 @@ export type ChurchCreateWithoutMembersInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -2409,6 +2443,7 @@ export type ChurchUncheckedCreateWithoutMembersInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -2489,6 +2524,7 @@ export type ChurchUpdateWithoutMembersInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -2553,6 +2589,7 @@ export type ChurchUncheckedUpdateWithoutMembersInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -2618,6 +2655,7 @@ export type ChurchCreateWithoutMemberAccessRequestsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -2682,6 +2720,7 @@ export type ChurchUncheckedCreateWithoutMemberAccessRequestsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -2762,6 +2801,7 @@ export type ChurchUpdateWithoutMemberAccessRequestsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -2826,6 +2866,7 @@ export type ChurchUncheckedUpdateWithoutMemberAccessRequestsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -2890,6 +2931,7 @@ export type ChurchCreateWithoutStaffInvitesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -2954,6 +2996,7 @@ export type ChurchUncheckedCreateWithoutStaffInvitesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -3034,6 +3077,7 @@ export type ChurchUpdateWithoutStaffInvitesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -3098,6 +3142,7 @@ export type ChurchUncheckedUpdateWithoutStaffInvitesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -3162,6 +3207,7 @@ export type ChurchCreateWithoutImportBatchesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -3226,6 +3272,7 @@ export type ChurchUncheckedCreateWithoutImportBatchesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -3306,6 +3353,7 @@ export type ChurchUpdateWithoutImportBatchesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -3370,6 +3418,7 @@ export type ChurchUncheckedUpdateWithoutImportBatchesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -3433,6 +3482,7 @@ export type ChurchCreateWithoutMemberRegistrationsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutChurchInput
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -3497,6 +3547,7 @@ export type ChurchUncheckedCreateWithoutMemberRegistrationsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutChurchInput
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -3577,6 +3628,7 @@ export type ChurchUpdateWithoutMemberRegistrationsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutChurchNestedInput
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -3641,6 +3693,7 @@ export type ChurchUncheckedUpdateWithoutMemberRegistrationsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutChurchNestedInput
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -3705,6 +3758,7 @@ export type ChurchCreateWithoutMemberTagsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -3769,6 +3823,7 @@ export type ChurchUncheckedCreateWithoutMemberTagsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -3849,6 +3904,7 @@ export type ChurchUpdateWithoutMemberTagsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -3913,6 +3969,7 @@ export type ChurchUncheckedUpdateWithoutMemberTagsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -3977,6 +4034,7 @@ export type ChurchCreateWithoutGroupsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -4041,6 +4099,7 @@ export type ChurchUncheckedCreateWithoutGroupsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -4121,6 +4180,7 @@ export type ChurchUpdateWithoutGroupsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -4185,6 +4245,7 @@ export type ChurchUncheckedUpdateWithoutGroupsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -4249,6 +4310,7 @@ export type ChurchCreateWithoutOnboardingWorkflowsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -4313,6 +4375,7 @@ export type ChurchUncheckedCreateWithoutOnboardingWorkflowsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -4393,6 +4456,7 @@ export type ChurchUpdateWithoutOnboardingWorkflowsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -4457,6 +4521,7 @@ export type ChurchUncheckedUpdateWithoutOnboardingWorkflowsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -4521,6 +4586,7 @@ export type ChurchCreateWithoutVolunteerRolesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -4585,6 +4651,7 @@ export type ChurchUncheckedCreateWithoutVolunteerRolesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -4665,6 +4732,7 @@ export type ChurchUpdateWithoutVolunteerRolesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -4729,6 +4797,7 @@ export type ChurchUncheckedUpdateWithoutVolunteerRolesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -4793,6 +4862,7 @@ export type ChurchCreateWithoutVolunteerShiftsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -4857,6 +4927,7 @@ export type ChurchUncheckedCreateWithoutVolunteerShiftsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -4937,6 +5008,7 @@ export type ChurchUpdateWithoutVolunteerShiftsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -5001,6 +5073,7 @@ export type ChurchUncheckedUpdateWithoutVolunteerShiftsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -5065,6 +5138,7 @@ export type ChurchCreateWithoutVolunteerAvailabilityInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -5129,6 +5203,7 @@ export type ChurchUncheckedCreateWithoutVolunteerAvailabilityInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -5209,6 +5284,7 @@ export type ChurchUpdateWithoutVolunteerAvailabilityInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -5273,6 +5349,7 @@ export type ChurchUncheckedUpdateWithoutVolunteerAvailabilityInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -5337,6 +5414,7 @@ export type ChurchCreateWithoutSurveysInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -5401,6 +5479,7 @@ export type ChurchUncheckedCreateWithoutSurveysInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -5481,6 +5560,7 @@ export type ChurchUpdateWithoutSurveysInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -5545,6 +5625,7 @@ export type ChurchUncheckedUpdateWithoutSurveysInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -5609,6 +5690,7 @@ export type ChurchCreateWithoutEventsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -5673,6 +5755,7 @@ export type ChurchUncheckedCreateWithoutEventsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -5753,6 +5836,7 @@ export type ChurchUpdateWithoutEventsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -5817,6 +5901,7 @@ export type ChurchUncheckedUpdateWithoutEventsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -5881,6 +5966,7 @@ export type ChurchCreateWithoutEventSeriesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -5945,6 +6031,7 @@ export type ChurchUncheckedCreateWithoutEventSeriesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -6025,6 +6112,7 @@ export type ChurchUpdateWithoutEventSeriesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -6089,6 +6177,7 @@ export type ChurchUncheckedUpdateWithoutEventSeriesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -6154,6 +6243,7 @@ export type ChurchCreateWithoutEventMediaInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -6218,6 +6308,7 @@ export type ChurchUncheckedCreateWithoutEventMediaInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -6298,6 +6389,7 @@ export type ChurchUpdateWithoutEventMediaInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -6362,6 +6454,7 @@ export type ChurchUncheckedUpdateWithoutEventMediaInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -6425,6 +6518,7 @@ export type ChurchCreateWithoutConversationsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -6489,6 +6583,7 @@ export type ChurchUncheckedCreateWithoutConversationsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -6569,6 +6664,7 @@ export type ChurchUpdateWithoutConversationsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -6633,6 +6729,7 @@ export type ChurchUncheckedUpdateWithoutConversationsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -6698,6 +6795,7 @@ export type ChurchCreateWithoutMediaAssetsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   eventMedia?: Prisma.EventMediaCreateNestedManyWithoutChurchInput
@@ -6762,6 +6860,7 @@ export type ChurchUncheckedCreateWithoutMediaAssetsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   eventMedia?: Prisma.EventMediaUncheckedCreateNestedManyWithoutChurchInput
@@ -6842,6 +6941,7 @@ export type ChurchUpdateWithoutMediaAssetsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   eventMedia?: Prisma.EventMediaUpdateManyWithoutChurchNestedInput
@@ -6906,6 +7006,7 @@ export type ChurchUncheckedUpdateWithoutMediaAssetsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   eventMedia?: Prisma.EventMediaUncheckedUpdateManyWithoutChurchNestedInput
@@ -6969,6 +7070,7 @@ export type ChurchCreateWithoutNotificationsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -7033,6 +7135,7 @@ export type ChurchUncheckedCreateWithoutNotificationsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -7113,6 +7216,7 @@ export type ChurchUpdateWithoutNotificationsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -7177,6 +7281,7 @@ export type ChurchUncheckedUpdateWithoutNotificationsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -7242,6 +7347,7 @@ export type ChurchCreateWithoutMemberRelationshipsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
   eventMedia?: Prisma.EventMediaCreateNestedManyWithoutChurchInput
@@ -7306,6 +7412,7 @@ export type ChurchUncheckedCreateWithoutMemberRelationshipsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
   eventMedia?: Prisma.EventMediaUncheckedCreateNestedManyWithoutChurchInput
@@ -7386,6 +7493,7 @@ export type ChurchUpdateWithoutMemberRelationshipsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
   eventMedia?: Prisma.EventMediaUpdateManyWithoutChurchNestedInput
@@ -7450,6 +7558,7 @@ export type ChurchUncheckedUpdateWithoutMemberRelationshipsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
   eventMedia?: Prisma.EventMediaUncheckedUpdateManyWithoutChurchNestedInput
@@ -7513,6 +7622,7 @@ export type ChurchCreateWithoutDonationsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -7577,6 +7687,7 @@ export type ChurchUncheckedCreateWithoutDonationsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -7657,6 +7768,7 @@ export type ChurchUpdateWithoutDonationsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -7721,6 +7833,7 @@ export type ChurchUncheckedUpdateWithoutDonationsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -7785,6 +7898,7 @@ export type ChurchCreateWithoutFundsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -7849,6 +7963,7 @@ export type ChurchUncheckedCreateWithoutFundsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -7929,6 +8044,7 @@ export type ChurchUpdateWithoutFundsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -7993,6 +8109,7 @@ export type ChurchUncheckedUpdateWithoutFundsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -8057,6 +8174,7 @@ export type ChurchCreateWithoutCampaignsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -8121,6 +8239,7 @@ export type ChurchUncheckedCreateWithoutCampaignsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -8201,6 +8320,7 @@ export type ChurchUpdateWithoutCampaignsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -8265,6 +8385,7 @@ export type ChurchUncheckedUpdateWithoutCampaignsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -8329,6 +8450,7 @@ export type ChurchCreateWithoutPaymentIntentsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -8393,6 +8515,7 @@ export type ChurchUncheckedCreateWithoutPaymentIntentsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -8473,6 +8596,7 @@ export type ChurchUpdateWithoutPaymentIntentsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -8537,6 +8661,7 @@ export type ChurchUncheckedUpdateWithoutPaymentIntentsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -8601,6 +8726,7 @@ export type ChurchCreateWithoutReceiptsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -8665,6 +8791,7 @@ export type ChurchUncheckedCreateWithoutReceiptsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -8745,6 +8872,7 @@ export type ChurchUpdateWithoutReceiptsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -8809,6 +8937,7 @@ export type ChurchUncheckedUpdateWithoutReceiptsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -8873,6 +9002,7 @@ export type ChurchCreateWithoutTextToGiveNumbersInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -8937,6 +9067,7 @@ export type ChurchUncheckedCreateWithoutTextToGiveNumbersInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -9017,6 +9148,7 @@ export type ChurchUpdateWithoutTextToGiveNumbersInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -9081,6 +9213,7 @@ export type ChurchUncheckedUpdateWithoutTextToGiveNumbersInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -9145,6 +9278,7 @@ export type ChurchCreateWithoutTextToGiveMessagesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -9209,6 +9343,7 @@ export type ChurchUncheckedCreateWithoutTextToGiveMessagesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -9289,6 +9424,7 @@ export type ChurchUpdateWithoutTextToGiveMessagesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -9353,6 +9489,7 @@ export type ChurchUncheckedUpdateWithoutTextToGiveMessagesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -9417,6 +9554,7 @@ export type ChurchCreateWithoutPayoutsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -9481,6 +9619,7 @@ export type ChurchUncheckedCreateWithoutPayoutsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -9561,6 +9700,7 @@ export type ChurchUpdateWithoutPayoutsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -9625,6 +9765,7 @@ export type ChurchUncheckedUpdateWithoutPayoutsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -9689,6 +9830,7 @@ export type ChurchCreateWithoutPayoutTransactionsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -9753,6 +9895,7 @@ export type ChurchUncheckedCreateWithoutPayoutTransactionsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -9833,6 +9976,7 @@ export type ChurchUpdateWithoutPayoutTransactionsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -9897,6 +10041,7 @@ export type ChurchUncheckedUpdateWithoutPayoutTransactionsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -9961,6 +10106,7 @@ export type ChurchCreateWithoutRefundsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -10025,6 +10171,7 @@ export type ChurchUncheckedCreateWithoutRefundsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -10105,6 +10252,7 @@ export type ChurchUpdateWithoutRefundsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -10169,6 +10317,7 @@ export type ChurchUncheckedUpdateWithoutRefundsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -10233,6 +10382,7 @@ export type ChurchCreateWithoutDisputesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -10297,6 +10447,7 @@ export type ChurchUncheckedCreateWithoutDisputesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -10377,6 +10528,7 @@ export type ChurchUpdateWithoutDisputesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -10441,6 +10593,7 @@ export type ChurchUncheckedUpdateWithoutDisputesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -10505,6 +10658,7 @@ export type ChurchCreateWithoutCommunicationSchedulesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -10569,6 +10723,7 @@ export type ChurchUncheckedCreateWithoutCommunicationSchedulesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -10649,6 +10804,7 @@ export type ChurchUpdateWithoutCommunicationSchedulesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -10713,6 +10869,7 @@ export type ChurchUncheckedUpdateWithoutCommunicationSchedulesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -10777,6 +10934,7 @@ export type ChurchCreateWithoutDripCampaignsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -10841,6 +10999,7 @@ export type ChurchUncheckedCreateWithoutDripCampaignsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -10921,6 +11080,7 @@ export type ChurchUpdateWithoutDripCampaignsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -10985,6 +11145,7 @@ export type ChurchUncheckedUpdateWithoutDripCampaignsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -11049,6 +11210,7 @@ export type ChurchCreateWithoutDripEnrollmentsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -11113,6 +11275,7 @@ export type ChurchUncheckedCreateWithoutDripEnrollmentsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -11193,6 +11356,7 @@ export type ChurchUpdateWithoutDripEnrollmentsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -11257,6 +11421,7 @@ export type ChurchUncheckedUpdateWithoutDripEnrollmentsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -11321,6 +11486,7 @@ export type ChurchCreateWithoutCommunicationTemplatesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -11385,6 +11551,7 @@ export type ChurchUncheckedCreateWithoutCommunicationTemplatesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -11465,6 +11632,7 @@ export type ChurchUpdateWithoutCommunicationTemplatesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -11529,6 +11697,7 @@ export type ChurchUncheckedUpdateWithoutCommunicationTemplatesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -11593,6 +11762,7 @@ export type ChurchCreateWithoutCommunicationMessagesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -11657,6 +11827,7 @@ export type ChurchUncheckedCreateWithoutCommunicationMessagesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -11737,6 +11908,7 @@ export type ChurchUpdateWithoutCommunicationMessagesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -11794,6 +11966,283 @@ export type ChurchUncheckedUpdateWithoutCommunicationMessagesInput = {
   refunds?: Prisma.RefundUncheckedUpdateManyWithoutChurchNestedInput
   disputes?: Prisma.DisputeUncheckedUpdateManyWithoutChurchNestedInput
   communicationTemplates?: Prisma.CommunicationTemplateUncheckedUpdateManyWithoutChurchNestedInput
+  communicationSchedules?: Prisma.CommunicationScheduleUncheckedUpdateManyWithoutChurchNestedInput
+  dripCampaigns?: Prisma.CommunicationDripCampaignUncheckedUpdateManyWithoutChurchNestedInput
+  dripEnrollments?: Prisma.CommunicationDripEnrollmentUncheckedUpdateManyWithoutChurchNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutChurchNestedInput
+  notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
+  memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
+  staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
+  memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
+  mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
+  eventMedia?: Prisma.EventMediaUncheckedUpdateManyWithoutChurchNestedInput
+  memberAccessRequests?: Prisma.MemberAccessRequestUncheckedUpdateManyWithoutChurchNestedInput
+  staffInvites?: Prisma.StaffInviteUncheckedUpdateManyWithoutChurchNestedInput
+  facilities?: Prisma.FacilityUncheckedUpdateManyWithoutChurchNestedInput
+  facilityBookings?: Prisma.FacilityBookingUncheckedUpdateManyWithoutChurchNestedInput
+  careRequests?: Prisma.CareRequestUncheckedUpdateManyWithoutChurchNestedInput
+  sermons?: Prisma.SermonUncheckedUpdateManyWithoutChurchNestedInput
+  contentResources?: Prisma.ContentResourceUncheckedUpdateManyWithoutChurchNestedInput
+  liveStreamChannels?: Prisma.LiveStreamChannelUncheckedUpdateManyWithoutChurchNestedInput
+  liveStreamSessions?: Prisma.LiveStreamSessionUncheckedUpdateManyWithoutChurchNestedInput
+  supportTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutChurchNestedInput
+  webhookEvents?: Prisma.WebhookEventUncheckedUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUncheckedUpdateManyWithoutChurchNestedInput
+}
+
+export type ChurchCreateWithoutAiInteractionsInput = {
+  id?: string
+  name: string
+  slug: string
+  countryCode?: string | null
+  timezone?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
+  campuses?: Prisma.CampusCreateNestedManyWithoutChurchInput
+  households?: Prisma.HouseholdCreateNestedManyWithoutChurchInput
+  members?: Prisma.MemberCreateNestedManyWithoutChurchInput
+  memberTags?: Prisma.MemberTagCreateNestedManyWithoutChurchInput
+  groups?: Prisma.GroupCreateNestedManyWithoutChurchInput
+  volunteerRoles?: Prisma.VolunteerRoleCreateNestedManyWithoutChurchInput
+  volunteerShifts?: Prisma.VolunteerShiftCreateNestedManyWithoutChurchInput
+  volunteerAvailability?: Prisma.VolunteerAvailabilityCreateNestedManyWithoutChurchInput
+  surveys?: Prisma.SurveyCreateNestedManyWithoutChurchInput
+  onboardingWorkflows?: Prisma.OnboardingWorkflowCreateNestedManyWithoutChurchInput
+  events?: Prisma.EventCreateNestedManyWithoutChurchInput
+  eventSeries?: Prisma.EventSeriesCreateNestedManyWithoutChurchInput
+  donations?: Prisma.DonationCreateNestedManyWithoutChurchInput
+  payoutTransactions?: Prisma.PayoutTransactionCreateNestedManyWithoutChurchInput
+  funds?: Prisma.FundCreateNestedManyWithoutChurchInput
+  campaigns?: Prisma.CampaignCreateNestedManyWithoutChurchInput
+  fundraiserPages?: Prisma.FundraiserPageCreateNestedManyWithoutChurchInput
+  paymentIntents?: Prisma.PaymentIntentCreateNestedManyWithoutChurchInput
+  pledges?: Prisma.PledgeCreateNestedManyWithoutChurchInput
+  recurringDonations?: Prisma.RecurringDonationCreateNestedManyWithoutChurchInput
+  expenseCategories?: Prisma.ExpenseCategoryCreateNestedManyWithoutChurchInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutChurchInput
+  budgets?: Prisma.BudgetCreateNestedManyWithoutChurchInput
+  receipts?: Prisma.DonationReceiptCreateNestedManyWithoutChurchInput
+  textToGiveNumbers?: Prisma.TextToGiveNumberCreateNestedManyWithoutChurchInput
+  textToGiveMessages?: Prisma.TextToGiveMessageCreateNestedManyWithoutChurchInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutChurchInput
+  refunds?: Prisma.RefundCreateNestedManyWithoutChurchInput
+  disputes?: Prisma.DisputeCreateNestedManyWithoutChurchInput
+  communicationTemplates?: Prisma.CommunicationTemplateCreateNestedManyWithoutChurchInput
+  communicationMessages?: Prisma.CommunicationMessageCreateNestedManyWithoutChurchInput
+  communicationSchedules?: Prisma.CommunicationScheduleCreateNestedManyWithoutChurchInput
+  dripCampaigns?: Prisma.CommunicationDripCampaignCreateNestedManyWithoutChurchInput
+  dripEnrollments?: Prisma.CommunicationDripEnrollmentCreateNestedManyWithoutChurchInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutChurchInput
+  notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
+  memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
+  memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
+  mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
+  eventMedia?: Prisma.EventMediaCreateNestedManyWithoutChurchInput
+  memberAccessRequests?: Prisma.MemberAccessRequestCreateNestedManyWithoutChurchInput
+  staffInvites?: Prisma.StaffInviteCreateNestedManyWithoutChurchInput
+  facilities?: Prisma.FacilityCreateNestedManyWithoutChurchInput
+  facilityBookings?: Prisma.FacilityBookingCreateNestedManyWithoutChurchInput
+  careRequests?: Prisma.CareRequestCreateNestedManyWithoutChurchInput
+  sermons?: Prisma.SermonCreateNestedManyWithoutChurchInput
+  contentResources?: Prisma.ContentResourceCreateNestedManyWithoutChurchInput
+  liveStreamChannels?: Prisma.LiveStreamChannelCreateNestedManyWithoutChurchInput
+  liveStreamSessions?: Prisma.LiveStreamSessionCreateNestedManyWithoutChurchInput
+  supportTickets?: Prisma.SupportTicketCreateNestedManyWithoutChurchInput
+  webhookEvents?: Prisma.WebhookEventCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchCreateNestedManyWithoutChurchInput
+}
+
+export type ChurchUncheckedCreateWithoutAiInteractionsInput = {
+  id?: string
+  organizationId: string
+  name: string
+  slug: string
+  countryCode?: string | null
+  timezone?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
+  households?: Prisma.HouseholdUncheckedCreateNestedManyWithoutChurchInput
+  members?: Prisma.MemberUncheckedCreateNestedManyWithoutChurchInput
+  memberTags?: Prisma.MemberTagUncheckedCreateNestedManyWithoutChurchInput
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutChurchInput
+  volunteerRoles?: Prisma.VolunteerRoleUncheckedCreateNestedManyWithoutChurchInput
+  volunteerShifts?: Prisma.VolunteerShiftUncheckedCreateNestedManyWithoutChurchInput
+  volunteerAvailability?: Prisma.VolunteerAvailabilityUncheckedCreateNestedManyWithoutChurchInput
+  surveys?: Prisma.SurveyUncheckedCreateNestedManyWithoutChurchInput
+  onboardingWorkflows?: Prisma.OnboardingWorkflowUncheckedCreateNestedManyWithoutChurchInput
+  events?: Prisma.EventUncheckedCreateNestedManyWithoutChurchInput
+  eventSeries?: Prisma.EventSeriesUncheckedCreateNestedManyWithoutChurchInput
+  donations?: Prisma.DonationUncheckedCreateNestedManyWithoutChurchInput
+  payoutTransactions?: Prisma.PayoutTransactionUncheckedCreateNestedManyWithoutChurchInput
+  funds?: Prisma.FundUncheckedCreateNestedManyWithoutChurchInput
+  campaigns?: Prisma.CampaignUncheckedCreateNestedManyWithoutChurchInput
+  fundraiserPages?: Prisma.FundraiserPageUncheckedCreateNestedManyWithoutChurchInput
+  paymentIntents?: Prisma.PaymentIntentUncheckedCreateNestedManyWithoutChurchInput
+  pledges?: Prisma.PledgeUncheckedCreateNestedManyWithoutChurchInput
+  recurringDonations?: Prisma.RecurringDonationUncheckedCreateNestedManyWithoutChurchInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedCreateNestedManyWithoutChurchInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutChurchInput
+  budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutChurchInput
+  receipts?: Prisma.DonationReceiptUncheckedCreateNestedManyWithoutChurchInput
+  textToGiveNumbers?: Prisma.TextToGiveNumberUncheckedCreateNestedManyWithoutChurchInput
+  textToGiveMessages?: Prisma.TextToGiveMessageUncheckedCreateNestedManyWithoutChurchInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutChurchInput
+  refunds?: Prisma.RefundUncheckedCreateNestedManyWithoutChurchInput
+  disputes?: Prisma.DisputeUncheckedCreateNestedManyWithoutChurchInput
+  communicationTemplates?: Prisma.CommunicationTemplateUncheckedCreateNestedManyWithoutChurchInput
+  communicationMessages?: Prisma.CommunicationMessageUncheckedCreateNestedManyWithoutChurchInput
+  communicationSchedules?: Prisma.CommunicationScheduleUncheckedCreateNestedManyWithoutChurchInput
+  dripCampaigns?: Prisma.CommunicationDripCampaignUncheckedCreateNestedManyWithoutChurchInput
+  dripEnrollments?: Prisma.CommunicationDripEnrollmentUncheckedCreateNestedManyWithoutChurchInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutChurchInput
+  notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
+  memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
+  memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
+  mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
+  eventMedia?: Prisma.EventMediaUncheckedCreateNestedManyWithoutChurchInput
+  memberAccessRequests?: Prisma.MemberAccessRequestUncheckedCreateNestedManyWithoutChurchInput
+  staffInvites?: Prisma.StaffInviteUncheckedCreateNestedManyWithoutChurchInput
+  facilities?: Prisma.FacilityUncheckedCreateNestedManyWithoutChurchInput
+  facilityBookings?: Prisma.FacilityBookingUncheckedCreateNestedManyWithoutChurchInput
+  careRequests?: Prisma.CareRequestUncheckedCreateNestedManyWithoutChurchInput
+  sermons?: Prisma.SermonUncheckedCreateNestedManyWithoutChurchInput
+  contentResources?: Prisma.ContentResourceUncheckedCreateNestedManyWithoutChurchInput
+  liveStreamChannels?: Prisma.LiveStreamChannelUncheckedCreateNestedManyWithoutChurchInput
+  liveStreamSessions?: Prisma.LiveStreamSessionUncheckedCreateNestedManyWithoutChurchInput
+  supportTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutChurchInput
+  webhookEvents?: Prisma.WebhookEventUncheckedCreateNestedManyWithoutChurchInput
+  importBatches?: Prisma.ImportBatchUncheckedCreateNestedManyWithoutChurchInput
+}
+
+export type ChurchCreateOrConnectWithoutAiInteractionsInput = {
+  where: Prisma.ChurchWhereUniqueInput
+  create: Prisma.XOR<Prisma.ChurchCreateWithoutAiInteractionsInput, Prisma.ChurchUncheckedCreateWithoutAiInteractionsInput>
+}
+
+export type ChurchUpsertWithoutAiInteractionsInput = {
+  update: Prisma.XOR<Prisma.ChurchUpdateWithoutAiInteractionsInput, Prisma.ChurchUncheckedUpdateWithoutAiInteractionsInput>
+  create: Prisma.XOR<Prisma.ChurchCreateWithoutAiInteractionsInput, Prisma.ChurchUncheckedCreateWithoutAiInteractionsInput>
+  where?: Prisma.ChurchWhereInput
+}
+
+export type ChurchUpdateToOneWithWhereWithoutAiInteractionsInput = {
+  where?: Prisma.ChurchWhereInput
+  data: Prisma.XOR<Prisma.ChurchUpdateWithoutAiInteractionsInput, Prisma.ChurchUncheckedUpdateWithoutAiInteractionsInput>
+}
+
+export type ChurchUpdateWithoutAiInteractionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
+  campuses?: Prisma.CampusUpdateManyWithoutChurchNestedInput
+  households?: Prisma.HouseholdUpdateManyWithoutChurchNestedInput
+  members?: Prisma.MemberUpdateManyWithoutChurchNestedInput
+  memberTags?: Prisma.MemberTagUpdateManyWithoutChurchNestedInput
+  groups?: Prisma.GroupUpdateManyWithoutChurchNestedInput
+  volunteerRoles?: Prisma.VolunteerRoleUpdateManyWithoutChurchNestedInput
+  volunteerShifts?: Prisma.VolunteerShiftUpdateManyWithoutChurchNestedInput
+  volunteerAvailability?: Prisma.VolunteerAvailabilityUpdateManyWithoutChurchNestedInput
+  surveys?: Prisma.SurveyUpdateManyWithoutChurchNestedInput
+  onboardingWorkflows?: Prisma.OnboardingWorkflowUpdateManyWithoutChurchNestedInput
+  events?: Prisma.EventUpdateManyWithoutChurchNestedInput
+  eventSeries?: Prisma.EventSeriesUpdateManyWithoutChurchNestedInput
+  donations?: Prisma.DonationUpdateManyWithoutChurchNestedInput
+  payoutTransactions?: Prisma.PayoutTransactionUpdateManyWithoutChurchNestedInput
+  funds?: Prisma.FundUpdateManyWithoutChurchNestedInput
+  campaigns?: Prisma.CampaignUpdateManyWithoutChurchNestedInput
+  fundraiserPages?: Prisma.FundraiserPageUpdateManyWithoutChurchNestedInput
+  paymentIntents?: Prisma.PaymentIntentUpdateManyWithoutChurchNestedInput
+  pledges?: Prisma.PledgeUpdateManyWithoutChurchNestedInput
+  recurringDonations?: Prisma.RecurringDonationUpdateManyWithoutChurchNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUpdateManyWithoutChurchNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutChurchNestedInput
+  budgets?: Prisma.BudgetUpdateManyWithoutChurchNestedInput
+  receipts?: Prisma.DonationReceiptUpdateManyWithoutChurchNestedInput
+  textToGiveNumbers?: Prisma.TextToGiveNumberUpdateManyWithoutChurchNestedInput
+  textToGiveMessages?: Prisma.TextToGiveMessageUpdateManyWithoutChurchNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutChurchNestedInput
+  refunds?: Prisma.RefundUpdateManyWithoutChurchNestedInput
+  disputes?: Prisma.DisputeUpdateManyWithoutChurchNestedInput
+  communicationTemplates?: Prisma.CommunicationTemplateUpdateManyWithoutChurchNestedInput
+  communicationMessages?: Prisma.CommunicationMessageUpdateManyWithoutChurchNestedInput
+  communicationSchedules?: Prisma.CommunicationScheduleUpdateManyWithoutChurchNestedInput
+  dripCampaigns?: Prisma.CommunicationDripCampaignUpdateManyWithoutChurchNestedInput
+  dripEnrollments?: Prisma.CommunicationDripEnrollmentUpdateManyWithoutChurchNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutChurchNestedInput
+  notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
+  memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
+  memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
+  mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
+  eventMedia?: Prisma.EventMediaUpdateManyWithoutChurchNestedInput
+  memberAccessRequests?: Prisma.MemberAccessRequestUpdateManyWithoutChurchNestedInput
+  staffInvites?: Prisma.StaffInviteUpdateManyWithoutChurchNestedInput
+  facilities?: Prisma.FacilityUpdateManyWithoutChurchNestedInput
+  facilityBookings?: Prisma.FacilityBookingUpdateManyWithoutChurchNestedInput
+  careRequests?: Prisma.CareRequestUpdateManyWithoutChurchNestedInput
+  sermons?: Prisma.SermonUpdateManyWithoutChurchNestedInput
+  contentResources?: Prisma.ContentResourceUpdateManyWithoutChurchNestedInput
+  liveStreamChannels?: Prisma.LiveStreamChannelUpdateManyWithoutChurchNestedInput
+  liveStreamSessions?: Prisma.LiveStreamSessionUpdateManyWithoutChurchNestedInput
+  supportTickets?: Prisma.SupportTicketUpdateManyWithoutChurchNestedInput
+  webhookEvents?: Prisma.WebhookEventUpdateManyWithoutChurchNestedInput
+  importBatches?: Prisma.ImportBatchUpdateManyWithoutChurchNestedInput
+}
+
+export type ChurchUncheckedUpdateWithoutAiInteractionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
+  households?: Prisma.HouseholdUncheckedUpdateManyWithoutChurchNestedInput
+  members?: Prisma.MemberUncheckedUpdateManyWithoutChurchNestedInput
+  memberTags?: Prisma.MemberTagUncheckedUpdateManyWithoutChurchNestedInput
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutChurchNestedInput
+  volunteerRoles?: Prisma.VolunteerRoleUncheckedUpdateManyWithoutChurchNestedInput
+  volunteerShifts?: Prisma.VolunteerShiftUncheckedUpdateManyWithoutChurchNestedInput
+  volunteerAvailability?: Prisma.VolunteerAvailabilityUncheckedUpdateManyWithoutChurchNestedInput
+  surveys?: Prisma.SurveyUncheckedUpdateManyWithoutChurchNestedInput
+  onboardingWorkflows?: Prisma.OnboardingWorkflowUncheckedUpdateManyWithoutChurchNestedInput
+  events?: Prisma.EventUncheckedUpdateManyWithoutChurchNestedInput
+  eventSeries?: Prisma.EventSeriesUncheckedUpdateManyWithoutChurchNestedInput
+  donations?: Prisma.DonationUncheckedUpdateManyWithoutChurchNestedInput
+  payoutTransactions?: Prisma.PayoutTransactionUncheckedUpdateManyWithoutChurchNestedInput
+  funds?: Prisma.FundUncheckedUpdateManyWithoutChurchNestedInput
+  campaigns?: Prisma.CampaignUncheckedUpdateManyWithoutChurchNestedInput
+  fundraiserPages?: Prisma.FundraiserPageUncheckedUpdateManyWithoutChurchNestedInput
+  paymentIntents?: Prisma.PaymentIntentUncheckedUpdateManyWithoutChurchNestedInput
+  pledges?: Prisma.PledgeUncheckedUpdateManyWithoutChurchNestedInput
+  recurringDonations?: Prisma.RecurringDonationUncheckedUpdateManyWithoutChurchNestedInput
+  expenseCategories?: Prisma.ExpenseCategoryUncheckedUpdateManyWithoutChurchNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutChurchNestedInput
+  budgets?: Prisma.BudgetUncheckedUpdateManyWithoutChurchNestedInput
+  receipts?: Prisma.DonationReceiptUncheckedUpdateManyWithoutChurchNestedInput
+  textToGiveNumbers?: Prisma.TextToGiveNumberUncheckedUpdateManyWithoutChurchNestedInput
+  textToGiveMessages?: Prisma.TextToGiveMessageUncheckedUpdateManyWithoutChurchNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutChurchNestedInput
+  refunds?: Prisma.RefundUncheckedUpdateManyWithoutChurchNestedInput
+  disputes?: Prisma.DisputeUncheckedUpdateManyWithoutChurchNestedInput
+  communicationTemplates?: Prisma.CommunicationTemplateUncheckedUpdateManyWithoutChurchNestedInput
+  communicationMessages?: Prisma.CommunicationMessageUncheckedUpdateManyWithoutChurchNestedInput
   communicationSchedules?: Prisma.CommunicationScheduleUncheckedUpdateManyWithoutChurchNestedInput
   dripCampaigns?: Prisma.CommunicationDripCampaignUncheckedUpdateManyWithoutChurchNestedInput
   dripEnrollments?: Prisma.CommunicationDripEnrollmentUncheckedUpdateManyWithoutChurchNestedInput
@@ -11865,6 +12314,7 @@ export type ChurchCreateWithoutFundraiserPagesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -11929,6 +12379,7 @@ export type ChurchUncheckedCreateWithoutFundraiserPagesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -12009,6 +12460,7 @@ export type ChurchUpdateWithoutFundraiserPagesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -12073,6 +12525,7 @@ export type ChurchUncheckedUpdateWithoutFundraiserPagesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -12137,6 +12590,7 @@ export type ChurchCreateWithoutPledgesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -12201,6 +12655,7 @@ export type ChurchUncheckedCreateWithoutPledgesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -12281,6 +12736,7 @@ export type ChurchUpdateWithoutPledgesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -12345,6 +12801,7 @@ export type ChurchUncheckedUpdateWithoutPledgesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -12409,6 +12866,7 @@ export type ChurchCreateWithoutRecurringDonationsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -12473,6 +12931,7 @@ export type ChurchUncheckedCreateWithoutRecurringDonationsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -12553,6 +13012,7 @@ export type ChurchUpdateWithoutRecurringDonationsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -12617,6 +13077,7 @@ export type ChurchUncheckedUpdateWithoutRecurringDonationsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -12681,6 +13142,7 @@ export type ChurchCreateWithoutExpenseCategoriesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -12745,6 +13207,7 @@ export type ChurchUncheckedCreateWithoutExpenseCategoriesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -12825,6 +13288,7 @@ export type ChurchUpdateWithoutExpenseCategoriesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -12889,6 +13353,7 @@ export type ChurchUncheckedUpdateWithoutExpenseCategoriesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -12953,6 +13418,7 @@ export type ChurchCreateWithoutExpensesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -13017,6 +13483,7 @@ export type ChurchUncheckedCreateWithoutExpensesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -13097,6 +13564,7 @@ export type ChurchUpdateWithoutExpensesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -13161,6 +13629,7 @@ export type ChurchUncheckedUpdateWithoutExpensesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -13225,6 +13694,7 @@ export type ChurchCreateWithoutBudgetsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -13289,6 +13759,7 @@ export type ChurchUncheckedCreateWithoutBudgetsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -13369,6 +13840,7 @@ export type ChurchUpdateWithoutBudgetsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -13433,6 +13905,7 @@ export type ChurchUncheckedUpdateWithoutBudgetsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -13497,6 +13970,7 @@ export type ChurchCreateWithoutAuditLogsInput = {
   conversations?: Prisma.ConversationCreateNestedManyWithoutChurchInput
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -13561,6 +14035,7 @@ export type ChurchUncheckedCreateWithoutAuditLogsInput = {
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutChurchInput
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -13641,6 +14116,7 @@ export type ChurchUpdateWithoutAuditLogsInput = {
   conversations?: Prisma.ConversationUpdateManyWithoutChurchNestedInput
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -13705,6 +14181,7 @@ export type ChurchUncheckedUpdateWithoutAuditLogsInput = {
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutChurchNestedInput
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -13770,6 +14247,7 @@ export type ChurchCreateWithoutStaffMembershipsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
   eventMedia?: Prisma.EventMediaCreateNestedManyWithoutChurchInput
@@ -13834,6 +14312,7 @@ export type ChurchUncheckedCreateWithoutStaffMembershipsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
   eventMedia?: Prisma.EventMediaUncheckedCreateNestedManyWithoutChurchInput
@@ -13914,6 +14393,7 @@ export type ChurchUpdateWithoutStaffMembershipsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
   eventMedia?: Prisma.EventMediaUpdateManyWithoutChurchNestedInput
@@ -13978,6 +14458,7 @@ export type ChurchUncheckedUpdateWithoutStaffMembershipsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
   eventMedia?: Prisma.EventMediaUncheckedUpdateManyWithoutChurchNestedInput
@@ -14042,6 +14523,7 @@ export type ChurchCreateWithoutFacilitiesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -14106,6 +14588,7 @@ export type ChurchUncheckedCreateWithoutFacilitiesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -14186,6 +14669,7 @@ export type ChurchUpdateWithoutFacilitiesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -14250,6 +14734,7 @@ export type ChurchUncheckedUpdateWithoutFacilitiesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -14314,6 +14799,7 @@ export type ChurchCreateWithoutFacilityBookingsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -14378,6 +14864,7 @@ export type ChurchUncheckedCreateWithoutFacilityBookingsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -14458,6 +14945,7 @@ export type ChurchUpdateWithoutFacilityBookingsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -14522,6 +15010,7 @@ export type ChurchUncheckedUpdateWithoutFacilityBookingsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -14586,6 +15075,7 @@ export type ChurchCreateWithoutCareRequestsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -14650,6 +15140,7 @@ export type ChurchUncheckedCreateWithoutCareRequestsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -14730,6 +15221,7 @@ export type ChurchUpdateWithoutCareRequestsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -14794,6 +15286,7 @@ export type ChurchUncheckedUpdateWithoutCareRequestsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -14858,6 +15351,7 @@ export type ChurchCreateWithoutSermonsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -14922,6 +15416,7 @@ export type ChurchUncheckedCreateWithoutSermonsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -15002,6 +15497,7 @@ export type ChurchUpdateWithoutSermonsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -15066,6 +15562,7 @@ export type ChurchUncheckedUpdateWithoutSermonsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -15130,6 +15627,7 @@ export type ChurchCreateWithoutContentResourcesInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -15194,6 +15692,7 @@ export type ChurchUncheckedCreateWithoutContentResourcesInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -15274,6 +15773,7 @@ export type ChurchUpdateWithoutContentResourcesInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -15338,6 +15838,7 @@ export type ChurchUncheckedUpdateWithoutContentResourcesInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -15402,6 +15903,7 @@ export type ChurchCreateWithoutSupportTicketsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -15466,6 +15968,7 @@ export type ChurchUncheckedCreateWithoutSupportTicketsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -15546,6 +16049,7 @@ export type ChurchUpdateWithoutSupportTicketsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -15610,6 +16114,7 @@ export type ChurchUncheckedUpdateWithoutSupportTicketsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -15674,6 +16179,7 @@ export type ChurchCreateWithoutWebhookEventsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -15738,6 +16244,7 @@ export type ChurchUncheckedCreateWithoutWebhookEventsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -15818,6 +16325,7 @@ export type ChurchUpdateWithoutWebhookEventsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -15882,6 +16390,7 @@ export type ChurchUncheckedUpdateWithoutWebhookEventsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -15946,6 +16455,7 @@ export type ChurchCreateWithoutLiveStreamChannelsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -16010,6 +16520,7 @@ export type ChurchUncheckedCreateWithoutLiveStreamChannelsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -16090,6 +16601,7 @@ export type ChurchUpdateWithoutLiveStreamChannelsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -16154,6 +16666,7 @@ export type ChurchUncheckedUpdateWithoutLiveStreamChannelsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -16218,6 +16731,7 @@ export type ChurchCreateWithoutLiveStreamSessionsInput = {
   notifications?: Prisma.InAppNotificationCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetCreateNestedManyWithoutChurchInput
@@ -16282,6 +16796,7 @@ export type ChurchUncheckedCreateWithoutLiveStreamSessionsInput = {
   notifications?: Prisma.InAppNotificationUncheckedCreateNestedManyWithoutChurchInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedCreateNestedManyWithoutChurchInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutChurchInput
+  aiInteractions?: Prisma.AiInteractionUncheckedCreateNestedManyWithoutChurchInput
   staffMemberships?: Prisma.StaffMembershipUncheckedCreateNestedManyWithoutChurchInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedCreateNestedManyWithoutChurchInput
   mediaAssets?: Prisma.MediaAssetUncheckedCreateNestedManyWithoutChurchInput
@@ -16362,6 +16877,7 @@ export type ChurchUpdateWithoutLiveStreamSessionsInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -16426,6 +16942,7 @@ export type ChurchUncheckedUpdateWithoutLiveStreamSessionsInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -16499,6 +17016,7 @@ export type ChurchUpdateWithoutOrganizationInput = {
   notifications?: Prisma.InAppNotificationUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUpdateManyWithoutChurchNestedInput
@@ -16563,6 +17081,7 @@ export type ChurchUncheckedUpdateWithoutOrganizationInput = {
   notifications?: Prisma.InAppNotificationUncheckedUpdateManyWithoutChurchNestedInput
   memberRegistrations?: Prisma.MemberRegistrationUncheckedUpdateManyWithoutChurchNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutChurchNestedInput
+  aiInteractions?: Prisma.AiInteractionUncheckedUpdateManyWithoutChurchNestedInput
   staffMemberships?: Prisma.StaffMembershipUncheckedUpdateManyWithoutChurchNestedInput
   memberRelationships?: Prisma.MemberRelationshipUncheckedUpdateManyWithoutChurchNestedInput
   mediaAssets?: Prisma.MediaAssetUncheckedUpdateManyWithoutChurchNestedInput
@@ -16635,6 +17154,7 @@ export type ChurchCountOutputType = {
   notifications: number
   memberRegistrations: number
   auditLogs: number
+  aiInteractions: number
   staffMemberships: number
   memberRelationships: number
   mediaAssets: number
@@ -16692,6 +17212,7 @@ export type ChurchCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   notifications?: boolean | ChurchCountOutputTypeCountNotificationsArgs
   memberRegistrations?: boolean | ChurchCountOutputTypeCountMemberRegistrationsArgs
   auditLogs?: boolean | ChurchCountOutputTypeCountAuditLogsArgs
+  aiInteractions?: boolean | ChurchCountOutputTypeCountAiInteractionsArgs
   staffMemberships?: boolean | ChurchCountOutputTypeCountStaffMembershipsArgs
   memberRelationships?: boolean | ChurchCountOutputTypeCountMemberRelationshipsArgs
   mediaAssets?: boolean | ChurchCountOutputTypeCountMediaAssetsArgs
@@ -16989,6 +17510,13 @@ export type ChurchCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Type
 /**
  * ChurchCountOutputType without action
  */
+export type ChurchCountOutputTypeCountAiInteractionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiInteractionWhereInput
+}
+
+/**
+ * ChurchCountOutputType without action
+ */
 export type ChurchCountOutputTypeCountStaffMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.StaffMembershipWhereInput
 }
@@ -17147,6 +17675,7 @@ export type ChurchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   notifications?: boolean | Prisma.Church$notificationsArgs<ExtArgs>
   memberRegistrations?: boolean | Prisma.Church$memberRegistrationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Church$auditLogsArgs<ExtArgs>
+  aiInteractions?: boolean | Prisma.Church$aiInteractionsArgs<ExtArgs>
   staffMemberships?: boolean | Prisma.Church$staffMembershipsArgs<ExtArgs>
   memberRelationships?: boolean | Prisma.Church$memberRelationshipsArgs<ExtArgs>
   mediaAssets?: boolean | Prisma.Church$mediaAssetsArgs<ExtArgs>
@@ -17242,6 +17771,7 @@ export type ChurchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   notifications?: boolean | Prisma.Church$notificationsArgs<ExtArgs>
   memberRegistrations?: boolean | Prisma.Church$memberRegistrationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Church$auditLogsArgs<ExtArgs>
+  aiInteractions?: boolean | Prisma.Church$aiInteractionsArgs<ExtArgs>
   staffMemberships?: boolean | Prisma.Church$staffMembershipsArgs<ExtArgs>
   memberRelationships?: boolean | Prisma.Church$memberRelationshipsArgs<ExtArgs>
   mediaAssets?: boolean | Prisma.Church$mediaAssetsArgs<ExtArgs>
@@ -17309,6 +17839,7 @@ export type $ChurchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     notifications: Prisma.$InAppNotificationPayload<ExtArgs>[]
     memberRegistrations: Prisma.$MemberRegistrationPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    aiInteractions: Prisma.$AiInteractionPayload<ExtArgs>[]
     staffMemberships: Prisma.$StaffMembershipPayload<ExtArgs>[]
     memberRelationships: Prisma.$MemberRelationshipPayload<ExtArgs>[]
     mediaAssets: Prisma.$MediaAssetPayload<ExtArgs>[]
@@ -17768,6 +18299,7 @@ export interface Prisma__ChurchClient<T, Null = never, ExtArgs extends runtime.T
   notifications<T extends Prisma.Church$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InAppNotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   memberRegistrations<T extends Prisma.Church$memberRegistrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$memberRegistrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Church$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiInteractions<T extends Prisma.Church$aiInteractionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$aiInteractionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiInteractionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   staffMemberships<T extends Prisma.Church$staffMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$staffMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   memberRelationships<T extends Prisma.Church$memberRelationshipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$memberRelationshipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MemberRelationshipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mediaAssets<T extends Prisma.Church$mediaAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Church$mediaAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaAssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -19126,6 +19658,30 @@ export type Church$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * Church.aiInteractions
+ */
+export type Church$aiInteractionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiInteraction
+   */
+  select?: Prisma.AiInteractionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiInteraction
+   */
+  omit?: Prisma.AiInteractionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiInteractionInclude<ExtArgs> | null
+  where?: Prisma.AiInteractionWhereInput
+  orderBy?: Prisma.AiInteractionOrderByWithRelationInput | Prisma.AiInteractionOrderByWithRelationInput[]
+  cursor?: Prisma.AiInteractionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiInteractionScalarFieldEnum | Prisma.AiInteractionScalarFieldEnum[]
 }
 
 /**
