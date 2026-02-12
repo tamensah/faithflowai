@@ -3,6 +3,7 @@ import { Prisma, prisma, CareRequestStatus, SermonStatus, TenantSubscriptionStat
 import { router, protectedProcedure } from '../trpc';
 import { ensureFeatureEnabled } from '../entitlements';
 import { TRPCError } from '@trpc/server';
+import { sendEmail } from '../email';
 
 const rangeInput = z
   .object({
@@ -45,6 +46,28 @@ export const operationsRouter = router({
       dbOk = false;
     }
     const dbLatencyMs = Date.now() - dbStart;
+
+    let migrationInfo: { ok: boolean; lastMigration?: { name: string; finishedAt: Date | null }; total?: number } = {
+      ok: false,
+    };
+    try {
+      const rows = (await prisma.$queryRaw<
+        Array<{ migration_name: string; finished_at: Date | null }>
+      >`SELECT migration_name, finished_at FROM "_prisma_migrations" ORDER BY finished_at DESC NULLS LAST LIMIT 1`) as Array<{
+        migration_name: string;
+        finished_at: Date | null;
+      }>;
+      const countRows = (await prisma.$queryRaw<Array<{ count: bigint }>>`SELECT COUNT(*)::bigint as count FROM "_prisma_migrations"`) as Array<{
+        count: bigint;
+      }>;
+      migrationInfo = {
+        ok: true,
+        lastMigration: rows[0] ? { name: rows[0].migration_name, finishedAt: rows[0].finished_at } : undefined,
+        total: countRows[0] ? Number(countRows[0].count) : undefined,
+      };
+    } catch {
+      // ignore if migrations table is unavailable in a given environment
+    }
 
     const providers = {
       clerk: Boolean(process.env.CLERK_SECRET_KEY && process.env.CLERK_JWT_ISSUER),
@@ -118,6 +141,7 @@ export const operationsRouter = router({
         ok: dbOk,
         latencyMs: dbLatencyMs,
       },
+      migrations: migrationInfo,
       providers,
       webhooks: {
         latestByProvider,
@@ -140,6 +164,39 @@ export const operationsRouter = router({
       },
     };
   }),
+
+  sendTestEmail: protectedProcedure
+    .input(z.object({ to: z.string().email().optional() }).optional())
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.userId || !ctx.tenantId) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Tenant context required' });
+      }
+
+      const staff = await prisma.staffMembership.findFirst({
+        where: {
+          user: { clerkUserId: ctx.userId },
+          church: { organization: { tenantId: ctx.tenantId } },
+        },
+        include: { user: true, church: true },
+      });
+      if (!staff) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
+      }
+
+      const to = input?.to ?? staff.user.email;
+      if (!to) {
+        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'No email found for staff user. Provide "to".' });
+      }
+
+      const now = new Date();
+      await sendEmail({
+        to,
+        subject: 'FaithFlow AI test email',
+        html: `<p>This is a test email from FaithFlow AI.</p><p>Tenant: ${ctx.tenantId}</p><p>Time: ${now.toISOString()}</p>`,
+      });
+
+      return { ok: true, to, sentAt: now.toISOString() };
+    }),
 
   headquartersSummary: protectedProcedure.input(rangeInput).query(async ({ input, ctx }) => {
     await ensureFeatureEnabled(

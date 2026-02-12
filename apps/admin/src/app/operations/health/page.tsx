@@ -13,6 +13,11 @@ function formatDate(value?: string | Date | null) {
 export default function OperationsHealthPage() {
   const utils = trpc.useUtils();
   const { data, isLoading, error } = trpc.operations.health.useQuery(undefined, { retry: false });
+  const { mutate: sendTestEmail, isPending: isSendingTestEmail } = trpc.operations.sendTestEmail.useMutation({
+    onSuccess: async () => {
+      await utils.operations.health.invalidate();
+    },
+  });
 
   return (
     <Shell>
@@ -42,6 +47,12 @@ export default function OperationsHealthPage() {
               <p className="mt-2 text-sm text-muted">
                 Status: {data.db.ok ? 'HEALTHY' : 'OUTAGE'} · Latency: {data.db.latencyMs}ms
               </p>
+              <p className="mt-2 text-sm text-muted">
+                Migrations:{' '}
+                {data.migrations.ok
+                  ? `${data.migrations.total ?? 0} applied · last: ${data.migrations.lastMigration?.name ?? 'N/A'}`
+                  : 'unknown'}
+              </p>
             </Card>
 
             <Card className="p-6">
@@ -54,6 +65,16 @@ export default function OperationsHealthPage() {
                 <p>Twilio: {data.providers.twilio ? 'configured' : 'missing'}</p>
                 <p>Storage: {data.providers.storage ? 'configured' : 'missing'}</p>
                 <p>Scheduler: {data.providers.scheduler}</p>
+              </div>
+              <div className="mt-4">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={isSendingTestEmail || !data.providers.resend}
+                  onClick={() => sendTestEmail({})}
+                >
+                  {isSendingTestEmail ? 'Sending...' : 'Send test email'}
+                </Button>
               </div>
             </Card>
 
@@ -110,4 +131,3 @@ export default function OperationsHealthPage() {
     </Shell>
   );
 }
-
