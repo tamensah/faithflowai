@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { UserButton } from '@clerk/nextjs';
+import { OrganizationSwitcher, UserButton } from '@clerk/nextjs';
+import { BillingStatusBanner } from './BillingStatusBanner';
 
 const nav = [
   { href: '/', label: 'Overview' },
@@ -33,6 +34,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-6">
             <span className="text-lg font-semibold">FaithFlow AI</span>
+            <OrganizationSwitcher hidePersonal afterSelectOrganizationUrl="/" afterCreateOrganizationUrl="/" />
             <nav className="flex gap-4 text-sm text-muted">
               {nav.map((item) => (
                 <Link key={item.href} href={item.href} className="hover:text-foreground">
@@ -44,6 +46,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <UserButton />
         </div>
       </header>
+      <BillingStatusBanner />
       <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
     </div>
   );
