@@ -12,6 +12,7 @@ import {
 import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
 import { recordAuditLog } from '../audit';
+import { getTenantUsageSnapshot, resolveTenantEntitlements } from '../entitlements';
 
 const clerk = process.env.CLERK_SECRET_KEY ? createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY }) : null;
 
@@ -311,6 +312,15 @@ export const billingRouter = router({
   plans: protectedProcedure.query(async ({ ctx }) => {
     await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
     return listActivePlans();
+  }),
+
+  entitlements: protectedProcedure.query(async ({ ctx }) => {
+    await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
+    const [entitlements, usage] = await Promise.all([
+      resolveTenantEntitlements(ctx.tenantId!),
+      getTenantUsageSnapshot(ctx.tenantId!),
+    ]);
+    return { entitlements, usage };
   }),
 
   currentSubscription: protectedProcedure.query(async ({ ctx }) => {

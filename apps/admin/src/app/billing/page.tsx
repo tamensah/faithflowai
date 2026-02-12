@@ -37,6 +37,7 @@ export default function BillingPage() {
 
   const { data: plans } = trpc.billing.plans.useQuery();
   const { data: current } = trpc.billing.currentSubscription.useQuery();
+  const { data: entitlementsStatus } = trpc.billing.entitlements.useQuery();
   const { data: invoices } = trpc.billing.invoices.useQuery({ provider, limit: 20 });
 
   const selectedPlan = useMemo(
@@ -56,6 +57,14 @@ export default function BillingPage() {
     },
   });
 
+  const lockedModules = useMemo(() => {
+    const ent = entitlementsStatus?.entitlements?.entitlements ?? {};
+    const keys = ['membership_enabled', 'events_enabled', 'finance_enabled', 'communications_enabled', 'support_center_enabled'];
+    return keys
+      .map((key) => ({ key, enabled: Boolean(ent[key]?.enabled) }))
+      .filter((entry) => entry.enabled === false);
+  }, [entitlementsStatus?.entitlements?.entitlements]);
+
   return (
     <Shell>
       <div className="space-y-8">
@@ -63,6 +72,25 @@ export default function BillingPage() {
           <h1 className="text-3xl font-semibold">Billing</h1>
           <p className="mt-2 text-sm text-muted">Self-serve subscription upgrades, payment method updates, and invoice visibility.</p>
         </div>
+
+        {entitlementsStatus?.entitlements?.source === 'inactive_subscription' ? (
+          <Card className="border-destructive/30 bg-white p-6">
+            <h2 className="text-lg font-semibold">Subscription inactive</h2>
+            <p className="mt-2 text-sm text-muted">
+              This tenant has a previous subscription but no active billing right now. Choose a plan below to restore access.
+            </p>
+            {lockedModules.length ? (
+              <div className="mt-3 text-sm text-muted">
+                Locked modules:{' '}
+                <span className="text-foreground">
+                  {lockedModules
+                    .map((entry) => entry.key.replace(/_enabled$/, '').replace(/_/g, ' '))
+                    .join(', ')}
+                </span>
+              </div>
+            ) : null}
+          </Card>
+        ) : null}
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Current Subscription</h2>
@@ -84,8 +112,16 @@ export default function BillingPage() {
                 {current.currentPeriodEnd ? new Date(current.currentPeriodEnd).toLocaleDateString() : 'N/A'}
               </p>
               <div className="mt-3 flex items-center gap-2">
-                <Button size="sm" onClick={() => createPortalSession({})} disabled={isOpeningPortal}>
-                  {isOpeningPortal ? 'Opening...' : 'Open billing portal'}
+                <Button
+                  size="sm"
+                  onClick={() => createPortalSession({})}
+                  disabled={isOpeningPortal || current.provider !== 'STRIPE'}
+                >
+                  {current.provider !== 'STRIPE'
+                    ? 'Stripe portal unavailable'
+                    : isOpeningPortal
+                      ? 'Opening...'
+                      : 'Open Stripe billing portal'}
                 </Button>
               </div>
             </div>
@@ -121,7 +157,7 @@ export default function BillingPage() {
               ))}
             </select>
           </div>
-          {selectedPlan ? (
+            {selectedPlan ? (
             <p className="mt-3 text-sm text-muted">
               {selectedPlan.description || 'No description'} ·{' '}
               {formatPlanPrice(selectedPlan.amountMinor, selectedPlan.currency, selectedPlan.interval)}
@@ -130,11 +166,20 @@ export default function BillingPage() {
           ) : null}
           <div className="mt-4">
             <Button
-              disabled={!selectedPlanCode || isStartingCheckout}
+              disabled={!selectedPlanCode || isStartingCheckout || (Boolean(current) && provider === 'STRIPE')}
               onClick={() => startCheckout({ planCode: selectedPlanCode, provider })}
             >
-              {isStartingCheckout ? 'Redirecting...' : 'Continue to checkout'}
+              {Boolean(current) && provider === 'STRIPE'
+                ? 'Use Stripe portal to change plan'
+                : isStartingCheckout
+                  ? 'Redirecting...'
+                  : 'Continue to checkout'}
             </Button>
+            {Boolean(current) && provider === 'STRIPE' ? (
+              <p className="mt-2 text-xs text-muted">
+                For existing Stripe subscriptions, use the Stripe billing portal to avoid duplicate subscriptions.
+              </p>
+            ) : null}
           </div>
         </Card>
 
