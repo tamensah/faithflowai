@@ -47,6 +47,7 @@ const createMemberSchema = z.object({
   clerkUserId: z.string().optional(),
   phone: z.string().optional(),
   status: z.nativeEnum(MemberStatus).optional(),
+  allowQuietHours: z.boolean().optional(),
   gender: z.nativeEnum(MemberGender).optional(),
   maritalStatus: z.nativeEnum(MemberMaritalStatus).optional(),
   dateOfBirth: z.coerce.date().optional(),
@@ -700,6 +701,7 @@ export const memberRouter = router({
   update: protectedProcedure
     .input(z.object({ id: z.string(), data: updateMemberSchema }))
     .mutation(async ({ input, ctx }) => {
+      await requireStaff(ctx.tenantId!, ctx.userId!);
       const member = await prisma.member.findFirst({
         where: {
           id: input.id,

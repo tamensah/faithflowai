@@ -520,14 +520,6 @@ export type EnumBillingIntervalFieldUpdateOperationsInput = {
   set?: $Enums.BillingInterval
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type SubscriptionPlanCreateNestedOneWithoutFeaturesInput = {
   create?: Prisma.XOR<Prisma.SubscriptionPlanCreateWithoutFeaturesInput, Prisma.SubscriptionPlanUncheckedCreateWithoutFeaturesInput>
   connectOrCreate?: Prisma.SubscriptionPlanCreateOrConnectWithoutFeaturesInput

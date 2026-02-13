@@ -58,7 +58,7 @@ function readEnvInt(name: string, fallback: number) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function quietHoursEnabled() {
+function quietHoursGloballyEnabled() {
   // Default to enabled for SMS/WhatsApp; can be disabled explicitly via env.
   return process.env.COMMS_QUIET_HOURS_ENABLED === 'false' ? false : true;
 }
@@ -83,17 +83,25 @@ async function rescheduleIfQuietHours({
   scheduleId,
   channel,
   churchTimeZone,
+  quietEnabled,
+  quietStart,
+  quietEnd,
+  incrementMinutes,
+  allowQuietHoursOverride,
 }: {
   scheduleId: string;
   channel: CommunicationChannel;
   churchTimeZone: string;
+  quietEnabled: boolean;
+  quietStart: number;
+  quietEnd: number;
+  incrementMinutes: number;
+  allowQuietHoursOverride: boolean;
 }) {
   if (channel === CommunicationChannel.EMAIL) return false;
-  if (!quietHoursEnabled()) return false;
-
-  const quietStart = readEnvInt('COMMS_QUIET_START_HOUR', 21);
-  const quietEnd = readEnvInt('COMMS_QUIET_END_HOUR', 7);
-  const incrementMinutes = readEnvInt('COMMS_QUIET_RESCHEDULE_INCREMENT_MINUTES', 30);
+  if (!quietHoursGloballyEnabled()) return false;
+  if (!quietEnabled) return false;
+  if (allowQuietHoursOverride) return false;
 
   const now = new Date();
   const localHour = getLocalHour(now, churchTimeZone);
@@ -192,11 +200,30 @@ export async function dispatchScheduledCommunications(limit = 50) {
   const churches = churchIds.length
     ? await prisma.church.findMany({
         where: { id: { in: churchIds } },
-        select: { id: true, timezone: true, organization: { select: { tenantId: true } } },
+        select: {
+          id: true,
+          timezone: true,
+          quietHoursEnabled: true,
+          quietHoursStartHour: true,
+          quietHoursEndHour: true,
+          quietHoursRescheduleMinutes: true,
+          organization: { select: { tenantId: true } },
+        },
       })
     : [];
   const timezoneByChurchId = new Map(churches.map((church) => [church.id, church.timezone || 'UTC']));
   const tenantByChurchId = new Map(churches.map((church) => [church.id, church.organization.tenantId]));
+  const quietHoursByChurchId = new Map(
+    churches.map((church) => [
+      church.id,
+      {
+        enabled: Boolean(church.quietHoursEnabled),
+        startHour: church.quietHoursStartHour ?? 21,
+        endHour: church.quietHoursEndHour ?? 7,
+        incrementMinutes: church.quietHoursRescheduleMinutes ?? 30,
+      },
+    ])
+  );
 
   const suppressionRequests = due
     .map((schedule) => {
@@ -247,15 +274,38 @@ export async function dispatchScheduledCommunications(limit = 50) {
       : [];
   const preferenceMap = new Map(preferences.map((pref) => [`${pref.memberId}:${pref.channel}`, pref.enabled]));
 
+  const memberOverrides =
+    uniqueMemberIds.length
+      ? await prisma.member.findMany({
+          where: { id: { in: uniqueMemberIds } },
+          select: { id: true, allowQuietHours: true },
+        })
+      : [];
+  const allowQuietHoursByMemberId = new Map(memberOverrides.map((row) => [row.id, Boolean(row.allowQuietHours)]));
+
   let sent = 0;
   let failed = 0;
 
   for (const schedule of due) {
     const tz = timezoneByChurchId.get(schedule.churchId) ?? 'UTC';
+    const quiet = quietHoursByChurchId.get(schedule.churchId) ?? {
+      enabled: true,
+      startHour: readEnvInt('COMMS_QUIET_START_HOUR', 21),
+      endHour: readEnvInt('COMMS_QUIET_END_HOUR', 7),
+      incrementMinutes: readEnvInt('COMMS_QUIET_RESCHEDULE_INCREMENT_MINUTES', 30),
+    };
+    const memberIdForOverride = readScheduleMemberId(schedule.metadata);
+    const allowOverride = memberIdForOverride ? allowQuietHoursByMemberId.get(memberIdForOverride) === true : false;
+
     const rescheduled = await rescheduleIfQuietHours({
       scheduleId: schedule.id,
       channel: schedule.channel,
       churchTimeZone: tz,
+      quietEnabled: quiet.enabled,
+      quietStart: quiet.startHour,
+      quietEnd: quiet.endHour,
+      incrementMinutes: quiet.incrementMinutes,
+      allowQuietHoursOverride: allowOverride,
     });
     if (rescheduled) continue;
 

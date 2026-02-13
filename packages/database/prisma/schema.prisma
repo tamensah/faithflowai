@@ -683,6 +683,10 @@ model Church {
   slug           String
   countryCode    String?  @default("US")
   timezone       String   @default("UTC")
+  quietHoursEnabled           Boolean @default(true)
+  quietHoursStartHour         Int     @default(21)
+  quietHoursEndHour           Int     @default(7)
+  quietHoursRescheduleMinutes Int     @default(30)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -795,6 +799,7 @@ model Member {
   clerkUserId            String?                   @unique
   phone                  String?
   status                 MemberStatus              @default(ACTIVE)
+  allowQuietHours        Boolean                   @default(false)
   gender                 MemberGender              @default(UNSPECIFIED)
   maritalStatus          MemberMaritalStatus       @default(UNSPECIFIED)
   directoryVisibility    MemberDirectoryVisibility @default(MEMBERS_ONLY)

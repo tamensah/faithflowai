@@ -20,8 +20,22 @@ export type ChurchModel = runtime.Types.Result.DefaultSelection<Prisma.$ChurchPa
 
 export type AggregateChurch = {
   _count: ChurchCountAggregateOutputType | null
+  _avg: ChurchAvgAggregateOutputType | null
+  _sum: ChurchSumAggregateOutputType | null
   _min: ChurchMinAggregateOutputType | null
   _max: ChurchMaxAggregateOutputType | null
+}
+
+export type ChurchAvgAggregateOutputType = {
+  quietHoursStartHour: number | null
+  quietHoursEndHour: number | null
+  quietHoursRescheduleMinutes: number | null
+}
+
+export type ChurchSumAggregateOutputType = {
+  quietHoursStartHour: number | null
+  quietHoursEndHour: number | null
+  quietHoursRescheduleMinutes: number | null
 }
 
 export type ChurchMinAggregateOutputType = {
@@ -31,6 +45,10 @@ export type ChurchMinAggregateOutputType = {
   slug: string | null
   countryCode: string | null
   timezone: string | null
+  quietHoursEnabled: boolean | null
+  quietHoursStartHour: number | null
+  quietHoursEndHour: number | null
+  quietHoursRescheduleMinutes: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -42,6 +60,10 @@ export type ChurchMaxAggregateOutputType = {
   slug: string | null
   countryCode: string | null
   timezone: string | null
+  quietHoursEnabled: boolean | null
+  quietHoursStartHour: number | null
+  quietHoursEndHour: number | null
+  quietHoursRescheduleMinutes: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,11 +75,27 @@ export type ChurchCountAggregateOutputType = {
   slug: number
   countryCode: number
   timezone: number
+  quietHoursEnabled: number
+  quietHoursStartHour: number
+  quietHoursEndHour: number
+  quietHoursRescheduleMinutes: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type ChurchAvgAggregateInputType = {
+  quietHoursStartHour?: true
+  quietHoursEndHour?: true
+  quietHoursRescheduleMinutes?: true
+}
+
+export type ChurchSumAggregateInputType = {
+  quietHoursStartHour?: true
+  quietHoursEndHour?: true
+  quietHoursRescheduleMinutes?: true
+}
 
 export type ChurchMinAggregateInputType = {
   id?: true
@@ -66,6 +104,10 @@ export type ChurchMinAggregateInputType = {
   slug?: true
   countryCode?: true
   timezone?: true
+  quietHoursEnabled?: true
+  quietHoursStartHour?: true
+  quietHoursEndHour?: true
+  quietHoursRescheduleMinutes?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,6 +119,10 @@ export type ChurchMaxAggregateInputType = {
   slug?: true
   countryCode?: true
   timezone?: true
+  quietHoursEnabled?: true
+  quietHoursStartHour?: true
+  quietHoursEndHour?: true
+  quietHoursRescheduleMinutes?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +134,10 @@ export type ChurchCountAggregateInputType = {
   slug?: true
   countryCode?: true
   timezone?: true
+  quietHoursEnabled?: true
+  quietHoursStartHour?: true
+  quietHoursEndHour?: true
+  quietHoursRescheduleMinutes?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -131,6 +181,18 @@ export type ChurchAggregateArgs<ExtArgs extends runtime.Types.Extensions.Interna
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: ChurchAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: ChurchSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: ChurchMinAggregateInputType
@@ -161,6 +223,8 @@ export type ChurchGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   _count?: ChurchCountAggregateInputType | true
+  _avg?: ChurchAvgAggregateInputType
+  _sum?: ChurchSumAggregateInputType
   _min?: ChurchMinAggregateInputType
   _max?: ChurchMaxAggregateInputType
 }
@@ -172,9 +236,15 @@ export type ChurchGroupByOutputType = {
   slug: string
   countryCode: string | null
   timezone: string
+  quietHoursEnabled: boolean
+  quietHoursStartHour: number
+  quietHoursEndHour: number
+  quietHoursRescheduleMinutes: number
   createdAt: Date
   updatedAt: Date
   _count: ChurchCountAggregateOutputType | null
+  _avg: ChurchAvgAggregateOutputType | null
+  _sum: ChurchSumAggregateOutputType | null
   _min: ChurchMinAggregateOutputType | null
   _max: ChurchMaxAggregateOutputType | null
 }
@@ -204,6 +274,10 @@ export type ChurchWhereInput = {
   slug?: Prisma.StringFilter<"Church"> | string
   countryCode?: Prisma.StringNullableFilter<"Church"> | string | null
   timezone?: Prisma.StringFilter<"Church"> | string
+  quietHoursEnabled?: Prisma.BoolFilter<"Church"> | boolean
+  quietHoursStartHour?: Prisma.IntFilter<"Church"> | number
+  quietHoursEndHour?: Prisma.IntFilter<"Church"> | number
+  quietHoursRescheduleMinutes?: Prisma.IntFilter<"Church"> | number
   createdAt?: Prisma.DateTimeFilter<"Church"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Church"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -271,6 +345,10 @@ export type ChurchOrderByWithRelationInput = {
   slug?: Prisma.SortOrder
   countryCode?: Prisma.SortOrderInput | Prisma.SortOrder
   timezone?: Prisma.SortOrder
+  quietHoursEnabled?: Prisma.SortOrder
+  quietHoursStartHour?: Prisma.SortOrder
+  quietHoursEndHour?: Prisma.SortOrder
+  quietHoursRescheduleMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
@@ -342,6 +420,10 @@ export type ChurchWhereUniqueInput = Prisma.AtLeast<{
   slug?: Prisma.StringFilter<"Church"> | string
   countryCode?: Prisma.StringNullableFilter<"Church"> | string | null
   timezone?: Prisma.StringFilter<"Church"> | string
+  quietHoursEnabled?: Prisma.BoolFilter<"Church"> | boolean
+  quietHoursStartHour?: Prisma.IntFilter<"Church"> | number
+  quietHoursEndHour?: Prisma.IntFilter<"Church"> | number
+  quietHoursRescheduleMinutes?: Prisma.IntFilter<"Church"> | number
   createdAt?: Prisma.DateTimeFilter<"Church"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Church"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
@@ -409,11 +491,17 @@ export type ChurchOrderByWithAggregationInput = {
   slug?: Prisma.SortOrder
   countryCode?: Prisma.SortOrderInput | Prisma.SortOrder
   timezone?: Prisma.SortOrder
+  quietHoursEnabled?: Prisma.SortOrder
+  quietHoursStartHour?: Prisma.SortOrder
+  quietHoursEndHour?: Prisma.SortOrder
+  quietHoursRescheduleMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ChurchCountOrderByAggregateInput
+  _avg?: Prisma.ChurchAvgOrderByAggregateInput
   _max?: Prisma.ChurchMaxOrderByAggregateInput
   _min?: Prisma.ChurchMinOrderByAggregateInput
+  _sum?: Prisma.ChurchSumOrderByAggregateInput
 }
 
 export type ChurchScalarWhereWithAggregatesInput = {
@@ -426,6 +514,10 @@ export type ChurchScalarWhereWithAggregatesInput = {
   slug?: Prisma.StringWithAggregatesFilter<"Church"> | string
   countryCode?: Prisma.StringNullableWithAggregatesFilter<"Church"> | string | null
   timezone?: Prisma.StringWithAggregatesFilter<"Church"> | string
+  quietHoursEnabled?: Prisma.BoolWithAggregatesFilter<"Church"> | boolean
+  quietHoursStartHour?: Prisma.IntWithAggregatesFilter<"Church"> | number
+  quietHoursEndHour?: Prisma.IntWithAggregatesFilter<"Church"> | number
+  quietHoursRescheduleMinutes?: Prisma.IntWithAggregatesFilter<"Church"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Church"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Church"> | Date | string
 }
@@ -436,6 +528,10 @@ export type ChurchCreateInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -503,6 +599,10 @@ export type ChurchUncheckedCreateInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -568,6 +668,10 @@ export type ChurchUpdateInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -635,6 +739,10 @@ export type ChurchUncheckedUpdateInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -701,6 +809,10 @@ export type ChurchCreateManyInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -711,6 +823,10 @@ export type ChurchUpdateManyMutationInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -722,6 +838,10 @@ export type ChurchUncheckedUpdateManyInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -748,8 +868,18 @@ export type ChurchCountOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   countryCode?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
+  quietHoursEnabled?: Prisma.SortOrder
+  quietHoursStartHour?: Prisma.SortOrder
+  quietHoursEndHour?: Prisma.SortOrder
+  quietHoursRescheduleMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ChurchAvgOrderByAggregateInput = {
+  quietHoursStartHour?: Prisma.SortOrder
+  quietHoursEndHour?: Prisma.SortOrder
+  quietHoursRescheduleMinutes?: Prisma.SortOrder
 }
 
 export type ChurchMaxOrderByAggregateInput = {
@@ -759,6 +889,10 @@ export type ChurchMaxOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   countryCode?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
+  quietHoursEnabled?: Prisma.SortOrder
+  quietHoursStartHour?: Prisma.SortOrder
+  quietHoursEndHour?: Prisma.SortOrder
+  quietHoursRescheduleMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -770,8 +904,18 @@ export type ChurchMinOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   countryCode?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
+  quietHoursEnabled?: Prisma.SortOrder
+  quietHoursStartHour?: Prisma.SortOrder
+  quietHoursEndHour?: Prisma.SortOrder
+  quietHoursRescheduleMinutes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type ChurchSumOrderByAggregateInput = {
+  quietHoursStartHour?: Prisma.SortOrder
+  quietHoursEndHour?: Prisma.SortOrder
+  quietHoursRescheduleMinutes?: Prisma.SortOrder
 }
 
 export type ChurchScalarRelationFilter = {
@@ -824,6 +968,18 @@ export type ChurchUncheckedUpdateManyWithoutOrganizationNestedInput = {
   update?: Prisma.ChurchUpdateWithWhereUniqueWithoutOrganizationInput | Prisma.ChurchUpdateWithWhereUniqueWithoutOrganizationInput[]
   updateMany?: Prisma.ChurchUpdateManyWithWhereWithoutOrganizationInput | Prisma.ChurchUpdateManyWithWhereWithoutOrganizationInput[]
   deleteMany?: Prisma.ChurchScalarWhereInput | Prisma.ChurchScalarWhereInput[]
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type ChurchCreateNestedOneWithoutCampusesInput = {
@@ -1616,6 +1772,10 @@ export type ChurchCreateWithoutOrganizationInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusCreateNestedManyWithoutChurchInput
@@ -1681,6 +1841,10 @@ export type ChurchUncheckedCreateWithoutOrganizationInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -1776,6 +1940,10 @@ export type ChurchScalarWhereInput = {
   slug?: Prisma.StringFilter<"Church"> | string
   countryCode?: Prisma.StringNullableFilter<"Church"> | string | null
   timezone?: Prisma.StringFilter<"Church"> | string
+  quietHoursEnabled?: Prisma.BoolFilter<"Church"> | boolean
+  quietHoursStartHour?: Prisma.IntFilter<"Church"> | number
+  quietHoursEndHour?: Prisma.IntFilter<"Church"> | number
+  quietHoursRescheduleMinutes?: Prisma.IntFilter<"Church"> | number
   createdAt?: Prisma.DateTimeFilter<"Church"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Church"> | Date | string
 }
@@ -1786,6 +1954,10 @@ export type ChurchCreateWithoutCampusesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -1852,6 +2024,10 @@ export type ChurchUncheckedCreateWithoutCampusesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   households?: Prisma.HouseholdUncheckedCreateNestedManyWithoutChurchInput
@@ -1932,6 +2108,10 @@ export type ChurchUpdateWithoutCampusesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -1998,6 +2178,10 @@ export type ChurchUncheckedUpdateWithoutCampusesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   households?: Prisma.HouseholdUncheckedUpdateManyWithoutChurchNestedInput
@@ -2062,6 +2246,10 @@ export type ChurchCreateWithoutHouseholdsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -2128,6 +2316,10 @@ export type ChurchUncheckedCreateWithoutHouseholdsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -2208,6 +2400,10 @@ export type ChurchUpdateWithoutHouseholdsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -2274,6 +2470,10 @@ export type ChurchUncheckedUpdateWithoutHouseholdsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -2338,6 +2538,10 @@ export type ChurchCreateWithoutMembersInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -2404,6 +2608,10 @@ export type ChurchUncheckedCreateWithoutMembersInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -2484,6 +2692,10 @@ export type ChurchUpdateWithoutMembersInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -2550,6 +2762,10 @@ export type ChurchUncheckedUpdateWithoutMembersInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -2614,6 +2830,10 @@ export type ChurchCreateWithoutMemberAccessRequestsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -2680,6 +2900,10 @@ export type ChurchUncheckedCreateWithoutMemberAccessRequestsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -2760,6 +2984,10 @@ export type ChurchUpdateWithoutMemberAccessRequestsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -2826,6 +3054,10 @@ export type ChurchUncheckedUpdateWithoutMemberAccessRequestsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -2890,6 +3122,10 @@ export type ChurchCreateWithoutStaffInvitesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -2956,6 +3192,10 @@ export type ChurchUncheckedCreateWithoutStaffInvitesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -3036,6 +3276,10 @@ export type ChurchUpdateWithoutStaffInvitesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -3102,6 +3346,10 @@ export type ChurchUncheckedUpdateWithoutStaffInvitesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -3166,6 +3414,10 @@ export type ChurchCreateWithoutImportBatchesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -3232,6 +3484,10 @@ export type ChurchUncheckedCreateWithoutImportBatchesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -3312,6 +3568,10 @@ export type ChurchUpdateWithoutImportBatchesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -3378,6 +3638,10 @@ export type ChurchUncheckedUpdateWithoutImportBatchesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -3442,6 +3706,10 @@ export type ChurchCreateWithoutMemberRegistrationsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -3508,6 +3776,10 @@ export type ChurchUncheckedCreateWithoutMemberRegistrationsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -3588,6 +3860,10 @@ export type ChurchUpdateWithoutMemberRegistrationsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -3654,6 +3930,10 @@ export type ChurchUncheckedUpdateWithoutMemberRegistrationsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -3718,6 +3998,10 @@ export type ChurchCreateWithoutMemberTagsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -3784,6 +4068,10 @@ export type ChurchUncheckedCreateWithoutMemberTagsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -3864,6 +4152,10 @@ export type ChurchUpdateWithoutMemberTagsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -3930,6 +4222,10 @@ export type ChurchUncheckedUpdateWithoutMemberTagsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -3994,6 +4290,10 @@ export type ChurchCreateWithoutGroupsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -4060,6 +4360,10 @@ export type ChurchUncheckedCreateWithoutGroupsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -4140,6 +4444,10 @@ export type ChurchUpdateWithoutGroupsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -4206,6 +4514,10 @@ export type ChurchUncheckedUpdateWithoutGroupsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -4270,6 +4582,10 @@ export type ChurchCreateWithoutOnboardingWorkflowsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -4336,6 +4652,10 @@ export type ChurchUncheckedCreateWithoutOnboardingWorkflowsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -4416,6 +4736,10 @@ export type ChurchUpdateWithoutOnboardingWorkflowsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -4482,6 +4806,10 @@ export type ChurchUncheckedUpdateWithoutOnboardingWorkflowsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -4546,6 +4874,10 @@ export type ChurchCreateWithoutVolunteerRolesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -4612,6 +4944,10 @@ export type ChurchUncheckedCreateWithoutVolunteerRolesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -4692,6 +5028,10 @@ export type ChurchUpdateWithoutVolunteerRolesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -4758,6 +5098,10 @@ export type ChurchUncheckedUpdateWithoutVolunteerRolesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -4822,6 +5166,10 @@ export type ChurchCreateWithoutVolunteerShiftsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -4888,6 +5236,10 @@ export type ChurchUncheckedCreateWithoutVolunteerShiftsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -4968,6 +5320,10 @@ export type ChurchUpdateWithoutVolunteerShiftsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -5034,6 +5390,10 @@ export type ChurchUncheckedUpdateWithoutVolunteerShiftsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -5098,6 +5458,10 @@ export type ChurchCreateWithoutVolunteerAvailabilityInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -5164,6 +5528,10 @@ export type ChurchUncheckedCreateWithoutVolunteerAvailabilityInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -5244,6 +5612,10 @@ export type ChurchUpdateWithoutVolunteerAvailabilityInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -5310,6 +5682,10 @@ export type ChurchUncheckedUpdateWithoutVolunteerAvailabilityInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -5374,6 +5750,10 @@ export type ChurchCreateWithoutSurveysInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -5440,6 +5820,10 @@ export type ChurchUncheckedCreateWithoutSurveysInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -5520,6 +5904,10 @@ export type ChurchUpdateWithoutSurveysInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -5586,6 +5974,10 @@ export type ChurchUncheckedUpdateWithoutSurveysInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -5650,6 +6042,10 @@ export type ChurchCreateWithoutEventsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -5716,6 +6112,10 @@ export type ChurchUncheckedCreateWithoutEventsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -5796,6 +6196,10 @@ export type ChurchUpdateWithoutEventsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -5862,6 +6266,10 @@ export type ChurchUncheckedUpdateWithoutEventsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -5926,6 +6334,10 @@ export type ChurchCreateWithoutEventSeriesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -5992,6 +6404,10 @@ export type ChurchUncheckedCreateWithoutEventSeriesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -6072,6 +6488,10 @@ export type ChurchUpdateWithoutEventSeriesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -6138,6 +6558,10 @@ export type ChurchUncheckedUpdateWithoutEventSeriesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -6202,6 +6626,10 @@ export type ChurchCreateWithoutEventMediaInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -6268,6 +6696,10 @@ export type ChurchUncheckedCreateWithoutEventMediaInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -6348,6 +6780,10 @@ export type ChurchUpdateWithoutEventMediaInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -6414,6 +6850,10 @@ export type ChurchUncheckedUpdateWithoutEventMediaInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -6478,6 +6918,10 @@ export type ChurchCreateWithoutConversationsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -6544,6 +6988,10 @@ export type ChurchUncheckedCreateWithoutConversationsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -6624,6 +7072,10 @@ export type ChurchUpdateWithoutConversationsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -6690,6 +7142,10 @@ export type ChurchUncheckedUpdateWithoutConversationsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -6754,6 +7210,10 @@ export type ChurchCreateWithoutMediaAssetsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -6820,6 +7280,10 @@ export type ChurchUncheckedCreateWithoutMediaAssetsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -6900,6 +7364,10 @@ export type ChurchUpdateWithoutMediaAssetsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -6966,6 +7434,10 @@ export type ChurchUncheckedUpdateWithoutMediaAssetsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -7030,6 +7502,10 @@ export type ChurchCreateWithoutNotificationsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -7096,6 +7572,10 @@ export type ChurchUncheckedCreateWithoutNotificationsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -7176,6 +7656,10 @@ export type ChurchUpdateWithoutNotificationsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -7242,6 +7726,10 @@ export type ChurchUncheckedUpdateWithoutNotificationsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -7306,6 +7794,10 @@ export type ChurchCreateWithoutMemberRelationshipsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -7372,6 +7864,10 @@ export type ChurchUncheckedCreateWithoutMemberRelationshipsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -7452,6 +7948,10 @@ export type ChurchUpdateWithoutMemberRelationshipsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -7518,6 +8018,10 @@ export type ChurchUncheckedUpdateWithoutMemberRelationshipsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -7582,6 +8086,10 @@ export type ChurchCreateWithoutDonationsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -7648,6 +8156,10 @@ export type ChurchUncheckedCreateWithoutDonationsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -7728,6 +8240,10 @@ export type ChurchUpdateWithoutDonationsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -7794,6 +8310,10 @@ export type ChurchUncheckedUpdateWithoutDonationsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -7858,6 +8378,10 @@ export type ChurchCreateWithoutFundsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -7924,6 +8448,10 @@ export type ChurchUncheckedCreateWithoutFundsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -8004,6 +8532,10 @@ export type ChurchUpdateWithoutFundsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -8070,6 +8602,10 @@ export type ChurchUncheckedUpdateWithoutFundsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -8134,6 +8670,10 @@ export type ChurchCreateWithoutCampaignsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -8200,6 +8740,10 @@ export type ChurchUncheckedCreateWithoutCampaignsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -8280,6 +8824,10 @@ export type ChurchUpdateWithoutCampaignsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -8346,6 +8894,10 @@ export type ChurchUncheckedUpdateWithoutCampaignsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -8410,6 +8962,10 @@ export type ChurchCreateWithoutPaymentIntentsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -8476,6 +9032,10 @@ export type ChurchUncheckedCreateWithoutPaymentIntentsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -8556,6 +9116,10 @@ export type ChurchUpdateWithoutPaymentIntentsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -8622,6 +9186,10 @@ export type ChurchUncheckedUpdateWithoutPaymentIntentsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -8686,6 +9254,10 @@ export type ChurchCreateWithoutReceiptsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -8752,6 +9324,10 @@ export type ChurchUncheckedCreateWithoutReceiptsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -8832,6 +9408,10 @@ export type ChurchUpdateWithoutReceiptsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -8898,6 +9478,10 @@ export type ChurchUncheckedUpdateWithoutReceiptsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -8962,6 +9546,10 @@ export type ChurchCreateWithoutTextToGiveNumbersInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -9028,6 +9616,10 @@ export type ChurchUncheckedCreateWithoutTextToGiveNumbersInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -9108,6 +9700,10 @@ export type ChurchUpdateWithoutTextToGiveNumbersInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -9174,6 +9770,10 @@ export type ChurchUncheckedUpdateWithoutTextToGiveNumbersInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -9238,6 +9838,10 @@ export type ChurchCreateWithoutTextToGiveMessagesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -9304,6 +9908,10 @@ export type ChurchUncheckedCreateWithoutTextToGiveMessagesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -9384,6 +9992,10 @@ export type ChurchUpdateWithoutTextToGiveMessagesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -9450,6 +10062,10 @@ export type ChurchUncheckedUpdateWithoutTextToGiveMessagesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -9514,6 +10130,10 @@ export type ChurchCreateWithoutPayoutsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -9580,6 +10200,10 @@ export type ChurchUncheckedCreateWithoutPayoutsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -9660,6 +10284,10 @@ export type ChurchUpdateWithoutPayoutsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -9726,6 +10354,10 @@ export type ChurchUncheckedUpdateWithoutPayoutsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -9790,6 +10422,10 @@ export type ChurchCreateWithoutPayoutTransactionsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -9856,6 +10492,10 @@ export type ChurchUncheckedCreateWithoutPayoutTransactionsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -9936,6 +10576,10 @@ export type ChurchUpdateWithoutPayoutTransactionsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -10002,6 +10646,10 @@ export type ChurchUncheckedUpdateWithoutPayoutTransactionsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -10066,6 +10714,10 @@ export type ChurchCreateWithoutRefundsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -10132,6 +10784,10 @@ export type ChurchUncheckedCreateWithoutRefundsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -10212,6 +10868,10 @@ export type ChurchUpdateWithoutRefundsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -10278,6 +10938,10 @@ export type ChurchUncheckedUpdateWithoutRefundsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -10342,6 +11006,10 @@ export type ChurchCreateWithoutDisputesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -10408,6 +11076,10 @@ export type ChurchUncheckedCreateWithoutDisputesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -10488,6 +11160,10 @@ export type ChurchUpdateWithoutDisputesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -10554,6 +11230,10 @@ export type ChurchUncheckedUpdateWithoutDisputesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -10618,6 +11298,10 @@ export type ChurchCreateWithoutCommunicationSchedulesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -10684,6 +11368,10 @@ export type ChurchUncheckedCreateWithoutCommunicationSchedulesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -10764,6 +11452,10 @@ export type ChurchUpdateWithoutCommunicationSchedulesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -10830,6 +11522,10 @@ export type ChurchUncheckedUpdateWithoutCommunicationSchedulesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -10894,6 +11590,10 @@ export type ChurchCreateWithoutDripCampaignsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -10960,6 +11660,10 @@ export type ChurchUncheckedCreateWithoutDripCampaignsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -11040,6 +11744,10 @@ export type ChurchUpdateWithoutDripCampaignsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -11106,6 +11814,10 @@ export type ChurchUncheckedUpdateWithoutDripCampaignsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -11170,6 +11882,10 @@ export type ChurchCreateWithoutDripEnrollmentsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -11236,6 +11952,10 @@ export type ChurchUncheckedCreateWithoutDripEnrollmentsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -11316,6 +12036,10 @@ export type ChurchUpdateWithoutDripEnrollmentsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -11382,6 +12106,10 @@ export type ChurchUncheckedUpdateWithoutDripEnrollmentsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -11446,6 +12174,10 @@ export type ChurchCreateWithoutCommunicationTemplatesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -11512,6 +12244,10 @@ export type ChurchUncheckedCreateWithoutCommunicationTemplatesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -11592,6 +12328,10 @@ export type ChurchUpdateWithoutCommunicationTemplatesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -11658,6 +12398,10 @@ export type ChurchUncheckedUpdateWithoutCommunicationTemplatesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -11722,6 +12466,10 @@ export type ChurchCreateWithoutCommunicationMessagesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -11788,6 +12536,10 @@ export type ChurchUncheckedCreateWithoutCommunicationMessagesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -11868,6 +12620,10 @@ export type ChurchUpdateWithoutCommunicationMessagesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -11934,6 +12690,10 @@ export type ChurchUncheckedUpdateWithoutCommunicationMessagesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -11998,6 +12758,10 @@ export type ChurchCreateWithoutAiInteractionsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -12064,6 +12828,10 @@ export type ChurchUncheckedCreateWithoutAiInteractionsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -12144,6 +12912,10 @@ export type ChurchUpdateWithoutAiInteractionsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -12210,6 +12982,10 @@ export type ChurchUncheckedUpdateWithoutAiInteractionsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -12274,6 +13050,10 @@ export type ChurchCreateWithoutFundraiserPagesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -12340,6 +13120,10 @@ export type ChurchUncheckedCreateWithoutFundraiserPagesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -12420,6 +13204,10 @@ export type ChurchUpdateWithoutFundraiserPagesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -12486,6 +13274,10 @@ export type ChurchUncheckedUpdateWithoutFundraiserPagesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -12550,6 +13342,10 @@ export type ChurchCreateWithoutPledgesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -12616,6 +13412,10 @@ export type ChurchUncheckedCreateWithoutPledgesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -12696,6 +13496,10 @@ export type ChurchUpdateWithoutPledgesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -12762,6 +13566,10 @@ export type ChurchUncheckedUpdateWithoutPledgesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -12826,6 +13634,10 @@ export type ChurchCreateWithoutRecurringDonationsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -12892,6 +13704,10 @@ export type ChurchUncheckedCreateWithoutRecurringDonationsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -12972,6 +13788,10 @@ export type ChurchUpdateWithoutRecurringDonationsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -13038,6 +13858,10 @@ export type ChurchUncheckedUpdateWithoutRecurringDonationsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -13102,6 +13926,10 @@ export type ChurchCreateWithoutExpenseCategoriesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -13168,6 +13996,10 @@ export type ChurchUncheckedCreateWithoutExpenseCategoriesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -13248,6 +14080,10 @@ export type ChurchUpdateWithoutExpenseCategoriesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -13314,6 +14150,10 @@ export type ChurchUncheckedUpdateWithoutExpenseCategoriesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -13378,6 +14218,10 @@ export type ChurchCreateWithoutExpensesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -13444,6 +14288,10 @@ export type ChurchUncheckedCreateWithoutExpensesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -13524,6 +14372,10 @@ export type ChurchUpdateWithoutExpensesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -13590,6 +14442,10 @@ export type ChurchUncheckedUpdateWithoutExpensesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -13654,6 +14510,10 @@ export type ChurchCreateWithoutBudgetsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -13720,6 +14580,10 @@ export type ChurchUncheckedCreateWithoutBudgetsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -13800,6 +14664,10 @@ export type ChurchUpdateWithoutBudgetsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -13866,6 +14734,10 @@ export type ChurchUncheckedUpdateWithoutBudgetsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -13930,6 +14802,10 @@ export type ChurchCreateWithoutAuditLogsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -13996,6 +14872,10 @@ export type ChurchUncheckedCreateWithoutAuditLogsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -14076,6 +14956,10 @@ export type ChurchUpdateWithoutAuditLogsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -14142,6 +15026,10 @@ export type ChurchUncheckedUpdateWithoutAuditLogsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -14206,6 +15094,10 @@ export type ChurchCreateWithoutStaffMembershipsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -14272,6 +15164,10 @@ export type ChurchUncheckedCreateWithoutStaffMembershipsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -14352,6 +15248,10 @@ export type ChurchUpdateWithoutStaffMembershipsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -14418,6 +15318,10 @@ export type ChurchUncheckedUpdateWithoutStaffMembershipsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -14482,6 +15386,10 @@ export type ChurchCreateWithoutFacilitiesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -14548,6 +15456,10 @@ export type ChurchUncheckedCreateWithoutFacilitiesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -14628,6 +15540,10 @@ export type ChurchUpdateWithoutFacilitiesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -14694,6 +15610,10 @@ export type ChurchUncheckedUpdateWithoutFacilitiesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -14758,6 +15678,10 @@ export type ChurchCreateWithoutFacilityBookingsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -14824,6 +15748,10 @@ export type ChurchUncheckedCreateWithoutFacilityBookingsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -14904,6 +15832,10 @@ export type ChurchUpdateWithoutFacilityBookingsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -14970,6 +15902,10 @@ export type ChurchUncheckedUpdateWithoutFacilityBookingsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -15034,6 +15970,10 @@ export type ChurchCreateWithoutCareRequestsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -15100,6 +16040,10 @@ export type ChurchUncheckedCreateWithoutCareRequestsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -15180,6 +16124,10 @@ export type ChurchUpdateWithoutCareRequestsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -15246,6 +16194,10 @@ export type ChurchUncheckedUpdateWithoutCareRequestsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -15310,6 +16262,10 @@ export type ChurchCreateWithoutSermonsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -15376,6 +16332,10 @@ export type ChurchUncheckedCreateWithoutSermonsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -15456,6 +16416,10 @@ export type ChurchUpdateWithoutSermonsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -15522,6 +16486,10 @@ export type ChurchUncheckedUpdateWithoutSermonsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -15586,6 +16554,10 @@ export type ChurchCreateWithoutContentResourcesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -15652,6 +16624,10 @@ export type ChurchUncheckedCreateWithoutContentResourcesInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -15732,6 +16708,10 @@ export type ChurchUpdateWithoutContentResourcesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -15798,6 +16778,10 @@ export type ChurchUncheckedUpdateWithoutContentResourcesInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -15862,6 +16846,10 @@ export type ChurchCreateWithoutSupportTicketsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -15928,6 +16916,10 @@ export type ChurchUncheckedCreateWithoutSupportTicketsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -16008,6 +17000,10 @@ export type ChurchUpdateWithoutSupportTicketsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -16074,6 +17070,10 @@ export type ChurchUncheckedUpdateWithoutSupportTicketsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -16138,6 +17138,10 @@ export type ChurchCreateWithoutWebhookEventsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -16204,6 +17208,10 @@ export type ChurchUncheckedCreateWithoutWebhookEventsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -16284,6 +17292,10 @@ export type ChurchUpdateWithoutWebhookEventsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -16350,6 +17362,10 @@ export type ChurchUncheckedUpdateWithoutWebhookEventsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -16414,6 +17430,10 @@ export type ChurchCreateWithoutLiveStreamChannelsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -16480,6 +17500,10 @@ export type ChurchUncheckedCreateWithoutLiveStreamChannelsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -16560,6 +17584,10 @@ export type ChurchUpdateWithoutLiveStreamChannelsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -16626,6 +17654,10 @@ export type ChurchUncheckedUpdateWithoutLiveStreamChannelsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -16690,6 +17722,10 @@ export type ChurchCreateWithoutLiveStreamSessionsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutChurchesInput
@@ -16756,6 +17792,10 @@ export type ChurchUncheckedCreateWithoutLiveStreamSessionsInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   campuses?: Prisma.CampusUncheckedCreateNestedManyWithoutChurchInput
@@ -16836,6 +17876,10 @@ export type ChurchUpdateWithoutLiveStreamSessionsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutChurchesNestedInput
@@ -16902,6 +17946,10 @@ export type ChurchUncheckedUpdateWithoutLiveStreamSessionsInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -16966,6 +18014,10 @@ export type ChurchCreateManyOrganizationInput = {
   slug: string
   countryCode?: string | null
   timezone?: string
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: number
+  quietHoursEndHour?: number
+  quietHoursRescheduleMinutes?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -16976,6 +18028,10 @@ export type ChurchUpdateWithoutOrganizationInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUpdateManyWithoutChurchNestedInput
@@ -17041,6 +18097,10 @@ export type ChurchUncheckedUpdateWithoutOrganizationInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   campuses?: Prisma.CampusUncheckedUpdateManyWithoutChurchNestedInput
@@ -17106,6 +18166,10 @@ export type ChurchUncheckedUpdateManyWithoutOrganizationInput = {
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   countryCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.StringFieldUpdateOperationsInput | string
+  quietHoursEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  quietHoursStartHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursEndHour?: Prisma.IntFieldUpdateOperationsInput | number
+  quietHoursRescheduleMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -17634,6 +18698,10 @@ export type ChurchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   slug?: boolean
   countryCode?: boolean
   timezone?: boolean
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: boolean
+  quietHoursEndHour?: boolean
+  quietHoursRescheduleMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -17702,6 +18770,10 @@ export type ChurchSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   slug?: boolean
   countryCode?: boolean
   timezone?: boolean
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: boolean
+  quietHoursEndHour?: boolean
+  quietHoursRescheduleMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -17714,6 +18786,10 @@ export type ChurchSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   slug?: boolean
   countryCode?: boolean
   timezone?: boolean
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: boolean
+  quietHoursEndHour?: boolean
+  quietHoursRescheduleMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
@@ -17726,11 +18802,15 @@ export type ChurchSelectScalar = {
   slug?: boolean
   countryCode?: boolean
   timezone?: boolean
+  quietHoursEnabled?: boolean
+  quietHoursStartHour?: boolean
+  quietHoursEndHour?: boolean
+  quietHoursRescheduleMinutes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ChurchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "name" | "slug" | "countryCode" | "timezone" | "createdAt" | "updatedAt", ExtArgs["result"]["church"]>
+export type ChurchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "organizationId" | "name" | "slug" | "countryCode" | "timezone" | "quietHoursEnabled" | "quietHoursStartHour" | "quietHoursEndHour" | "quietHoursRescheduleMinutes" | "createdAt" | "updatedAt", ExtArgs["result"]["church"]>
 export type ChurchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   campuses?: boolean | Prisma.Church$campusesArgs<ExtArgs>
@@ -17864,6 +18944,10 @@ export type $ChurchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     slug: string
     countryCode: string | null
     timezone: string
+    quietHoursEnabled: boolean
+    quietHoursStartHour: number
+    quietHoursEndHour: number
+    quietHoursRescheduleMinutes: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["church"]>
@@ -18351,6 +19435,10 @@ export interface ChurchFieldRefs {
   readonly slug: Prisma.FieldRef<"Church", 'String'>
   readonly countryCode: Prisma.FieldRef<"Church", 'String'>
   readonly timezone: Prisma.FieldRef<"Church", 'String'>
+  readonly quietHoursEnabled: Prisma.FieldRef<"Church", 'Boolean'>
+  readonly quietHoursStartHour: Prisma.FieldRef<"Church", 'Int'>
+  readonly quietHoursEndHour: Prisma.FieldRef<"Church", 'Int'>
+  readonly quietHoursRescheduleMinutes: Prisma.FieldRef<"Church", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Church", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Church", 'DateTime'>
 }

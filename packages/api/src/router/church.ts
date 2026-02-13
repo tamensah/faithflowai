@@ -4,6 +4,16 @@ import { AuditActorType, prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { recordAuditLog } from '../audit';
 
+async function requireStaff(tenantId: string, clerkUserId: string) {
+  const staff = await prisma.staffMembership.findFirst({
+    where: { user: { clerkUserId }, church: { organization: { tenantId } } },
+  });
+  if (!staff) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
+  }
+  return staff;
+}
+
 const createChurchSchema = z.object({
   name: z.string().min(2),
   slug: z.string().min(2),
@@ -16,6 +26,7 @@ export const churchRouter = router({
   create: protectedProcedure
     .input(createChurchSchema)
     .mutation(async ({ input, ctx }) => {
+      await requireStaff(ctx.tenantId!, ctx.userId!);
       const organization = await prisma.organization.findFirst({
         where: { id: input.organizationId, tenantId: ctx.tenantId! },
       });
@@ -46,9 +57,14 @@ export const churchRouter = router({
         slug: z.string().min(2).optional(),
         timezone: z.string().optional(),
         countryCode: z.string().min(2).max(2).optional(),
+        quietHoursEnabled: z.boolean().optional(),
+        quietHoursStartHour: z.number().int().min(0).max(23).optional(),
+        quietHoursEndHour: z.number().int().min(0).max(23).optional(),
+        quietHoursRescheduleMinutes: z.number().int().min(5).max(180).optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
+      await requireStaff(ctx.tenantId!, ctx.userId!);
       const church = await prisma.church.findFirst({
         where: { id: input.id, organization: { tenantId: ctx.tenantId! } },
       });
@@ -64,6 +80,10 @@ export const churchRouter = router({
           slug: input.slug,
           timezone: input.timezone,
           countryCode: input.countryCode,
+          quietHoursEnabled: input.quietHoursEnabled,
+          quietHoursStartHour: input.quietHoursStartHour,
+          quietHoursEndHour: input.quietHoursEndHour,
+          quietHoursRescheduleMinutes: input.quietHoursRescheduleMinutes,
         },
       });
 

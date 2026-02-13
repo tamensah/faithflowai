@@ -36,6 +36,7 @@ export default function MembersPage() {
   const [showPhone, setShowPhone] = useState(false);
   const [showAddress, setShowAddress] = useState(false);
   const [showPhoto, setShowPhoto] = useState(true);
+  const [allowQuietHours, setAllowQuietHours] = useState(false);
   const [clerkUserId, setClerkUserId] = useState('');
   const [workflowName, setWorkflowName] = useState('');
   const [workflowDescription, setWorkflowDescription] = useState('');
@@ -640,6 +641,7 @@ export default function MembersPage() {
       setShowAddress(Boolean(memberProfile.member.showAddressInDirectory));
       setShowPhoto(Boolean(memberProfile.member.showPhotoInDirectory));
       setClerkUserId(memberProfile.member.clerkUserId ?? '');
+      setAllowQuietHours(Boolean((memberProfile.member as any).allowQuietHours));
     }
   }, [memberProfile]);
 
@@ -1234,6 +1236,36 @@ export default function MembersPage() {
               disabled={!selectedMemberId}
             >
               Update privacy
+            </Button>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Quiet hours override</h2>
+          <p className="mt-1 text-sm text-muted">
+            Allow this member to receive SMS/WhatsApp messages during quiet hours (use sparingly).
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={allowQuietHours}
+                onChange={(e) => setAllowQuietHours(e.target.checked)}
+                disabled={!canWrite || !selectedMemberId}
+              />
+              Allow quiet hours delivery
+            </label>
+          </div>
+          <div className="mt-4">
+            <Button
+              onClick={() => {
+                if (selectedMemberId) {
+                  updateMember({ id: selectedMemberId, data: { allowQuietHours } });
+                }
+              }}
+              disabled={!canWrite || !selectedMemberId}
+            >
+              Save override
             </Button>
           </div>
         </Card>

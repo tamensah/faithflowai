@@ -16,6 +16,10 @@ export default function CommunicationsPage() {
   const utils = trpc.useUtils();
   const canWrite = gate.canWrite;
   const [churchId, setChurchId] = useState('');
+  const [quietEnabled, setQuietEnabled] = useState(true);
+  const [quietStart, setQuietStart] = useState('21');
+  const [quietEnd, setQuietEnd] = useState('7');
+  const [quietIncrement, setQuietIncrement] = useState('30');
   const [templateName, setTemplateName] = useState('');
   const [templateChannel, setTemplateChannel] = useState('EMAIL');
   const [templateSubject, setTemplateSubject] = useState('');
@@ -76,6 +80,16 @@ export default function CommunicationsPage() {
       setChurchId(churches[0].id);
     }
   }, [churchId, churches]);
+
+  const selectedChurch = useMemo(() => churches?.find((church) => church.id === churchId) ?? null, [churches, churchId]);
+
+  useEffect(() => {
+    if (!selectedChurch) return;
+    setQuietEnabled(Boolean((selectedChurch as any).quietHoursEnabled ?? true));
+    setQuietStart(String((selectedChurch as any).quietHoursStartHour ?? 21));
+    setQuietEnd(String((selectedChurch as any).quietHoursEndHour ?? 7));
+    setQuietIncrement(String((selectedChurch as any).quietHoursRescheduleMinutes ?? 30));
+  }, [selectedChurch?.id]);
 
   useEffect(() => {
     if (!selectedDripId && drips?.length) {
@@ -166,6 +180,12 @@ export default function CommunicationsPage() {
     },
   });
 
+  const { mutate: updateChurch, isPending: isSavingQuietHours } = trpc.church.update.useMutation({
+    onSuccess: async () => {
+      await utils.church.list.invalidate();
+    },
+  });
+
   return (
     <Shell>
       {!gate.isLoading && gate.access === 'locked' ? (
@@ -203,6 +223,59 @@ export default function CommunicationsPage() {
                 </option>
               ))}
             </select>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Quiet hours</h2>
+          <p className="mt-1 text-sm text-muted">
+            SMS/WhatsApp sends are rescheduled during quiet hours. Members can be marked as “allow quiet hours” for urgent
+            communications.
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-4">
+            <label className="flex items-center gap-2 text-sm text-muted">
+              <input
+                type="checkbox"
+                checked={quietEnabled}
+                onChange={(event) => setQuietEnabled(event.target.checked)}
+                disabled={!canWrite}
+              />
+              Enabled
+            </label>
+            <Input
+              placeholder="Start hour (0-23)"
+              value={quietStart}
+              onChange={(event) => setQuietStart(event.target.value)}
+              disabled={!canWrite}
+            />
+            <Input
+              placeholder="End hour (0-23)"
+              value={quietEnd}
+              onChange={(event) => setQuietEnd(event.target.value)}
+              disabled={!canWrite}
+            />
+            <Input
+              placeholder="Reschedule minutes"
+              value={quietIncrement}
+              onChange={(event) => setQuietIncrement(event.target.value)}
+              disabled={!canWrite}
+            />
+          </div>
+          <div className="mt-4">
+            <Button
+              onClick={() =>
+                updateChurch({
+                  id: churchId,
+                  quietHoursEnabled: quietEnabled,
+                  quietHoursStartHour: Number(quietStart || '21'),
+                  quietHoursEndHour: Number(quietEnd || '7'),
+                  quietHoursRescheduleMinutes: Number(quietIncrement || '30'),
+                })
+              }
+              disabled={!canWrite || !churchId || isSavingQuietHours}
+            >
+              {isSavingQuietHours ? 'Saving…' : 'Save quiet hours'}
+            </Button>
           </div>
         </Card>
 

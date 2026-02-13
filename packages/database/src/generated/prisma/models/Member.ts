@@ -36,6 +36,7 @@ export type MemberMinAggregateOutputType = {
   clerkUserId: string | null
   phone: string | null
   status: $Enums.MemberStatus | null
+  allowQuietHours: boolean | null
   gender: $Enums.MemberGender | null
   maritalStatus: $Enums.MemberMaritalStatus | null
   directoryVisibility: $Enums.MemberDirectoryVisibility | null
@@ -73,6 +74,7 @@ export type MemberMaxAggregateOutputType = {
   clerkUserId: string | null
   phone: string | null
   status: $Enums.MemberStatus | null
+  allowQuietHours: boolean | null
   gender: $Enums.MemberGender | null
   maritalStatus: $Enums.MemberMaritalStatus | null
   directoryVisibility: $Enums.MemberDirectoryVisibility | null
@@ -110,6 +112,7 @@ export type MemberCountAggregateOutputType = {
   clerkUserId: number
   phone: number
   status: number
+  allowQuietHours: number
   gender: number
   maritalStatus: number
   directoryVisibility: number
@@ -149,6 +152,7 @@ export type MemberMinAggregateInputType = {
   clerkUserId?: true
   phone?: true
   status?: true
+  allowQuietHours?: true
   gender?: true
   maritalStatus?: true
   directoryVisibility?: true
@@ -186,6 +190,7 @@ export type MemberMaxAggregateInputType = {
   clerkUserId?: true
   phone?: true
   status?: true
+  allowQuietHours?: true
   gender?: true
   maritalStatus?: true
   directoryVisibility?: true
@@ -223,6 +228,7 @@ export type MemberCountAggregateInputType = {
   clerkUserId?: true
   phone?: true
   status?: true
+  allowQuietHours?: true
   gender?: true
   maritalStatus?: true
   directoryVisibility?: true
@@ -333,6 +339,7 @@ export type MemberGroupByOutputType = {
   clerkUserId: string | null
   phone: string | null
   status: $Enums.MemberStatus
+  allowQuietHours: boolean
   gender: $Enums.MemberGender
   maritalStatus: $Enums.MemberMaritalStatus
   directoryVisibility: $Enums.MemberDirectoryVisibility
@@ -391,6 +398,7 @@ export type MemberWhereInput = {
   clerkUserId?: Prisma.StringNullableFilter<"Member"> | string | null
   phone?: Prisma.StringNullableFilter<"Member"> | string | null
   status?: Prisma.EnumMemberStatusFilter<"Member"> | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFilter<"Member"> | boolean
   gender?: Prisma.EnumMemberGenderFilter<"Member"> | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFilter<"Member"> | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFilter<"Member"> | $Enums.MemberDirectoryVisibility
@@ -464,6 +472,7 @@ export type MemberOrderByWithRelationInput = {
   clerkUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  allowQuietHours?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   maritalStatus?: Prisma.SortOrder
   directoryVisibility?: Prisma.SortOrder
@@ -540,6 +549,7 @@ export type MemberWhereUniqueInput = Prisma.AtLeast<{
   email?: Prisma.StringNullableFilter<"Member"> | string | null
   phone?: Prisma.StringNullableFilter<"Member"> | string | null
   status?: Prisma.EnumMemberStatusFilter<"Member"> | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFilter<"Member"> | boolean
   gender?: Prisma.EnumMemberGenderFilter<"Member"> | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFilter<"Member"> | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFilter<"Member"> | $Enums.MemberDirectoryVisibility
@@ -613,6 +623,7 @@ export type MemberOrderByWithAggregationInput = {
   clerkUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  allowQuietHours?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   maritalStatus?: Prisma.SortOrder
   directoryVisibility?: Prisma.SortOrder
@@ -656,6 +667,7 @@ export type MemberScalarWhereWithAggregatesInput = {
   clerkUserId?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   phone?: Prisma.StringNullableWithAggregatesFilter<"Member"> | string | null
   status?: Prisma.EnumMemberStatusWithAggregatesFilter<"Member"> | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolWithAggregatesFilter<"Member"> | boolean
   gender?: Prisma.EnumMemberGenderWithAggregatesFilter<"Member"> | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusWithAggregatesFilter<"Member"> | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityWithAggregatesFilter<"Member"> | $Enums.MemberDirectoryVisibility
@@ -691,6 +703,7 @@ export type MemberCreateInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -764,6 +777,7 @@ export type MemberUncheckedCreateInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -833,6 +847,7 @@ export type MemberUpdateInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -906,6 +921,7 @@ export type MemberUncheckedUpdateInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -977,6 +993,7 @@ export type MemberCreateManyInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -1012,6 +1029,7 @@ export type MemberUpdateManyMutationInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -1049,6 +1067,7 @@ export type MemberUncheckedUpdateManyInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -1101,6 +1120,7 @@ export type MemberCountOrderByAggregateInput = {
   clerkUserId?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  allowQuietHours?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   maritalStatus?: Prisma.SortOrder
   directoryVisibility?: Prisma.SortOrder
@@ -1138,6 +1158,7 @@ export type MemberMaxOrderByAggregateInput = {
   clerkUserId?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  allowQuietHours?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   maritalStatus?: Prisma.SortOrder
   directoryVisibility?: Prisma.SortOrder
@@ -1175,6 +1196,7 @@ export type MemberMinOrderByAggregateInput = {
   clerkUserId?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  allowQuietHours?: Prisma.SortOrder
   gender?: Prisma.SortOrder
   maritalStatus?: Prisma.SortOrder
   directoryVisibility?: Prisma.SortOrder
@@ -1319,10 +1341,6 @@ export type EnumMemberMaritalStatusFieldUpdateOperationsInput = {
 
 export type EnumMemberDirectoryVisibilityFieldUpdateOperationsInput = {
   set?: $Enums.MemberDirectoryVisibility
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
 }
 
 export type MemberCreateNestedOneWithoutAccessRequestsInput = {
@@ -1831,6 +1849,7 @@ export type MemberCreateWithoutChurchInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -1902,6 +1921,7 @@ export type MemberUncheckedCreateWithoutChurchInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -2002,6 +2022,7 @@ export type MemberScalarWhereInput = {
   clerkUserId?: Prisma.StringNullableFilter<"Member"> | string | null
   phone?: Prisma.StringNullableFilter<"Member"> | string | null
   status?: Prisma.EnumMemberStatusFilter<"Member"> | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFilter<"Member"> | boolean
   gender?: Prisma.EnumMemberGenderFilter<"Member"> | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFilter<"Member"> | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFilter<"Member"> | $Enums.MemberDirectoryVisibility
@@ -2037,6 +2058,7 @@ export type MemberCreateWithoutPrimaryHouseholdInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -2109,6 +2131,7 @@ export type MemberUncheckedCreateWithoutPrimaryHouseholdInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -2182,6 +2205,7 @@ export type MemberCreateWithoutHouseholdInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -2253,6 +2277,7 @@ export type MemberUncheckedCreateWithoutHouseholdInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -2343,6 +2368,7 @@ export type MemberUpdateWithoutPrimaryHouseholdInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -2415,6 +2441,7 @@ export type MemberUncheckedUpdateWithoutPrimaryHouseholdInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -2499,6 +2526,7 @@ export type MemberCreateWithoutAccessRequestsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -2571,6 +2599,7 @@ export type MemberUncheckedCreateWithoutAccessRequestsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -2655,6 +2684,7 @@ export type MemberUpdateWithoutAccessRequestsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -2727,6 +2757,7 @@ export type MemberUncheckedUpdateWithoutAccessRequestsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -2795,6 +2826,7 @@ export type MemberCreateWithoutRegistrationsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -2867,6 +2899,7 @@ export type MemberUncheckedCreateWithoutRegistrationsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -2951,6 +2984,7 @@ export type MemberUpdateWithoutRegistrationsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -3023,6 +3057,7 @@ export type MemberUncheckedUpdateWithoutRegistrationsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -3091,6 +3126,7 @@ export type MemberCreateWithoutTagAssignmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -3163,6 +3199,7 @@ export type MemberUncheckedCreateWithoutTagAssignmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -3247,6 +3284,7 @@ export type MemberUpdateWithoutTagAssignmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -3319,6 +3357,7 @@ export type MemberUncheckedUpdateWithoutTagAssignmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -3387,6 +3426,7 @@ export type MemberCreateWithoutMilestonesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -3459,6 +3499,7 @@ export type MemberUncheckedCreateWithoutMilestonesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -3543,6 +3584,7 @@ export type MemberUpdateWithoutMilestonesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -3615,6 +3657,7 @@ export type MemberUncheckedUpdateWithoutMilestonesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -3683,6 +3726,7 @@ export type MemberCreateWithoutOnboardingAssignmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -3755,6 +3799,7 @@ export type MemberUncheckedCreateWithoutOnboardingAssignmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -3839,6 +3884,7 @@ export type MemberUpdateWithoutOnboardingAssignmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -3911,6 +3957,7 @@ export type MemberUncheckedUpdateWithoutOnboardingAssignmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -3979,6 +4026,7 @@ export type MemberCreateWithoutGroupMembershipsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -4051,6 +4099,7 @@ export type MemberUncheckedCreateWithoutGroupMembershipsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -4135,6 +4184,7 @@ export type MemberUpdateWithoutGroupMembershipsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -4207,6 +4257,7 @@ export type MemberUncheckedUpdateWithoutGroupMembershipsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -4275,6 +4326,7 @@ export type MemberCreateWithoutVolunteerShiftAssignmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -4347,6 +4399,7 @@ export type MemberUncheckedCreateWithoutVolunteerShiftAssignmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -4431,6 +4484,7 @@ export type MemberUpdateWithoutVolunteerShiftAssignmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -4503,6 +4557,7 @@ export type MemberUncheckedUpdateWithoutVolunteerShiftAssignmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -4571,6 +4626,7 @@ export type MemberCreateWithoutVolunteerAvailabilityInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -4643,6 +4699,7 @@ export type MemberUncheckedCreateWithoutVolunteerAvailabilityInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -4727,6 +4784,7 @@ export type MemberUpdateWithoutVolunteerAvailabilityInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -4799,6 +4857,7 @@ export type MemberUncheckedUpdateWithoutVolunteerAvailabilityInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -4867,6 +4926,7 @@ export type MemberCreateWithoutSurveyResponsesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -4939,6 +4999,7 @@ export type MemberUncheckedCreateWithoutSurveyResponsesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -5023,6 +5084,7 @@ export type MemberUpdateWithoutSurveyResponsesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -5095,6 +5157,7 @@ export type MemberUncheckedUpdateWithoutSurveyResponsesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -5163,6 +5226,7 @@ export type MemberCreateWithoutVolunteerAssignmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -5235,6 +5299,7 @@ export type MemberUncheckedCreateWithoutVolunteerAssignmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -5319,6 +5384,7 @@ export type MemberUpdateWithoutVolunteerAssignmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -5391,6 +5457,7 @@ export type MemberUncheckedUpdateWithoutVolunteerAssignmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -5459,6 +5526,7 @@ export type MemberCreateWithoutEventRsvpsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -5531,6 +5599,7 @@ export type MemberUncheckedCreateWithoutEventRsvpsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -5615,6 +5684,7 @@ export type MemberUpdateWithoutEventRsvpsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -5687,6 +5757,7 @@ export type MemberUncheckedUpdateWithoutEventRsvpsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -5755,6 +5826,7 @@ export type MemberCreateWithoutEventBadgesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -5827,6 +5899,7 @@ export type MemberUncheckedCreateWithoutEventBadgesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -5911,6 +5984,7 @@ export type MemberUpdateWithoutEventBadgesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -5983,6 +6057,7 @@ export type MemberUncheckedUpdateWithoutEventBadgesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -6051,6 +6126,7 @@ export type MemberCreateWithoutEventRegistrationsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -6123,6 +6199,7 @@ export type MemberUncheckedCreateWithoutEventRegistrationsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -6207,6 +6284,7 @@ export type MemberUpdateWithoutEventRegistrationsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -6279,6 +6357,7 @@ export type MemberUncheckedUpdateWithoutEventRegistrationsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -6347,6 +6426,7 @@ export type MemberCreateWithoutEventAssignmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -6419,6 +6499,7 @@ export type MemberUncheckedCreateWithoutEventAssignmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -6503,6 +6584,7 @@ export type MemberUpdateWithoutEventAssignmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -6575,6 +6657,7 @@ export type MemberUncheckedUpdateWithoutEventAssignmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -6643,6 +6726,7 @@ export type MemberCreateWithoutTicketOrdersInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -6715,6 +6799,7 @@ export type MemberUncheckedCreateWithoutTicketOrdersInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -6799,6 +6884,7 @@ export type MemberUpdateWithoutTicketOrdersInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -6871,6 +6957,7 @@ export type MemberUncheckedUpdateWithoutTicketOrdersInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -6939,6 +7026,7 @@ export type MemberCreateWithoutConversationMembersInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -7011,6 +7099,7 @@ export type MemberUncheckedCreateWithoutConversationMembersInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -7095,6 +7184,7 @@ export type MemberUpdateWithoutConversationMembersInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -7167,6 +7257,7 @@ export type MemberUncheckedUpdateWithoutConversationMembersInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -7235,6 +7326,7 @@ export type MemberCreateWithoutSentMessagesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -7307,6 +7399,7 @@ export type MemberUncheckedCreateWithoutSentMessagesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -7391,6 +7484,7 @@ export type MemberUpdateWithoutSentMessagesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -7463,6 +7557,7 @@ export type MemberUncheckedUpdateWithoutSentMessagesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -7531,6 +7626,7 @@ export type MemberCreateWithoutUploadedAssetsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -7603,6 +7699,7 @@ export type MemberUncheckedCreateWithoutUploadedAssetsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -7687,6 +7784,7 @@ export type MemberUpdateWithoutUploadedAssetsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -7759,6 +7857,7 @@ export type MemberUncheckedUpdateWithoutUploadedAssetsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -7827,6 +7926,7 @@ export type MemberCreateWithoutNotificationPreferencesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -7899,6 +7999,7 @@ export type MemberUncheckedCreateWithoutNotificationPreferencesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -7983,6 +8084,7 @@ export type MemberUpdateWithoutNotificationPreferencesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -8055,6 +8157,7 @@ export type MemberUncheckedUpdateWithoutNotificationPreferencesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -8123,6 +8226,7 @@ export type MemberCreateWithoutInboxNotificationsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -8195,6 +8299,7 @@ export type MemberUncheckedCreateWithoutInboxNotificationsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -8279,6 +8384,7 @@ export type MemberUpdateWithoutInboxNotificationsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -8351,6 +8457,7 @@ export type MemberUncheckedUpdateWithoutInboxNotificationsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -8419,6 +8526,7 @@ export type MemberCreateWithoutDeviceTokensInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -8491,6 +8599,7 @@ export type MemberUncheckedCreateWithoutDeviceTokensInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -8575,6 +8684,7 @@ export type MemberUpdateWithoutDeviceTokensInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -8647,6 +8757,7 @@ export type MemberUncheckedUpdateWithoutDeviceTokensInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -8715,6 +8826,7 @@ export type MemberCreateWithoutAttendanceInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -8787,6 +8899,7 @@ export type MemberUncheckedCreateWithoutAttendanceInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -8871,6 +8984,7 @@ export type MemberUpdateWithoutAttendanceInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -8943,6 +9057,7 @@ export type MemberUncheckedUpdateWithoutAttendanceInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -9011,6 +9126,7 @@ export type MemberCreateWithoutRelationshipsFromInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -9083,6 +9199,7 @@ export type MemberUncheckedCreateWithoutRelationshipsFromInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -9156,6 +9273,7 @@ export type MemberCreateWithoutRelationshipsToInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -9228,6 +9346,7 @@ export type MemberUncheckedCreateWithoutRelationshipsToInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -9312,6 +9431,7 @@ export type MemberUpdateWithoutRelationshipsFromInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -9384,6 +9504,7 @@ export type MemberUncheckedUpdateWithoutRelationshipsFromInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -9463,6 +9584,7 @@ export type MemberUpdateWithoutRelationshipsToInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -9535,6 +9657,7 @@ export type MemberUncheckedUpdateWithoutRelationshipsToInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -9603,6 +9726,7 @@ export type MemberCreateWithoutDonationsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -9675,6 +9799,7 @@ export type MemberUncheckedCreateWithoutDonationsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -9759,6 +9884,7 @@ export type MemberUpdateWithoutDonationsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -9831,6 +9957,7 @@ export type MemberUncheckedUpdateWithoutDonationsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -9899,6 +10026,7 @@ export type MemberCreateWithoutPaymentIntentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -9971,6 +10099,7 @@ export type MemberUncheckedCreateWithoutPaymentIntentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -10055,6 +10184,7 @@ export type MemberUpdateWithoutPaymentIntentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -10127,6 +10257,7 @@ export type MemberUncheckedUpdateWithoutPaymentIntentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -10195,6 +10326,7 @@ export type MemberCreateWithoutDripEnrollmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -10267,6 +10399,7 @@ export type MemberUncheckedCreateWithoutDripEnrollmentsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -10351,6 +10484,7 @@ export type MemberUpdateWithoutDripEnrollmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -10423,6 +10557,7 @@ export type MemberUncheckedUpdateWithoutDripEnrollmentsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -10491,6 +10626,7 @@ export type MemberCreateWithoutFundraiserPagesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -10563,6 +10699,7 @@ export type MemberUncheckedCreateWithoutFundraiserPagesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -10647,6 +10784,7 @@ export type MemberUpdateWithoutFundraiserPagesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -10719,6 +10857,7 @@ export type MemberUncheckedUpdateWithoutFundraiserPagesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -10787,6 +10926,7 @@ export type MemberCreateWithoutPledgesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -10859,6 +10999,7 @@ export type MemberUncheckedCreateWithoutPledgesInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -10943,6 +11084,7 @@ export type MemberUpdateWithoutPledgesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -11015,6 +11157,7 @@ export type MemberUncheckedUpdateWithoutPledgesInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -11083,6 +11226,7 @@ export type MemberCreateWithoutRecurringDonationsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -11155,6 +11299,7 @@ export type MemberUncheckedCreateWithoutRecurringDonationsInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -11239,6 +11384,7 @@ export type MemberUpdateWithoutRecurringDonationsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -11311,6 +11457,7 @@ export type MemberUncheckedUpdateWithoutRecurringDonationsInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -11379,6 +11526,7 @@ export type MemberCreateWithoutCareRequestsAsSubjectInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -11451,6 +11599,7 @@ export type MemberUncheckedCreateWithoutCareRequestsAsSubjectInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -11524,6 +11673,7 @@ export type MemberCreateWithoutCareRequestsAsRequesterInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -11596,6 +11746,7 @@ export type MemberUncheckedCreateWithoutCareRequestsAsRequesterInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -11680,6 +11831,7 @@ export type MemberUpdateWithoutCareRequestsAsSubjectInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -11752,6 +11904,7 @@ export type MemberUncheckedUpdateWithoutCareRequestsAsSubjectInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -11831,6 +11984,7 @@ export type MemberUpdateWithoutCareRequestsAsRequesterInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -11903,6 +12057,7 @@ export type MemberUncheckedUpdateWithoutCareRequestsAsRequesterInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -11971,6 +12126,7 @@ export type MemberCreateWithoutCareNotesAuthoredInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -12043,6 +12199,7 @@ export type MemberUncheckedCreateWithoutCareNotesAuthoredInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -12127,6 +12284,7 @@ export type MemberUpdateWithoutCareNotesAuthoredInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -12199,6 +12357,7 @@ export type MemberUncheckedUpdateWithoutCareNotesAuthoredInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -12268,6 +12427,7 @@ export type MemberCreateManyChurchInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -12303,6 +12463,7 @@ export type MemberUpdateWithoutChurchInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -12374,6 +12535,7 @@ export type MemberUncheckedUpdateWithoutChurchInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -12444,6 +12606,7 @@ export type MemberUncheckedUpdateManyWithoutChurchInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -12480,6 +12643,7 @@ export type MemberCreateManyHouseholdInput = {
   clerkUserId?: string | null
   phone?: string | null
   status?: $Enums.MemberStatus
+  allowQuietHours?: boolean
   gender?: $Enums.MemberGender
   maritalStatus?: $Enums.MemberMaritalStatus
   directoryVisibility?: $Enums.MemberDirectoryVisibility
@@ -12515,6 +12679,7 @@ export type MemberUpdateWithoutHouseholdInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -12586,6 +12751,7 @@ export type MemberUncheckedUpdateWithoutHouseholdInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -12656,6 +12822,7 @@ export type MemberUncheckedUpdateManyWithoutHouseholdInput = {
   clerkUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumMemberStatusFieldUpdateOperationsInput | $Enums.MemberStatus
+  allowQuietHours?: Prisma.BoolFieldUpdateOperationsInput | boolean
   gender?: Prisma.EnumMemberGenderFieldUpdateOperationsInput | $Enums.MemberGender
   maritalStatus?: Prisma.EnumMemberMaritalStatusFieldUpdateOperationsInput | $Enums.MemberMaritalStatus
   directoryVisibility?: Prisma.EnumMemberDirectoryVisibilityFieldUpdateOperationsInput | $Enums.MemberDirectoryVisibility
@@ -13012,6 +13179,7 @@ export type MemberSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   clerkUserId?: boolean
   phone?: boolean
   status?: boolean
+  allowQuietHours?: boolean
   gender?: boolean
   maritalStatus?: boolean
   directoryVisibility?: boolean
@@ -13086,6 +13254,7 @@ export type MemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   clerkUserId?: boolean
   phone?: boolean
   status?: boolean
+  allowQuietHours?: boolean
   gender?: boolean
   maritalStatus?: boolean
   directoryVisibility?: boolean
@@ -13125,6 +13294,7 @@ export type MemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   clerkUserId?: boolean
   phone?: boolean
   status?: boolean
+  allowQuietHours?: boolean
   gender?: boolean
   maritalStatus?: boolean
   directoryVisibility?: boolean
@@ -13164,6 +13334,7 @@ export type MemberSelectScalar = {
   clerkUserId?: boolean
   phone?: boolean
   status?: boolean
+  allowQuietHours?: boolean
   gender?: boolean
   maritalStatus?: boolean
   directoryVisibility?: boolean
@@ -13189,7 +13360,7 @@ export type MemberSelectScalar = {
   updatedAt?: boolean
 }
 
-export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "churchId" | "householdId" | "firstName" | "middleName" | "lastName" | "preferredName" | "email" | "clerkUserId" | "phone" | "status" | "gender" | "maritalStatus" | "directoryVisibility" | "showEmailInDirectory" | "showPhoneInDirectory" | "showAddressInDirectory" | "showPhotoInDirectory" | "dateOfBirth" | "joinDate" | "baptismDate" | "confirmationDate" | "avatarUrl" | "addressLine1" | "addressLine2" | "city" | "state" | "postalCode" | "country" | "emergencyContactName" | "emergencyContactPhone" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
+export type MemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "churchId" | "householdId" | "firstName" | "middleName" | "lastName" | "preferredName" | "email" | "clerkUserId" | "phone" | "status" | "allowQuietHours" | "gender" | "maritalStatus" | "directoryVisibility" | "showEmailInDirectory" | "showPhoneInDirectory" | "showAddressInDirectory" | "showPhotoInDirectory" | "dateOfBirth" | "joinDate" | "baptismDate" | "confirmationDate" | "avatarUrl" | "addressLine1" | "addressLine2" | "city" | "state" | "postalCode" | "country" | "emergencyContactName" | "emergencyContactPhone" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["member"]>
 export type MemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   church?: boolean | Prisma.ChurchDefaultArgs<ExtArgs>
   household?: boolean | Prisma.Member$householdArgs<ExtArgs>
@@ -13290,6 +13461,7 @@ export type $MemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     clerkUserId: string | null
     phone: string | null
     status: $Enums.MemberStatus
+    allowQuietHours: boolean
     gender: $Enums.MemberGender
     maritalStatus: $Enums.MemberMaritalStatus
     directoryVisibility: $Enums.MemberDirectoryVisibility
@@ -13783,6 +13955,7 @@ export interface MemberFieldRefs {
   readonly clerkUserId: Prisma.FieldRef<"Member", 'String'>
   readonly phone: Prisma.FieldRef<"Member", 'String'>
   readonly status: Prisma.FieldRef<"Member", 'MemberStatus'>
+  readonly allowQuietHours: Prisma.FieldRef<"Member", 'Boolean'>
   readonly gender: Prisma.FieldRef<"Member", 'MemberGender'>
   readonly maritalStatus: Prisma.FieldRef<"Member", 'MemberMaritalStatus'>
   readonly directoryVisibility: Prisma.FieldRef<"Member", 'MemberDirectoryVisibility'>

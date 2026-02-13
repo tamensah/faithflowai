@@ -197,6 +197,10 @@ export const ChurchScalarFieldEnum = {
   slug: 'slug',
   countryCode: 'countryCode',
   timezone: 'timezone',
+  quietHoursEnabled: 'quietHoursEnabled',
+  quietHoursStartHour: 'quietHoursStartHour',
+  quietHoursEndHour: 'quietHoursEndHour',
+  quietHoursRescheduleMinutes: 'quietHoursRescheduleMinutes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -240,6 +244,7 @@ export const MemberScalarFieldEnum = {
   clerkUserId: 'clerkUserId',
   phone: 'phone',
   status: 'status',
+  allowQuietHours: 'allowQuietHours',
   gender: 'gender',
   maritalStatus: 'maritalStatus',
   directoryVisibility: 'directoryVisibility',

@@ -7600,6 +7600,10 @@ export const ChurchScalarFieldEnum = {
   slug: 'slug',
   countryCode: 'countryCode',
   timezone: 'timezone',
+  quietHoursEnabled: 'quietHoursEnabled',
+  quietHoursStartHour: 'quietHoursStartHour',
+  quietHoursEndHour: 'quietHoursEndHour',
+  quietHoursRescheduleMinutes: 'quietHoursRescheduleMinutes',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -7643,6 +7647,7 @@ export const MemberScalarFieldEnum = {
   clerkUserId: 'clerkUserId',
   phone: 'phone',
   status: 'status',
+  allowQuietHours: 'allowQuietHours',
   gender: 'gender',
   maritalStatus: 'maritalStatus',
   directoryVisibility: 'directoryVisibility',
@@ -9228,6 +9233,27 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
  * Reference to a field of type 'MemberStatus'
  */
 export type EnumMemberStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemberStatus'>
@@ -9280,13 +9306,6 @@ export type EnumMemberDirectoryVisibilityFieldRefInput<$PrismaModel> = FieldRefI
  * Reference to a field of type 'MemberDirectoryVisibility[]'
  */
 export type ListEnumMemberDirectoryVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MemberDirectoryVisibility[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -9371,20 +9390,6 @@ export type EnumBillingIntervalFieldRefInput<$PrismaModel> = FieldRefInputType<$
  * Reference to a field of type 'BillingInterval[]'
  */
 export type ListEnumBillingIntervalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingInterval[]'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 

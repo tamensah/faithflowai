@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE "Church" ADD COLUMN "quietHoursEnabled" BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE "Church" ADD COLUMN "quietHoursStartHour" INTEGER NOT NULL DEFAULT 21;
+ALTER TABLE "Church" ADD COLUMN "quietHoursEndHour" INTEGER NOT NULL DEFAULT 7;
+ALTER TABLE "Church" ADD COLUMN "quietHoursRescheduleMinutes" INTEGER NOT NULL DEFAULT 30;
+
+-- AlterTable
+ALTER TABLE "Member" ADD COLUMN "allowQuietHours" BOOLEAN NOT NULL DEFAULT false;
