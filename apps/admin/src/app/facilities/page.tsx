@@ -6,6 +6,7 @@ import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 function toDateInput(value: Date) {
   return value.toISOString().slice(0, 10);
@@ -14,6 +15,7 @@ function toDateInput(value: Date) {
 export default function FacilitiesPage() {
   const gate = useFeatureGate('facility_management_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const now = new Date();
   const [churchId, setChurchId] = useState('');
   const [campusId, setCampusId] = useState('');
@@ -69,7 +71,7 @@ export default function FacilitiesPage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="facility_management_enabled"
           title="Facilities are locked"
@@ -81,6 +83,8 @@ export default function FacilitiesPage() {
           <h1 className="text-3xl font-semibold">Facilities & Scheduling</h1>
           <p className="mt-2 text-sm text-muted">Manage facility inventory, booking conflicts, and utilization across campuses.</p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Scope</h2>
@@ -151,7 +155,7 @@ export default function FacilitiesPage() {
                   capacity: facilityCapacity ? Number(facilityCapacity) : undefined,
                 })
               }
-              disabled={!churchId || !facilityName.trim() || isCreatingFacility}
+              disabled={!canWrite || !churchId || !facilityName.trim() || isCreatingFacility}
             >
               {isCreatingFacility ? 'Creating...' : 'Create facility'}
             </Button>
@@ -188,7 +192,7 @@ export default function FacilitiesPage() {
                   endAt: new Date(bookingEndAt),
                 })
               }
-              disabled={!churchId || !bookingFacilityId || !bookingTitle.trim() || !bookingStartAt || !bookingEndAt || isCreatingBooking}
+              disabled={!canWrite || !churchId || !bookingFacilityId || !bookingTitle.trim() || !bookingStartAt || !bookingEndAt || isCreatingBooking}
             >
               {isCreatingBooking ? 'Booking...' : 'Create booking'}
             </Button>

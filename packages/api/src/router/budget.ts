@@ -3,7 +3,7 @@ import { router, protectedProcedure } from '../trpc';
 import { AuditActorType, prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { recordAuditLog } from '../audit';
-import { ensureFeatureEnabled } from '../entitlements';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 const budgetInput = z.object({
   churchId: z.string(),
@@ -23,6 +23,11 @@ export const budgetRouter = router({
   list: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       return prisma.budget.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -36,7 +41,7 @@ export const budgetRouter = router({
   create: protectedProcedure
     .input(budgetInput)
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'finance_enabled',
         'Your subscription does not include finance operations.'
@@ -74,6 +79,11 @@ export const budgetRouter = router({
   addItem: protectedProcedure
     .input(budgetItemInput)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const budget = await prisma.budget.findFirst({
         where: { id: input.budgetId, church: { organization: { tenantId: ctx.tenantId! } } },
       });

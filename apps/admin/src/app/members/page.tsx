@@ -6,10 +6,12 @@ import { trpc } from '../../lib/trpc';
 import { Shell } from '../../components/Shell';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 export default function MembersPage() {
   const gate = useFeatureGate('membership_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const { data: churches } = trpc.church.list.useQuery({});
   const [churchId, setChurchId] = useState<string>('');
   const [firstName, setFirstName] = useState('');
@@ -661,7 +663,7 @@ export default function MembersPage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="membership_enabled"
           title="Membership is locked"
@@ -675,6 +677,8 @@ export default function MembersPage() {
             Manage your congregation with accurate profiles and status tracking.
           </p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <div className="flex flex-wrap items-center gap-3">
@@ -717,7 +721,7 @@ export default function MembersPage() {
                   phone: phone || undefined,
                 })
               }
-              disabled={!churchId || !firstName || !lastName || isPending}
+              disabled={!canWrite || !churchId || !firstName || !lastName || isPending}
             >
               {isPending ? 'Saving…' : 'Save member'}
             </Button>
@@ -876,6 +880,7 @@ export default function MembersPage() {
                       <Button
                         variant="outline"
                         size="sm"
+                        disabled={!canWrite}
                         onClick={() => {
                           if (confirm('Delete this member?')) {
                             deleteMember({ id: member.id });
@@ -915,13 +920,13 @@ export default function MembersPage() {
             <Button
               variant="outline"
               onClick={() => importMembers({ churchId, csv: importCsv, dryRun: true })}
-              disabled={!churchId || !importCsv || isImportingMembers}
+              disabled={!canWrite || !churchId || !importCsv || isImportingMembers}
             >
               {isImportingMembers ? 'Processing…' : 'Dry run'}
             </Button>
             <Button
               onClick={() => importMembers({ churchId, csv: importCsv })}
-              disabled={!churchId || !importCsv || isImportingMembers}
+              disabled={!canWrite || !churchId || !importCsv || isImportingMembers}
             >
               {isImportingMembers ? 'Importing…' : 'Import members'}
             </Button>
@@ -929,7 +934,7 @@ export default function MembersPage() {
               <Button
                 variant="outline"
                 onClick={() => rollbackImport({ batchId: importSummary.batchId })}
-                disabled={isRollingBackImport}
+                disabled={!canWrite || isRollingBackImport}
               >
                 {isRollingBackImport ? 'Rolling back…' : 'Rollback created'}
               </Button>
@@ -959,7 +964,7 @@ export default function MembersPage() {
                   updateMember({ id: selectedMemberId, data: { clerkUserId: clerkUserId || undefined } });
                 }
               }}
-              disabled={!selectedMemberId}
+              disabled={!canWrite || !selectedMemberId}
             >
               Link Clerk user
             </Button>
@@ -1008,6 +1013,7 @@ export default function MembersPage() {
               <Input
                 placeholder="Write a message"
                 value={staffMessageBody}
+                disabled={!canWrite}
                 onChange={(e) => setStaffMessageBody(e.target.value)}
               />
               <Button
@@ -1026,7 +1032,7 @@ export default function MembersPage() {
                     });
                   }
                 }}
-                disabled={!staffConversationId || !staffMessageBody.trim()}
+                disabled={!canWrite || !staffConversationId || !staffMessageBody.trim()}
               >
                 Send
               </Button>
@@ -1042,12 +1048,12 @@ export default function MembersPage() {
                 value={staffAttachmentName}
                 onChange={(e) => setStaffAttachmentName(e.target.value)}
               />
-              <Button variant="outline" onClick={addStaffAttachment} disabled={!staffAttachmentUrl.trim()}>
+              <Button variant="outline" onClick={addStaffAttachment} disabled={!canWrite || !staffAttachmentUrl.trim()}>
                 Add attachment
               </Button>
               <Input
                 type="file"
-                disabled={uploadingStaffAttachment}
+                disabled={!canWrite || uploadingStaffAttachment}
                 onChange={(e) => handleStaffAttachmentFile(e.target.files?.[0])}
               />
             </div>
@@ -1056,7 +1062,7 @@ export default function MembersPage() {
                 {pendingStaffAttachments.map((attachment) => (
                   <div key={attachment.url} className="flex items-center gap-2 rounded-md border border-border px-2 py-1">
                     <span className="truncate">{attachment.name ?? attachment.url}</span>
-                    <Button size="sm" variant="outline" onClick={() => removeStaffAttachment(attachment.url)}>
+                    <Button size="sm" variant="outline" disabled={!canWrite} onClick={() => removeStaffAttachment(attachment.url)}>
                       Remove
                     </Button>
                   </div>

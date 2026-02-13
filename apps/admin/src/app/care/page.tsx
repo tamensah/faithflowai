@@ -6,6 +6,7 @@ import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const priorityOptions = ['LOW', 'NORMAL', 'HIGH', 'URGENT'] as const;
 const channelOptions = ['WEB', 'MOBILE', 'STAFF', 'REFERRAL'] as const;
@@ -14,6 +15,7 @@ const statusOptions = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'CLOSED', 'ARCHIVED'] 
 export default function CarePage() {
   const gate = useFeatureGate('pastoral_care_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const [churchId, setChurchId] = useState('');
   const [campusId, setCampusId] = useState('');
   const [memberQuery, setMemberQuery] = useState('');
@@ -105,7 +107,7 @@ export default function CarePage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="pastoral_care_enabled"
           title="Pastoral care is locked"
@@ -117,6 +119,8 @@ export default function CarePage() {
           <h1 className="text-3xl font-semibold">Pastoral Care</h1>
           <p className="mt-2 text-sm text-muted">Manage care intake, assignment, follow-ups, and status transitions.</p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Scope & Summary</h2>
@@ -217,7 +221,7 @@ export default function CarePage() {
           </div>
           <div className="mt-4">
             <Button
-              disabled={!churchId || !title.trim() || isCreating}
+              disabled={!canWrite || !churchId || !title.trim() || isCreating}
               onClick={() =>
                 createRequest({
                   churchId,
@@ -252,6 +256,7 @@ export default function CarePage() {
                   <select
                     className="h-9 rounded-md border border-border bg-white px-2 text-xs"
                     value={request.status}
+                    disabled={!canWrite}
                     onChange={(event) =>
                       updateStatus({
                         id: request.id,
@@ -270,6 +275,7 @@ export default function CarePage() {
                   <select
                     className="h-9 rounded-md border border-border bg-white px-2 text-xs"
                     value={assignments[request.id] ?? request.assignedTo?.id ?? ''}
+                    disabled={!canWrite}
                     onChange={(event) => {
                       const userId = event.target.value;
                       setAssignments((current) => ({ ...current, [request.id]: userId }));
@@ -290,6 +296,7 @@ export default function CarePage() {
                     <Input
                       placeholder="Add note"
                       value={noteDrafts[request.id] ?? ''}
+                      disabled={!canWrite}
                       onChange={(event) =>
                         setNoteDrafts((current) => ({
                           ...current,
@@ -300,7 +307,7 @@ export default function CarePage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      disabled={!noteDrafts[request.id]?.trim()}
+                      disabled={!canWrite || !noteDrafts[request.id]?.trim()}
                       onClick={() =>
                         addNote({
                           careRequestId: request.id,

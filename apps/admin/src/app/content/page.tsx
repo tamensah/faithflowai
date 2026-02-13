@@ -6,6 +6,7 @@ import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const sermonStatusOptions = ['DRAFT', 'PUBLISHED', 'ARCHIVED'] as const;
 const resourceTypeOptions = ['DOCUMENT', 'VIDEO', 'AUDIO', 'LINK', 'IMAGE', 'OTHER'] as const;
@@ -14,6 +15,7 @@ const resourceVisibilityOptions = ['PUBLIC', 'MEMBERS_ONLY', 'LEADERS_ONLY', 'PR
 export default function ContentPage() {
   const gate = useFeatureGate('content_library_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const [churchId, setChurchId] = useState('');
   const [campusId, setCampusId] = useState('');
 
@@ -97,7 +99,7 @@ export default function ContentPage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="content_library_enabled"
           title="Content library is locked"
@@ -109,6 +111,8 @@ export default function ContentPage() {
           <h1 className="text-3xl font-semibold">Sermons & Content Library</h1>
           <p className="mt-2 text-sm text-muted">Publish sermons and resources with campus-aware visibility controls.</p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Scope</h2>
@@ -175,7 +179,7 @@ export default function ContentPage() {
           </div>
           <div className="mt-4">
             <Button
-              disabled={!churchId || !sermonTitle.trim() || isCreatingSermon}
+              disabled={!canWrite || !churchId || !sermonTitle.trim() || isCreatingSermon}
               onClick={() =>
                 createSermon({
                   churchId,
@@ -240,6 +244,7 @@ export default function ContentPage() {
               <input
                 type="checkbox"
                 checked={resourceFeatured}
+                disabled={!canWrite}
                 onChange={(event) => setResourceFeatured(event.target.checked)}
               />
               Feature this resource
@@ -247,7 +252,7 @@ export default function ContentPage() {
           </div>
           <div className="mt-4">
             <Button
-              disabled={!churchId || !resourceTitle.trim() || isCreatingResource}
+              disabled={!canWrite || !churchId || !resourceTitle.trim() || isCreatingResource}
               onClick={() =>
                 createResource({
                   churchId,
@@ -285,6 +290,7 @@ export default function ContentPage() {
                   <Button
                     size="sm"
                     variant="outline"
+                    disabled={!canWrite}
                     onClick={() => publishSermon({ id: sermon.id, published: sermon.status !== 'PUBLISHED' })}
                   >
                     {sermon.status === 'PUBLISHED' ? 'Unpublish' : 'Publish'}

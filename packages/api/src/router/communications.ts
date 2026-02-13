@@ -16,6 +16,7 @@ import { TRPCError } from '@trpc/server';
 import { recordAuditLog } from '../audit';
 import { channelToPreference, dispatchScheduledCommunications, normalizeRecipientAddress, sendCommunication } from '../communications';
 import { buildUnsubscribeUrl, createUnsubscribeToken } from '../unsubscribe';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 const templateSchema = z.object({
   churchId: z.string(),
@@ -254,6 +255,11 @@ export const communicationsRouter = router({
         .optional()
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
       await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       const q = input?.q?.trim().toLowerCase();
       return prisma.communicationSuppression.findMany({
@@ -276,6 +282,11 @@ export const communicationsRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
       await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       const address = normalizeSuppressionAddress(input.channel, input.address);
       if (!address) {
@@ -319,6 +330,11 @@ export const communicationsRouter = router({
   removeSuppression: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
       await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       const suppression = await prisma.communicationSuppression.findFirst({
         where: { id: input.id, tenantId: ctx.tenantId! },
@@ -345,6 +361,12 @@ export const communicationsRouter = router({
   templates: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       return prisma.communicationTemplate.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -357,6 +379,12 @@ export const communicationsRouter = router({
   createTemplate: protectedProcedure
     .input(templateSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       const church = await prisma.church.findFirst({
         where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
       });
@@ -395,6 +423,12 @@ export const communicationsRouter = router({
   messages: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), limit: z.number().min(1).max(200).default(50) }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       return prisma.communicationMessage.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -408,6 +442,12 @@ export const communicationsRouter = router({
   summary: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       return prisma.communicationMessage.groupBy({
         by: ['status', 'channel'],
         where: {
@@ -421,6 +461,12 @@ export const communicationsRouter = router({
   schedules: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), limit: z.number().min(1).max(200).default(50) }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       return prisma.communicationSchedule.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -432,6 +478,12 @@ export const communicationsRouter = router({
     }),
 
   schedule: protectedProcedure.input(scheduleSchema).mutation(async ({ input, ctx }) => {
+    await ensureFeatureWriteAccess(
+      ctx.tenantId!,
+      'communications_enabled',
+      'Your subscription does not include communications.'
+    );
+    await requireTenantStaff(ctx.tenantId!, ctx.userId!);
     const church = await prisma.church.findFirst({
       where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
     });
@@ -560,6 +612,12 @@ export const communicationsRouter = router({
   dispatchDue: protectedProcedure
     .input(z.object({ limit: z.number().min(1).max(200).default(50) }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       const result = await dispatchScheduledCommunications(input.limit);
       await recordAuditLog({
         tenantId: ctx.tenantId,
@@ -575,6 +633,12 @@ export const communicationsRouter = router({
   drips: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       return prisma.communicationDripCampaign.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -585,6 +649,12 @@ export const communicationsRouter = router({
     }),
 
   createDrip: protectedProcedure.input(createDripSchema).mutation(async ({ input, ctx }) => {
+    await ensureFeatureWriteAccess(
+      ctx.tenantId!,
+      'communications_enabled',
+      'Your subscription does not include communications.'
+    );
+    await requireTenantStaff(ctx.tenantId!, ctx.userId!);
     const church = await prisma.church.findFirst({
       where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
     });
@@ -618,6 +688,12 @@ export const communicationsRouter = router({
   dripSteps: protectedProcedure
     .input(z.object({ campaignId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
       const campaign = await prisma.communicationDripCampaign.findFirst({
         where: { id: input.campaignId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -632,6 +708,12 @@ export const communicationsRouter = router({
     }),
 
   addDripStep: protectedProcedure.input(dripStepSchema).mutation(async ({ input, ctx }) => {
+    await ensureFeatureWriteAccess(
+      ctx.tenantId!,
+      'communications_enabled',
+      'Your subscription does not include communications.'
+    );
+    await requireTenantStaff(ctx.tenantId!, ctx.userId!);
     const campaign = await prisma.communicationDripCampaign.findFirst({
       where: { id: input.campaignId, church: { organization: { tenantId: ctx.tenantId! } } },
     });
@@ -687,6 +769,12 @@ export const communicationsRouter = router({
   }),
 
   enrollDrip: protectedProcedure.input(enrollDripSchema).mutation(async ({ input, ctx }) => {
+    await ensureFeatureWriteAccess(
+      ctx.tenantId!,
+      'communications_enabled',
+      'Your subscription does not include communications.'
+    );
+    await requireTenantStaff(ctx.tenantId!, ctx.userId!);
     const campaign = await prisma.communicationDripCampaign.findFirst({
       where: { id: input.campaignId, church: { organization: { tenantId: ctx.tenantId! } } },
     });
@@ -815,6 +903,12 @@ export const communicationsRouter = router({
   }),
 
   send: protectedProcedure.input(sendSchema).mutation(async ({ input, ctx }) => {
+    await ensureFeatureWriteAccess(
+      ctx.tenantId!,
+      'communications_enabled',
+      'Your subscription does not include communications.'
+    );
+    await requireTenantStaff(ctx.tenantId!, ctx.userId!);
     const church = await prisma.church.findFirst({
       where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
     });

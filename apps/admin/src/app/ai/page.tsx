@@ -6,6 +6,7 @@ import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const providerOptions = ['openai', 'anthropic', 'google'] as const;
 
@@ -27,7 +28,7 @@ export default function AiAssistantPage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="ai_insights"
           title="AI insights are locked"
@@ -39,6 +40,8 @@ export default function AiAssistantPage() {
           <h1 className="text-3xl font-semibold">Ask FaithFlow</h1>
           <p className="mt-2 text-sm text-muted">Tenant-scoped assistant with sources and audit logging.</p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Starter insights</h2>
@@ -89,7 +92,7 @@ export default function AiAssistantPage() {
             </select>
             <Input value={model} onChange={(e) => setModel(e.target.value)} placeholder="Model override (optional)" />
             <Button
-              disabled={isPending || question.trim().length < 5}
+              disabled={!gate.canWrite || isPending || question.trim().length < 5}
               onClick={() => ask({ question, provider, model: model.trim() || undefined })}
             >
               {isPending ? 'Thinking...' : 'Ask'}

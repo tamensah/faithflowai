@@ -12,6 +12,7 @@ import { TRPCError } from '@trpc/server';
 import { emitRealtimeEvent } from '../realtime';
 import { createDonationReceiptForManual } from '../receipts';
 import { recordAuditLog } from '../audit';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 const requireStaff = async (tenantId: string, clerkUserId: string) => {
   const membership = await prisma.staffMembership.findFirst({
@@ -145,6 +146,11 @@ export const donationRouter = router({
   create: protectedProcedure
     .input(createDonationSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const church = await prisma.church.findFirst({
         where: {
           id: input.churchId,
@@ -282,6 +288,11 @@ export const donationRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       return prisma.donation.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -301,6 +312,11 @@ export const donationRouter = router({
     }),
 
   importCsv: protectedProcedure.input(donationImportSchema).mutation(async ({ input, ctx }) => {
+    await ensureFeatureWriteAccess(
+      ctx.tenantId!,
+      'finance_enabled',
+      'Your subscription does not include finance operations.'
+    );
     await requireStaff(ctx.tenantId!, ctx.userId!);
     const church = await prisma.church.findFirst({
       where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
@@ -434,6 +450,11 @@ export const donationRouter = router({
   rollbackImport: protectedProcedure
     .input(z.object({ batchId: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       await requireStaff(ctx.tenantId!, ctx.userId!);
       const batch = await prisma.importBatch.findFirst({
         where: { id: input.batchId, tenantId: ctx.tenantId!, entityType: ImportEntityType.DONATION },

@@ -6,6 +6,7 @@ import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const priorityOptions = ['LOW', 'NORMAL', 'HIGH', 'URGENT'] as const;
 const platformStatusOptions = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'RESOLVED', 'CLOSED'] as const;
@@ -13,6 +14,7 @@ const platformStatusOptions = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'RESOL
 export default function SupportPage() {
   const gate = useFeatureGate('support_center_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const { data: platformSelf } = trpc.platform.self.useQuery();
   const { data: tenantTickets } = trpc.support.tenantTickets.useQuery({ limit: 100 });
   const { data: platformTickets } = trpc.support.platformTickets.useQuery(
@@ -106,7 +108,7 @@ export default function SupportPage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="support_center_enabled"
           title="Support Center is locked"
@@ -118,6 +120,8 @@ export default function SupportPage() {
           <h1 className="text-3xl font-semibold">Support Center</h1>
           <p className="mt-2 text-sm text-muted">Open support tickets, collaborate on resolution, and track escalation status.</p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Create Ticket</h2>
@@ -143,7 +147,7 @@ export default function SupportPage() {
           </div>
           <div className="mt-4">
             <Button
-              disabled={!subject.trim() || description.trim().length < 10 || isCreating}
+              disabled={!canWrite || !subject.trim() || description.trim().length < 10 || isCreating}
               onClick={() =>
                 createTicket({
                   subject: subject.trim(),
@@ -182,7 +186,7 @@ export default function SupportPage() {
           <Card className="p-6">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-lg font-semibold">SLA Analytics</h2>
-              <Button variant="outline" disabled={isRunningSlaSweep} onClick={() => runSlaSweep({ dryRun: false })}>
+              <Button variant="outline" disabled={!canWrite || isRunningSlaSweep} onClick={() => runSlaSweep({ dryRun: false })}>
                 {isRunningSlaSweep ? 'Running...' : 'Run SLA sweep'}
               </Button>
             </div>
@@ -275,6 +279,7 @@ export default function SupportPage() {
                 <select
                   className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
                   value={assigneeId}
+                  disabled={!canWrite}
                   onChange={(event) => setAssigneeId(event.target.value)}
                 >
                   <option value="">Unassigned</option>
@@ -286,6 +291,7 @@ export default function SupportPage() {
                 </select>
                 <Button
                   variant="outline"
+                  disabled={!canWrite}
                   onClick={() => assignPlatformTicket({ ticketId: selectedTicket.id, platformUserId: assigneeId || undefined })}
                 >
                   Assign
@@ -293,6 +299,7 @@ export default function SupportPage() {
                 <select
                   className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
                   value={status}
+                  disabled={!canWrite}
                   onChange={(event) => setStatus(event.target.value as (typeof platformStatusOptions)[number])}
                 >
                   {platformStatusOptions.map((option) => (
@@ -301,7 +308,7 @@ export default function SupportPage() {
                     </option>
                   ))}
                 </select>
-                <Button variant="outline" onClick={() => updatePlatformTicket({ ticketId: selectedTicket.id, status })}>
+                <Button variant="outline" disabled={!canWrite} onClick={() => updatePlatformTicket({ ticketId: selectedTicket.id, status })}>
                   Update status
                 </Button>
               </div>
@@ -318,19 +325,20 @@ export default function SupportPage() {
             </div>
 
             <div className="mt-4 space-y-2">
-              <Input placeholder="Write a reply" value={reply} onChange={(event) => setReply(event.target.value)} />
+              <Input placeholder="Write a reply" value={reply} disabled={!canWrite} onChange={(event) => setReply(event.target.value)} />
               {platformSelf?.platformUser ? (
                 <label className="flex items-center gap-2 text-xs text-muted">
                   <input
                     type="checkbox"
                     checked={internalNote}
+                    disabled={!canWrite}
                     onChange={(event) => setInternalNote(event.target.checked)}
                   />
                   Internal note (hidden from tenant)
                 </label>
               ) : null}
               <Button
-                disabled={!reply.trim() || isTenantReplying || isPlatformReplying}
+                disabled={!canWrite || !reply.trim() || isTenantReplying || isPlatformReplying}
                 onClick={() => {
                   if (platformSelf?.platformUser) {
                     addPlatformMessage({ ticketId: selectedTicket.id, body: reply.trim(), isInternal: internalNote });

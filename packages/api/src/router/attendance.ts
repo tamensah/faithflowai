@@ -3,11 +3,17 @@ import { router, protectedProcedure, publicProcedure } from '../trpc';
 import { prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { emitRealtimeEvent } from '../realtime';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 export const attendanceRouter = router({
   checkIn: protectedProcedure
     .input(z.object({ eventId: z.string(), memberId: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'events_enabled',
+        'Your subscription does not include event management.'
+      );
       const event = await prisma.event.findFirst({
         where: {
           id: input.eventId,
@@ -64,6 +70,11 @@ export const attendanceRouter = router({
   checkOut: protectedProcedure
     .input(z.object({ eventId: z.string(), memberId: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'events_enabled',
+        'Your subscription does not include event management.'
+      );
       const event = await prisma.event.findFirst({
         where: {
           id: input.eventId,
@@ -92,6 +103,11 @@ export const attendanceRouter = router({
   bulkCheckIn: protectedProcedure
     .input(z.object({ eventId: z.string(), memberIds: z.array(z.string()).min(1) }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'events_enabled',
+        'Your subscription does not include event management.'
+      );
       const event = await prisma.event.findFirst({
         where: {
           id: input.eventId,
@@ -145,6 +161,11 @@ export const attendanceRouter = router({
   listByEvent: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'events_enabled',
+        'Your subscription does not include event management.'
+      );
       return prisma.attendance.findMany({
         where: {
           eventId: input.eventId,
@@ -163,6 +184,11 @@ export const attendanceRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'events_enabled',
+        'Your subscription does not include event management.'
+      );
       const event = await prisma.event.findFirst({
         where: {
           id: input.eventId,
@@ -234,10 +260,16 @@ export const attendanceRouter = router({
     .query(async ({ input }) => {
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, checkInEnabled: true, checkInCode: input.code },
+        include: { church: { select: { organization: { select: { tenantId: true } } } } },
       });
       if (!event) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Kiosk access denied' });
       }
+      await ensureFeatureReadAccess(
+        event.church.organization.tenantId,
+        'events_enabled',
+        'Your subscription does not include event management.'
+      );
 
       const attendance = await prisma.attendance.findMany({
         where: { eventId: event.id },
@@ -299,10 +331,16 @@ export const attendanceRouter = router({
     .mutation(async ({ input }) => {
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, checkInEnabled: true, checkInCode: input.code },
+        include: { church: { select: { organization: { select: { tenantId: true } } } } },
       });
       if (!event) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Kiosk access denied' });
       }
+      await ensureFeatureWriteAccess(
+        event.church.organization.tenantId,
+        'events_enabled',
+        'Your subscription does not include event management.'
+      );
 
       const member = await prisma.member.findFirst({
         where: { id: input.memberId, churchId: event.churchId },
@@ -340,10 +378,16 @@ export const attendanceRouter = router({
     .mutation(async ({ input }) => {
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, checkInEnabled: true, checkInCode: input.code },
+        include: { church: { select: { organization: { select: { tenantId: true } } } } },
       });
       if (!event) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Kiosk access denied' });
       }
+      await ensureFeatureWriteAccess(
+        event.church.organization.tenantId,
+        'events_enabled',
+        'Your subscription does not include event management.'
+      );
 
       const attendance = await prisma.attendance.findFirst({
         where: { eventId: event.id, memberId: input.memberId },
@@ -361,6 +405,11 @@ export const attendanceRouter = router({
   checkInBadge: protectedProcedure
     .input(z.object({ badgeCode: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'events_enabled',
+        'Your subscription does not include event management.'
+      );
       const badge = await prisma.eventBadge.findFirst({
         where: { badgeCode: input.badgeCode, event: { church: { organization: { tenantId: ctx.tenantId! } } } },
         include: { event: true },
@@ -409,10 +458,16 @@ export const attendanceRouter = router({
     .mutation(async ({ input }) => {
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, checkInEnabled: true, checkInCode: input.code },
+        include: { church: { select: { organization: { select: { tenantId: true } } } } },
       });
       if (!event) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Kiosk access denied' });
       }
+      await ensureFeatureWriteAccess(
+        event.church.organization.tenantId,
+        'events_enabled',
+        'Your subscription does not include event management.'
+      );
 
       const badge = await prisma.eventBadge.findFirst({
         where: { badgeCode: input.badgeCode, eventId: event.id },

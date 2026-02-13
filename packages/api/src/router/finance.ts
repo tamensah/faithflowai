@@ -7,6 +7,7 @@ import { toCsv } from '../csv';
 import { recordAuditLog } from '../audit';
 import { createRefundForDonation } from '../payments';
 import { createDisputeEvidenceRecord, submitDisputeEvidence, submitStripeDispute } from '../disputes';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 const churchFilterSchema = z.object({
   churchId: z.string().optional(),
@@ -94,6 +95,7 @@ export const financeRouter = router({
   dashboard: protectedProcedure
     .input(churchFilterSchema.merge(dateRangeSchema))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const from = input.from ?? new Date(new Date().getFullYear(), 0, 1);
       const to = input.to ?? new Date();
 
@@ -128,6 +130,7 @@ export const financeRouter = router({
   reconciliationSummary: protectedProcedure
     .input(churchFilterSchema)
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const paymentIntents = await prisma.paymentIntent.groupBy({
         by: ['status'],
         where: {
@@ -163,6 +166,7 @@ export const financeRouter = router({
   reconciliationMismatches: protectedProcedure
     .input(churchFilterSchema)
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const successIntents = await prisma.paymentIntent.findMany({
         where: {
           status: 'SUCCEEDED',
@@ -212,6 +216,7 @@ export const financeRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const memberGroups = await prisma.donation.groupBy({
         by: ['memberId', 'currency'],
         where: {
@@ -272,6 +277,7 @@ export const financeRouter = router({
   donationTrends: protectedProcedure
     .input(trendInputSchema)
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       return computeDonationTrends({
         tenantId: ctx.tenantId!,
         churchId: input.churchId,
@@ -282,6 +288,7 @@ export const financeRouter = router({
   donationForecast: protectedProcedure
     .input(trendInputSchema)
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const trends = await computeDonationTrends({
         tenantId: ctx.tenantId!,
         churchId: input.churchId,
@@ -307,6 +314,7 @@ export const financeRouter = router({
   donorSegments: protectedProcedure
     .input(donorSegmentInputSchema)
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const now = new Date();
       const lookbackFrom = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
       lookbackFrom.setUTCMonth(lookbackFrom.getUTCMonth() - (input.lookbackMonths - 1));
@@ -482,6 +490,7 @@ export const financeRouter = router({
         })
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const from = new Date(input.year, 0, 1);
       const to = new Date(input.year, 11, 31, 23, 59, 59);
 
@@ -519,6 +528,7 @@ export const financeRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const donation = await prisma.donation.findFirst({
         where: { id: input.donationId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -537,6 +547,7 @@ export const financeRouter = router({
   refunds: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), limit: z.number().min(1).max(200).default(50) }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       return prisma.refund.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -551,6 +562,7 @@ export const financeRouter = router({
   disputes: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), limit: z.number().min(1).max(200).default(50) }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       return prisma.dispute.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -565,6 +577,7 @@ export const financeRouter = router({
   disputeEvidence: protectedProcedure
     .input(z.object({ disputeId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const dispute = await prisma.dispute.findFirst({
         where: { id: input.disputeId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -589,6 +602,7 @@ export const financeRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const dispute = await prisma.dispute.findFirst({
         where: { id: input.disputeId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -615,6 +629,7 @@ export const financeRouter = router({
   submitDispute: protectedProcedure
     .input(z.object({ disputeId: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const dispute = await prisma.dispute.findFirst({
         where: { id: input.disputeId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -643,6 +658,7 @@ export const financeRouter = router({
   disputeSummary: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       return prisma.dispute.groupBy({
         by: ['status'],
         where: {
@@ -656,6 +672,7 @@ export const financeRouter = router({
   refundAnalytics: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), lookbackDays: z.number().min(7).max(365).default(90) }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const since = new Date(Date.now() - input.lookbackDays * 24 * 60 * 60 * 1000);
       const baseFilter = {
         church: { organization: { tenantId: ctx.tenantId! } },
@@ -723,6 +740,7 @@ export const financeRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       return prisma.payout.findMany({
         where: {
           tenantId: ctx.tenantId!,
@@ -737,6 +755,7 @@ export const financeRouter = router({
   payoutTransactions: protectedProcedure
     .input(z.object({ payoutId: z.string(), limit: z.number().min(1).max(200).default(100) }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const payout = await prisma.payout.findFirst({
         where: { id: input.payoutId, tenantId: ctx.tenantId! },
       });
@@ -759,6 +778,7 @@ export const financeRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const result = await syncStripePayouts(ctx.tenantId!, input.from, input.to);
       await recordAuditLog({
         tenantId: ctx.tenantId,
@@ -774,6 +794,7 @@ export const financeRouter = router({
   syncPaystackSettlements: protectedProcedure
     .input(z.object({}))
     .mutation(async ({ ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const result = await syncPaystackSettlements(ctx.tenantId!);
       await recordAuditLog({
         tenantId: ctx.tenantId,
@@ -796,6 +817,7 @@ export const financeRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
       const baseFilter = {
         ...(input.churchId ? { churchId: input.churchId } : {}),
         church: { organization: { tenantId: ctx.tenantId! } },

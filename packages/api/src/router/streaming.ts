@@ -9,7 +9,7 @@ import {
 } from '@faithflow-ai/database';
 import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
-import { ensureFeatureEnabled } from '../entitlements';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 import { recordAuditLog } from '../audit';
 
 async function requireStaff(tenantId: string, clerkUserId: string) {
@@ -28,7 +28,7 @@ export const streamingRouter = router({
   channels: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), campusId: z.string().optional() }).optional())
     .query(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      await ensureFeatureReadAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
       await requireStaff(ctx.tenantId!, ctx.userId!);
 
       return prisma.liveStreamChannel.findMany({
@@ -55,7 +55,7 @@ export const streamingRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
       const membership = await requireStaff(ctx.tenantId!, ctx.userId!);
 
       const church = await prisma.church.findFirst({
@@ -106,7 +106,7 @@ export const streamingRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
       const membership = await requireStaff(ctx.tenantId!, ctx.userId!);
 
       const channel = await prisma.liveStreamChannel.findFirst({
@@ -150,7 +150,7 @@ export const streamingRouter = router({
         .optional()
     )
     .query(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      await ensureFeatureReadAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
       await requireStaff(ctx.tenantId!, ctx.userId!);
 
       return prisma.liveStreamSession.findMany({
@@ -183,7 +183,7 @@ export const streamingRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
       const membership = await requireStaff(ctx.tenantId!, ctx.userId!);
 
       const channel = await prisma.liveStreamChannel.findFirst({
@@ -228,7 +228,7 @@ export const streamingRouter = router({
     }),
 
   startSession: protectedProcedure.input(z.object({ id: z.string() })).mutation(async ({ input, ctx }) => {
-    await ensureFeatureEnabled(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+    await ensureFeatureWriteAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
     const membership = await requireStaff(ctx.tenantId!, ctx.userId!);
 
     const session = await prisma.liveStreamSession.findFirst({
@@ -267,7 +267,7 @@ export const streamingRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
       const membership = await requireStaff(ctx.tenantId!, ctx.userId!);
 
       const session = await prisma.liveStreamSession.findFirst({
@@ -309,7 +309,7 @@ export const streamingRouter = router({
       }).optional()
     )
     .query(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      await ensureFeatureReadAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
       await requireStaff(ctx.tenantId!, ctx.userId!);
 
       const from = input?.from ?? new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);

@@ -8,7 +8,7 @@ import {
   SermonStatus,
 } from '@faithflow-ai/database';
 import { router, protectedProcedure } from '../trpc';
-import { ensureFeatureEnabled } from '../entitlements';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 import { recordAuditLog } from '../audit';
 
 const sermonInput = z.object({
@@ -66,7 +66,7 @@ export const contentRouter = router({
   createSermon: protectedProcedure
     .input(sermonInput)
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'content_library_enabled',
         'Your subscription does not include content library features.'
@@ -116,7 +116,7 @@ export const contentRouter = router({
         .optional()
     )
     .query(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureReadAccess(
         ctx.tenantId!,
         'content_library_enabled',
         'Your subscription does not include content library features.'
@@ -140,7 +140,7 @@ export const contentRouter = router({
   publishSermon: protectedProcedure
     .input(z.object({ id: z.string(), published: z.boolean().default(true) }))
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'content_library_enabled',
         'Your subscription does not include content library features.'
@@ -175,7 +175,7 @@ export const contentRouter = router({
   createResource: protectedProcedure
     .input(resourceInput)
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'content_library_enabled',
         'Your subscription does not include content library features.'
@@ -225,7 +225,7 @@ export const contentRouter = router({
         .optional()
     )
     .query(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureReadAccess(
         ctx.tenantId!,
         'content_library_enabled',
         'Your subscription does not include content library features.'
@@ -247,7 +247,7 @@ export const contentRouter = router({
   analytics: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), campusId: z.string().optional() }).optional())
     .query(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureReadAccess(
         ctx.tenantId!,
         'content_library_enabled',
         'Your subscription does not include content library features.'

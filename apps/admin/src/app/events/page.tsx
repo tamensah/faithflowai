@@ -7,10 +7,12 @@ import { trpc } from '../../lib/trpc';
 import { Shell } from '../../components/Shell';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 export default function EventsPage() {
   const gate = useFeatureGate('events_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const { data: churches } = trpc.church.list.useQuery({});
   const [churchId, setChurchId] = useState<string>('');
   const [title, setTitle] = useState('');
@@ -413,7 +415,7 @@ export default function EventsPage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="events_enabled"
           title="Events are locked"
@@ -427,6 +429,8 @@ export default function EventsPage() {
             Plan services, gatherings, and classes with attendance tracking.
           </p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <div className="flex flex-wrap items-center gap-3">
@@ -581,7 +585,7 @@ export default function EventsPage() {
                   notes: assignmentNotes || undefined,
                 });
               }}
-              disabled={!selectedEventId || (!assignmentMemberId && !assignmentName)}
+              disabled={!canWrite || !selectedEventId || (!assignmentMemberId && !assignmentName)}
             >
               Add assignment
             </Button>
@@ -598,7 +602,12 @@ export default function EventsPage() {
                     </p>
                     <p className="text-xs text-muted">{assignment.role}</p>
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => removeAssignment({ id: assignment.id })}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!canWrite}
+                    onClick={() => removeAssignment({ id: assignment.id })}
+                  >
                     Remove
                   </Button>
                 </div>
@@ -638,11 +647,16 @@ export default function EventsPage() {
               <input
                 type="checkbox"
                 checked={mediaIsPublic}
+                disabled={!canWrite}
                 onChange={(e) => setMediaIsPublic(e.target.checked)}
               />
               Visible on public page
             </label>
-            <Input type="file" disabled={uploadingMedia} onChange={(e) => handleMediaUpload(e.target.files?.[0])} />
+            <Input
+              type="file"
+              disabled={!canWrite || uploadingMedia}
+              onChange={(e) => handleMediaUpload(e.target.files?.[0])}
+            />
           </div>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {eventMedia?.map((media) => (
@@ -656,7 +670,7 @@ export default function EventsPage() {
                     <a className="text-primary underline text-xs" href={media.asset.url} target="_blank" rel="noreferrer">
                       View
                     </a>
-                    <Button size="sm" variant="outline" onClick={() => removeMedia({ id: media.id })}>
+                    <Button size="sm" variant="outline" disabled={!canWrite} onClick={() => removeMedia({ id: media.id })}>
                       Remove
                     </Button>
                   </div>
@@ -800,11 +814,17 @@ export default function EventsPage() {
                     <input
                       type="checkbox"
                       checked={fieldRequired}
+                      disabled={!canWrite}
                       onChange={(e) => setFieldRequired(e.target.checked)}
                     />
                     Required
                   </label>
-                  <Button variant="outline" size="sm" onClick={addRegistrationField} disabled={!fieldLabel}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={addRegistrationField}
+                    disabled={!canWrite || !fieldLabel}
+                  >
                     Add
                   </Button>
                 </div>
@@ -816,7 +836,7 @@ export default function EventsPage() {
                       <span>
                         {field.label} · {field.type} {field.required ? '(required)' : ''}
                       </span>
-                      <Button size="sm" variant="outline" onClick={() => removeRegistrationField(field.id)}>
+                      <Button size="sm" variant="outline" disabled={!canWrite} onClick={() => removeRegistrationField(field.id)}>
                         Remove
                       </Button>
                     </div>
@@ -849,7 +869,7 @@ export default function EventsPage() {
                   allowGuestRegistration,
                 })
               }
-              disabled={!churchId || !title || !startAt || !endAt || isPending}
+              disabled={!canWrite || !churchId || !title || !startAt || !endAt || isPending}
             >
               {isPending ? 'Saving…' : 'Save event'}
             </Button>
@@ -1021,11 +1041,17 @@ export default function EventsPage() {
                     <input
                       type="checkbox"
                       checked={seriesFieldRequired}
+                      disabled={!canWrite}
                       onChange={(e) => setSeriesFieldRequired(e.target.checked)}
                     />
                     Required
                   </label>
-                  <Button variant="outline" size="sm" onClick={addSeriesField} disabled={!seriesFieldLabel}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={addSeriesField}
+                    disabled={!canWrite || !seriesFieldLabel}
+                  >
                     Add
                   </Button>
                 </div>
@@ -1037,7 +1063,7 @@ export default function EventsPage() {
                       <span>
                         {field.label} · {field.type} {field.required ? '(required)' : ''}
                       </span>
-                      <Button size="sm" variant="outline" onClick={() => removeSeriesField(field.id)}>
+                      <Button size="sm" variant="outline" disabled={!canWrite} onClick={() => removeSeriesField(field.id)}>
                         Remove
                       </Button>
                     </div>
@@ -1076,7 +1102,7 @@ export default function EventsPage() {
                   capacity: seriesCapacity ? Number(seriesCapacity) : undefined,
                 });
               }}
-              disabled={!churchId || !seriesTitle || !seriesStartDate || isCreatingSeries}
+              disabled={!canWrite || !churchId || !seriesTitle || !seriesStartDate || isCreatingSeries}
             >
               {isCreatingSeries ? 'Scheduling…' : 'Create series'}
             </Button>
@@ -1123,6 +1149,7 @@ export default function EventsPage() {
                       <Button
                         variant="outline"
                         size="sm"
+                        disabled={!canWrite}
                         onClick={() => {
                           if (confirm('Delete this event?')) {
                             deleteEvent({ id: event.id });
@@ -1184,7 +1211,7 @@ export default function EventsPage() {
                   capacity: ticketCapacity ? Number(ticketCapacity) : undefined,
                 });
               }}
-              disabled={!selectedEventId || !ticketName || !ticketPrice}
+              disabled={!canWrite || !selectedEventId || !ticketName || !ticketPrice}
             >
               Create ticket type
             </Button>
@@ -1233,7 +1260,7 @@ export default function EventsPage() {
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Button
               onClick={() => selectedEventId && generateBadges({ eventId: selectedEventId })}
-              disabled={!selectedEventId}
+              disabled={!canWrite || !selectedEventId}
             >
               Generate badges
             </Button>
@@ -1261,7 +1288,7 @@ export default function EventsPage() {
             />
             <Button
               onClick={() => badgeCodeInput && checkInBadge({ badgeCode: badgeCodeInput.trim() })}
-              disabled={!badgeCodeInput.trim()}
+              disabled={!canWrite || !badgeCodeInput.trim()}
             >
               Check in badge
             </Button>
@@ -1280,7 +1307,7 @@ export default function EventsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="default">{badge.status}</Badge>
-                    <Button size="sm" variant="outline" onClick={() => revokeBadge({ id: badge.id })}>
+                    <Button size="sm" variant="outline" disabled={!canWrite} onClick={() => revokeBadge({ id: badge.id })}>
                       Revoke
                     </Button>
                   </div>
@@ -1301,6 +1328,7 @@ export default function EventsPage() {
               <input
                 type="checkbox"
                 checked={playbookChannels.includes('EMAIL')}
+                disabled={!canWrite}
                 onChange={(e) => {
                   setPlaybookChannels((prev) =>
                     e.target.checked ? [...prev, 'EMAIL'] : prev.filter((channel) => channel !== 'EMAIL')
@@ -1313,6 +1341,7 @@ export default function EventsPage() {
               <input
                 type="checkbox"
                 checked={playbookChannels.includes('SMS')}
+                disabled={!canWrite}
                 onChange={(e) => {
                   setPlaybookChannels((prev) =>
                     e.target.checked ? [...prev, 'SMS'] : prev.filter((channel) => channel !== 'SMS')
@@ -1331,7 +1360,7 @@ export default function EventsPage() {
                   channels: playbookChannels as any,
                 })
               }
-              disabled={!selectedEventId || !playbookChannels.length || isCreatingPlaybook}
+              disabled={!canWrite || !selectedEventId || !playbookChannels.length || isCreatingPlaybook}
             >
               {isCreatingPlaybook ? 'Scheduling…' : 'Create playbook'}
             </Button>
@@ -1382,7 +1411,7 @@ export default function EventsPage() {
                 <Button
                   size="sm"
                   onClick={() => selectedEventId && enableCheckIn({ eventId: selectedEventId })}
-                  disabled={!selectedEventId}
+                  disabled={!canWrite || !selectedEventId}
                 >
                   Enable kiosk
                 </Button>
@@ -1390,7 +1419,7 @@ export default function EventsPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => selectedEventId && enableCheckIn({ eventId: selectedEventId })}
-                  disabled={!selectedEventId}
+                  disabled={!canWrite || !selectedEventId}
                 >
                   Rotate code
                 </Button>
@@ -1398,7 +1427,7 @@ export default function EventsPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => selectedEventId && disableCheckIn({ eventId: selectedEventId })}
-                  disabled={!selectedEventId}
+                  disabled={!canWrite || !selectedEventId}
                 >
                   Disable
                 </Button>
@@ -1429,7 +1458,7 @@ export default function EventsPage() {
                   bulkCheckIn({ eventId: selectedEventId, memberIds: ids });
                 }
               }}
-              disabled={!selectedEventId || !roster?.roster?.length}
+              disabled={!canWrite || !selectedEventId || !roster?.roster?.length}
             >
               Check in all filtered
             </Button>
@@ -1465,6 +1494,7 @@ export default function EventsPage() {
                         <Button
                           size="sm"
                           variant="outline"
+                          disabled={!canWrite}
                           onClick={() => checkOutMember({ eventId: selectedEventId, memberId: entry.member.id })}
                         >
                           Check out
@@ -1472,6 +1502,7 @@ export default function EventsPage() {
                       ) : (
                         <Button
                           size="sm"
+                          disabled={!canWrite}
                           onClick={() => checkInMember({ eventId: selectedEventId, memberId: entry.member.id })}
                         >
                           Check in

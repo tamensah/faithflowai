@@ -22,7 +22,7 @@ import {
 } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { createTicketCheckout } from '../payments';
-import { ensureFeatureEnabled, ensureFeatureLimit } from '../entitlements';
+import { ensureFeatureLimit, ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 const createEventSchemaBase = z.object({
   churchId: z.string(),
@@ -293,7 +293,7 @@ export const eventRouter = router({
   create: protectedProcedure
     .input(createEventSchema)
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const monthStart = new Date();
       monthStart.setUTCDate(1);
       monthStart.setUTCHours(0, 0, 0, 0);
@@ -345,6 +345,7 @@ export const eventRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       return prisma.event.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -364,6 +365,7 @@ export const eventRouter = router({
   detail: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
         include: { church: true },
@@ -378,6 +380,7 @@ export const eventRouter = router({
   enableCheckIn: protectedProcedure
     .input(checkInCodeSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -396,6 +399,7 @@ export const eventRouter = router({
   disableCheckIn: protectedProcedure
     .input(checkInCodeSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -413,6 +417,7 @@ export const eventRouter = router({
   checkInInfo: protectedProcedure
     .input(checkInCodeSchema)
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
         select: { id: true, checkInEnabled: true, checkInCode: true },
@@ -426,6 +431,7 @@ export const eventRouter = router({
   createTicketType: protectedProcedure
     .input(ticketTypeSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -448,6 +454,7 @@ export const eventRouter = router({
   updateTicketType: protectedProcedure
     .input(z.object({ id: z.string(), data: ticketTypeSchema.partial().omit({ eventId: true }) }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const ticketType = await prisma.eventTicketType.findFirst({
         where: { id: input.id, event: { church: { organization: { tenantId: ctx.tenantId! } } } },
       });
@@ -470,6 +477,7 @@ export const eventRouter = router({
   listTicketTypes: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -486,6 +494,7 @@ export const eventRouter = router({
   ticketCheckout: protectedProcedure
     .input(ticketCheckoutSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const memberId = input.memberId ?? (await (async () => {
         if (!ctx.userId || !ctx.tenantId) return undefined;
         const member = await prisma.member.findFirst({
@@ -511,6 +520,7 @@ export const eventRouter = router({
   listTicketOrders: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -529,6 +539,7 @@ export const eventRouter = router({
     if (!ctx.userId || !ctx.tenantId) {
       throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Not authenticated' });
     }
+    await ensureFeatureReadAccess(ctx.tenantId, 'events_enabled', 'Your subscription does not include event management.');
 
     const member = await prisma.member.findFirst({
       where: { clerkUserId: ctx.userId, church: { organization: { tenantId: ctx.tenantId } } },
@@ -547,7 +558,7 @@ export const eventRouter = router({
   createSeries: protectedProcedure
     .input(createSeriesSchema)
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const occurrences = generateOccurrences(input);
       const monthStart = new Date();
       monthStart.setUTCDate(1);
@@ -647,6 +658,7 @@ export const eventRouter = router({
   listSeries: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), limit: z.number().min(1).max(100).default(25) }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       return prisma.eventSeries.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -663,11 +675,13 @@ export const eventRouter = router({
     .query(async ({ input }) => {
       const church = await prisma.church.findFirst({
         where: { slug: input.churchSlug },
-        select: { id: true, name: true, slug: true, timezone: true },
+        select: { id: true, name: true, slug: true, timezone: true, organization: { select: { tenantId: true } } },
       });
       if (!church) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Church not found' });
       }
+      await ensureFeatureReadAccess(church.organization.tenantId, 'events_enabled', 'Your subscription does not include event management.');
+      const churchSummary = { id: church.id, name: church.name, slug: church.slug, timezone: church.timezone };
 
       const from = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       const events = await prisma.event.findMany({
@@ -684,7 +698,7 @@ export const eventRouter = router({
         },
       });
 
-      return { church, events };
+      return { church: churchSummary, events };
     }),
 
   publicDetail: publicProcedure
@@ -692,11 +706,13 @@ export const eventRouter = router({
     .query(async ({ input }) => {
       const church = await prisma.church.findFirst({
         where: { slug: input.churchSlug },
-        select: { id: true, name: true, slug: true, timezone: true },
+        select: { id: true, name: true, slug: true, timezone: true, organization: { select: { tenantId: true } } },
       });
       if (!church) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Church not found' });
       }
+      await ensureFeatureReadAccess(church.organization.tenantId, 'events_enabled', 'Your subscription does not include event management.');
+      const churchSummary = { id: church.id, name: church.name, slug: church.slug, timezone: church.timezone };
 
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, churchId: church.id, visibility: EventVisibility.PUBLIC },
@@ -711,12 +727,13 @@ export const eventRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' });
       }
 
-      return { church, event };
+      return { church: churchSummary, event };
     }),
 
   register: protectedProcedure
     .input(registrationSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -763,6 +780,7 @@ export const eventRouter = router({
   cancelRegistration: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -795,10 +813,12 @@ export const eventRouter = router({
     .mutation(async ({ input }) => {
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, visibility: EventVisibility.PUBLIC },
+        include: { church: { select: { organization: { select: { tenantId: true } } } } },
       });
       if (!event) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' });
       }
+      await ensureFeatureWriteAccess(event.church.organization.tenantId, 'events_enabled', 'Your subscription does not include event management.');
       if (!event.registrationEnabled) {
         throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Registration is closed' });
       }
@@ -845,6 +865,7 @@ export const eventRouter = router({
   listRegistrations: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -863,6 +884,7 @@ export const eventRouter = router({
     if (!ctx.userId || !ctx.tenantId) {
       throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Not authenticated' });
     }
+    await ensureFeatureReadAccess(ctx.tenantId, 'events_enabled', 'Your subscription does not include event management.');
 
     const member = await prisma.member.findFirst({
       where: { clerkUserId: ctx.userId, church: { organization: { tenantId: ctx.tenantId } } },
@@ -881,6 +903,7 @@ export const eventRouter = router({
   addAssignment: protectedProcedure
     .input(assignmentSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -915,6 +938,7 @@ export const eventRouter = router({
   listAssignments: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -932,6 +956,7 @@ export const eventRouter = router({
   removeAssignment: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const assignment = await prisma.eventAssignment.findFirst({
         where: { id: input.id, event: { church: { organization: { tenantId: ctx.tenantId! } } } },
       });
@@ -945,6 +970,7 @@ export const eventRouter = router({
   addMedia: protectedProcedure
     .input(mediaSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -975,6 +1001,7 @@ export const eventRouter = router({
   listMedia: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -992,6 +1019,7 @@ export const eventRouter = router({
   removeMedia: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const media = await prisma.eventMedia.findFirst({
         where: { id: input.id, event: { church: { organization: { tenantId: ctx.tenantId! } } } },
       });
@@ -1005,6 +1033,7 @@ export const eventRouter = router({
   analytics: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -1049,6 +1078,7 @@ export const eventRouter = router({
   generateBadges: protectedProcedure
     .input(badgeSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -1123,6 +1153,7 @@ export const eventRouter = router({
   listBadges: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -1140,6 +1171,7 @@ export const eventRouter = router({
   revokeBadge: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const badge = await prisma.eventBadge.findFirst({
         where: { id: input.id, event: { church: { organization: { tenantId: ctx.tenantId! } } } },
       });
@@ -1156,6 +1188,7 @@ export const eventRouter = router({
   createCommsPlaybook: protectedProcedure
     .input(playbookSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
         include: { church: true },
@@ -1254,6 +1287,7 @@ export const eventRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -1314,6 +1348,7 @@ export const eventRouter = router({
   listRsvps: protectedProcedure
     .input(z.object({ eventId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: { id: input.eventId, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -1332,6 +1367,7 @@ export const eventRouter = router({
     if (!ctx.userId || !ctx.tenantId) {
       throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Not authenticated' });
     }
+    await ensureFeatureReadAccess(ctx.tenantId, 'events_enabled', 'Your subscription does not include event management.');
 
     const member = await prisma.member.findFirst({
       where: { clerkUserId: ctx.userId, church: { organization: { tenantId: ctx.tenantId } } },
@@ -1350,6 +1386,7 @@ export const eventRouter = router({
   update: protectedProcedure
     .input(z.object({ id: z.string(), data: updateEventSchema }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: {
           id: input.id,
@@ -1374,6 +1411,7 @@ export const eventRouter = router({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'events_enabled', 'Your subscription does not include event management.');
       const event = await prisma.event.findFirst({
         where: {
           id: input.id,

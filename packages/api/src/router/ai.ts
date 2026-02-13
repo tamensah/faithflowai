@@ -5,7 +5,7 @@ import { TRPCError } from '@trpc/server';
 import { generateTextSimple, type AIProvider } from '@faithflow-ai/ai';
 import { AuditActorType } from '@faithflow-ai/database';
 import { recordAuditLog } from '../audit';
-import { ensureFeatureEnabled } from '../entitlements';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 const providerSchema = z.enum(['openai', 'anthropic', 'google']).default('openai');
 
@@ -167,7 +167,7 @@ export const aiRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       await requireStaff(ctx.tenantId!, ctx.userId!);
-      await ensureFeatureEnabled(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
 
       const provider = (input.provider ?? 'openai') as AIProvider;
       const model = input.model?.trim() || defaultModel(provider);
@@ -240,7 +240,7 @@ export const aiRouter = router({
     .input(z.object({ churchId: z.string().optional() }).optional())
     .query(async ({ input, ctx }) => {
       await requireStaff(ctx.tenantId!, ctx.userId!);
-      await ensureFeatureEnabled(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
+      await ensureFeatureReadAccess(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
 
       const churchId = input?.churchId ?? null;
       const churchFilter = churchId ? { churchId } : {};
@@ -352,7 +352,7 @@ export const aiRouter = router({
     .input(z.object({ limit: z.number().min(1).max(50).default(20) }).optional())
     .query(async ({ input, ctx }) => {
       await requireStaff(ctx.tenantId!, ctx.userId!);
-      await ensureFeatureEnabled(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
+      await ensureFeatureReadAccess(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
       return prisma.aiInteraction.findMany({
         where: { tenantId: ctx.tenantId! },
         orderBy: { createdAt: 'desc' },

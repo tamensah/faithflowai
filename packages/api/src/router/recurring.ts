@@ -6,6 +6,7 @@ import { ensureDonationReceipt } from '../receipts';
 import { createRecurringCheckout } from '../payments';
 import { recurringCheckoutInputSchema } from '../payments/inputs';
 import { recordAuditLog } from '../audit';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 function nextChargeDate(from: Date, interval: 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY') {
   const next = new Date(from);
@@ -41,6 +42,11 @@ export const recurringRouter = router({
   createCheckout: protectedProcedure
     .input(recurringCheckoutInputSchema)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const result = await createRecurringCheckout({ ...input, tenantId: ctx.tenantId });
       await recordAuditLog({
         tenantId: ctx.tenantId,
@@ -58,6 +64,11 @@ export const recurringRouter = router({
   list: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       return prisma.recurringDonation.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -70,6 +81,11 @@ export const recurringRouter = router({
   create: protectedProcedure
     .input(recurringInput)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       if (input.provider === PaymentProvider.PAYSTACK) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
@@ -100,6 +116,11 @@ export const recurringRouter = router({
   updateStatus: protectedProcedure
     .input(z.object({ id: z.string(), status: z.enum(['ACTIVE', 'PAUSED', 'CANCELED']) }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const recurring = await prisma.recurringDonation.findFirst({
         where: { id: input.id, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -129,6 +150,11 @@ export const recurringRouter = router({
   chargeNow: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const recurring = await prisma.recurringDonation.findFirst({
         where: { id: input.id, church: { organization: { tenantId: ctx.tenantId! } } },
       });

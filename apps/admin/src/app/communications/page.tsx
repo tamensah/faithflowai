@@ -7,12 +7,14 @@ import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const channelOptions = ['EMAIL', 'SMS', 'WHATSAPP'] as const;
 
 export default function CommunicationsPage() {
   const gate = useFeatureGate('communications_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const [churchId, setChurchId] = useState('');
   const [templateName, setTemplateName] = useState('');
   const [templateChannel, setTemplateChannel] = useState('EMAIL');
@@ -166,7 +168,7 @@ export default function CommunicationsPage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="communications_enabled"
           title="Communications are locked"
@@ -174,6 +176,8 @@ export default function CommunicationsPage() {
         />
       ) : (
       <div className="space-y-6">
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
+
         <Card className="p-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
@@ -259,7 +263,7 @@ export default function CommunicationsPage() {
                   body: templateBody,
                 })
               }
-              disabled={!churchId || !templateName || !templateBody || isCreatingTemplate}
+              disabled={!canWrite || !churchId || !templateName || !templateBody || isCreatingTemplate}
             >
               {isCreatingTemplate ? 'Creating…' : 'Create template'}
             </Button>
@@ -336,7 +340,7 @@ export default function CommunicationsPage() {
                     .filter(Boolean),
                 })
               }
-              disabled={!churchId || (!sendTo && !audience) || isSendingMessage}
+              disabled={!canWrite || !churchId || (!sendTo && !audience) || isSendingMessage}
             >
               {isSendingMessage ? 'Sending…' : 'Send'}
             </Button>
@@ -419,11 +423,11 @@ export default function CommunicationsPage() {
                     .filter(Boolean),
                 })
               }
-              disabled={!churchId || (!scheduleTo && !scheduleAudience) || isScheduling}
+              disabled={!canWrite || !churchId || (!scheduleTo && !scheduleAudience) || isScheduling}
             >
               {isScheduling ? 'Scheduling…' : 'Schedule'}
             </Button>
-            <Button variant="outline" onClick={() => dispatchDue({ limit: 50 })} disabled={isDispatching}>
+            <Button variant="outline" onClick={() => dispatchDue({ limit: 50 })} disabled={!canWrite || isDispatching}>
               {isDispatching ? 'Dispatching…' : 'Dispatch due now'}
             </Button>
           </div>
@@ -461,7 +465,7 @@ export default function CommunicationsPage() {
                   description: dripDescription || undefined,
                 })
               }
-              disabled={!churchId || !dripName || isCreatingDrip}
+              disabled={!canWrite || !churchId || !dripName || isCreatingDrip}
             >
               {isCreatingDrip ? 'Creating…' : 'Create drip'}
             </Button>
@@ -545,7 +549,7 @@ export default function CommunicationsPage() {
                       body: dripBody || undefined,
                     })
                   }
-                  disabled={!dripStepOrder || isAddingDripStep}
+                  disabled={!canWrite || !dripStepOrder || isAddingDripStep}
                 >
                   {isAddingDripStep ? 'Adding…' : 'Add drip step'}
                 </Button>
@@ -589,7 +593,7 @@ export default function CommunicationsPage() {
                         .filter(Boolean),
                     })
                   }
-                  disabled={!selectedDripId || (!dripAudience && !dripTo) || isEnrollingDrip}
+                  disabled={!canWrite || !selectedDripId || (!dripAudience && !dripTo) || isEnrollingDrip}
                 >
                   {isEnrollingDrip ? 'Enrolling…' : 'Enroll recipients'}
                 </Button>

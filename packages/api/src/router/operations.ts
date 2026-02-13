@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { Prisma, prisma, CareRequestStatus, SermonStatus, StorageProvider, TenantSubscriptionStatus } from '@faithflow-ai/database';
 import { router, protectedProcedure } from '../trpc';
-import { ensureFeatureEnabled } from '../entitlements';
+import { ensureFeatureReadAccess } from '../entitlements';
 import { TRPCError } from '@trpc/server';
 import { sendEmail } from '../email';
 import { runStorageSmokeTest } from '../storage';
@@ -333,7 +333,7 @@ export const operationsRouter = router({
     }),
 
   headquartersSummary: protectedProcedure.input(rangeInput).query(async ({ input, ctx }) => {
-    await ensureFeatureEnabled(
+    await ensureFeatureReadAccess(
       ctx.tenantId!,
       'multi_campus_enabled',
       'Your subscription does not include multi-campus operations.'
@@ -422,7 +422,7 @@ export const operationsRouter = router({
   }),
 
   campusPerformance: protectedProcedure.input(rangeInput).query(async ({ input, ctx }) => {
-    await ensureFeatureEnabled(
+    await ensureFeatureReadAccess(
       ctx.tenantId!,
       'multi_campus_enabled',
       'Your subscription does not include multi-campus operations.'

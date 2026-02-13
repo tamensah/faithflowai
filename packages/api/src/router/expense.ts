@@ -3,7 +3,7 @@ import { router, protectedProcedure } from '../trpc';
 import { AuditActorType, prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { recordAuditLog } from '../audit';
-import { ensureFeatureEnabled, ensureFeatureLimit } from '../entitlements';
+import { ensureFeatureLimit, ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 const expenseInput = z.object({
   churchId: z.string(),
@@ -19,6 +19,11 @@ export const expenseRouter = router({
   list: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       return prisma.expense.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -32,7 +37,7 @@ export const expenseRouter = router({
   create: protectedProcedure
     .input(expenseInput)
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'finance_enabled',
         'Your subscription does not include finance operations.'
@@ -103,7 +108,7 @@ export const expenseRouter = router({
   approve: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'finance_enabled',
         'Your subscription does not include finance operations.'
@@ -145,7 +150,7 @@ export const expenseRouter = router({
   reject: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'finance_enabled',
         'Your subscription does not include finance operations.'
@@ -179,7 +184,7 @@ export const expenseRouter = router({
   markPaid: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'finance_enabled',
         'Your subscription does not include finance operations.'

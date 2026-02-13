@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma, AuditActorType, CareRequestChannel, CareRequestPriority, CareRequestStatus } from '@faithflow-ai/database';
 import { router, protectedProcedure } from '../trpc';
-import { ensureFeatureEnabled } from '../entitlements';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 import { recordAuditLog } from '../audit';
 
 const careRequestInput = z.object({
@@ -21,7 +21,7 @@ export const careRouter = router({
   createRequest: protectedProcedure
     .input(careRequestInput)
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
 
       const church = await prisma.church.findFirst({
         where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
@@ -83,7 +83,7 @@ export const careRouter = router({
         .optional()
     )
     .query(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
+      await ensureFeatureReadAccess(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
 
       return prisma.careRequest.findMany({
         where: {
@@ -107,7 +107,7 @@ export const careRouter = router({
   assignRequest: protectedProcedure
     .input(z.object({ id: z.string(), assignedToUserId: z.string().optional(), status: z.nativeEnum(CareRequestStatus).optional() }))
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
 
       const request = await prisma.careRequest.findFirst({
         where: { id: input.id, church: { organization: { tenantId: ctx.tenantId! } } },
@@ -156,7 +156,7 @@ export const careRouter = router({
   addNote: protectedProcedure
     .input(z.object({ careRequestId: z.string(), note: z.string().min(1), isPrivate: z.boolean().optional() }))
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
 
       const request = await prisma.careRequest.findFirst({
         where: { id: input.careRequestId, church: { organization: { tenantId: ctx.tenantId! } } },
@@ -191,7 +191,7 @@ export const careRouter = router({
   updateStatus: protectedProcedure
     .input(z.object({ id: z.string(), status: z.nativeEnum(CareRequestStatus) }))
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
 
       const request = await prisma.careRequest.findFirst({
         where: { id: input.id, church: { organization: { tenantId: ctx.tenantId! } } },
@@ -225,7 +225,7 @@ export const careRouter = router({
   dashboard: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), campusId: z.string().optional() }).optional())
     .query(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
+      await ensureFeatureReadAccess(ctx.tenantId!, 'pastoral_care_enabled', 'Your subscription does not include pastoral care.');
 
       const where = {
         church: { organization: { tenantId: ctx.tenantId! } },

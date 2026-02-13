@@ -7,6 +7,7 @@ import { trpc } from '../../lib/trpc';
 import { useAuth } from '@clerk/nextjs';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const evidenceTypeOptions = [
   'UNCATEGORIZED',
@@ -27,6 +28,7 @@ export default function FinancePage() {
   const gate = useFeatureGate('finance_enabled');
   const utils = trpc.useUtils();
   const { getToken } = useAuth();
+  const canWrite = gate.canWrite;
   const [churchId, setChurchId] = useState('');
   const [statementYear, setStatementYear] = useState(String(new Date().getFullYear()));
   const [statementMemberId, setStatementMemberId] = useState('');
@@ -353,7 +355,7 @@ export default function FinancePage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="finance_enabled"
           title="Finance is locked"
@@ -365,6 +367,8 @@ export default function FinancePage() {
           <h1 className="text-3xl font-semibold">Finance</h1>
           <p className="mt-2 text-muted">Reconciliation, pledges, recurring giving, budgets, and expenses.</p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -403,7 +407,7 @@ export default function FinancePage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
               variant="outline"
-              disabled={!churchId || donationImportCsv.trim().length < 5 || isImportingDonations}
+              disabled={!canWrite || !churchId || donationImportCsv.trim().length < 5 || isImportingDonations}
               onClick={() =>
                 importDonations({
                   churchId,
@@ -415,7 +419,7 @@ export default function FinancePage() {
               {isImportingDonations ? 'Running...' : 'Dry-run import'}
             </Button>
             <Button
-              disabled={!churchId || donationImportCsv.trim().length < 5 || isImportingDonations}
+              disabled={!canWrite || !churchId || donationImportCsv.trim().length < 5 || isImportingDonations}
               onClick={() =>
                 importDonations({
                   churchId,
@@ -427,7 +431,7 @@ export default function FinancePage() {
             </Button>
             <Button
               variant="outline"
-              disabled={!donationImportBatchId || isRollingBackDonationImport}
+              disabled={!canWrite || !donationImportBatchId || isRollingBackDonationImport}
               onClick={() => rollbackDonationImport({ batchId: donationImportBatchId })}
             >
               {isRollingBackDonationImport ? 'Rolling back...' : 'Rollback last batch'}

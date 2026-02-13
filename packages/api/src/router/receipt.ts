@@ -5,6 +5,7 @@ import { TRPCError } from '@trpc/server';
 import { ensureDonationReceipt, getReceiptByNumber, renderReceiptHtml } from '../receipts';
 import { sendEmail } from '../email';
 import { recordAuditLog } from '../audit';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 export const receiptRouter = router({
   list: protectedProcedure
@@ -15,6 +16,11 @@ export const receiptRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       return prisma.donationReceipt.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -28,6 +34,11 @@ export const receiptRouter = router({
   getByDonation: protectedProcedure
     .input(z.object({ donationId: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const receipt = await prisma.donationReceipt.findFirst({
         where: {
           donationId: input.donationId,
@@ -45,6 +56,11 @@ export const receiptRouter = router({
   issue: protectedProcedure
     .input(z.object({ donationId: z.string() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const donation = await prisma.donation.findFirst({
         where: {
           id: input.donationId,
@@ -82,6 +98,11 @@ export const receiptRouter = router({
   sendEmail: protectedProcedure
     .input(z.object({ receiptNumber: z.string(), to: z.string().email() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const receipt = await getReceiptByNumber(input.receiptNumber);
 
       if (!receipt) {
@@ -119,6 +140,11 @@ export const receiptRouter = router({
   void: protectedProcedure
     .input(z.object({ receiptNumber: z.string(), reason: z.string().optional() }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const receipt = await prisma.donationReceipt.findFirst({
         where: {
           receiptNumber: input.receiptNumber,

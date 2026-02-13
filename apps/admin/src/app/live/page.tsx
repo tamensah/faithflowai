@@ -7,6 +7,7 @@ import { Shell } from '../../components/Shell';
 import { useAuth } from '@clerk/nextjs';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 type FeedEvent = {
   type: string;
@@ -17,6 +18,7 @@ type FeedEvent = {
 export default function LivePage() {
   const gate = useFeatureGate('events_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const [events, setEvents] = useState<FeedEvent[]>([]);
   const [eventId, setEventId] = useState('');
   const [memberId, setMemberId] = useState('');
@@ -77,7 +79,7 @@ export default function LivePage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="events_enabled"
           title="Live feed is locked"
@@ -89,6 +91,8 @@ export default function LivePage() {
             <h1 className="text-3xl font-semibold">Live feed</h1>
             <p className="mt-2 text-muted">Realtime attendance and giving activity.</p>
           </div>
+
+          {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Trigger realtime events</h2>
@@ -124,7 +128,7 @@ export default function LivePage() {
 
               <Button
                 onClick={() => checkIn({ eventId, memberId })}
-                disabled={!eventId || !memberId || isCheckingIn}
+                disabled={!canWrite || !eventId || !memberId || isCheckingIn}
               >
                 {isCheckingIn ? 'Checking in…' : 'Check in member'}
               </Button>
@@ -162,7 +166,7 @@ export default function LivePage() {
                     providerRef: donationRef,
                   })
                 }
-                disabled={!(selectedEvent?.churchId || eventList?.[0]?.churchId) || !donationAmount || isCreatingDonation}
+                disabled={!canWrite || !(selectedEvent?.churchId || eventList?.[0]?.churchId) || !donationAmount || isCreatingDonation}
               >
                 {isCreatingDonation ? 'Creating…' : 'Create donation'}
               </Button>

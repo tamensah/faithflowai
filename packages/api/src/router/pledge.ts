@@ -3,6 +3,7 @@ import { router, protectedProcedure } from '../trpc';
 import { AuditActorType, prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { recordAuditLog } from '../audit';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 const pledgeInput = z.object({
   churchId: z.string(),
@@ -17,6 +18,11 @@ export const pledgeRouter = router({
   list: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       return prisma.pledge.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -29,6 +35,11 @@ export const pledgeRouter = router({
   create: protectedProcedure
     .input(pledgeInput)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const church = await prisma.church.findFirst({
         where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
       });
@@ -64,6 +75,11 @@ export const pledgeRouter = router({
   updateStatus: protectedProcedure
     .input(z.object({ id: z.string(), status: z.enum(['ACTIVE', 'FULFILLED', 'CANCELED']) }))
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const pledge = await prisma.pledge.findFirst({
         where: { id: input.id, church: { organization: { tenantId: ctx.tenantId! } } },
       });
@@ -93,6 +109,11 @@ export const pledgeRouter = router({
   progress: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const pledge = await prisma.pledge.findFirst({
         where: { id: input.id, church: { organization: { tenantId: ctx.tenantId! } } },
       });

@@ -7,6 +7,7 @@ import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const providerOptions = [
   { value: 'STRIPE', label: 'Stripe' },
@@ -17,6 +18,7 @@ const paystackCurrencyOptions = ['GHS', 'NGN', 'KES', 'ZAR', 'USD', 'XOF'];
 export default function GivingPage() {
   const gate = useFeatureGate('finance_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const [churchId, setChurchId] = useState('');
   const [amount, setAmount] = useState('50');
   const [provider, setProvider] = useState('STRIPE');
@@ -176,7 +178,7 @@ export default function GivingPage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="finance_enabled"
           title="Giving is locked"
@@ -188,6 +190,8 @@ export default function GivingPage() {
           <h1 className="text-3xl font-semibold">Giving</h1>
           <p className="mt-2 text-muted">Create funds, campaigns, and live checkout links.</p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Create checkout</h2>
@@ -310,7 +314,7 @@ export default function GivingPage() {
                   })
                 }
                 disabled={
-                  !churchId || !amount || isCreatingCheckout || (provider === 'PAYSTACK' && !donorEmail)
+                  !canWrite || !churchId || !amount || isCreatingCheckout || (provider === 'PAYSTACK' && !donorEmail)
                 }
               >
                 {isCreatingCheckout ? 'Creating…' : 'Create checkout link'}
@@ -376,7 +380,7 @@ export default function GivingPage() {
                     isDefault: !funds?.length,
                   })
                 }
-                disabled={!churchId || !newFundName || isCreatingFund}
+                disabled={!canWrite || !churchId || !newFundName || isCreatingFund}
               >
                 {isCreatingFund ? 'Creating…' : 'Create fund'}
               </Button>
@@ -420,7 +424,7 @@ export default function GivingPage() {
                     currency,
                   })
                 }
-                disabled={!churchId || !newCampaignName || isCreatingCampaign}
+                disabled={!canWrite || !churchId || !newCampaignName || isCreatingCampaign}
               >
                 {isCreatingCampaign ? 'Creating…' : 'Create campaign'}
               </Button>
@@ -491,7 +495,7 @@ export default function GivingPage() {
                   campaignId: newFundraiserCampaignId || undefined,
                 })
               }
-              disabled={!churchId || !newFundraiserName || !newFundraiserSlug || isCreatingFundraiser}
+              disabled={!canWrite || !churchId || !newFundraiserName || !newFundraiserSlug || isCreatingFundraiser}
             >
               {isCreatingFundraiser ? 'Creating…' : 'Create fundraiser'}
             </Button>
@@ -566,7 +570,7 @@ export default function GivingPage() {
                   campaignId: textCampaignId || undefined,
                 })
               }
-              disabled={!churchId || !textNumber || isCreatingTextNumber}
+              disabled={!canWrite || !churchId || !textNumber || isCreatingTextNumber}
             >
               {isCreatingTextNumber ? 'Creating…' : 'Add text-to-give number'}
             </Button>

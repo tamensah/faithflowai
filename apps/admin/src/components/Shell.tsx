@@ -48,6 +48,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     retry: false,
   });
   const entitlements = entitlementsStatus?.entitlements?.entitlements ?? null;
+  const isBillingReadOnly = entitlementsStatus?.entitlements?.source === 'inactive_subscription';
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,10 +57,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-6">
             <span className="text-lg font-semibold">FaithFlow AI</span>
             <OrganizationSwitcher hidePersonal afterSelectOrganizationUrl="/" afterCreateOrganizationUrl="/" />
+            {isBillingReadOnly ? (
+              <span className="rounded-full bg-accent/10 px-2 py-1 text-xs font-medium text-foreground">
+                Read-only
+              </span>
+            ) : null}
             <nav className="flex gap-4 text-sm text-muted">
               {nav.map((item) => {
                 const required = navEntitlementMap[item.href];
-                const isLocked = Boolean(required && entitlements?.[required] && !entitlements[required]?.enabled);
+                const isLocked = Boolean(
+                  !isBillingReadOnly && required && entitlements?.[required] && !entitlements[required]?.enabled
+                );
                 const href = isLocked ? `/billing?upgrade=1&feature=${encodeURIComponent(required)}` : item.href;
                 const className = isLocked ? 'opacity-60 hover:text-foreground' : 'hover:text-foreground';
                 const label = isLocked ? `${item.label} (Locked)` : item.label;

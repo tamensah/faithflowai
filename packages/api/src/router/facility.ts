@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma, AuditActorType, FacilityType, FacilityBookingStatus } from '@faithflow-ai/database';
 import { router, protectedProcedure } from '../trpc';
-import { ensureFeatureEnabled } from '../entitlements';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 import { recordAuditLog } from '../audit';
 
 const facilityInput = z.object({
@@ -37,6 +37,11 @@ export const facilityRouter = router({
   list: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), campusId: z.string().optional() }).optional())
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'facility_management_enabled',
+        'Your subscription does not include facility management.'
+      );
       return prisma.facility.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -50,7 +55,7 @@ export const facilityRouter = router({
   create: protectedProcedure
     .input(facilityInput)
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'facility_management_enabled',
         'Your subscription does not include facility management.'
@@ -105,7 +110,7 @@ export const facilityRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'facility_management_enabled',
         'Your subscription does not include facility management.'
@@ -155,6 +160,11 @@ export const facilityRouter = router({
         .optional()
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'facility_management_enabled',
+        'Your subscription does not include facility management.'
+      );
       return prisma.facilityBooking.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -176,7 +186,7 @@ export const facilityRouter = router({
   createBooking: protectedProcedure
     .input(bookingInput)
     .mutation(async ({ input, ctx }) => {
-      await ensureFeatureEnabled(
+      await ensureFeatureWriteAccess(
         ctx.tenantId!,
         'facility_management_enabled',
         'Your subscription does not include facility management.'
@@ -255,6 +265,11 @@ export const facilityRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'facility_management_enabled',
+        'Your subscription does not include facility management.'
+      );
       if (input.to <= input.from) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid date range.' });
       }

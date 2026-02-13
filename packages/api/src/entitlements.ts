@@ -121,10 +121,24 @@ export async function getFeatureEntitlement(tenantId: string, key: string) {
 }
 
 export async function ensureFeatureEnabled(tenantId: string, key: string, errorMessage: string) {
+  // Backwards-compatible helper: treat this as a WRITE gate.
+  await ensureFeatureWriteAccess(tenantId, key, errorMessage);
+}
+
+export async function ensureFeatureReadAccess(tenantId: string, key: string, errorMessage: string) {
+  const { source, entitlement } = await getFeatureEntitlement(tenantId, key);
+  if (!entitlement) return;
+  if (entitlement.enabled) return;
+
+  // Billing lockout should be read-only (view allowed; writes blocked).
+  if (source === 'inactive_subscription') return;
+
+  throw new TRPCError({ code: 'FORBIDDEN', message: errorMessage });
+}
+
+export async function ensureFeatureWriteAccess(tenantId: string, key: string, errorMessage: string) {
   const { entitlement } = await getFeatureEntitlement(tenantId, key);
-  if (!entitlement) {
-    return;
-  }
+  if (!entitlement) return;
   if (!entitlement.enabled) {
     throw new TRPCError({ code: 'FORBIDDEN', message: errorMessage });
   }

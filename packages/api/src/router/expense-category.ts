@@ -3,6 +3,7 @@ import { router, protectedProcedure } from '../trpc';
 import { AuditActorType, prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { recordAuditLog } from '../audit';
+import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
 const categoryInput = z.object({
   churchId: z.string(),
@@ -14,6 +15,11 @@ export const expenseCategoryRouter = router({
   list: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }))
     .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       return prisma.expenseCategory.findMany({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
@@ -26,6 +32,11 @@ export const expenseCategoryRouter = router({
   create: protectedProcedure
     .input(categoryInput)
     .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'finance_enabled',
+        'Your subscription does not include finance operations.'
+      );
       const church = await prisma.church.findFirst({
         where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
       });

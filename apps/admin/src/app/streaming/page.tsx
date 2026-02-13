@@ -6,6 +6,7 @@ import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const providerOptions = ['YOUTUBE', 'FACEBOOK', 'VIMEO', 'CUSTOM_RTMP'] as const;
 const moderationOptions = ['OPEN', 'FILTERED', 'STRICT'] as const;
@@ -13,6 +14,7 @@ const moderationOptions = ['OPEN', 'FILTERED', 'STRICT'] as const;
 export default function StreamingPage() {
   const gate = useFeatureGate('streaming_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const [churchId, setChurchId] = useState('');
   const [campusId, setCampusId] = useState('');
   const [channelName, setChannelName] = useState('');
@@ -66,7 +68,7 @@ export default function StreamingPage() {
 
   return (
     <Shell>
-      {!gate.isLoading && !gate.enabled ? (
+      {!gate.isLoading && gate.access === 'locked' ? (
         <FeatureLocked
           featureKey="streaming_enabled"
           title="Streaming is locked"
@@ -80,6 +82,8 @@ export default function StreamingPage() {
               Configure live channels, schedule sessions, and monitor stream outcomes.
             </p>
           </div>
+
+          {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Scope</h2>
@@ -138,7 +142,7 @@ export default function StreamingPage() {
           </div>
           <div className="mt-4">
             <Button
-              disabled={!churchId || !channelName.trim() || isCreatingChannel}
+              disabled={!canWrite || !churchId || !channelName.trim() || isCreatingChannel}
               onClick={() =>
                 createChannel({
                   churchId,
@@ -190,7 +194,7 @@ export default function StreamingPage() {
           </div>
           <div className="mt-4">
             <Button
-              disabled={!churchId || !sessionChannelId || !sessionTitle.trim() || isCreatingSession}
+              disabled={!canWrite || !churchId || !sessionChannelId || !sessionTitle.trim() || isCreatingSession}
               onClick={() =>
                 createSession({
                   churchId,
@@ -221,7 +225,7 @@ export default function StreamingPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => startSession({ id: session.id })}
-                    disabled={session.status === 'LIVE'}
+                    disabled={!canWrite || session.status === 'LIVE'}
                   >
                     Go live
                   </Button>
@@ -229,7 +233,7 @@ export default function StreamingPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => endSession({ id: session.id })}
-                    disabled={session.status === 'ENDED' || session.status === 'CANCELED'}
+                    disabled={!canWrite || session.status === 'ENDED' || session.status === 'CANCELED'}
                   >
                     End stream
                   </Button>
