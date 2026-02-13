@@ -562,6 +562,8 @@ enum CommunicationStatus {
 }
 
 enum CommunicationScheduleStatus {
+  DRAFT
+  PENDING_REVIEW
   QUEUED
   SENT
   FAILED

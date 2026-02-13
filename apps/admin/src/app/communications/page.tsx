@@ -37,6 +37,9 @@ export default function CommunicationsPage() {
   const [scheduleSubject, setScheduleSubject] = useState('');
   const [scheduleBody, setScheduleBody] = useState('');
   const [scheduleSendAt, setScheduleSendAt] = useState('');
+  const [scheduleInitialStatus, setScheduleInitialStatus] = useState<'QUEUED' | 'DRAFT' | 'PENDING_REVIEW'>('QUEUED');
+  const [lastScheduleBatchKey, setLastScheduleBatchKey] = useState('');
+  const [batchActionStatus, setBatchActionStatus] = useState<string>('');
   const [dripName, setDripName] = useState('');
   const [dripDescription, setDripDescription] = useState('');
   const [selectedDripId, setSelectedDripId] = useState('');
@@ -115,6 +118,33 @@ export default function CommunicationsPage() {
   const scheduleTemplates = templatesByChannel[scheduleChannel] ?? [];
   const dripTemplates = templatesByChannel[dripChannel] ?? [];
 
+  const scheduleBatches = useMemo(() => {
+    const map = new Map<string, any[]>();
+    for (const item of schedules ?? []) {
+      const meta = (item as any).metadata as any;
+      const key = meta?.batchKey;
+      const batchKey = typeof key === 'string' && key.length ? key : `single:${item.id}`;
+      const list = map.get(batchKey) ?? [];
+      list.push(item);
+      map.set(batchKey, list);
+    }
+    return Array.from(map.entries()).map(([batchKey, entries]) => {
+      const sorted = [...entries].sort((a, b) => new Date(a.sendAt).getTime() - new Date(b.sendAt).getTime());
+      const statusCounts = sorted.reduce<Record<string, number>>((acc, row) => {
+        acc[row.status] = (acc[row.status] ?? 0) + 1;
+        return acc;
+      }, {});
+      return {
+        batchKey,
+        channel: sorted[0]?.channel,
+        sendAt: sorted[0]?.sendAt,
+        primaryStatus: sorted[0]?.status,
+        count: sorted.length,
+        statusCounts,
+      };
+    });
+  }, [schedules]);
+
   const { mutate: createTemplate, isPending: isCreatingTemplate } = trpc.communications.createTemplate.useMutation({
     onSuccess: async () => {
       setTemplateName('');
@@ -136,15 +166,25 @@ export default function CommunicationsPage() {
   });
 
   const { mutate: scheduleMessage, isPending: isScheduling } = trpc.communications.schedule.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       setScheduleTo('');
       setScheduleSubject('');
       setScheduleBody('');
       setScheduleTemplateId('');
       setScheduleAudience('');
+      setLastScheduleBatchKey((data as any)?.batchKey ?? '');
       await utils.communications.schedules.invalidate();
     },
   });
+
+  const { mutate: updateBatchStatus, isPending: isUpdatingBatch } =
+    trpc.communications.updateScheduleBatchStatus.useMutation({
+      onSuccess: async (data) => {
+        setBatchActionStatus(`Updated ${data.updated} schedule(s).`);
+        await utils.communications.schedules.invalidate();
+      },
+      onError: (error) => setBatchActionStatus(error.message),
+    });
 
   const { mutate: dispatchDue, isPending: isDispatching } = trpc.communications.dispatchDue.useMutation({
     onSuccess: async () => {
@@ -422,7 +462,7 @@ export default function CommunicationsPage() {
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Schedule message</h2>
-          <p className="mt-1 text-sm text-muted">Queue a message to be sent later (use dispatch in your cron).</p>
+          <p className="mt-1 text-sm text-muted">Draft, review, and queue messages to be sent later (use dispatch in your cron).</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <select
               className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
@@ -434,6 +474,15 @@ export default function CommunicationsPage() {
                   {channel}
                 </option>
               ))}
+            </select>
+            <select
+              className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+              value={scheduleInitialStatus}
+              onChange={(event) => setScheduleInitialStatus(event.target.value as any)}
+            >
+              <option value="QUEUED">Queue (ready to send)</option>
+              <option value="DRAFT">Draft</option>
+              <option value="PENDING_REVIEW">Submit for review</option>
             </select>
             <select
               className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
@@ -490,6 +539,7 @@ export default function CommunicationsPage() {
                   subject: scheduleChannel === 'EMAIL' ? scheduleSubject : undefined,
                   body: scheduleBody || undefined,
                   sendAt: scheduleSendAt ? new Date(scheduleSendAt) : new Date(),
+                  initialStatus: scheduleInitialStatus,
                   to: scheduleTo
                     .split(',')
                     .map((value) => value.trim())
@@ -498,19 +548,62 @@ export default function CommunicationsPage() {
               }
               disabled={!canWrite || !churchId || (!scheduleTo && !scheduleAudience) || isScheduling}
             >
-              {isScheduling ? 'Scheduling…' : 'Schedule'}
+              {isScheduling ? 'Saving…' : scheduleInitialStatus === 'QUEUED' ? 'Queue' : 'Save'}
             </Button>
             <Button variant="outline" onClick={() => dispatchDue({ limit: 50 })} disabled={!canWrite || isDispatching}>
               {isDispatching ? 'Dispatching…' : 'Dispatch due now'}
             </Button>
           </div>
+          {lastScheduleBatchKey ? (
+            <p className="mt-3 text-xs text-muted">
+              Batch key: <span className="font-mono">{lastScheduleBatchKey}</span>
+            </p>
+          ) : null}
+          {batchActionStatus ? <p className="mt-2 text-xs text-muted">{batchActionStatus}</p> : null}
           <div className="mt-4 space-y-2 text-sm text-muted">
-            {schedules?.map((item) => (
-              <div key={item.id} className="flex items-center justify-between">
-                <span>
-                  {item.channel} · {item.to}
-                </span>
-                <span>{new Date(item.sendAt).toLocaleString()} · {item.status}</span>
+            {scheduleBatches.map((batch) => (
+              <div key={batch.batchKey} className="rounded-md border border-border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-sm">
+                    <span className="font-medium text-foreground">{batch.channel}</span>{' '}
+                    <span className="text-muted">· {batch.count} recipient(s)</span>
+                  </div>
+                  <div className="text-xs text-muted">
+                    {batch.sendAt ? new Date(batch.sendAt).toLocaleString() : 'N/A'} · {batch.primaryStatus}
+                  </div>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {batch.primaryStatus === 'DRAFT' ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => updateBatchStatus({ churchId, batchKey: batch.batchKey, status: 'PENDING_REVIEW' })}
+                      disabled={!canWrite || isUpdatingBatch}
+                    >
+                      Submit for review
+                    </Button>
+                  ) : null}
+                  {batch.primaryStatus === 'PENDING_REVIEW' ? (
+                    <Button
+                      size="sm"
+                      onClick={() => updateBatchStatus({ churchId, batchKey: batch.batchKey, status: 'QUEUED' })}
+                      disabled={!canWrite || isUpdatingBatch}
+                    >
+                      Approve & queue
+                    </Button>
+                  ) : null}
+                  {batch.primaryStatus === 'QUEUED' ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => updateBatchStatus({ churchId, batchKey: batch.batchKey, status: 'CANCELED' })}
+                      disabled={!canWrite || isUpdatingBatch}
+                    >
+                      Cancel
+                    </Button>
+                  ) : null}
+                </div>
+                <p className="mt-2 text-[11px] text-muted font-mono break-all">{batch.batchKey}</p>
               </div>
             ))}
             {!schedules?.length && <p>No scheduled messages yet.</p>}

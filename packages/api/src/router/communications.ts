@@ -10,6 +10,7 @@ import {
   DripCampaignStatus,
   DripEnrollmentStatus,
   Prisma,
+  UserRole,
   prisma,
 } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
@@ -17,6 +18,7 @@ import { recordAuditLog } from '../audit';
 import { channelToPreference, dispatchScheduledCommunications, normalizeRecipientAddress, sendCommunication } from '../communications';
 import { buildUnsubscribeUrl, createUnsubscribeToken } from '../unsubscribe';
 import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
+import crypto from 'crypto';
 
 const templateSchema = z.object({
   churchId: z.string(),
@@ -47,6 +49,10 @@ const sendSchema = z
 
 const scheduleSchema = sendSchema.extend({
   sendAt: z.coerce.date(),
+  initialStatus: z
+    .enum(['QUEUED', 'DRAFT', 'PENDING_REVIEW'])
+    .optional()
+    .default('QUEUED'),
 });
 
 const createDripSchema = z.object({
@@ -105,6 +111,14 @@ async function requireTenantStaff(tenantId: string, clerkUserId: string) {
   });
   if (!staff) {
     throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
+  }
+  return staff;
+}
+
+async function requireTenantAdmin(tenantId: string, clerkUserId: string) {
+  const staff = await requireTenantStaff(tenantId, clerkUserId);
+  if (staff.role !== UserRole.ADMIN) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
   }
   return staff;
 }
@@ -548,6 +562,7 @@ export const communicationsRouter = router({
       recipients: recipientList,
     });
 
+    const batchKey = `batch_${crypto.randomUUID()}`;
     const scheduleRecords: Prisma.CommunicationScheduleCreateManyInput[] = [];
     for (const [recipient, context] of recipients.entries()) {
       const resolvedSubject = subject ? renderTemplate(subject, context) : undefined;
@@ -582,13 +597,19 @@ export const communicationsRouter = router({
         subject: resolvedSubject,
         body: resolvedBody,
         sendAt: input.sendAt,
-        status: suppressionReason || optedOut ? CommunicationScheduleStatus.CANCELED : CommunicationScheduleStatus.QUEUED,
+        status: suppressionReason || optedOut
+          ? CommunicationScheduleStatus.CANCELED
+          : (input.initialStatus as unknown as CommunicationScheduleStatus),
         error: suppressionReason
           ? `Suppressed recipient (${suppressionReason})`
           : optedOut
             ? 'Recipient opted out for this channel'
             : undefined,
-        metadata: { audience: input.audience ?? null, memberId: context.memberId ?? null },
+        metadata: {
+          audience: input.audience ?? null,
+          memberId: context.memberId ?? null,
+          batchKey,
+        },
       });
     }
 
@@ -601,13 +622,83 @@ export const communicationsRouter = router({
       actorId: ctx.userId,
       action: 'communications.scheduled',
       targetType: 'CommunicationSchedule',
-      metadata: { channel: input.channel, count: scheduleRecords.length, sendAt: input.sendAt.toISOString() },
+      metadata: {
+        channel: input.channel,
+        count: scheduleRecords.length,
+        sendAt: input.sendAt.toISOString(),
+        batchKey,
+        initialStatus: input.initialStatus,
+      },
     });
 
     const queued = scheduleRecords.filter((row) => row.status === CommunicationScheduleStatus.QUEUED).length;
     const canceled = scheduleRecords.filter((row) => row.status === CommunicationScheduleStatus.CANCELED).length;
-    return { count: scheduleRecords.length, queued, canceled };
+    return { count: scheduleRecords.length, queued, canceled, batchKey };
   }),
+
+  updateScheduleBatchStatus: protectedProcedure
+    .input(
+      z.object({
+        churchId: z.string(),
+        batchKey: z.string().min(8),
+        status: z.enum(['DRAFT', 'PENDING_REVIEW', 'QUEUED', 'CANCELED']),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      if (input.status === 'QUEUED') {
+        await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
+      } else {
+        await requireTenantStaff(ctx.tenantId!, ctx.userId!);
+      }
+
+      const church = await prisma.church.findFirst({
+        where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
+      });
+      if (!church) throw new TRPCError({ code: 'NOT_FOUND', message: 'Church not found' });
+
+      const eligible =
+        input.status === 'CANCELED'
+          ? { status: { notIn: [CommunicationScheduleStatus.SENT] } }
+          : {
+              status: {
+                in: [
+                  CommunicationScheduleStatus.DRAFT,
+                  CommunicationScheduleStatus.PENDING_REVIEW,
+                  CommunicationScheduleStatus.QUEUED,
+                  CommunicationScheduleStatus.FAILED,
+                ],
+              },
+            };
+
+      const updated = await prisma.communicationSchedule.updateMany({
+        where: {
+          churchId: input.churchId,
+          ...eligible,
+          metadata: { path: ['batchKey'], equals: input.batchKey },
+        },
+        data: {
+          status: input.status as unknown as CommunicationScheduleStatus,
+          ...(input.status === 'CANCELED' ? { error: 'Canceled by staff' } : {}),
+        },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        churchId: input.churchId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'communications.batch_status_updated',
+        targetType: 'CommunicationSchedule',
+        metadata: { batchKey: input.batchKey, status: input.status, updated: updated.count },
+      });
+
+      return { ok: true, updated: updated.count };
+    }),
 
   dispatchDue: protectedProcedure
     .input(z.object({ limit: z.number().min(1).max(200).default(50) }))

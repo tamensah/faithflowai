@@ -801,6 +801,8 @@ export type CommunicationStatus = (typeof CommunicationStatus)[keyof typeof Comm
 
 
 export const CommunicationScheduleStatus = {
+  DRAFT: 'DRAFT',
+  PENDING_REVIEW: 'PENDING_REVIEW',
   QUEUED: 'QUEUED',
   SENT: 'SENT',
   FAILED: 'FAILED',
