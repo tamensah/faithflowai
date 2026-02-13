@@ -43,7 +43,7 @@ Acceptance criteria:
 - [~] Consent + quiet hours enforcement (server-side)
 - [~] Suppression list + unsubscribe flows (per channel)
 - [~] Transactional templates (welcome, trial ending, failed payment, receipts)
-- [ ] Scheduling UX upgrades (draft/review/approve + analytics)
+- [~] Scheduling UX upgrades (draft/review/approve + analytics)
 
 Acceptance criteria:
 - No outbound SMS/WhatsApp/email is sent if the member opted out.

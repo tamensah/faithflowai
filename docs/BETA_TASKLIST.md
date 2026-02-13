@@ -73,7 +73,7 @@ Deliverables:
   - [~] Suppression list and unsubscribe flows
 - [ ] Campaign scheduling UX:
   - [ ] Calendar view
-  - [ ] Draft -> review -> approve -> schedule workflow
+  - [x] Draft -> review -> approve -> schedule workflow
   - [ ] Delivery analytics improvements
 
 Deliverables:
