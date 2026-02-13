@@ -16,19 +16,19 @@ Status legend:
   - [~] Paystack: start plan-change checkout + best-effort prevent double billing
 - [x] Define proration rules (beta-safe default: next-cycle effective + optional immediate Stripe upgrade)
 - [x] Add "effective next cycle" toggle + confirmation dialog (show impact)
-- [ ] Trial conversion flow:
+- [x] Trial conversion flow:
   - [x] Trial ending reminders (email + in-app banner)
-  - [~] Grace period policy (default 7 days) with clear lockout behavior (no tenant suspension)
-  - [ ] Post-trial enforcement (read-only mode vs. lock) per feature key
+  - [x] Grace period policy (configurable) with clear lockout behavior (no tenant suspension)
+  - [x] Post-trial enforcement (read-only mode: view/export allowed; writes blocked; billing accessible)
 - [ ] Stripe:
   - [x] Customer Portal deep link in admin billing
   - [x] Subscription cancel/resume UX (in-app)
 - [ ] Paystack:
   - [~] Manage subscription guidance + cancel flow (provider-specific)
   - [~] Ensure webhook sync covers status transitions reliably
-- [ ] Entitlements polish:
+- [~] Entitlements polish:
   - [~] "What's locked" UI across admin modules
-  - [ ] Upgrade CTA with deep-link to `/billing`
+  - [x] Upgrade CTA with deep-link to `/billing`
 
 Deliverables:
 - Admin: `/billing` supports plan changes and trial visibility end-to-end
@@ -38,7 +38,7 @@ Deliverables:
 
 ## 2) Operational Readiness (Reduce Support Load)
 
-- [~] Admin health page: `/operations/health`
+- [x] Admin health page: `/operations/health`
   - [x] DB connectivity + latency
   - [x] Webhook status (Stripe/Paystack/etc) + last event timestamps
   - [x] Email provider status (Resend) config check
@@ -104,9 +104,9 @@ Deliverables:
 
 ## 5) AI Layer (Useful + Governed)
 
-- [ ] Admin “Ask FaithFlow” assistant:
-  - [~] Tenant-scoped retrieval
-  - [~] Citations (source records + timestamps)
+- [~] Admin “Ask FaithFlow” assistant:
+  - [x] Tenant-scoped retrieval
+  - [x] Citations (source records + timestamps)
   - [~] Role-based access and redaction
   - [x] Prompt + output logging (audit)
 - [ ] AI summaries:

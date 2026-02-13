@@ -78,7 +78,10 @@ This is the live checklist for product scope, implementation status, and next st
 - Subscription system foundation:
   - Plan catalog (starter/growth/enterprise)
   - Tenant subscription assignments + history
-  - Entitlements API resolution (`tenant subscription` -> `default plan` fallback)
+  - Entitlements resolution:
+    - Active subscription -> plan features
+    - No subscription history -> default plan fallback
+    - Subscription history but no active subscription -> `inactive_subscription` (read-only lockout; no fallback)
   - Platform admin subscriptions UI
 - Subscription system manual (`docs/SUBSCRIPTION_SYSTEM.md`)
 - Subscription hardening + monetization ops:
@@ -89,6 +92,10 @@ This is the live checklist for product scope, implementation status, and next st
   - Dunning preview + run workflows (platform + scheduled endpoint)
   - Webhook idempotency + replay-safe event persistence (`WebhookEvent`)
   - Subscription metadata normalization backfill (platform + scheduled task)
+- Billing lapse enforcement (Policy A):
+  - Server-side: global mutation block in inactive-subscription mode (except `billing.*`)
+  - Entitlements: read vs write gates (`ensureFeatureReadAccess` / `ensureFeatureWriteAccess`)
+  - Admin UX: read-only banner + write actions disabled across modules
 - Onboarding and catalog UX hardening:
   - Church onboarding flow (org selection, admin claim, plan checkout, admin landing)
   - Trial-aware tier UX (Starter/Growth 14-day, Enterprise 0-day default)
@@ -141,31 +148,14 @@ This is the live checklist for product scope, implementation status, and next st
 - Native mobile apps (member + staff)
 - Competitor data migration tooling
 
-## Finance Scope (Reference)
-Source: `/Users/tamensah/aihub/faithlow/docs/notes/FaithFlow_Financial_Management.md`.
-Key areas to deliver:
-- Recurring donations, pledges, tithing statements
-- Expenses, budgets, approval workflows
-- Receipts + localized tax rules
-- Multi-currency + local payment methods
-- Campaigns + peer-to-peer + QR/text-to-give
-- Financial dashboards, forecasting, donor analytics
-- Compliance, audit logs, PCI posture
-
-## Scope Reconciliation (FEATURES + PROJECT_BLUEPRINT)
-Source features: `/Users/tamensah/aihub/faithlow/docs/notes/FEATURES.md`.
-Source blueprint: `/Users/tamensah/aihub/faithlow/docs/notes/PROJECT_BLUEPRINT.md`.
-
-Main workstreams not yet delivered:
-- SaaS platform layer: self-serve billing portal, invoices, plan change UX, enterprise billing controls
-- Church hierarchy operations: governance workflows, maintenance lifecycle, advanced branch controls
-- Domain/platform ops: tenant domain automation, SSL lifecycle, health monitoring
-- Streaming + social: live broadcast orchestration, moderation, post-stream analytics
-- Support operations: queue analytics, help center, SLA automation
-- Security/compliance hardening: MFA policy, audit governance, data retention controls
-- Mobile-first execution: dedicated member/staff app flows beyond mobile web
+## Manuals (Reference)
+- Finance: `docs/FINANCE_MANUAL.md`
+- Membership: `docs/MEMBERSHIP_MANUAL.md`
+- Events: `docs/EVENTS_MANUAL.md`
+- Subscription system: `docs/SUBSCRIPTION_SYSTEM.md`
+- Disputes: `docs/DISPUTE_PLAYBOOK.md`
 
 ## Notes
 - All features must enforce tenant isolation and RBAC by default.
 - AI outputs must be traceable with source attribution.
-- Operational notes log: `/Users/tamensah/aihub/faithflow_ai/docs/OPERATIONAL_NOTES.md`.
+- Operational notes log: `docs/OPERATIONAL_NOTES.md`.

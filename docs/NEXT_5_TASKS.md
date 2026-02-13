@@ -13,7 +13,7 @@ Legend:
 
 - [~] Stripe plan change (admin self-serve)
 - [~] Paystack tier change (checkout + best-effort old subscription disable)
-- [~] Trial -> grace -> lockout policy (server-side)
+- [x] Trial -> grace -> read-only lockout policy (server-side)
 - [~] Cancel/resume flows (Stripe + Paystack cancel)
 - [~] “What’s locked” UX everywhere (pages + actions + empty states)
 

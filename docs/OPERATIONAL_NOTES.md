@@ -78,6 +78,11 @@ This file is the running operations log for implementation details, runtime cons
 - Subscription metadata normalization/backfill is implemented:
   - `platform.subscriptionMetadataBackfill`
   - `POST /tasks/subscriptions/metadata-backfill` (API key protected)
+- Subscription lapse enforcement (Policy A) is implemented:
+  - If a tenant has subscription history but no active subscription, entitlements resolve to `inactive_subscription` (no fallback to default plan).
+  - Server-side: all tenant mutations are blocked in inactive-subscription mode except `billing.*` (so tenants can restore service).
+  - Read-only mode: read queries continue to work (view/export), but no edits/sends/check-ins/financial actions.
+  - Admin UI: shows read-only banner and disables write actions where applicable.
 
 ### Platform ops
 
