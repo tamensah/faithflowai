@@ -73,13 +73,35 @@ Related pages:
 Current source of truth:
 
 1. Latest active/trialing/past_due/paused `TenantSubscription`
-2. Fallback to active default `SubscriptionPlan`
+2. If no subscription history exists, fallback to active default `SubscriptionPlan`
+3. If subscription history exists but no active subscription exists, treat the tenant as `inactive_subscription` (no fallback to default)
 
 `platform.tenantEntitlements` returns resolved entitlements map:
 
 - `enabled` boolean
 - `limit` optional numeric cap
 - source plan code
+
+### Inactive Subscription Lockout (Policy A)
+
+If a tenant has a subscription history but no active subscription, the entitlements resolver returns:
+
+- `source: inactive_subscription`
+- all known feature keys are returned with `enabled: false`
+
+Behavior:
+
+- Reads are allowed for product modules (so admins can view and export data).
+- Writes are blocked globally (so no edits, sends, check-ins, refunds, etc).
+- Billing remains accessible so tenants can restore service.
+
+Implementation notes:
+
+- Server-side: `protectedProcedure` blocks all mutations when `resolveTenantPlan(...).source === inactive_subscription`, except `billing.*`.
+- Feature helpers:
+  - `ensureFeatureReadAccess(...)` allows reads in inactive-subscription mode.
+  - `ensureFeatureWriteAccess(...)` blocks writes (including inactive-subscription mode).
+- UI: admin shows a "Read-only mode" banner and disables write actions where applicable.
 
 Implemented enforcement pattern for protected feature routes:
 
