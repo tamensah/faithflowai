@@ -322,16 +322,36 @@ export const householdRouter = router({
             });
 
         if (primaryMemberId) {
+          const before = await prisma.member.findUnique({ where: { id: primaryMemberId }, select: { householdId: true } });
           await prisma.member.update({ where: { id: primaryMemberId }, data: { householdId: household.id } });
+          await prisma.importBatchItem.create({
+            data: {
+              batchId: batch.id,
+              entityType: ImportEntityType.MEMBER,
+              action: ImportItemAction.UPDATED,
+              entityId: primaryMemberId,
+              metadata: { before: { householdId: before?.householdId ?? null }, after: { householdId: household.id }, reason: 'household_primary' },
+            },
+          });
         }
 
         if (row.memberEmails?.length) {
           const members = await prisma.member.findMany({
             where: { churchId: input.churchId, email: { in: row.memberEmails } },
-            select: { id: true },
+            select: { id: true, householdId: true },
           });
           for (const member of members) {
+            const beforeHouseholdId = member.householdId ?? null;
             await prisma.member.update({ where: { id: member.id }, data: { householdId: household.id } });
+            await prisma.importBatchItem.create({
+              data: {
+                batchId: batch.id,
+                entityType: ImportEntityType.MEMBER,
+                action: ImportItemAction.UPDATED,
+                entityId: member.id,
+                metadata: { before: { householdId: beforeHouseholdId }, after: { householdId: household.id }, reason: 'household_member' },
+              },
+            });
           }
         }
 
@@ -341,6 +361,12 @@ export const householdRouter = router({
             entityType: ImportEntityType.HOUSEHOLD,
             action: existing ? ImportItemAction.UPDATED : ImportItemAction.CREATED,
             entityId: household.id,
+            metadata: existing
+              ? {
+                  before: { name: existing.name ?? null, primaryMemberId: existing.primaryMemberId ?? null },
+                  after: { name: household.name ?? null, primaryMemberId: household.primaryMemberId ?? null },
+                }
+              : { row: i + 2 },
           },
         });
 
@@ -377,9 +403,50 @@ export const householdRouter = router({
       if (!batch) throw new TRPCError({ code: 'NOT_FOUND', message: 'Import batch not found' });
       if (batch.status === ImportBatchStatus.ROLLED_BACK) return { ok: true, alreadyRolledBack: true };
 
-      const createdIds = batch.items.filter((item) => item.action === ImportItemAction.CREATED).map((item) => item.entityId);
-      if (createdIds.length) {
-        await prisma.household.deleteMany({ where: { id: { in: createdIds }, churchId: batch.churchId } });
+      const createdHouseholdIds = batch.items
+        .filter((item) => item.entityType === ImportEntityType.HOUSEHOLD && item.action === ImportItemAction.CREATED)
+        .map((item) => item.entityId);
+
+      const updatedHouseholdItems = batch.items.filter(
+        (item) => item.entityType === ImportEntityType.HOUSEHOLD && item.action === ImportItemAction.UPDATED
+      );
+
+      const memberUpdateItems = batch.items.filter(
+        (item) => item.entityType === ImportEntityType.MEMBER && item.action === ImportItemAction.UPDATED
+      );
+
+      let restoredMembers = 0;
+      for (const item of memberUpdateItems) {
+        const metadata = item.metadata as any;
+        const beforeHouseholdId = metadata?.before?.householdId ?? null;
+        await prisma.member.updateMany({
+          where: { id: item.entityId, churchId: batch.churchId },
+          data: { householdId: beforeHouseholdId },
+        });
+        restoredMembers += 1;
+      }
+
+      let restoredHouseholds = 0;
+      for (const item of updatedHouseholdItems) {
+        const metadata = item.metadata as any;
+        const before = metadata?.before as Record<string, any> | undefined;
+        if (!before) continue;
+        await prisma.household.updateMany({
+          where: { id: item.entityId, churchId: batch.churchId },
+          data: {
+            name: before.name ?? null,
+            primaryMemberId: before.primaryMemberId ?? null,
+          },
+        });
+        restoredHouseholds += 1;
+      }
+
+      let deletedHouseholds = 0;
+      for (const householdId of createdHouseholdIds) {
+        const linked = await prisma.member.count({ where: { churchId: batch.churchId, householdId } });
+        if (linked > 0) continue;
+        const result = await prisma.household.deleteMany({ where: { id: householdId, churchId: batch.churchId } });
+        deletedHouseholds += result.count;
       }
 
       await prisma.importBatch.update({
@@ -395,9 +462,9 @@ export const householdRouter = router({
         action: 'household.import_csv_rolled_back',
         targetType: 'ImportBatch',
         targetId: batch.id,
-        metadata: { deletedHouseholds: createdIds.length },
+        metadata: { deletedHouseholds, restoredMembers, restoredHouseholds },
       });
 
-      return { ok: true, deletedHouseholds: createdIds.length };
+      return { ok: true, deletedHouseholds, restoredMembers, restoredHouseholds };
     }),
 });

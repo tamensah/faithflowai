@@ -930,13 +930,13 @@ export default function MembersPage() {
             >
               {isImportingMembers ? 'Importing…' : 'Import members'}
             </Button>
-            {importSummary?.batchId && importSummary?.created ? (
+            {importSummary?.batchId ? (
               <Button
                 variant="outline"
                 onClick={() => rollbackImport({ batchId: importSummary.batchId })}
-                disabled={!canWrite || isRollingBackImport}
+                disabled={!canWrite || isRollingBackImport || importSummary?.rolledBack}
               >
-                {isRollingBackImport ? 'Rolling back…' : 'Rollback created'}
+                {importSummary?.rolledBack ? 'Rolled back' : isRollingBackImport ? 'Rolling back…' : 'Rollback import batch'}
               </Button>
             ) : null}
           </div>
@@ -1373,13 +1373,17 @@ export default function MembersPage() {
               >
                 {isImportingHouseholds ? 'Importing…' : 'Import households'}
               </Button>
-              {householdImportSummary?.batchId && householdImportSummary?.summary?.created ? (
+              {householdImportSummary?.batchId ? (
                 <Button
                   variant="outline"
                   onClick={() => rollbackHouseholdImport({ batchId: householdImportSummary.batchId })}
-                  disabled={isRollingBackHouseholds}
+                  disabled={!canWrite || isRollingBackHouseholds || householdImportSummary?.rolledBack}
                 >
-                  {isRollingBackHouseholds ? 'Rolling back…' : 'Rollback created'}
+                  {householdImportSummary?.rolledBack
+                    ? 'Rolled back'
+                    : isRollingBackHouseholds
+                      ? 'Rolling back…'
+                      : 'Rollback import batch'}
                 </Button>
               ) : null}
             </div>

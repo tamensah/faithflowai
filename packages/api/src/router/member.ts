@@ -10,6 +10,7 @@ import {
   MemberMaritalStatus,
   MemberStatus,
   MemberDirectoryVisibility,
+  Prisma,
   prisma,
 } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
@@ -981,6 +982,7 @@ export const memberRouter = router({
         'membership_enabled',
         'Your subscription does not include membership management.'
       );
+      await requireStaff(ctx.tenantId!, ctx.userId!);
       const church = await prisma.church.findFirst({
         where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
       });
@@ -1020,7 +1022,34 @@ export const memberRouter = router({
           });
       summary.batchId = batch?.id ?? null;
 
-      const batchItems: Array<{ entityType: ImportEntityType; action: ImportItemAction; entityId: string }> = [];
+      const batchItems: Array<{
+        entityType: ImportEntityType;
+        action: ImportItemAction;
+        entityId: string;
+        metadata?: Record<string, unknown>;
+      }> = [];
+
+      const snapshotMember = (value: any) => ({
+        firstName: value.firstName,
+        lastName: value.lastName,
+        middleName: value.middleName ?? null,
+        preferredName: value.preferredName ?? null,
+        email: value.email ?? null,
+        phone: value.phone ?? null,
+        status: value.status ?? null,
+        addressLine1: value.addressLine1 ?? null,
+        addressLine2: value.addressLine2 ?? null,
+        city: value.city ?? null,
+        state: value.state ?? null,
+        postalCode: value.postalCode ?? null,
+        country: value.country ?? null,
+        dateOfBirth: value.dateOfBirth ? new Date(value.dateOfBirth).toISOString() : null,
+        joinDate: value.joinDate ? new Date(value.joinDate).toISOString() : null,
+        baptismDate: value.baptismDate ? new Date(value.baptismDate).toISOString() : null,
+        confirmationDate: value.confirmationDate ? new Date(value.confirmationDate).toISOString() : null,
+        notes: value.notes ?? null,
+        householdId: value.householdId ?? null,
+      });
 
       for (const [index, row] of rows.entries()) {
         const rowNumber = index + 2;
@@ -1072,6 +1101,14 @@ export const memberRouter = router({
               data: { churchId: input.churchId, name: householdName },
             });
             householdId = createdHousehold.id;
+            if (batch) {
+              batchItems.push({
+                entityType: ImportEntityType.HOUSEHOLD,
+                action: ImportItemAction.CREATED,
+                entityId: createdHousehold.id,
+                metadata: { reason: 'member_import_household', rowNumber, name: householdName },
+              });
+            }
           }
         }
 
@@ -1115,9 +1152,17 @@ export const memberRouter = router({
 
         try {
           if (member) {
+            const before = snapshotMember(member);
             member = await prisma.member.update({ where: { id: member.id }, data });
             summary.updated += 1;
-            if (batch) batchItems.push({ entityType: ImportEntityType.MEMBER, action: ImportItemAction.UPDATED, entityId: member.id });
+            if (batch) {
+              batchItems.push({
+                entityType: ImportEntityType.MEMBER,
+                action: ImportItemAction.UPDATED,
+                entityId: member.id,
+                metadata: { rowNumber, before, after: snapshotMember(member) },
+              });
+            }
           } else {
             await ensureFeatureLimit(
               ctx.tenantId!,
@@ -1129,7 +1174,14 @@ export const memberRouter = router({
             member = await prisma.member.create({ data: { ...data, churchId: input.churchId } });
             summary.created += 1;
             currentMemberCount += 1;
-            if (batch) batchItems.push({ entityType: ImportEntityType.MEMBER, action: ImportItemAction.CREATED, entityId: member.id });
+            if (batch) {
+              batchItems.push({
+                entityType: ImportEntityType.MEMBER,
+                action: ImportItemAction.CREATED,
+                entityId: member.id,
+                metadata: { rowNumber },
+              });
+            }
           }
         } catch (error) {
           summary.errors.push(`Row ${rowNumber}: Failed to save member.`);
@@ -1160,6 +1212,7 @@ export const memberRouter = router({
               entityType: item.entityType,
               action: item.action,
               entityId: item.entityId,
+              metadata: item.metadata ? (item.metadata as Prisma.InputJsonValue) : undefined,
             })),
           });
         }
@@ -1211,20 +1264,69 @@ export const memberRouter = router({
       }
 
       const items = await prisma.importBatchItem.findMany({
-        where: {
-          batchId: batch.id,
-          entityType: ImportEntityType.MEMBER,
-          action: ImportItemAction.CREATED,
-        },
-        select: { entityId: true },
+        where: { batchId: batch.id },
       });
-      const ids = items.map((row) => row.entityId);
 
-      const deleted = ids.length
+      const createdMemberIds = items
+        .filter((item) => item.entityType === ImportEntityType.MEMBER && item.action === ImportItemAction.CREATED)
+        .map((item) => item.entityId);
+
+      const updatedMemberItems = items.filter(
+        (item) => item.entityType === ImportEntityType.MEMBER && item.action === ImportItemAction.UPDATED
+      );
+
+      const createdHouseholdIds = items
+        .filter((item) => item.entityType === ImportEntityType.HOUSEHOLD && item.action === ImportItemAction.CREATED)
+        .map((item) => item.entityId);
+
+      const deleted = createdMemberIds.length
         ? await prisma.member.deleteMany({
-            where: { id: { in: ids }, churchId: batch.churchId },
+            where: { id: { in: createdMemberIds }, churchId: batch.churchId },
           })
         : { count: 0 };
+
+      let restored = 0;
+      for (const item of updatedMemberItems) {
+        const metadata = item.metadata as any;
+        const before = metadata?.before as Record<string, any> | undefined;
+        if (!before) continue;
+
+        const parseDate = (value: unknown) => (typeof value === 'string' && value ? new Date(value) : null);
+
+        await prisma.member.updateMany({
+          where: { id: item.entityId, churchId: batch.churchId },
+          data: {
+            firstName: before.firstName,
+            lastName: before.lastName,
+            middleName: before.middleName ?? null,
+            preferredName: before.preferredName ?? null,
+            email: before.email ?? null,
+            phone: before.phone ?? null,
+            status: before.status,
+            addressLine1: before.addressLine1 ?? null,
+            addressLine2: before.addressLine2 ?? null,
+            city: before.city ?? null,
+            state: before.state ?? null,
+            postalCode: before.postalCode ?? null,
+            country: before.country ?? null,
+            dateOfBirth: parseDate(before.dateOfBirth),
+            joinDate: parseDate(before.joinDate),
+            baptismDate: parseDate(before.baptismDate),
+            confirmationDate: parseDate(before.confirmationDate),
+            notes: before.notes ?? null,
+            householdId: before.householdId ?? null,
+          },
+        });
+        restored += 1;
+      }
+
+      let deletedHouseholds = 0;
+      for (const householdId of createdHouseholdIds) {
+        const linked = await prisma.member.count({ where: { churchId: batch.churchId, householdId } });
+        if (linked > 0) continue;
+        const result = await prisma.household.deleteMany({ where: { id: householdId, churchId: batch.churchId } });
+        deletedHouseholds += result.count;
+      }
 
       await prisma.importBatch.update({
         where: { id: batch.id },
@@ -1239,10 +1341,10 @@ export const memberRouter = router({
         action: 'members.import_csv_rolled_back',
         targetType: 'ImportBatch',
         targetId: batch.id,
-        metadata: { deletedMembers: deleted.count },
+        metadata: { deletedMembers: deleted.count, restoredMembers: restored, deletedHouseholds },
       });
 
-      return { ok: true, deletedMembers: deleted.count };
+      return { ok: true, deletedMembers: deleted.count, restoredMembers: restored, deletedHouseholds };
     }),
 
   delete: protectedProcedure

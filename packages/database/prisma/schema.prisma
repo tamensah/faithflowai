@@ -1024,6 +1024,7 @@ model ImportBatchItem {
   entityType ImportEntityType
   action     ImportItemAction
   entityId   String
+  metadata   Json?
   createdAt  DateTime         @default(now())
 
   batch ImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)

@@ -7807,6 +7807,7 @@ export const ImportBatchItemScalarFieldEnum = {
   entityType: 'entityType',
   action: 'action',
   entityId: 'entityId',
+  metadata: 'metadata',
   createdAt: 'createdAt'
 } as const
 

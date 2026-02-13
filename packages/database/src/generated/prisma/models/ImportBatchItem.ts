@@ -48,6 +48,7 @@ export type ImportBatchItemCountAggregateOutputType = {
   entityType: number
   action: number
   entityId: number
+  metadata: number
   createdAt: number
   _all: number
 }
@@ -77,6 +78,7 @@ export type ImportBatchItemCountAggregateInputType = {
   entityType?: true
   action?: true
   entityId?: true
+  metadata?: true
   createdAt?: true
   _all?: true
 }
@@ -159,6 +161,7 @@ export type ImportBatchItemGroupByOutputType = {
   entityType: $Enums.ImportEntityType
   action: $Enums.ImportItemAction
   entityId: string
+  metadata: runtime.JsonValue | null
   createdAt: Date
   _count: ImportBatchItemCountAggregateOutputType | null
   _min: ImportBatchItemMinAggregateOutputType | null
@@ -189,6 +192,7 @@ export type ImportBatchItemWhereInput = {
   entityType?: Prisma.EnumImportEntityTypeFilter<"ImportBatchItem"> | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionFilter<"ImportBatchItem"> | $Enums.ImportItemAction
   entityId?: Prisma.StringFilter<"ImportBatchItem"> | string
+  metadata?: Prisma.JsonNullableFilter<"ImportBatchItem">
   createdAt?: Prisma.DateTimeFilter<"ImportBatchItem"> | Date | string
   batch?: Prisma.XOR<Prisma.ImportBatchScalarRelationFilter, Prisma.ImportBatchWhereInput>
 }
@@ -199,6 +203,7 @@ export type ImportBatchItemOrderByWithRelationInput = {
   entityType?: Prisma.SortOrder
   action?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
+  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   batch?: Prisma.ImportBatchOrderByWithRelationInput
 }
@@ -212,6 +217,7 @@ export type ImportBatchItemWhereUniqueInput = Prisma.AtLeast<{
   entityType?: Prisma.EnumImportEntityTypeFilter<"ImportBatchItem"> | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionFilter<"ImportBatchItem"> | $Enums.ImportItemAction
   entityId?: Prisma.StringFilter<"ImportBatchItem"> | string
+  metadata?: Prisma.JsonNullableFilter<"ImportBatchItem">
   createdAt?: Prisma.DateTimeFilter<"ImportBatchItem"> | Date | string
   batch?: Prisma.XOR<Prisma.ImportBatchScalarRelationFilter, Prisma.ImportBatchWhereInput>
 }, "id">
@@ -222,6 +228,7 @@ export type ImportBatchItemOrderByWithAggregationInput = {
   entityType?: Prisma.SortOrder
   action?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
+  metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ImportBatchItemCountOrderByAggregateInput
   _max?: Prisma.ImportBatchItemMaxOrderByAggregateInput
@@ -237,6 +244,7 @@ export type ImportBatchItemScalarWhereWithAggregatesInput = {
   entityType?: Prisma.EnumImportEntityTypeWithAggregatesFilter<"ImportBatchItem"> | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionWithAggregatesFilter<"ImportBatchItem"> | $Enums.ImportItemAction
   entityId?: Prisma.StringWithAggregatesFilter<"ImportBatchItem"> | string
+  metadata?: Prisma.JsonNullableWithAggregatesFilter<"ImportBatchItem">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ImportBatchItem"> | Date | string
 }
 
@@ -245,6 +253,7 @@ export type ImportBatchItemCreateInput = {
   entityType: $Enums.ImportEntityType
   action: $Enums.ImportItemAction
   entityId: string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   batch: Prisma.ImportBatchCreateNestedOneWithoutItemsInput
 }
@@ -255,6 +264,7 @@ export type ImportBatchItemUncheckedCreateInput = {
   entityType: $Enums.ImportEntityType
   action: $Enums.ImportItemAction
   entityId: string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -263,6 +273,7 @@ export type ImportBatchItemUpdateInput = {
   entityType?: Prisma.EnumImportEntityTypeFieldUpdateOperationsInput | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionFieldUpdateOperationsInput | $Enums.ImportItemAction
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batch?: Prisma.ImportBatchUpdateOneRequiredWithoutItemsNestedInput
 }
@@ -273,6 +284,7 @@ export type ImportBatchItemUncheckedUpdateInput = {
   entityType?: Prisma.EnumImportEntityTypeFieldUpdateOperationsInput | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionFieldUpdateOperationsInput | $Enums.ImportItemAction
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -282,6 +294,7 @@ export type ImportBatchItemCreateManyInput = {
   entityType: $Enums.ImportEntityType
   action: $Enums.ImportItemAction
   entityId: string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -290,6 +303,7 @@ export type ImportBatchItemUpdateManyMutationInput = {
   entityType?: Prisma.EnumImportEntityTypeFieldUpdateOperationsInput | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionFieldUpdateOperationsInput | $Enums.ImportItemAction
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -299,6 +313,7 @@ export type ImportBatchItemUncheckedUpdateManyInput = {
   entityType?: Prisma.EnumImportEntityTypeFieldUpdateOperationsInput | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionFieldUpdateOperationsInput | $Enums.ImportItemAction
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -318,6 +333,7 @@ export type ImportBatchItemCountOrderByAggregateInput = {
   entityType?: Prisma.SortOrder
   action?: Prisma.SortOrder
   entityId?: Prisma.SortOrder
+  metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -390,6 +406,7 @@ export type ImportBatchItemCreateWithoutBatchInput = {
   entityType: $Enums.ImportEntityType
   action: $Enums.ImportItemAction
   entityId: string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -398,6 +415,7 @@ export type ImportBatchItemUncheckedCreateWithoutBatchInput = {
   entityType: $Enums.ImportEntityType
   action: $Enums.ImportItemAction
   entityId: string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -436,6 +454,7 @@ export type ImportBatchItemScalarWhereInput = {
   entityType?: Prisma.EnumImportEntityTypeFilter<"ImportBatchItem"> | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionFilter<"ImportBatchItem"> | $Enums.ImportItemAction
   entityId?: Prisma.StringFilter<"ImportBatchItem"> | string
+  metadata?: Prisma.JsonNullableFilter<"ImportBatchItem">
   createdAt?: Prisma.DateTimeFilter<"ImportBatchItem"> | Date | string
 }
 
@@ -444,6 +463,7 @@ export type ImportBatchItemCreateManyBatchInput = {
   entityType: $Enums.ImportEntityType
   action: $Enums.ImportItemAction
   entityId: string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
 }
 
@@ -452,6 +472,7 @@ export type ImportBatchItemUpdateWithoutBatchInput = {
   entityType?: Prisma.EnumImportEntityTypeFieldUpdateOperationsInput | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionFieldUpdateOperationsInput | $Enums.ImportItemAction
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -460,6 +481,7 @@ export type ImportBatchItemUncheckedUpdateWithoutBatchInput = {
   entityType?: Prisma.EnumImportEntityTypeFieldUpdateOperationsInput | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionFieldUpdateOperationsInput | $Enums.ImportItemAction
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -468,6 +490,7 @@ export type ImportBatchItemUncheckedUpdateManyWithoutBatchInput = {
   entityType?: Prisma.EnumImportEntityTypeFieldUpdateOperationsInput | $Enums.ImportEntityType
   action?: Prisma.EnumImportItemActionFieldUpdateOperationsInput | $Enums.ImportItemAction
   entityId?: Prisma.StringFieldUpdateOperationsInput | string
+  metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -479,6 +502,7 @@ export type ImportBatchItemSelect<ExtArgs extends runtime.Types.Extensions.Inter
   entityType?: boolean
   action?: boolean
   entityId?: boolean
+  metadata?: boolean
   createdAt?: boolean
   batch?: boolean | Prisma.ImportBatchDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["importBatchItem"]>
@@ -489,6 +513,7 @@ export type ImportBatchItemSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   entityType?: boolean
   action?: boolean
   entityId?: boolean
+  metadata?: boolean
   createdAt?: boolean
   batch?: boolean | Prisma.ImportBatchDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["importBatchItem"]>
@@ -499,6 +524,7 @@ export type ImportBatchItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   entityType?: boolean
   action?: boolean
   entityId?: boolean
+  metadata?: boolean
   createdAt?: boolean
   batch?: boolean | Prisma.ImportBatchDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["importBatchItem"]>
@@ -509,10 +535,11 @@ export type ImportBatchItemSelectScalar = {
   entityType?: boolean
   action?: boolean
   entityId?: boolean
+  metadata?: boolean
   createdAt?: boolean
 }
 
-export type ImportBatchItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "batchId" | "entityType" | "action" | "entityId" | "createdAt", ExtArgs["result"]["importBatchItem"]>
+export type ImportBatchItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "batchId" | "entityType" | "action" | "entityId" | "metadata" | "createdAt", ExtArgs["result"]["importBatchItem"]>
 export type ImportBatchItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   batch?: boolean | Prisma.ImportBatchDefaultArgs<ExtArgs>
 }
@@ -534,6 +561,7 @@ export type $ImportBatchItemPayload<ExtArgs extends runtime.Types.Extensions.Int
     entityType: $Enums.ImportEntityType
     action: $Enums.ImportItemAction
     entityId: string
+    metadata: runtime.JsonValue | null
     createdAt: Date
   }, ExtArgs["result"]["importBatchItem"]>
   composites: {}
@@ -964,6 +992,7 @@ export interface ImportBatchItemFieldRefs {
   readonly entityType: Prisma.FieldRef<"ImportBatchItem", 'ImportEntityType'>
   readonly action: Prisma.FieldRef<"ImportBatchItem", 'ImportItemAction'>
   readonly entityId: Prisma.FieldRef<"ImportBatchItem", 'String'>
+  readonly metadata: Prisma.FieldRef<"ImportBatchItem", 'Json'>
   readonly createdAt: Prisma.FieldRef<"ImportBatchItem", 'DateTime'>
 }
     
