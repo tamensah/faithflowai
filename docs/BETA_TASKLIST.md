@@ -91,7 +91,7 @@ Deliverables:
   - [x] Field mapping + required checks (header aliases)
   - [x] Duplicate detection (email/phone)
   - [x] Dry-run mode with summary
-- [ ] Rollback strategy (batch id + revert updates)
+- [x] Rollback strategy (batch id + revert updates)
 - [x] Rollback strategy (batch id + delete created members)
 - [ ] Migration assistant docs + templates:
   - [x] Example CSV templates

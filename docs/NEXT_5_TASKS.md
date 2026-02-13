@@ -60,7 +60,7 @@ Acceptance criteria:
 - [x] Migration assistant docs + templates
 
 Acceptance criteria:
-- A church can migrate a real dataset safely and undo mistakes via batch rollback.
+- A church can migrate a real dataset safely and undo mistakes via batch rollback (including reverting updated records).
 
 ---
 
