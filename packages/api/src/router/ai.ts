@@ -3,7 +3,7 @@ import { router, protectedProcedure } from '../trpc';
 import { prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { generateTextSimple, type AIProvider } from '@faithflow-ai/ai';
-import { AuditActorType } from '@faithflow-ai/database';
+import { AuditActorType, UserRole } from '@faithflow-ai/database';
 import { recordAuditLog } from '../audit';
 import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
@@ -12,6 +12,7 @@ const providerSchema = z.enum(['openai', 'anthropic', 'google']).default('openai
 async function requireStaff(tenantId: string, clerkUserId: string) {
   const staff = await prisma.staffMembership.findFirst({
     where: { user: { clerkUserId }, church: { organization: { tenantId } } },
+    include: { user: true, church: true },
   });
   if (!staff) {
     throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
@@ -45,7 +46,21 @@ type Source = {
   timestamp?: string;
 };
 
-async function collectSources(input: { tenantId: string; churchId?: string | null; question: string }): Promise<Source[]> {
+function redactEmail(value: string) {
+  // Minimal email redaction for UI labels; does not attempt to parse all edge cases.
+  return value.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted]');
+}
+
+function redactLabel(label: string) {
+  return redactEmail(label);
+}
+
+async function collectSources(input: {
+  tenantId: string;
+  churchId?: string | null;
+  question: string;
+  allowFinanceSources: boolean;
+}): Promise<Source[]> {
   const tokens = pickQueryTokens(input.question);
   const baseChurchFilter = input.churchId ? { churchId: input.churchId } : {};
 
@@ -70,6 +85,10 @@ async function collectSources(input: { tenantId: string; churchId?: string | nul
     }),
   ]);
 
+  const givingLabel = input.allowFinanceSources
+    ? `Giving (last 30d): count=${givingLast30._count._all} sum=${givingLast30._sum.amount?.toString() ?? '0'}`
+    : `Giving (last 30d): count=${givingLast30._count._all}`;
+
   const sources: Source[] = [
     {
       id: 'metric:members',
@@ -86,7 +105,7 @@ async function collectSources(input: { tenantId: string; churchId?: string | nul
     {
       id: 'metric:giving_30d',
       type: 'metric',
-      label: `Giving (last 30d): count=${givingLast30._count._all} sum=${givingLast30._sum.amount?.toString() ?? '0'}`,
+      label: givingLabel,
       timestamp: new Date().toISOString(),
     },
   ];
@@ -104,17 +123,23 @@ async function collectSources(input: { tenantId: string; churchId?: string | nul
       select: { id: true, firstName: true, lastName: true, status: true, updatedAt: true },
       take: 8,
     }),
-    prisma.donation.findMany({
-      where: {
-        church: { organization: { tenantId: input.tenantId } },
-        ...baseChurchFilter,
-        status: 'COMPLETED',
-        OR: [{ donorName: { contains: like, mode: 'insensitive' } }, { donorEmail: { contains: like, mode: 'insensitive' } }],
-      },
-      select: { id: true, amount: true, currency: true, donorName: true, createdAt: true },
-      orderBy: { createdAt: 'desc' },
-      take: 8,
-    }),
+    input.allowFinanceSources
+      ? prisma.donation.findMany({
+          where: {
+            church: { organization: { tenantId: input.tenantId } },
+            ...baseChurchFilter,
+            status: 'COMPLETED',
+            OR: [
+              { donorName: { contains: like, mode: 'insensitive' } },
+              // Note: query tokens strip emails; this is mainly for name fragments.
+              { donorEmail: { contains: like, mode: 'insensitive' } },
+            ],
+          },
+          select: { id: true, amount: true, currency: true, donorName: true, createdAt: true },
+          orderBy: { createdAt: 'desc' },
+          take: 8,
+        })
+      : Promise.resolve([]),
     prisma.event.findMany({
       where: {
         church: { organization: { tenantId: input.tenantId } },
@@ -139,7 +164,9 @@ async function collectSources(input: { tenantId: string; churchId?: string | nul
     sources.push({
       id: donation.id,
       type: 'donation',
-      label: `Donation ${donation.amount.toString()} ${donation.currency} by ${donation.donorName ?? 'Unknown'} (${donation.createdAt.toISOString().slice(0, 10)})`,
+      label: redactLabel(
+        `Donation ${donation.amount.toString()} ${donation.currency} by ${donation.donorName ?? 'Unknown'} (${donation.createdAt.toISOString().slice(0, 10)})`
+      ),
       timestamp: donation.createdAt.toISOString(),
     });
   }
@@ -166,7 +193,7 @@ export const aiRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      await requireStaff(ctx.tenantId!, ctx.userId!);
+      const staff = await requireStaff(ctx.tenantId!, ctx.userId!);
       await ensureFeatureWriteAccess(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
 
       const provider = (input.provider ?? 'openai') as AIProvider;
@@ -176,6 +203,7 @@ export const aiRouter = router({
         tenantId: ctx.tenantId!,
         churchId: input.churchId ?? null,
         question: input.question,
+        allowFinanceSources: staff.role === UserRole.ADMIN,
       });
 
       const sourcesText = sources
@@ -187,6 +215,7 @@ export const aiRouter = router({
         'Use ONLY the provided SOURCES. If a question cannot be answered from sources, say what is missing and suggest what to check next.',
         'Cite sources inline using [S#] for any factual claim derived from sources.',
         'Be concise and action-oriented.',
+        'Do not invent personal data. Do not reveal emails, phone numbers, addresses, or private notes.',
         '',
         'SOURCES:',
         sourcesText || '(none)',
