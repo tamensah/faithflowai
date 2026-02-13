@@ -1,6 +1,15 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
-import { AuditActorType, DisputeEvidenceType, PaymentProvider, prisma } from '@faithflow-ai/database';
+import {
+  AuditActorType,
+  CommunicationChannel,
+  CommunicationProvider,
+  CommunicationStatus,
+  DisputeEvidenceType,
+  NotificationChannel,
+  PaymentProvider,
+  prisma,
+} from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { syncPaystackSettlements, syncStripePayouts } from '../reconciliation';
 import { toCsv } from '../csv';
@@ -8,6 +17,19 @@ import { recordAuditLog } from '../audit';
 import { createRefundForDonation } from '../payments';
 import { createDisputeEvidenceRecord, submitDisputeEvidence, submitStripeDispute } from '../disputes';
 import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
+import { sendEmail } from '../email';
+import { renderTithingStatementEmail } from '../email-templates';
+
+async function requireStaff(tenantId: string, clerkUserId: string) {
+  const membership = await prisma.staffMembership.findFirst({
+    where: { user: { clerkUserId }, church: { organization: { tenantId } } },
+    include: { user: true, church: true },
+  });
+  if (!membership) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
+  }
+  return membership;
+}
 
 const churchFilterSchema = z.object({
   churchId: z.string().optional(),
@@ -517,6 +539,135 @@ export const financeRouter = router({
         totals,
         donations,
       };
+    }),
+
+  sendTithingStatementEmail: protectedProcedure
+    .input(
+      z
+        .object({
+          churchId: z.string().optional(),
+          memberId: z.string().optional(),
+          donorEmail: z.string().email().optional(),
+          year: z.number().min(2000).max(2100),
+        })
+        .refine((data) => data.memberId || data.donorEmail, {
+          message: 'memberId or donorEmail is required',
+        })
+    )
+    .mutation(async ({ input, ctx }) => {
+      await requireStaff(ctx.tenantId!, ctx.userId!);
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'finance_enabled', 'Your subscription does not include finance operations.');
+
+      const church = await prisma.church.findFirst({
+        where: {
+          organization: { tenantId: ctx.tenantId! },
+          ...(input.churchId ? { id: input.churchId } : {}),
+        },
+        orderBy: { createdAt: 'asc' },
+      });
+      if (!church) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Church not found' });
+      }
+
+      let toEmail = input.donorEmail?.toLowerCase() ?? null;
+      let memberId = input.memberId ?? null;
+      if (memberId) {
+        const member = await prisma.member.findFirst({
+          where: { id: memberId, churchId: church.id },
+          select: { id: true, email: true },
+        });
+        if (!member?.email) {
+          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Member is missing an email address' });
+        }
+        toEmail = member.email.toLowerCase();
+      }
+
+      if (!toEmail) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Recipient email is required' });
+      }
+
+      // Respect suppressions + member opt-outs when emailing statements.
+      const suppression = await prisma.communicationSuppression.findFirst({
+        where: {
+          tenantId: ctx.tenantId!,
+          channel: CommunicationChannel.EMAIL,
+          address: toEmail,
+        },
+      });
+      if (suppression) {
+        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: `Recipient is suppressed (${suppression.reason})` });
+      }
+
+      if (memberId) {
+        const pref = await prisma.notificationPreference.findUnique({
+          where: { memberId_channel: { memberId, channel: NotificationChannel.EMAIL } },
+        });
+        if (pref?.enabled === false) {
+          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Member opted out of email notifications' });
+        }
+      }
+
+      const statement = await prisma.donation.findMany({
+        where: {
+          createdAt: { gte: new Date(input.year, 0, 1), lte: new Date(input.year, 11, 31, 23, 59, 59) },
+          churchId: church.id,
+          status: 'COMPLETED',
+          ...(memberId ? { memberId } : {}),
+          ...(input.donorEmail ? { donorEmail: input.donorEmail.toLowerCase() } : {}),
+        },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      const totals = statement.reduce<Record<string, number>>((acc, donation) => {
+        const amount = Number(donation.amount);
+        acc[donation.currency] = (acc[donation.currency] ?? 0) + amount;
+        return acc;
+      }, {});
+
+      const subject = `Tithing statement (${input.year})`;
+      const adminUrl = `${process.env.NEXT_PUBLIC_ADMIN_URL ?? process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3001'}/finance`;
+      const html = renderTithingStatementEmail({
+        churchName: church.name,
+        year: input.year,
+        totals,
+        adminUrl,
+      });
+
+      const message = await prisma.communicationMessage.create({
+        data: {
+          churchId: church.id,
+          channel: CommunicationChannel.EMAIL,
+          provider: CommunicationProvider.RESEND,
+          to: toEmail,
+          subject,
+          body: html,
+          status: CommunicationStatus.QUEUED,
+          metadata: {
+            reason: 'tithing_statement',
+            year: input.year,
+            ...(memberId ? { memberId } : {}),
+          },
+        },
+      });
+
+      await sendEmail({ to: toEmail, subject, html });
+      await prisma.communicationMessage.update({
+        where: { id: message.id },
+        data: { status: CommunicationStatus.SENT, sentAt: new Date() },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        churchId: church.id,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'finance.tithing_statement_emailed',
+        targetType: 'CommunicationMessage',
+        targetId: message.id,
+        metadata: { year: input.year, to: toEmail },
+      });
+
+      return { ok: true };
     }),
 
   refundDonation: protectedProcedure

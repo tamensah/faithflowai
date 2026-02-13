@@ -4,11 +4,16 @@ import {
   prisma,
   Prisma,
   AuditActorType,
+  CommunicationChannel,
+  CommunicationProvider,
+  CommunicationScheduleStatus,
   SubscriptionProvider,
   TenantSubscriptionStatus,
+  UserRole,
   WebhookProvider,
 } from '@faithflow-ai/database';
 import { recordAuditLog } from './audit';
+import { renderWelcomeOrgEmail } from './email-templates';
 import {
   beginWebhookProcessing,
   buildWebhookExternalEventId,
@@ -68,7 +73,61 @@ function normalizeStripeInvoiceMetadata(invoice: Stripe.Invoice) {
   } as Prisma.InputJsonValue;
 }
 
-function normalizePaystackMetadata(event: { event: string; data?: Record<string, any> }, fallbackRef: string) {
+async function queueTenantWelcomeEmail(tenantId: string) {
+  // Avoid queueing messages that will inevitably fail when email isn't configured.
+  if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) return;
+
+  const admins = await prisma.staffMembership.findMany({
+    where: {
+      role: UserRole.ADMIN,
+      church: { organization: { tenantId } },
+      user: { email: { not: '' } },
+    },
+    include: {
+      church: true,
+      user: true,
+    },
+    take: 50,
+  });
+
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3001';
+
+  for (const admin of admins) {
+    const to = admin.user.email?.toLowerCase();
+    if (!to) continue;
+    const dedupeKey = `welcome:${tenantId}:${to}`;
+
+    const existing = await prisma.communicationSchedule.findFirst({
+      where: {
+        churchId: admin.churchId,
+        to,
+        status: { in: [CommunicationScheduleStatus.QUEUED, CommunicationScheduleStatus.SENT] },
+        metadata: { path: ['dedupeKey'], equals: dedupeKey },
+      },
+    });
+    if (existing) continue;
+
+    await prisma.communicationSchedule.create({
+      data: {
+        churchId: admin.churchId,
+        channel: CommunicationChannel.EMAIL,
+        provider: CommunicationProvider.RESEND,
+        to,
+        subject: 'Welcome to FaithFlow AI',
+        body: renderWelcomeOrgEmail({ churchName: admin.church.name, adminUrl }),
+        sendAt: new Date(),
+        status: CommunicationScheduleStatus.QUEUED,
+        metadata: {
+          dedupeKey,
+          tenantId,
+          reason: 'tenant_welcome',
+        } as Prisma.InputJsonValue,
+      },
+    });
+  }
+}
+
+function normalizePaystackMetadata(event: { event: string; data?: Record<string, any> }) {
   const data = event.data ?? {};
   const customerCode = (data.customer as { customer_code?: string } | undefined)?.customer_code;
   const emailToken =
@@ -81,9 +140,13 @@ function normalizePaystackMetadata(event: { event: string; data?: Record<string,
       : (data.subscription as { subscription_code?: string } | undefined)?.subscription_code;
   const planCode =
     typeof data.plan === 'string' ? data.plan : (data.plan as { plan_code?: string } | undefined)?.plan_code;
+
+  const normalizedSubscriptionCode =
+    typeof subscriptionCode === 'string' && /^SUB_[A-Za-z0-9]+$/.test(subscriptionCode) ? subscriptionCode : null;
+
   return {
     ...event,
-    paystackSubscriptionCode: subscriptionCode ?? fallbackRef,
+    ...(normalizedSubscriptionCode ? { paystackSubscriptionCode: normalizedSubscriptionCode } : {}),
     ...(customerCode ? { paystackCustomerCode: customerCode } : {}),
     ...(planCode ? { paystackPlanCode: planCode } : {}),
     ...(emailToken ? { paystackEmailToken: emailToken } : {}),
@@ -247,6 +310,10 @@ export async function handlePlatformStripeWebhook(
           metadata: { eventType: event.type, stripeSubscriptionId: subscription.id, status: record.status },
         });
 
+        if (record.status === TenantSubscriptionStatus.ACTIVE || record.status === TenantSubscriptionStatus.TRIALING) {
+          await queueTenantWelcomeEmail(tenant.id);
+        }
+
         result = { ok: true, provider: 'stripe', event: event.type, subscriptionId: record.id };
       }
     } else if (event.type === 'invoice.payment_failed' || event.type === 'invoice.paid') {
@@ -376,7 +443,7 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
           status,
           currentPeriodEnd: data.next_payment_date ? new Date(data.next_payment_date as string) : null,
           canceledAt: event.event === 'subscription.disable' ? new Date() : null,
-          metadata: normalizePaystackMetadata(event, providerRef),
+          metadata: normalizePaystackMetadata(event),
         });
 
         const planChangeFrom =
@@ -461,6 +528,10 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
           targetId: record.id,
           metadata: { eventType: event.event, status: record.status, reference: record.providerRef },
         });
+
+        if (record.status === TenantSubscriptionStatus.ACTIVE || record.status === TenantSubscriptionStatus.TRIALING) {
+          await queueTenantWelcomeEmail(tenant.id);
+        }
 
         result = { ok: true, provider: 'paystack', event: event.event, subscriptionId: record.id };
       }

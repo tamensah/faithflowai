@@ -9,6 +9,7 @@ import {
   prisma,
 } from '@faithflow-ai/database';
 import { recordAuditLog } from './audit';
+import { renderPastDueEmail } from './email-templates';
 
 type RunSubscriptionDunningInput = {
   tenantIds?: string[];
@@ -36,20 +37,12 @@ function uniqueRecipients(entries: Array<{ churchId: string; email: string }>) {
   });
 }
 
-function buildDunningBody(input: { tenantName: string; planName: string; periodEnd: Date | null; billingUrl: string }) {
-  const dueText = input.periodEnd ? input.periodEnd.toISOString().slice(0, 10) : 'the current billing cycle';
-  return [
-    `Hello ${input.tenantName} team,`,
-    '',
-    `Your FaithFlow ${input.planName} subscription is currently past due as of ${dueText}.`,
-    'Please update your payment method or change plan to avoid service suspension.',
-    '',
-    `Manage billing: ${input.billingUrl}`,
-    '',
-    'If payment has already been completed, you can ignore this notice.',
-    '',
-    'FaithFlow Billing Operations',
-  ].join('\n');
+function buildDunningBody(input: { planName: string; periodEnd: Date | null; billingUrl: string }) {
+  return renderPastDueEmail({
+    planName: input.planName,
+    periodEndIso: input.periodEnd?.toISOString() ?? null,
+    billingUrl: input.billingUrl,
+  });
 }
 
 export async function runSubscriptionDunning(input: RunSubscriptionDunningInput = {}) {
@@ -123,7 +116,6 @@ export async function runSubscriptionDunning(input: RunSubscriptionDunningInput 
   for (const target of targets) {
     const subject = `Action required: FaithFlow subscription payment issue (${target.planCode})`;
     const body = buildDunningBody({
-      tenantName: target.tenantId,
       planName: target.planName,
       periodEnd: target.currentPeriodEnd,
       billingUrl: `${billingBaseUrl}/billing`,

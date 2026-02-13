@@ -33,6 +33,7 @@ export default function FinancePage() {
   const [statementYear, setStatementYear] = useState(String(new Date().getFullYear()));
   const [statementMemberId, setStatementMemberId] = useState('');
   const [statementEmail, setStatementEmail] = useState('');
+  const [statementSendStatus, setStatementSendStatus] = useState<string>('');
 
   const [pledgeAmount, setPledgeAmount] = useState('100');
   const [pledgeCurrency, setPledgeCurrency] = useState('USD');
@@ -251,6 +252,12 @@ export default function FinancePage() {
       setReceiptNumber('');
     },
   });
+
+  const { mutate: sendTithingStatementEmail, isPending: isSendingStatement } =
+    trpc.finance.sendTithingStatementEmail.useMutation({
+      onSuccess: () => setStatementSendStatus('Statement email sent.'),
+      onError: (error) => setStatementSendStatus(error.message),
+    });
   const { mutate: voidReceipt, isPending: isVoidingReceipt } = trpc.receipt.void.useMutation({
     onSuccess: () => {
       setReceiptNumber('');
@@ -600,6 +607,7 @@ export default function FinancePage() {
               className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
               value={statementMemberId}
               onChange={(event) => {
+                setStatementSendStatus('');
                 setStatementMemberId(event.target.value);
                 setStatementEmail('');
               }}
@@ -615,10 +623,29 @@ export default function FinancePage() {
               placeholder="Or donor email"
               value={statementEmail}
               onChange={(event) => {
+                setStatementSendStatus('');
                 setStatementEmail(event.target.value);
                 setStatementMemberId('');
               }}
             />
+          </div>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              disabled={!canWrite || !churchId || !statementYear || !(statementMemberId || statementEmail) || isSendingStatement}
+              onClick={() => {
+                setStatementSendStatus('');
+                sendTithingStatementEmail({
+                  churchId,
+                  year: Number(statementYear),
+                  memberId: statementMemberId || undefined,
+                  donorEmail: statementEmail || undefined,
+                });
+              }}
+            >
+              {isSendingStatement ? 'Sending…' : 'Email statement'}
+            </Button>
+            {statementSendStatus ? <p className="text-xs text-muted">{statementSendStatus}</p> : null}
           </div>
           <div className="mt-4 text-sm text-muted">
             <pre className="rounded-md bg-muted/10 p-3 text-xs">

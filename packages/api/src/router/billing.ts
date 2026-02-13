@@ -184,12 +184,14 @@ function extractPaystackCustomerCode(meta: Prisma.JsonValue | null | undefined) 
 
 function extractPaystackSubscriptionCode(meta: Prisma.JsonValue | null | undefined) {
   const direct = metadataValue(meta, 'paystackSubscriptionCode') ?? metadataValue(meta, 'subscription_code');
-  if (direct) return direct;
+  // Paystack subscription codes typically look like `SUB_xxx`. Avoid treating plan codes or other
+  // references as cancellable subscription identifiers.
+  if (direct && /^SUB_[A-Za-z0-9]+$/.test(direct)) return direct;
   if (!meta || typeof meta !== 'object' || Array.isArray(meta)) return null;
   const subscription = (meta as Record<string, unknown>).subscription;
   if (subscription && typeof subscription === 'object' && !Array.isArray(subscription)) {
     const code = (subscription as Record<string, unknown>).subscription_code;
-    if (typeof code === 'string') return code;
+    if (typeof code === 'string' && /^SUB_[A-Za-z0-9]+$/.test(code)) return code;
   }
   return null;
 }
@@ -301,6 +303,20 @@ function requirePaystackSecret() {
     throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Paystack is not configured' });
   }
   return process.env.PAYSTACK_SECRET_KEY;
+}
+
+async function fetchPaystackSubscriptionDetails(subscriptionRef: string, secret: string) {
+  const response = await fetch(`https://api.paystack.co/subscription/${encodeURIComponent(subscriptionRef)}`, {
+    headers: { Authorization: `Bearer ${secret}` },
+  });
+  if (!response.ok) return null;
+  const payload = (await response.json()) as { status?: boolean; data?: unknown };
+  if (!payload.status || !payload.data || typeof payload.data !== 'object' || Array.isArray(payload.data)) return null;
+  const data = payload.data as Record<string, unknown>;
+  const rawCode = typeof data.subscription_code === 'string' ? data.subscription_code : null;
+  const emailToken = typeof data.email_token === 'string' ? data.email_token : null;
+  const subscriptionCode = rawCode && /^SUB_[A-Za-z0-9]+$/.test(rawCode) ? rawCode : null;
+  return { subscriptionCode, emailToken };
 }
 
 async function ensureBaselinePlans() {
@@ -648,8 +664,30 @@ export const billingRouter = router({
 
     if (active.provider === SubscriptionProvider.PAYSTACK) {
       const secret = requirePaystackSecret();
-      const subscriptionCode = extractPaystackSubscriptionCode(active.metadata);
-      const emailToken = extractPaystackEmailToken(active.metadata);
+      let subscriptionCode = extractPaystackSubscriptionCode(active.metadata);
+      let emailToken = extractPaystackEmailToken(active.metadata);
+
+      // Best-effort fallback: fetch cancellation tokens from Paystack when webhooks/backfill
+      // haven't populated them yet (only possible when providerRef is a real subscription code).
+      if ((!subscriptionCode || !emailToken) && active.providerRef && /^SUB_[A-Za-z0-9]+$/.test(active.providerRef)) {
+        const details = await fetchPaystackSubscriptionDetails(active.providerRef, secret);
+        subscriptionCode = subscriptionCode ?? details?.subscriptionCode ?? null;
+        emailToken = emailToken ?? details?.emailToken ?? null;
+
+        if (details?.subscriptionCode || details?.emailToken) {
+          const merged =
+            active.metadata && typeof active.metadata === 'object' && !Array.isArray(active.metadata)
+              ? ({ ...(active.metadata as Record<string, unknown>) } as Record<string, unknown>)
+              : ({} as Record<string, unknown>);
+          if (details.subscriptionCode) merged.paystackSubscriptionCode = details.subscriptionCode;
+          if (details.emailToken) merged.paystackEmailToken = details.emailToken;
+
+          await prisma.tenantSubscription.update({
+            where: { id: active.id },
+            data: { metadata: merged as Prisma.InputJsonValue },
+          });
+        }
+      }
       if (!subscriptionCode || !emailToken) {
         throw new TRPCError({
           code: 'PRECONDITION_FAILED',

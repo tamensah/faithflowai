@@ -4,6 +4,7 @@ import { MemberStatus, RegistrationStatus, prisma } from '@faithflow-ai/database
 import { TRPCError } from '@trpc/server';
 import { createHash, randomBytes } from 'crypto';
 import { sendEmail } from '../email';
+import { renderMemberVerificationEmail } from '../email-templates';
 
 const registerSchema = z.object({
   churchId: z.string().optional(),
@@ -104,7 +105,11 @@ export const registrationRouter = router({
           await sendEmail({
             to: email,
             subject: `Verify your FaithFlow membership`,
-            html: `<p>Hello ${input.firstName},</p><p>Please verify your membership registration for ${church.name}.</p><p><a href="${verificationLink}">Verify membership</a></p>`,
+            html: renderMemberVerificationEmail({
+              firstName: input.firstName,
+              churchName: church.name,
+              verifyUrl: verificationLink,
+            }),
           });
           delivery = 'EMAIL';
         } catch (error) {
@@ -198,7 +203,11 @@ export const registrationRouter = router({
         await sendEmail({
           to: member.email,
           subject: `Verify your FaithFlow membership`,
-          html: `<p>Hello ${member.firstName},</p><p>Please verify your membership registration for ${churchName}.</p><p><a href="${verificationLink}">Verify membership</a></p>`,
+          html: renderMemberVerificationEmail({
+            firstName: member.firstName,
+            churchName,
+            verifyUrl: verificationLink,
+          }),
         });
       }
 

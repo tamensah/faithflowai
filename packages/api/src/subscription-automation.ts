@@ -9,6 +9,7 @@ import {
 } from '@faithflow-ai/database';
 import { recordAuditLog } from './audit';
 import { getTenantUsageSnapshot, resolveTenantEntitlements } from './entitlements';
+import { renderTrialEndingEmail } from './email-templates';
 
 const monitoredLimits = [
   { key: 'max_members', usageField: 'members' as const },
@@ -126,16 +127,7 @@ export async function runSubscriptionAutomation(options?: {
 
           const billingUrl = `${process.env.NEXT_PUBLIC_ADMIN_URL ?? process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3001'}/billing`;
           const subject = 'Your FaithFlow trial is ending soon';
-          const body = [
-            `Hello,`,
-            '',
-            `Your FaithFlow trial ends on ${isoDate(trialEndsAt)}.`,
-            'To avoid any interruption, choose a plan and complete billing setup.',
-            '',
-            `Manage billing: ${billingUrl}`,
-            '',
-            'FaithFlow Billing Operations',
-          ].join('\n');
+          const body = renderTrialEndingEmail({ trialEndsAtIso: trialEndsAt.toISOString(), billingUrl });
 
           await prisma.communicationSchedule.create({
             data: {

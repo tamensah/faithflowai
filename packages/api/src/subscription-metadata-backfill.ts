@@ -98,7 +98,7 @@ function normalizePaystackMetadata(rawMetadata: unknown, providerRef?: string | 
       ['subscription_code'],
       ['data', 'subscription', 'subscription_code'],
       ['data', 'subscription_code'],
-    ]) ?? (providerRef ?? null);
+    ]) ?? (providerRef && /^SUB_[A-Za-z0-9]+$/.test(providerRef) ? providerRef : null);
   const customerCode = readStringFromPaths(metadata, [
     ['paystackCustomerCode'],
     ['customer_code'],
@@ -113,7 +113,7 @@ function normalizePaystackMetadata(rawMetadata: unknown, providerRef?: string | 
   ]);
   const emailToken = readStringFromPaths(metadata, [['paystackEmailToken'], ['email_token'], ['data', 'email_token']]);
 
-  if (subscriptionCode) normalized.paystackSubscriptionCode = subscriptionCode;
+  if (subscriptionCode && /^SUB_[A-Za-z0-9]+$/.test(subscriptionCode)) normalized.paystackSubscriptionCode = subscriptionCode;
   if (customerCode) normalized.paystackCustomerCode = customerCode;
   if (planCode) normalized.paystackPlanCode = planCode;
   if (emailToken) normalized.paystackEmailToken = emailToken;
