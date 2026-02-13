@@ -24,6 +24,9 @@ FaithFlow treats AI like an operational tool, not a consumer chatbot.
 - **Audit trail**: each AI interaction records:
   - `AiInteraction` row (question, answer, sources)
   - `AuditLog` event (`ai.ask`) with provider/model metadata
+ - **RBAC (beta-safe)**:
+   - Staff can use Ask FaithFlow.
+   - Finance-linked sources (donation record lookups and giving sum details) are only included for `ADMIN` staff.
 
 ## 3) Data Sources + Citations
 
@@ -38,15 +41,16 @@ Current sources (see `collectSources(...)` in `packages/api/src/router/ai.ts`):
 - **Metrics**:
   - total members
   - upcoming events
-  - giving (last 30 days)
+  - giving (last 30 days; staff sees counts, admins also see sum)
 - **Light keyword lookups** (best-effort, single-token):
   - member name matches
-  - completed donation matches by donor name/email (limited)
+  - completed donation matches by donor name/email (admins only; limited)
   - event title matches
 
 Important note:
 
 - FaithFlow intentionally avoids feeding raw PII into prompts by filtering query tokens that look like emails or phone numbers.
+- Source labels redact email-like strings; deeper redaction is tracked as a follow-up.
 - This is not a vector database / RAG system yet; it's a governed, structured "sources list" approach.
 
 ## 4) AI Providers + Runtime Configuration
@@ -107,4 +111,3 @@ If you later introduce a vector store:
 - **Human review**: for AI-generated outbound comms, add an approval UI and store the approved prompt/output.
 - **Rate limiting**: add per-tenant and per-user throttles to avoid runaway spend.
 - **Evaluation**: add "thumbs up/down" + incident reporting on AI answers.
-
