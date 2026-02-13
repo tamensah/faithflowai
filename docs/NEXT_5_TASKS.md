@@ -15,7 +15,7 @@ Legend:
 - [~] Paystack tier change (checkout + best-effort old subscription disable)
 - [~] Trial -> grace -> lockout policy (server-side)
 - [~] Cancel/resume flows (Stripe + Paystack cancel)
-- [ ] “What’s locked” UX everywhere (pages + actions + empty states)
+- [~] “What’s locked” UX everywhere (pages + actions + empty states)
 
 Acceptance criteria:
 - Admin can upgrade/downgrade tiers with “effective next cycle” default and optional immediate Stripe upgrade.
@@ -27,10 +27,10 @@ Acceptance criteria:
 
 ## 2) Operational Readiness (Reduce Support Load)
 
-- [~] `/operations/health` checks (DB, migrations, providers, recent webhooks, subscription, job signals)
-- [ ] Storage upload test (S3/GCS) + permissions diagnostics
-- [ ] Tenant audit timeline filters + export
-- [ ] Go-live checklist UI (clear next steps per provider)
+- [x] `/operations/health` checks (DB, migrations, providers, recent webhooks, subscription, job signals)
+- [x] Storage upload test (S3/GCS) + permissions diagnostics
+- [x] Tenant audit timeline filters + export
+- [x] Go-live checklist UI (clear next steps per provider)
 
 Acceptance criteria:
 - A staff/admin can diagnose “why isn’t X working” from a single page without engineering support.
@@ -41,8 +41,8 @@ Acceptance criteria:
 ## 3) Communications Foundations (Activation + Retention)
 
 - [~] Consent + quiet hours enforcement (server-side)
-- [ ] Suppression list + unsubscribe flows (per channel)
-- [ ] Transactional templates (welcome, trial ending, failed payment, receipts)
+- [~] Suppression list + unsubscribe flows (per channel)
+- [~] Transactional templates (welcome, trial ending, failed payment, receipts)
 - [ ] Scheduling UX upgrades (draft/review/approve + analytics)
 
 Acceptance criteria:
@@ -55,9 +55,9 @@ Acceptance criteria:
 ## 4) Data Import (Adoption Unlock)
 
 - [~] Members CSV import with batch tracking + rollback
-- [ ] Households CSV import (mapping + preview + rollback)
-- [ ] Donations CSV import (mapping + preview + rollback)
-- [ ] Migration assistant docs + templates
+- [~] Households CSV import (mapping + preview + rollback)
+- [~] Donations CSV import (mapping + preview + rollback)
+- [x] Migration assistant docs + templates
 
 Acceptance criteria:
 - A church can migrate a real dataset safely and undo mistakes via batch rollback.
@@ -66,11 +66,10 @@ Acceptance criteria:
 
 ## 5) AI Layer (Useful + Governed)
 
-- [ ] “Ask FaithFlow” admin assistant (tenant-scoped)
-- [ ] Citations + prompt/output logging (audit)
-- [ ] RBAC + redaction for sensitive fields
-- [ ] Opinionated starter insights (giving/attendance/volunteers)
+- [x] “Ask FaithFlow” admin assistant (tenant-scoped)
+- [x] Citations + prompt/output logging (audit)
+- [~] RBAC + redaction for sensitive fields
+- [x] Opinionated starter insights (giving/attendance/volunteers)
 
 Acceptance criteria:
 - AI outputs are tenant-scoped, attributable, and safe to use in staff workflows.
-

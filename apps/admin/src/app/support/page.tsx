@@ -4,11 +4,14 @@ import { useMemo, useState } from 'react';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 const priorityOptions = ['LOW', 'NORMAL', 'HIGH', 'URGENT'] as const;
 const platformStatusOptions = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'RESOLVED', 'CLOSED'] as const;
 
 export default function SupportPage() {
+  const gate = useFeatureGate('support_center_enabled');
   const utils = trpc.useUtils();
   const { data: platformSelf } = trpc.platform.self.useQuery();
   const { data: tenantTickets } = trpc.support.tenantTickets.useQuery({ limit: 100 });
@@ -103,6 +106,13 @@ export default function SupportPage() {
 
   return (
     <Shell>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="support_center_enabled"
+          title="Support Center is locked"
+          description="Your current subscription does not include the support center. Upgrade to restore access."
+        />
+      ) : (
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Support Center</h1>
@@ -335,6 +345,7 @@ export default function SupportPage() {
           </Card>
         ) : null}
       </div>
+      )}
     </Shell>
   );
 }

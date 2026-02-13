@@ -4,12 +4,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 const priorityOptions = ['LOW', 'NORMAL', 'HIGH', 'URGENT'] as const;
 const channelOptions = ['WEB', 'MOBILE', 'STAFF', 'REFERRAL'] as const;
 const statusOptions = ['OPEN', 'ASSIGNED', 'IN_PROGRESS', 'CLOSED', 'ARCHIVED'] as const;
 
 export default function CarePage() {
+  const gate = useFeatureGate('pastoral_care_enabled');
   const utils = trpc.useUtils();
   const [churchId, setChurchId] = useState('');
   const [campusId, setCampusId] = useState('');
@@ -102,6 +105,13 @@ export default function CarePage() {
 
   return (
     <Shell>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="pastoral_care_enabled"
+          title="Pastoral care is locked"
+          description="Your current subscription does not include pastoral care workflows. Upgrade to restore access."
+        />
+      ) : (
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Pastoral Care</h1>
@@ -309,6 +319,7 @@ export default function CarePage() {
           </div>
         </Card>
       </div>
+      )}
     </Shell>
   );
 }

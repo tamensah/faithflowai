@@ -69,6 +69,7 @@ Optional communications policy env:
 - `COMMS_QUIET_START_HOUR` (defaults to `21`)
 - `COMMS_QUIET_END_HOUR` (defaults to `7`)
 - `COMMS_QUIET_RESCHEDULE_INCREMENT_MINUTES` (defaults to `30`)
+- `COMMS_UNSUBSCRIBE_SECRET` (required to generate/verify one-click unsubscribe links)
 
 When enabled, queued SMS/WhatsApp messages are automatically deferred out of quiet hours using the church timezone.
 

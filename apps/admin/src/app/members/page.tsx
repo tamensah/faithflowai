@@ -4,8 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Input, Badge } from '@faithflow-ai/ui';
 import { trpc } from '../../lib/trpc';
 import { Shell } from '../../components/Shell';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 export default function MembersPage() {
+  const gate = useFeatureGate('membership_enabled');
   const utils = trpc.useUtils();
   const { data: churches } = trpc.church.list.useQuery({});
   const [churchId, setChurchId] = useState<string>('');
@@ -658,6 +661,13 @@ export default function MembersPage() {
 
   return (
     <Shell>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="membership_enabled"
+          title="Membership is locked"
+          description="Your current subscription does not include membership management. Upgrade to restore access."
+        />
+      ) : (
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold">Members</h1>
@@ -2155,6 +2165,7 @@ export default function MembersPage() {
           </div>
         </Card>
       </div>
+      )}
     </Shell>
   );
 }

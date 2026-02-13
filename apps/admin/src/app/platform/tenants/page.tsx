@@ -6,10 +6,23 @@ import { Shell } from '../../../components/Shell';
 import { trpc } from '../../../lib/trpc';
 
 type TenantStatusFilter = 'ALL' | 'ACTIVE' | 'SUSPENDED';
+type AuditActorTypeFilter = 'ALL' | 'USER' | 'SYSTEM' | 'WEBHOOK';
 
 function formatDate(value: Date | string | null | undefined) {
   if (!value) return 'N/A';
   return new Date(value).toLocaleString();
+}
+
+function toDateInputValue(value: Date) {
+  return value.toISOString().slice(0, 10);
+}
+
+function escapeCsvCell(value: unknown) {
+  if (value === null || value === undefined) return '';
+  const raw = typeof value === 'string' ? value : JSON.stringify(value);
+  const needsQuotes = /[",\n\r]/.test(raw);
+  const escaped = raw.replace(/"/g, '""');
+  return needsQuotes ? `"${escaped}"` : escaped;
 }
 
 export default function PlatformTenantsPage() {
@@ -19,6 +32,13 @@ export default function PlatformTenantsPage() {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<TenantStatusFilter>('ALL');
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
+  const [auditActionContains, setAuditActionContains] = useState('');
+  const [auditActorType, setAuditActorType] = useState<AuditActorTypeFilter>('ALL');
+  const [auditActorId, setAuditActorId] = useState('');
+  const [auditTargetType, setAuditTargetType] = useState('');
+  const [auditTargetId, setAuditTargetId] = useState('');
+  const [auditFrom, setAuditFrom] = useState('');
+  const [auditTo, setAuditTo] = useState('');
 
   const tenantFilters = useMemo(
     () => ({
@@ -38,11 +58,23 @@ export default function PlatformTenantsPage() {
     [selectedTenantId, tenants]
   );
 
-  const { data: auditLogs, isLoading: isAuditLoading } = trpc.platform.tenantAudit.useQuery(
-    {
+  const auditFilters = useMemo(
+    () => ({
       tenantId: selectedTenantId ?? '',
-      limit: 80,
-    },
+      limit: 120,
+      actionContains: auditActionContains.trim() ? auditActionContains.trim() : undefined,
+      actorType: auditActorType === 'ALL' ? undefined : (auditActorType as any),
+      actorId: auditActorId.trim() ? auditActorId.trim() : undefined,
+      targetType: auditTargetType.trim() ? auditTargetType.trim() : undefined,
+      targetId: auditTargetId.trim() ? auditTargetId.trim() : undefined,
+      from: auditFrom ? new Date(`${auditFrom}T00:00:00.000Z`) : undefined,
+      to: auditTo ? new Date(`${auditTo}T23:59:59.999Z`) : undefined,
+    }),
+    [auditActionContains, auditActorId, auditActorType, auditFrom, auditTargetId, auditTargetType, auditTo, selectedTenantId]
+  );
+
+  const { data: auditLogs, isLoading: isAuditLoading } = trpc.platform.tenantAudit.useQuery(
+    auditFilters,
     {
       enabled: Boolean(selectedTenantId),
     }
@@ -52,7 +84,7 @@ export default function PlatformTenantsPage() {
     onSuccess: async () => {
       await utils.platform.listTenants.invalidate();
       if (selectedTenantId) {
-        await utils.platform.tenantAudit.invalidate({ tenantId: selectedTenantId, limit: 80 });
+        await utils.platform.tenantAudit.invalidate(auditFilters);
       }
     },
   });
@@ -192,9 +224,92 @@ export default function PlatformTenantsPage() {
                 <h2 className="text-lg font-semibold">Tenant audit: {selectedTenant.name}</h2>
                 <p className="text-xs text-muted">{selectedTenant.id}</p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => setSelectedTenantId(null)}>
-                Close
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const rows = auditLogs ?? [];
+                    const header = [
+                      'createdAt',
+                      'action',
+                      'actorType',
+                      'actorId',
+                      'targetType',
+                      'targetId',
+                      'churchId',
+                      'churchName',
+                      'metadata',
+                    ];
+                    const lines = [
+                      header.join(','),
+                      ...rows.map((row) =>
+                        [
+                          escapeCsvCell(row.createdAt),
+                          escapeCsvCell(row.action),
+                          escapeCsvCell(row.actorType),
+                          escapeCsvCell(row.actorId ?? ''),
+                          escapeCsvCell(row.targetType),
+                          escapeCsvCell(row.targetId ?? ''),
+                          escapeCsvCell(row.church?.id ?? ''),
+                          escapeCsvCell(row.church?.name ?? ''),
+                          escapeCsvCell(row.metadata ?? ''),
+                        ].join(',')
+                      ),
+                    ].join('\n');
+                    const blob = new Blob([lines], { type: 'text/csv;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `tenant-audit-${selectedTenant.slug}-${toDateInputValue(new Date())}.csv`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  disabled={!auditLogs?.length}
+                >
+                  Export CSV
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setSelectedTenantId(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              <Input
+                placeholder="Action contains (e.g., billing., platform.)"
+                value={auditActionContains}
+                onChange={(event) => setAuditActionContains(event.target.value)}
+              />
+              <select
+                className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+                value={auditActorType}
+                onChange={(event) => setAuditActorType(event.target.value as AuditActorTypeFilter)}
+              >
+                <option value="ALL">All actors</option>
+                <option value="USER">USER</option>
+                <option value="SYSTEM">SYSTEM</option>
+                <option value="WEBHOOK">WEBHOOK</option>
+              </select>
+              <Input
+                placeholder="Actor id (optional)"
+                value={auditActorId}
+                onChange={(event) => setAuditActorId(event.target.value)}
+              />
+              <Input
+                placeholder="Target type (optional)"
+                value={auditTargetType}
+                onChange={(event) => setAuditTargetType(event.target.value)}
+              />
+              <Input
+                placeholder="Target id (optional)"
+                value={auditTargetId}
+                onChange={(event) => setAuditTargetId(event.target.value)}
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <Input type="date" value={auditFrom} onChange={(event) => setAuditFrom(event.target.value)} />
+                <Input type="date" value={auditTo} onChange={(event) => setAuditTo(event.target.value)} />
+              </div>
             </div>
 
             <div className="mt-4 space-y-3">

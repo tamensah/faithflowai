@@ -40,6 +40,7 @@ const navEntitlementMap: Record<string, string> = {
   '/support': 'support_center_enabled',
   '/care': 'pastoral_care_enabled',
   '/content': 'content_library_enabled',
+  '/communications': 'communications_enabled',
 };
 
 export function Shell({ children }: { children: React.ReactNode }) {

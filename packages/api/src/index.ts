@@ -18,3 +18,4 @@ export { runSubscriptionDunning } from './billing-dunning';
 export { runSubscriptionMetadataBackfill } from './subscription-metadata-backfill';
 export { runTenantDomainAutomation } from './tenant-ops-automation';
 export { runSupportSlaAutomation } from './support-sla';
+export { apiPublicBaseUrl, buildUnsubscribeUrl, createUnsubscribeToken, verifyUnsubscribeToken } from './unsubscribe';

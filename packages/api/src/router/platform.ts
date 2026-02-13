@@ -36,6 +36,13 @@ const tenantListInput = z.object({
 
 const tenantAuditInput = z.object({
   tenantId: z.string(),
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+  actionContains: z.string().trim().max(120).optional(),
+  actorType: z.nativeEnum(AuditActorType).optional(),
+  actorId: z.string().trim().max(191).optional(),
+  targetType: z.string().trim().max(120).optional(),
+  targetId: z.string().trim().max(191).optional(),
   limit: z.number().int().min(1).max(200).default(50),
 });
 
@@ -801,8 +808,27 @@ export const platformRouter = router({
       PlatformRole.BILLING_ADMIN,
     ]);
 
+    const where: Prisma.AuditLogWhereInput = {
+      tenantId: input.tenantId,
+      ...(input.actorType ? { actorType: input.actorType } : {}),
+      ...(input.actorId ? { actorId: input.actorId } : {}),
+      ...(input.targetType ? { targetType: input.targetType } : {}),
+      ...(input.targetId ? { targetId: input.targetId } : {}),
+      ...(input.actionContains
+        ? { action: { contains: input.actionContains, mode: 'insensitive' } }
+        : {}),
+      ...(input.from || input.to
+        ? {
+            createdAt: {
+              ...(input.from ? { gte: input.from } : {}),
+              ...(input.to ? { lte: input.to } : {}),
+            },
+          }
+        : {}),
+    };
+
     return prisma.auditLog.findMany({
-      where: { tenantId: input.tenantId },
+      where,
       include: {
         church: {
           select: { id: true, name: true, slug: true },

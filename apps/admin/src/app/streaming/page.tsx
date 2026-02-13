@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 const providerOptions = ['YOUTUBE', 'FACEBOOK', 'VIMEO', 'CUSTOM_RTMP'] as const;
 const moderationOptions = ['OPEN', 'FILTERED', 'STRICT'] as const;
 
 export default function StreamingPage() {
+  const gate = useFeatureGate('streaming_enabled');
   const utils = trpc.useUtils();
   const [churchId, setChurchId] = useState('');
   const [campusId, setCampusId] = useState('');
@@ -63,11 +66,20 @@ export default function StreamingPage() {
 
   return (
     <Shell>
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-semibold">Streaming Ops</h1>
-          <p className="mt-2 text-sm text-muted">Configure live channels, schedule sessions, and monitor stream outcomes.</p>
-        </div>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="streaming_enabled"
+          title="Streaming is locked"
+          description="Your current subscription does not include streaming operations. Upgrade to unlock channels and sessions."
+        />
+      ) : (
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-3xl font-semibold">Streaming Ops</h1>
+            <p className="mt-2 text-sm text-muted">
+              Configure live channels, schedule sessions, and monitor stream outcomes.
+            </p>
+          </div>
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Scope</h2>
@@ -237,7 +249,8 @@ export default function StreamingPage() {
             <p>Total views: {analytics?.totals.totalViews ?? 0}</p>
           </div>
         </Card>
-      </div>
+        </div>
+      )}
     </Shell>
   );
 }

@@ -5,8 +5,11 @@ import { Button, Card, Input, Badge } from '@faithflow-ai/ui';
 import QRCode from 'qrcode';
 import { trpc } from '../../lib/trpc';
 import { Shell } from '../../components/Shell';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 export default function EventsPage() {
+  const gate = useFeatureGate('events_enabled');
   const utils = trpc.useUtils();
   const { data: churches } = trpc.church.list.useQuery({});
   const [churchId, setChurchId] = useState<string>('');
@@ -410,6 +413,13 @@ export default function EventsPage() {
 
   return (
     <Shell>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="events_enabled"
+          title="Events are locked"
+          description="Your current subscription does not include event management. Upgrade to restore access."
+        />
+      ) : (
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold">Events</h1>
@@ -1478,6 +1488,7 @@ export default function EventsPage() {
           </div>
         </Card>
       </div>
+      )}
     </Shell>
   );
 }

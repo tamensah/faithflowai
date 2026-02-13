@@ -4,16 +4,20 @@ import { useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 const providerOptions = ['openai', 'anthropic', 'google'] as const;
 
 export default function AiAssistantPage() {
+  const gate = useFeatureGate('ai_insights');
   const utils = trpc.useUtils();
   const [question, setQuestion] = useState('');
   const [provider, setProvider] = useState<(typeof providerOptions)[number]>('openai');
   const [model, setModel] = useState('');
 
   const { data: recent } = trpc.ai.recent.useQuery({ limit: 10 });
+  const { data: starter } = trpc.ai.starterInsights.useQuery({});
 
   const { mutate: ask, data: response, isPending, error } = trpc.ai.ask.useMutation({
     onSuccess: async () => {
@@ -23,11 +27,51 @@ export default function AiAssistantPage() {
 
   return (
     <Shell>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="ai_insights"
+          title="AI insights are locked"
+          description="Your current subscription does not include AI insights. Upgrade to unlock Ask FaithFlow."
+        />
+      ) : (
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Ask FaithFlow</h1>
           <p className="mt-2 text-sm text-muted">Tenant-scoped assistant with sources and audit logging.</p>
         </div>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Starter insights</h2>
+          <p className="mt-2 text-sm text-muted">Quick operational signals (last 30 days) to help staff take action.</p>
+          <div className="mt-4 grid gap-3 text-sm text-muted sm:grid-cols-2">
+            <p>Members: {starter?.membersTotal ?? 0}</p>
+            <p>Upcoming events: {starter?.upcomingEvents ?? 0}</p>
+            <p>
+              Giving (30d): {starter?.giving?.last30Count ?? 0} gifts · {starter?.giving?.last30Sum ?? 0} total
+            </p>
+            <p>
+              Attendance (30d): {starter?.attendance?.last30 ?? 0}{' '}
+              {typeof starter?.attendance?.delta === 'number' ? `(${starter.attendance.delta >= 0 ? '+' : ''}${starter.attendance.delta})` : ''}
+            </p>
+            <p>Volunteer shifts (next 30d): {starter?.volunteer?.shiftsNext30 ?? 0}</p>
+            <p>Shifts with gaps: {starter?.volunteer?.gaps?.length ?? 0}</p>
+          </div>
+          {starter?.volunteer?.gaps?.length ? (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold text-foreground">Top gaps</h3>
+              <div className="mt-2 space-y-2 text-sm text-muted">
+                {starter.volunteer.gaps.map((gap: any) => (
+                  <div key={gap.id} className="rounded-md border border-border p-3">
+                    <p className="font-medium text-foreground">{gap.title}</p>
+                    <p className="text-xs text-muted">
+                      {new Date(gap.startAt).toLocaleString()} · assigned {gap.assigned}/{gap.capacity} · gap {gap.gap}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </Card>
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Question</h2>
@@ -98,7 +142,7 @@ export default function AiAssistantPage() {
           </div>
         </Card>
       </div>
+      )}
     </Shell>
   );
 }
-

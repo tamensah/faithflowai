@@ -32,14 +32,14 @@ function asWhatsappNumber(value: string) {
   return value.startsWith('whatsapp:') ? value : `whatsapp:${value}`;
 }
 
-function normalizeRecipientAddress(channel: CommunicationChannel, to: string) {
+export function normalizeRecipientAddress(channel: CommunicationChannel, to: string) {
   const value = to.trim();
   if (!value) return '';
   if (channel === CommunicationChannel.EMAIL) return value.toLowerCase();
   return value.startsWith('whatsapp:') ? value.slice('whatsapp:'.length) : value;
 }
 
-function channelToPreference(channel: CommunicationChannel) {
+export function channelToPreference(channel: CommunicationChannel) {
   if (channel === CommunicationChannel.EMAIL) return NotificationChannel.EMAIL;
   if (channel === CommunicationChannel.SMS) return NotificationChannel.SMS;
   return NotificationChannel.WHATSAPP;

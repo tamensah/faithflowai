@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 const channelOptions = ['EMAIL', 'SMS', 'WHATSAPP'] as const;
 
 export default function CommunicationsPage() {
+  const gate = useFeatureGate('communications_enabled');
   const utils = trpc.useUtils();
   const [churchId, setChurchId] = useState('');
   const [templateName, setTemplateName] = useState('');
@@ -163,6 +166,13 @@ export default function CommunicationsPage() {
 
   return (
     <Shell>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="communications_enabled"
+          title="Communications are locked"
+          description="Your current subscription does not include communications. Upgrade to restore access."
+        />
+      ) : (
       <div className="space-y-6">
         <Card className="p-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
@@ -611,6 +621,7 @@ export default function CommunicationsPage() {
           </div>
         </Card>
       </div>
+      )}
     </Shell>
   );
 }

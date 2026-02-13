@@ -48,12 +48,12 @@ Deliverables:
   - [x] Migration state visibility
   - [x] Send test email
   - [x] Upload test
-- [ ] Tenant audit timeline improvements:
-  - [ ] Filter by actor/action/target
-  - [ ] CSV export
-- [ ] "Go-live checklist" UI:
-  - [ ] Reads current config health from API
-  - [ ] Shows exact next steps per missing provider config
+- [x] Tenant audit timeline improvements:
+  - [x] Filter by actor/action/target
+  - [x] CSV export
+- [x] "Go-live checklist" UI:
+  - [x] Reads current config health from API
+  - [x] Shows exact next steps per missing provider config
 
 Deliverables:
 - One place to diagnose “why it’s not working” without engineering intervention.
@@ -63,8 +63,8 @@ Deliverables:
 ## 3) Communications Foundations (Activation + Retention)
 
 - [ ] Resend transactional templates:
-  - [ ] Welcome/onboarding
-  - [ ] Trial ending reminders
+  - [~] Welcome/onboarding
+  - [~] Trial ending reminders
   - [ ] Receipt resend / tithing statement notice
   - [ ] Failed payment / past-due notices
 - [ ] Messaging consent + compliance:
@@ -94,8 +94,8 @@ Deliverables:
 - [ ] Rollback strategy (batch id + revert updates)
 - [x] Rollback strategy (batch id + delete created members)
 - [ ] Migration assistant docs + templates:
-  - [ ] Example CSV templates
-  - [ ] Common ChMS export guidance
+  - [x] Example CSV templates
+  - [~] Common ChMS export guidance
 
 Deliverables:
 - A church can migrate a real dataset safely.
@@ -107,7 +107,7 @@ Deliverables:
 - [ ] Admin “Ask FaithFlow” assistant:
   - [~] Tenant-scoped retrieval
   - [~] Citations (source records + timestamps)
-  - [ ] Role-based access and redaction
+  - [~] Role-based access and redaction
   - [x] Prompt + output logging (audit)
 - [ ] AI summaries:
   - [ ] Attendance trends

@@ -14,7 +14,8 @@ import {
 } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { recordAuditLog } from '../audit';
-import { dispatchScheduledCommunications, sendCommunication } from '../communications';
+import { channelToPreference, dispatchScheduledCommunications, normalizeRecipientAddress, sendCommunication } from '../communications';
+import { buildUnsubscribeUrl, createUnsubscribeToken } from '../unsubscribe';
 
 const templateSchema = z.object({
   churchId: z.string(),
@@ -112,6 +113,60 @@ function renderTemplate(text: string, context: RecipientContext) {
     const value = (context as Record<string, string | undefined>)[key];
     return value ?? '';
   });
+}
+
+function appendUnsubscribeFooter(html: string, unsubscribeUrl: string | null) {
+  if (!unsubscribeUrl) return html;
+  // Avoid double-adding if a template already includes its own footer/link.
+  if (html.toLowerCase().includes('unsubscribe')) return html;
+  return [
+    html,
+    '<hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0" />',
+    `<p style="margin:0;font-size:12px;line-height:1.5;color:#64748b">`,
+    `You are receiving this message from FaithFlow. `,
+    `<a href="${unsubscribeUrl}" style="color:#0f172a;text-decoration:underline">Unsubscribe</a>`,
+    `</p>`,
+  ].join('\n');
+}
+
+async function loadSuppressionsAndPrefs(input: {
+  tenantId: string;
+  channel: CommunicationChannel;
+  recipients: Array<{ to: string; memberId?: string | null }>;
+}) {
+  const suppressionAddresses = Array.from(
+    new Set(
+      input.recipients
+        .map((r) => normalizeRecipientAddress(input.channel, r.to))
+        .filter(Boolean)
+    )
+  );
+  const suppressions = suppressionAddresses.length
+    ? await prisma.communicationSuppression.findMany({
+        where: {
+          tenantId: input.tenantId,
+          channel: input.channel,
+          address: { in: suppressionAddresses },
+        },
+        select: { address: true, reason: true },
+      })
+    : [];
+  const suppressionMap = new Map(suppressions.map((row) => [row.address, row.reason]));
+
+  const memberIds = Array.from(new Set(input.recipients.map((r) => r.memberId).filter(Boolean))) as string[];
+  const prefChannel = channelToPreference(input.channel);
+  const prefs = memberIds.length
+    ? await prisma.notificationPreference.findMany({
+        where: {
+          memberId: { in: memberIds },
+          channel: prefChannel,
+        },
+        select: { memberId: true, enabled: true },
+      })
+    : [];
+  const prefMap = new Map(prefs.map((row) => [row.memberId, row.enabled]));
+
+  return { suppressionMap, prefMap };
 }
 
 async function resolveAudienceRecipients({
@@ -431,10 +486,40 @@ export const communicationsRouter = router({
       throw new TRPCError({ code: 'BAD_REQUEST', message: 'No valid recipients found' });
     }
 
+    const recipientList = Array.from(recipients.entries()).map(([to, context]) => ({
+      to,
+      memberId: context.memberId ?? null,
+    }));
+    const { suppressionMap, prefMap } = await loadSuppressionsAndPrefs({
+      tenantId: ctx.tenantId!,
+      channel: input.channel,
+      recipients: recipientList,
+    });
+
     const scheduleRecords: Prisma.CommunicationScheduleCreateManyInput[] = [];
     for (const [recipient, context] of recipients.entries()) {
       const resolvedSubject = subject ? renderTemplate(subject, context) : undefined;
-      const resolvedBody = renderTemplate(body, context);
+      const resolvedBodyRaw = renderTemplate(body, context);
+
+      const normalizedAddress = normalizeRecipientAddress(input.channel, recipient);
+      const suppressionReason = normalizedAddress ? suppressionMap.get(normalizedAddress) : undefined;
+      const memberPref = context.memberId ? prefMap.get(context.memberId) : undefined;
+      const optedOut = memberPref === false;
+
+      const unsubscribeToken =
+        input.channel === CommunicationChannel.EMAIL && normalizedAddress
+          ? createUnsubscribeToken({
+              tenantId: ctx.tenantId!,
+              channel: input.channel,
+              address: normalizedAddress,
+              memberId: context.memberId ?? null,
+            })
+          : null;
+      const unsubscribeUrl = unsubscribeToken ? buildUnsubscribeUrl(unsubscribeToken) : null;
+      const resolvedBody =
+        input.channel === CommunicationChannel.EMAIL
+          ? appendUnsubscribeFooter(resolvedBodyRaw, unsubscribeUrl)
+          : resolvedBodyRaw;
       scheduleRecords.push({
         churchId: input.churchId,
         templateId: template?.id ?? null,
@@ -445,7 +530,12 @@ export const communicationsRouter = router({
         subject: resolvedSubject,
         body: resolvedBody,
         sendAt: input.sendAt,
-        status: CommunicationScheduleStatus.QUEUED,
+        status: suppressionReason || optedOut ? CommunicationScheduleStatus.CANCELED : CommunicationScheduleStatus.QUEUED,
+        error: suppressionReason
+          ? `Suppressed recipient (${suppressionReason})`
+          : optedOut
+            ? 'Recipient opted out for this channel'
+            : undefined,
         metadata: { audience: input.audience ?? null, memberId: context.memberId ?? null },
       });
     }
@@ -462,7 +552,9 @@ export const communicationsRouter = router({
       metadata: { channel: input.channel, count: scheduleRecords.length, sendAt: input.sendAt.toISOString() },
     });
 
-    return { count: scheduleRecords.length };
+    const queued = scheduleRecords.filter((row) => row.status === CommunicationScheduleStatus.QUEUED).length;
+    const canceled = scheduleRecords.filter((row) => row.status === CommunicationScheduleStatus.CANCELED).length;
+    return { count: scheduleRecords.length, queued, canceled };
   }),
 
   dispatchDue: protectedProcedure
@@ -666,7 +758,22 @@ export const communicationsRouter = router({
         const subjectBase = step.subject ?? template?.subject ?? undefined;
         const bodyBase = step.body || template?.body || '';
         const resolvedSubject = subjectBase ? renderTemplate(subjectBase, context) : undefined;
-        const resolvedBody = renderTemplate(bodyBase, context);
+        const resolvedBodyRaw = renderTemplate(bodyBase, context);
+        const normalizedAddress = normalizeRecipientAddress(step.channel, recipient);
+        const unsubscribeToken =
+          step.channel === CommunicationChannel.EMAIL && normalizedAddress
+            ? createUnsubscribeToken({
+                tenantId: ctx.tenantId!,
+                channel: step.channel,
+                address: normalizedAddress,
+                memberId: context.memberId ?? null,
+              })
+            : null;
+        const unsubscribeUrl = unsubscribeToken ? buildUnsubscribeUrl(unsubscribeToken) : null;
+        const resolvedBody =
+          step.channel === CommunicationChannel.EMAIL
+            ? appendUnsubscribeFooter(resolvedBodyRaw, unsubscribeUrl)
+            : resolvedBodyRaw;
 
         await prisma.communicationSchedule.create({
           data: {
@@ -736,6 +843,7 @@ export const communicationsRouter = router({
 
     let sent = 0;
     let failed = 0;
+    let skipped = 0;
 
     const recipients = new Map<string, RecipientContext>();
     let churchName = church.name;
@@ -768,16 +876,51 @@ export const communicationsRouter = router({
       throw new TRPCError({ code: 'BAD_REQUEST', message: 'No valid recipients found' });
     }
 
+    const recipientList = Array.from(recipients.entries()).map(([to, context]) => ({
+      to,
+      memberId: context.memberId ?? null,
+    }));
+    const { suppressionMap, prefMap } = await loadSuppressionsAndPrefs({
+      tenantId: ctx.tenantId!,
+      channel: input.channel,
+      recipients: recipientList,
+    });
+
     for (const [recipient, context] of recipients.entries()) {
       const resolvedSubject = subject ? renderTemplate(subject, context) : undefined;
-      const resolvedBody = renderTemplate(body, context);
+      const resolvedBodyRaw = renderTemplate(body, context);
+
+      const normalizedAddress = normalizeRecipientAddress(input.channel, recipient);
+      const suppressionReason = normalizedAddress ? suppressionMap.get(normalizedAddress) : undefined;
+      const memberPref = context.memberId ? prefMap.get(context.memberId) : undefined;
+      const optedOut = memberPref === false;
+
+      if (suppressionReason || optedOut) {
+        skipped += 1;
+        continue;
+      }
+
+      const unsubscribeToken =
+        input.channel === CommunicationChannel.EMAIL && normalizedAddress
+          ? createUnsubscribeToken({
+              tenantId: ctx.tenantId!,
+              channel: input.channel,
+              address: normalizedAddress,
+              memberId: context.memberId ?? null,
+            })
+          : null;
+      const unsubscribeUrl = unsubscribeToken ? buildUnsubscribeUrl(unsubscribeToken) : null;
+      const resolvedBody =
+        input.channel === CommunicationChannel.EMAIL
+          ? appendUnsubscribeFooter(resolvedBodyRaw, unsubscribeUrl)
+          : resolvedBodyRaw;
+
       const message = await prisma.communicationMessage.create({
         data: {
           churchId: input.churchId,
           templateId: template?.id ?? null,
           channel: input.channel,
-          provider:
-            input.channel === CommunicationChannel.EMAIL ? CommunicationProvider.RESEND : CommunicationProvider.TWILIO,
+          provider: input.channel === CommunicationChannel.EMAIL ? CommunicationProvider.RESEND : CommunicationProvider.TWILIO,
           to: recipient,
           subject: resolvedSubject,
           body: resolvedBody,
@@ -828,11 +971,12 @@ export const communicationsRouter = router({
         channel: input.channel,
         sent,
         failed,
+        skipped,
         templateId: template?.id ?? null,
         audience: input.audience ?? null,
       },
     });
 
-    return { sent, failed };
+    return { sent, failed, skipped };
   }),
 });

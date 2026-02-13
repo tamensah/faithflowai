@@ -5,6 +5,8 @@ import QRCode from 'qrcode';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 const providerOptions = [
   { value: 'STRIPE', label: 'Stripe' },
@@ -13,6 +15,7 @@ const providerOptions = [
 const paystackCurrencyOptions = ['GHS', 'NGN', 'KES', 'ZAR', 'USD', 'XOF'];
 
 export default function GivingPage() {
+  const gate = useFeatureGate('finance_enabled');
   const utils = trpc.useUtils();
   const [churchId, setChurchId] = useState('');
   const [amount, setAmount] = useState('50');
@@ -173,6 +176,13 @@ export default function GivingPage() {
 
   return (
     <Shell>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="finance_enabled"
+          title="Giving is locked"
+          description="Your current subscription does not include giving and donation workflows. Upgrade to restore access."
+        />
+      ) : (
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Giving</h1>
@@ -595,6 +605,7 @@ export default function GivingPage() {
           </div>
         </Card>
       </div>
+      )}
     </Shell>
   );
 }

@@ -166,6 +166,102 @@ export const operationsRouter = router({
     };
   }),
 
+  goLiveChecklist: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.userId || !ctx.tenantId) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'Tenant context required' });
+    }
+
+    const staff = await prisma.staffMembership.findFirst({
+      where: {
+        user: { clerkUserId: ctx.userId },
+        church: { organization: { tenantId: ctx.tenantId } },
+      },
+      include: { user: true },
+    });
+    if (!staff) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
+    }
+
+    const storageProvider = process.env.STORAGE_PROVIDER as StorageProvider | undefined;
+    const checklist = [
+      {
+        id: 'clerk',
+        title: 'Clerk auth configured',
+        status: process.env.CLERK_SECRET_KEY && process.env.CLERK_JWT_ISSUER && process.env.CLERK_JWT_AUDIENCE ? 'OK' : 'MISSING',
+        env: ['CLERK_SECRET_KEY', 'CLERK_JWT_ISSUER', 'CLERK_JWT_AUDIENCE'],
+        detail: 'Required for admin + portal auth and API verification.',
+      },
+      {
+        id: 'clerk_webhooks',
+        title: 'Clerk webhooks configured',
+        status: process.env.CLERK_WEBHOOK_SECRET ? 'OK' : 'WARN',
+        env: ['CLERK_WEBHOOK_SECRET'],
+        detail: 'Enables org provisioning and user lifecycle events.',
+      },
+      {
+        id: 'resend',
+        title: 'Resend email configured',
+        status: process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL ? 'OK' : 'MISSING',
+        env: ['RESEND_API_KEY', 'RESEND_FROM_EMAIL'],
+        detail: 'Receipts, transactional emails, and contact form notifications.',
+      },
+      {
+        id: 'payments_stripe',
+        title: 'Stripe configured',
+        status: process.env.STRIPE_SECRET_KEY ? 'OK' : 'WARN',
+        env: ['STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET'],
+        detail: 'Recommended for USD billing and giving.',
+      },
+      {
+        id: 'payments_paystack',
+        title: 'Paystack configured',
+        status: process.env.PAYSTACK_SECRET_KEY ? 'OK' : 'WARN',
+        env: ['PAYSTACK_SECRET_KEY', 'PAYSTACK_WEBHOOK_SECRET'],
+        detail: 'Recommended for NGN/GHS and supported African currencies.',
+      },
+      {
+        id: 'storage',
+        title: 'Storage configured',
+        status: process.env.STORAGE_PROVIDER ? 'OK' : 'MISSING',
+        env:
+          storageProvider === StorageProvider.GCS
+            ? ['STORAGE_PROVIDER', 'GCS_BUCKET', 'GCS_PROJECT_ID', 'GCS_CLIENT_EMAIL', 'GCS_PRIVATE_KEY']
+            : ['STORAGE_PROVIDER', 'S3_BUCKET', 'S3_REGION', 'S3_ACCESS_KEY_ID', 'S3_SECRET_ACCESS_KEY'],
+        detail: 'Required for dispute evidence uploads, media library, and attachments.',
+      },
+      {
+        id: 'twilio',
+        title: 'Twilio SMS/WhatsApp configured',
+        status: process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN ? 'OK' : 'WARN',
+        env: ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_SMS_NUMBER', 'TWILIO_WHATSAPP_NUMBER'],
+        detail: 'Required for SMS/WhatsApp campaigns and text-to-give.',
+      },
+      {
+        id: 'unsubscribe',
+        title: 'Unsubscribe token signing configured',
+        status: process.env.COMMS_UNSUBSCRIBE_SECRET ? 'OK' : 'WARN',
+        env: ['COMMS_UNSUBSCRIBE_SECRET'],
+        detail: 'Required to enable one-click unsubscribe links in email.',
+      },
+      {
+        id: 'scheduler',
+        title: 'Scheduler mode',
+        status: process.env.ENABLE_INTERNAL_SCHEDULER === 'true' ? 'WARN' : 'OK',
+        env: ['ENABLE_INTERNAL_SCHEDULER', 'CRON_TENANT_OPS_AUTOMATE', 'CRON_SUPPORT_SLA_SWEEP', 'CRON_SUBSCRIPTION_METADATA_BACKFILL'],
+        detail: 'In production, prefer Render cron jobs over internal scheduler for multi-instance safety.',
+      },
+    ] as const;
+
+    return {
+      tenantId: ctx.tenantId,
+      items: checklist.map((item) => ({
+        ...item,
+        status: item.status as 'OK' | 'MISSING' | 'WARN',
+        env: [...item.env],
+      })),
+    };
+  }),
+
   sendTestEmail: protectedProcedure
     .input(z.object({ to: z.string().email().optional() }).optional())
     .mutation(async ({ ctx, input }) => {

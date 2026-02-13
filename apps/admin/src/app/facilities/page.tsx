@@ -4,12 +4,15 @@ import { useMemo, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 function toDateInput(value: Date) {
   return value.toISOString().slice(0, 10);
 }
 
 export default function FacilitiesPage() {
+  const gate = useFeatureGate('facility_management_enabled');
   const utils = trpc.useUtils();
   const now = new Date();
   const [churchId, setChurchId] = useState('');
@@ -66,6 +69,13 @@ export default function FacilitiesPage() {
 
   return (
     <Shell>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="facility_management_enabled"
+          title="Facilities are locked"
+          description="Your current subscription does not include facility management. Upgrade to restore access."
+        />
+      ) : (
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Facilities & Scheduling</h1>
@@ -219,6 +229,7 @@ export default function FacilitiesPage() {
           </div>
         </Card>
       </div>
+      )}
     </Shell>
   );
 }

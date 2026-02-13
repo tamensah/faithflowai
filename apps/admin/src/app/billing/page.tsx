@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
@@ -42,6 +42,13 @@ export default function BillingPage() {
   const { data: current } = trpc.billing.currentSubscription.useQuery();
   const { data: entitlementsStatus } = trpc.billing.entitlements.useQuery();
   const { data: invoices } = trpc.billing.invoices.useQuery({ provider, limit: 20 });
+
+  useEffect(() => {
+    if (!current?.provider) return;
+    if (current.provider === 'STRIPE' || current.provider === 'PAYSTACK') {
+      setProvider(current.provider);
+    }
+  }, [current?.provider]);
 
   const selectedPlan = useMemo(
     () => plans?.find((plan) => plan.code === selectedPlanCode) ?? null,
@@ -197,8 +204,23 @@ export default function BillingPage() {
                       {isCanceling ? 'Canceling...' : 'Cancel at period end'}
                     </Button>
                   )
+                ) : current.provider === 'PAYSTACK' ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={isCanceling}
+                    onClick={() => cancelSubscription({ atPeriodEnd: false })}
+                  >
+                    {isCanceling ? 'Canceling...' : 'Cancel Paystack subscription'}
+                  </Button>
                 ) : null}
               </div>
+              {current.provider === 'PAYSTACK' ? (
+                <p className="mt-2 text-xs text-muted">
+                  Paystack cancellation requires Paystack to have issued a subscription. If this button fails, cancel the
+                  subscription from your Paystack dashboard, then refresh this page.
+                </p>
+              ) : null}
             </div>
           ) : (
             <p className="mt-4 text-sm text-muted">No active subscription found.</p>
@@ -221,16 +243,22 @@ export default function BillingPage() {
               ))}
             </select>
             {current ? (
-              <select
-                className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
-                value={effective}
-                onChange={(event) => setEffective(event.target.value as (typeof changeEffectiveOptions)[number])}
-              >
-                <option value="NEXT_CYCLE">Effective next cycle</option>
-                <option value="IMMEDIATE" disabled={!selectedPlanIsUpgrade || current.provider !== 'STRIPE'}>
-                  Immediate (Stripe upgrade only)
-                </option>
-              </select>
+              current.provider === 'STRIPE' ? (
+                <select
+                  className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+                  value={effective}
+                  onChange={(event) => setEffective(event.target.value as (typeof changeEffectiveOptions)[number])}
+                >
+                  <option value="NEXT_CYCLE">Effective next cycle</option>
+                  <option value="IMMEDIATE" disabled={!selectedPlanIsUpgrade}>
+                    Immediate (upgrade only)
+                  </option>
+                </select>
+              ) : (
+                <div className="flex h-10 items-center rounded-md border border-border bg-white px-3 text-sm text-muted">
+                  Paystack change via checkout
+                </div>
+              )
             ) : (
               <select
                 className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
@@ -257,7 +285,10 @@ export default function BillingPage() {
               disabled={!selectedPlanCode || isStartingCheckout || isChangingPlan}
               onClick={() => {
                 if (current) {
-                  changePlan({ planCode: selectedPlanCode, effective });
+                  changePlan({
+                    planCode: selectedPlanCode,
+                    effective: current.provider === 'STRIPE' ? effective : 'NEXT_CYCLE',
+                  });
                 } else {
                   startCheckout({ planCode: selectedPlanCode, provider });
                 }
@@ -266,16 +297,19 @@ export default function BillingPage() {
               {current
                 ? isChangingPlan
                   ? 'Applying...'
-                  : effective === 'NEXT_CYCLE'
-                    ? 'Schedule plan change'
-                    : 'Upgrade now'
+                  : current.provider === 'STRIPE'
+                    ? effective === 'NEXT_CYCLE'
+                      ? 'Schedule plan change'
+                      : 'Upgrade now'
+                    : 'Continue to Paystack checkout'
                 : isStartingCheckout
                   ? 'Redirecting...'
                   : 'Continue to checkout'}
             </Button>
             {current?.provider === 'PAYSTACK' ? (
               <p className="mt-2 text-xs text-muted">
-                Paystack plan changes are not supported in-app yet. Cancel and re-subscribe to switch tiers.
+                Paystack tier changes start a new checkout. After the new subscription activates, FaithFlow will attempt
+                to disable the previous Paystack subscription (best effort) to avoid double billing.
               </p>
             ) : null}
           </div>
@@ -283,7 +317,20 @@ export default function BillingPage() {
 
         <Card className="p-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Invoices</h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold">Invoices</h2>
+              <select
+                className="h-8 rounded-md border border-border bg-white px-2 text-xs"
+                value={provider}
+                onChange={(event) => setProvider(event.target.value as (typeof checkoutProviders)[number])}
+              >
+                {checkoutProviders.map((entry) => (
+                  <option key={entry} value={entry}>
+                    {entry}
+                  </option>
+                ))}
+              </select>
+            </div>
             <Button
               size="sm"
               variant="outline"

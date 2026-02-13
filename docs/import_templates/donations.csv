@@ -1,0 +1,2 @@
+amount,currency,donorName,donorEmail,donorPhone,memberEmail,memberPhone,fundName,campaignName,createdAt
+25,USD,Jane Doe,jane@example.com,+15551231234,jane@example.com,,General,,2026-02-01

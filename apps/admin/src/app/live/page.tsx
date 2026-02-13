@@ -5,6 +5,8 @@ import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { trpc } from '../../lib/trpc';
 import { Shell } from '../../components/Shell';
 import { useAuth } from '@clerk/nextjs';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 type FeedEvent = {
   type: string;
@@ -13,6 +15,7 @@ type FeedEvent = {
 };
 
 export default function LivePage() {
+  const gate = useFeatureGate('events_enabled');
   const utils = trpc.useUtils();
   const [events, setEvents] = useState<FeedEvent[]>([]);
   const [eventId, setEventId] = useState('');
@@ -74,11 +77,18 @@ export default function LivePage() {
 
   return (
     <Shell>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold">Live feed</h1>
-          <p className="mt-2 text-muted">Realtime attendance and giving activity.</p>
-        </div>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="events_enabled"
+          title="Live feed is locked"
+          description="Your current subscription does not include events operations. Upgrade to unlock realtime attendance activity."
+        />
+      ) : (
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-semibold">Live feed</h1>
+            <p className="mt-2 text-muted">Realtime attendance and giving activity.</p>
+          </div>
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Trigger realtime events</h2>
@@ -181,7 +191,8 @@ export default function LivePage() {
             {!events.length && <p className="text-sm text-muted">Waiting for events…</p>}
           </div>
         </Card>
-      </div>
+        </div>
+      )}
     </Shell>
   );
 }

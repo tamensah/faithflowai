@@ -15,6 +15,7 @@ export default function OperationsHealthPage() {
   const utils = trpc.useUtils();
   const [message, setMessage] = useState<string | null>(null);
   const { data, isLoading, error } = trpc.operations.health.useQuery(undefined, { retry: false });
+  const { data: checklist } = trpc.operations.goLiveChecklist.useQuery(undefined, { retry: false });
   const { mutate: sendTestEmail, isPending: isSendingTestEmail } = trpc.operations.sendTestEmail.useMutation({
     onSuccess: async () => {
       setMessage('Test email sent.');
@@ -112,6 +113,30 @@ export default function OperationsHealthPage() {
                 >
                   {isRunningUploadTest ? 'Testing...' : 'Run storage upload test'}
                 </Button>
+              </div>
+            </Card>
+
+            <Card className="p-6 lg:col-span-2">
+              <h2 className="text-lg font-semibold">Go-live checklist</h2>
+              <p className="mt-2 text-sm text-muted">Concrete setup steps based on current environment configuration.</p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {checklist?.items?.map((item) => (
+                  <Card key={item.id} className="p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-semibold">{item.title}</p>
+                      <Badge variant={item.status === 'OK' ? 'success' : item.status === 'MISSING' ? 'warning' : 'default'}>
+                        {item.status}
+                      </Badge>
+                    </div>
+                    <p className="mt-2 text-xs text-muted">{item.detail}</p>
+                    <p className="mt-2 text-xs text-muted">
+                      Env: <span className="text-foreground">{item.env.join(', ')}</span>
+                    </p>
+                  </Card>
+                ))}
+                {!checklist?.items?.length ? (
+                  <p className="text-sm text-muted">Checklist unavailable.</p>
+                ) : null}
               </div>
             </Card>
 

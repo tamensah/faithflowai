@@ -5,6 +5,8 @@ import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
 import { useAuth } from '@clerk/nextjs';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 const evidenceTypeOptions = [
   'UNCATEGORIZED',
@@ -22,6 +24,7 @@ const evidenceTypeOptions = [
 ];
 
 export default function FinancePage() {
+  const gate = useFeatureGate('finance_enabled');
   const utils = trpc.useUtils();
   const { getToken } = useAuth();
   const [churchId, setChurchId] = useState('');
@@ -71,6 +74,10 @@ export default function FinancePage() {
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [submitAfterUpload, setSubmitAfterUpload] = useState(false);
   const [isUploadingEvidence, setIsUploadingEvidence] = useState(false);
+  const [donationImportCsv, setDonationImportCsv] = useState('');
+  const [donationImportFilename, setDonationImportFilename] = useState('');
+  const [donationImportResult, setDonationImportResult] = useState<any>(null);
+  const [donationImportBatchId, setDonationImportBatchId] = useState<string>('');
 
   const { data: churches } = trpc.church.list.useQuery({ organizationId: undefined });
   const { data: members } = trpc.member.list.useQuery({ churchId: churchId || undefined }, { enabled: Boolean(churchId) });
@@ -314,13 +321,134 @@ export default function FinancePage() {
       onSuccess: () => utils.finance.listPayouts.invalidate(),
     });
 
+  const { mutate: importDonations, isPending: isImportingDonations } = trpc.donation.importCsv.useMutation({
+    onSuccess: async (result) => {
+      setDonationImportResult(result);
+      if (result?.batchId) setDonationImportBatchId(result.batchId);
+      await Promise.all([utils.donation.list.invalidate(), utils.receipt.list.invalidate()]);
+    },
+  });
+
+  const { mutate: rollbackDonationImport, isPending: isRollingBackDonationImport } = trpc.donation.rollbackImport.useMutation({
+    onSuccess: async () => {
+      setDonationImportResult(null);
+      setDonationImportBatchId('');
+      await Promise.all([utils.donation.list.invalidate(), utils.receipt.list.invalidate()]);
+    },
+  });
+
+  const downloadDonationTemplate = () => {
+    const csv = [
+      'amount,currency,donorName,donorEmail,donorPhone,memberEmail,memberPhone,fundName,campaignName,createdAt',
+      '25,USD,Jane Doe,jane@example.com,+15551231234,jane@example.com,,General,,2026-02-01',
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'faithflow-donations-import-template.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Shell>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="finance_enabled"
+          title="Finance is locked"
+          description="Your current subscription does not include finance operations. Upgrade to restore access."
+        />
+      ) : (
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Finance</h1>
           <p className="mt-2 text-muted">Reconciliation, pledges, recurring giving, budgets, and expenses.</p>
         </div>
+
+        <Card className="p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold">Import donations (CSV)</h2>
+              <p className="mt-2 text-sm text-muted">Dry-run, apply, and rollback donation imports.</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={downloadDonationTemplate}>
+              Download template
+            </Button>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                setDonationImportFilename(file.name);
+                setDonationImportCsv(await file.text());
+              }}
+            />
+            <div className="text-xs text-muted">
+              {donationImportFilename ? `Loaded: ${donationImportFilename}` : 'Choose a CSV file to populate the import box.'}
+            </div>
+          </div>
+
+          <textarea
+            className="mt-4 min-h-[140px] w-full rounded-md border border-border bg-white p-3 text-sm"
+            placeholder="Paste donation CSV here..."
+            value={donationImportCsv}
+            onChange={(event) => setDonationImportCsv(event.target.value)}
+          />
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={!churchId || donationImportCsv.trim().length < 5 || isImportingDonations}
+              onClick={() =>
+                importDonations({
+                  churchId,
+                  csv: donationImportCsv,
+                  dryRun: true,
+                })
+              }
+            >
+              {isImportingDonations ? 'Running...' : 'Dry-run import'}
+            </Button>
+            <Button
+              disabled={!churchId || donationImportCsv.trim().length < 5 || isImportingDonations}
+              onClick={() =>
+                importDonations({
+                  churchId,
+                  csv: donationImportCsv,
+                })
+              }
+            >
+              {isImportingDonations ? 'Importing...' : 'Apply import'}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!donationImportBatchId || isRollingBackDonationImport}
+              onClick={() => rollbackDonationImport({ batchId: donationImportBatchId })}
+            >
+              {isRollingBackDonationImport ? 'Rolling back...' : 'Rollback last batch'}
+            </Button>
+          </div>
+
+          {donationImportResult ? (
+            <div className="mt-4 space-y-2 text-sm text-muted">
+              <p>
+                Batch: {donationImportResult.batchId ?? 'dry-run'} · Scanned: {donationImportResult.summary?.scanned ?? 0} · Created:{' '}
+                {donationImportResult.summary?.created ?? 0} · Skipped: {donationImportResult.summary?.skipped ?? 0} · Errors:{' '}
+                {donationImportResult.summary?.errors ?? 0}
+              </p>
+              {donationImportResult.errors?.length ? (
+                <pre className="rounded-md bg-muted/10 p-3 text-xs">
+                  {JSON.stringify(donationImportResult.errors.slice(0, 20), null, 2)}
+                </pre>
+              ) : null}
+            </div>
+          ) : null}
+        </Card>
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Reconciliation</h2>
@@ -1131,6 +1259,7 @@ export default function FinancePage() {
           </div>
         </Card>
       </div>
+      )}
     </Shell>
   );
 }

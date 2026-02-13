@@ -5,6 +5,7 @@ import { TRPCError } from '@trpc/server';
 import { generateTextSimple, type AIProvider } from '@faithflow-ai/ai';
 import { AuditActorType } from '@faithflow-ai/database';
 import { recordAuditLog } from '../audit';
+import { ensureFeatureEnabled } from '../entitlements';
 
 const providerSchema = z.enum(['openai', 'anthropic', 'google']).default('openai');
 
@@ -30,6 +31,9 @@ function pickQueryTokens(question: string) {
     .split(/[^a-z0-9+@._-]+/g)
     .map((t) => t.trim())
     .filter((t) => t.length >= 3)
+    // Drop obvious PII-like tokens (emails, long phone-like digit sequences).
+    .filter((t) => !t.includes('@'))
+    .filter((t) => !/^\+?\d{7,}$/.test(t))
     .slice(0, 6);
   return Array.from(new Set(tokens));
 }
@@ -163,6 +167,7 @@ export const aiRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       await requireStaff(ctx.tenantId!, ctx.userId!);
+      await ensureFeatureEnabled(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
 
       const provider = (input.provider ?? 'openai') as AIProvider;
       const model = input.model?.trim() || defaultModel(provider);
@@ -231,10 +236,123 @@ export const aiRouter = router({
       };
     }),
 
+  starterInsights: protectedProcedure
+    .input(z.object({ churchId: z.string().optional() }).optional())
+    .query(async ({ input, ctx }) => {
+      await requireStaff(ctx.tenantId!, ctx.userId!);
+      await ensureFeatureEnabled(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
+
+      const churchId = input?.churchId ?? null;
+      const churchFilter = churchId ? { churchId } : {};
+      const now = Date.now();
+      const last30 = new Date(now - 30 * 24 * 60 * 60 * 1000);
+      const prev30 = new Date(now - 60 * 24 * 60 * 60 * 1000);
+
+      const [membersTotal, attendanceLast30, attendancePrev30, givingLast30, givingPrev30, upcomingEvents, volunteerShifts] =
+        await Promise.all([
+          prisma.member.count({ where: { church: { organization: { tenantId: ctx.tenantId! } }, ...churchFilter } }),
+          prisma.attendance.count({
+            where: {
+              event: { church: { organization: { tenantId: ctx.tenantId! } }, ...churchFilter },
+              createdAt: { gte: last30 },
+            },
+          }),
+          prisma.attendance.count({
+            where: {
+              event: { church: { organization: { tenantId: ctx.tenantId! } }, ...churchFilter },
+              createdAt: { gte: prev30, lt: last30 },
+            },
+          }),
+          prisma.donation.aggregate({
+            where: {
+              church: { organization: { tenantId: ctx.tenantId! } },
+              ...churchFilter,
+              status: 'COMPLETED',
+              createdAt: { gte: last30 },
+            },
+            _sum: { amount: true },
+            _count: { _all: true },
+          }),
+          prisma.donation.aggregate({
+            where: {
+              church: { organization: { tenantId: ctx.tenantId! } },
+              ...churchFilter,
+              status: 'COMPLETED',
+              createdAt: { gte: prev30, lt: last30 },
+            },
+            _sum: { amount: true },
+            _count: { _all: true },
+          }),
+          prisma.event.count({
+            where: {
+              church: { organization: { tenantId: ctx.tenantId! } },
+              ...churchFilter,
+              startAt: { gte: new Date() },
+            },
+          }),
+          prisma.volunteerShift.findMany({
+            where: {
+              church: { organization: { tenantId: ctx.tenantId! } },
+              ...churchFilter,
+              startAt: { gte: new Date(), lte: new Date(now + 30 * 24 * 60 * 60 * 1000) },
+            },
+            select: { id: true, capacity: true, _count: { select: { assignments: true } }, startAt: true, title: true },
+            take: 120,
+            orderBy: { startAt: 'asc' },
+          }),
+        ]);
+
+      const givingLast30Sum = Number(givingLast30._sum.amount?.toString() ?? '0');
+      const givingPrev30Sum = Number(givingPrev30._sum.amount?.toString() ?? '0');
+      const givingDelta = givingLast30Sum - givingPrev30Sum;
+      const givingDeltaPct = givingPrev30Sum > 0 ? (givingDelta / givingPrev30Sum) * 100 : null;
+
+      const attendanceDelta = attendanceLast30 - attendancePrev30;
+      const attendanceDeltaPct = attendancePrev30 > 0 ? (attendanceDelta / attendancePrev30) * 100 : null;
+
+      const shiftGaps = volunteerShifts
+        .filter((shift) => typeof shift.capacity === 'number' && shift.capacity !== null)
+        .map((shift) => ({
+          id: shift.id,
+          title: shift.title,
+          startAt: shift.startAt,
+          capacity: shift.capacity ?? 0,
+          assigned: shift._count.assignments,
+          gap: Math.max(0, (shift.capacity ?? 0) - shift._count.assignments),
+        }))
+        .filter((shift) => shift.gap > 0)
+        .slice(0, 10);
+
+      return {
+        membersTotal,
+        upcomingEvents,
+        attendance: {
+          last30: attendanceLast30,
+          prev30: attendancePrev30,
+          delta: attendanceDelta,
+          deltaPct: attendanceDeltaPct,
+        },
+        giving: {
+          last30Sum: givingLast30Sum,
+          last30Count: givingLast30._count._all,
+          prev30Sum: givingPrev30Sum,
+          prev30Count: givingPrev30._count._all,
+          delta: givingDelta,
+          deltaPct: givingDeltaPct,
+        },
+        volunteer: {
+          shiftsNext30: volunteerShifts.length,
+          gaps: shiftGaps,
+        },
+        asOf: new Date().toISOString(),
+      };
+    }),
+
   recent: protectedProcedure
     .input(z.object({ limit: z.number().min(1).max(50).default(20) }).optional())
     .query(async ({ input, ctx }) => {
       await requireStaff(ctx.tenantId!, ctx.userId!);
+      await ensureFeatureEnabled(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
       return prisma.aiInteraction.findMany({
         where: { tenantId: ctx.tenantId! },
         orderBy: { createdAt: 'desc' },

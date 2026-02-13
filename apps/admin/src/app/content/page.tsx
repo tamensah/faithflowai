@@ -4,12 +4,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
 
 const sermonStatusOptions = ['DRAFT', 'PUBLISHED', 'ARCHIVED'] as const;
 const resourceTypeOptions = ['DOCUMENT', 'VIDEO', 'AUDIO', 'LINK', 'IMAGE', 'OTHER'] as const;
 const resourceVisibilityOptions = ['PUBLIC', 'MEMBERS_ONLY', 'LEADERS_ONLY', 'PRIVATE'] as const;
 
 export default function ContentPage() {
+  const gate = useFeatureGate('content_library_enabled');
   const utils = trpc.useUtils();
   const [churchId, setChurchId] = useState('');
   const [campusId, setCampusId] = useState('');
@@ -94,6 +97,13 @@ export default function ContentPage() {
 
   return (
     <Shell>
+      {!gate.isLoading && !gate.enabled ? (
+        <FeatureLocked
+          featureKey="content_library_enabled"
+          title="Content library is locked"
+          description="Your current subscription does not include the content library. Upgrade to restore access."
+        />
+      ) : (
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Sermons & Content Library</h1>
@@ -302,6 +312,7 @@ export default function ContentPage() {
           </div>
         </Card>
       </div>
+      )}
     </Shell>
   );
 }

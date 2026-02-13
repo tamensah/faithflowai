@@ -36,13 +36,22 @@ import {
   renderReceiptHtml,
   subscribeRealtime,
   recordAuditLog,
+  verifyUnsubscribeToken,
 } from '@faithflow-ai/api';
 import { createContext } from './context';
 import { env } from './env';
 import { openApiSpec } from './openapi';
 import { extractBearerToken, verifyClerkToken } from './auth';
 import { provisionTenant } from './context';
-import { AuditActorType, DisputeEvidenceType, EventVisibility, PaymentProvider, prisma } from '@faithflow-ai/database';
+import {
+  AuditActorType,
+  CommunicationSuppressionReason,
+  DisputeEvidenceType,
+  EventVisibility,
+  NotificationChannel,
+  PaymentProvider,
+  prisma,
+} from '@faithflow-ai/database';
 import { buildTwimlMessage, normalizePhoneNumber, parseTextToGiveBody, verifyTwilioSignature } from './twilio';
 import { startInternalSchedulers } from './scheduler';
 
@@ -309,6 +318,74 @@ async function start() {
 
     const html = renderReceiptHtml(receipt);
     reply.header('Content-Type', 'text/html; charset=utf-8').send(html);
+  });
+
+  server.get('/unsubscribe', async (request, reply) => {
+    const token = (request.query as { token?: string })?.token;
+    if (!token) {
+      reply.code(400).header('Content-Type', 'text/html; charset=utf-8').send('<h1>Missing token</h1>');
+      return;
+    }
+
+    const result = verifyUnsubscribeToken(token);
+    if (!result.ok) {
+      reply
+        .code(400)
+        .header('Content-Type', 'text/html; charset=utf-8')
+        .send(`<h1>Unsubscribe link invalid</h1><p>${result.error}</p>`);
+      return;
+    }
+
+    const { tenantId, channel, address, memberId } = result.payload;
+
+    const suppression = await prisma.communicationSuppression.upsert({
+      where: { tenantId_channel_address: { tenantId, channel, address } },
+      update: { reason: CommunicationSuppressionReason.USER_UNSUBSCRIBE },
+      create: { tenantId, channel, address, reason: CommunicationSuppressionReason.USER_UNSUBSCRIBE },
+    });
+
+    if (memberId) {
+      const prefChannel: NotificationChannel =
+        channel === 'EMAIL'
+          ? NotificationChannel.EMAIL
+          : channel === 'SMS'
+            ? NotificationChannel.SMS
+            : NotificationChannel.WHATSAPP;
+      await prisma.notificationPreference.upsert({
+        where: { memberId_channel: { memberId, channel: prefChannel } },
+        update: { enabled: false },
+        create: { memberId, channel: prefChannel, enabled: false },
+      });
+    }
+
+    await recordAuditLog({
+      tenantId,
+      actorType: AuditActorType.SYSTEM,
+      action: 'communications.unsubscribe',
+      targetType: 'CommunicationSuppression',
+      targetId: suppression.id,
+      metadata: { channel, address, memberId: memberId ?? null },
+    });
+
+    reply.header('Content-Type', 'text/html; charset=utf-8').send(
+      [
+        '<!doctype html>',
+        '<html lang="en">',
+        '<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>',
+        '<title>Unsubscribed - FaithFlow</title>',
+        '<style>body{font-family:ui-sans-serif,system-ui,-apple-system;max-width:720px;margin:48px auto;padding:0 16px;line-height:1.5;color:#0f172a} .card{border:1px solid #e2e8f0;border-radius:14px;padding:20px;background:#fff} .muted{color:#64748b;font-size:14px}</style>',
+        '</head>',
+        '<body>',
+        '<div class="card">',
+        '<h1>You are unsubscribed.</h1>',
+        `<p class="muted">Channel: ${channel}</p>`,
+        `<p class="muted">Address: ${address}</p>`,
+        '<p class="muted">You can still receive critical transactional messages (e.g., receipts) depending on your tenant policies.</p>',
+        '</div>',
+        '</body>',
+        '</html>',
+      ].join('')
+    );
   });
 
   const manualDonationSchema = z.object({
