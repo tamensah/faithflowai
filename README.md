@@ -201,6 +201,7 @@ See `/Users/tamensah/aihub/faithflow_ai/docs/BRAND_GUIDE.md`.
 - Provider setup checklist: `/Users/tamensah/aihub/faithflow_ai/docs/THIRDPARTY_CONFIG.md`
 - Scheduler profiles: `/Users/tamensah/aihub/faithflow_ai/docs/SCHEDULER_PROFILES.md`
 - Onboarding runbook: `/Users/tamensah/aihub/faithflow_ai/docs/ONBOARDING_MANUAL.md`
+- Demo playbook (seeded accounts + pastor demo flow): `/Users/tamensah/aihub/faithflow_ai/docs/DEMO_PLAYBOOK.md`
 
 ## Next Focus Areas
 - Payments refinements (refunds, disputes, multi-account routing)
