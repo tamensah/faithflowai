@@ -139,3 +139,44 @@ export function renderTithingStatementEmail(input: {
     footer: 'FaithFlow Finance',
   });
 }
+
+export function renderReceiptResendEmail(input: {
+  churchName: string;
+  receiptNumber: string;
+  amount: string;
+  currency: string;
+  issuedAtIso: string;
+  receiptUrl: string;
+}) {
+  return renderBaseEmail({
+    title: `Donation receipt ${input.receiptNumber}`,
+    greeting: 'Hello,',
+    intro: `Your receipt from ${input.churchName} is attached via secure link.`,
+    bullets: [
+      `Receipt number: ${input.receiptNumber}`,
+      `Amount: ${input.amount} ${input.currency}`,
+      `Issued: ${input.issuedAtIso.slice(0, 10)}`,
+    ],
+    cta: { label: 'View receipt', href: input.receiptUrl },
+    outro: 'If this was not expected, please contact your church finance team.',
+    footer: 'FaithFlow Finance',
+  });
+}
+
+export function renderFailedPaymentNoticeEmail(input: {
+  planName: string;
+  periodEndIso?: string | null;
+  billingUrl: string;
+}) {
+  return renderBaseEmail({
+    title: 'Payment failed - action required',
+    greeting: 'Hello,',
+    intro: `We could not process a payment for your ${input.planName} plan${
+      input.periodEndIso ? ` (period ended ${input.periodEndIso.slice(0, 10)})` : ''
+    }.`,
+    bullets: ['Update payment method', 'Retry checkout for the current plan', 'Confirm invoice status after payment'],
+    cta: { label: 'Fix billing', href: input.billingUrl },
+    outro: 'Service remains read-only until billing is restored.',
+    footer: 'FaithFlow Billing Operations',
+  });
+}

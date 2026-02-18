@@ -30,11 +30,15 @@ This is the live checklist for product scope, implementation status, and next st
 - Finance CSV exports
 - Communications: outbound email/SMS/WhatsApp (templates + logs)
 - Communications: audience targeting + delivery analytics
+- Communications: suppression workspace + unsubscribe reporting by channel/reason
+- Communications: STOP keyword unsubscribe handling (Twilio inbound SMS/WhatsApp)
 - Refunds + disputes (Stripe + Paystack + manual)
 - OpenAPI external integration routes (API key secured)
 - Dispute evidence workflows + admin upload
 - Comms scheduling + drip campaigns
+- Comms schedule calendar + batch delivery analytics (including top failure reasons)
 - AI donor insights (first wave)
+- AI communication drafting assistant with human-review checklist and draft-first scheduling
 - Refund analytics dashboard
 - Dispute resolution playbook
 - Payments: dispute monitoring automation

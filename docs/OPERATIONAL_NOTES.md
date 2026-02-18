@@ -109,6 +109,29 @@ This file is the running operations log for implementation details, runtime cons
   - `POST /tasks/support/sla` (API key protected)
 - Knowledge base workflow is not yet implemented.
 
+### Communications operations
+
+- Quiet hours are now tenant-configurable at church level, with per-member override support.
+- Scheduling workflow supports `DRAFT -> PENDING_REVIEW -> QUEUED` with batch actions in admin.
+- Admin communications now includes:
+  - Day-grouped schedule calendar (14/30/60 day windows, channel filter)
+  - Delivery analytics table (SENT/FAILED/QUEUED by channel)
+  - Top failure reasons (messages + schedules)
+  - Suppression summary (by channel/reason + recent user-unsubscribe counts)
+- Outbound message handling now appends unsubscribe guidance across channels:
+  - Email: one-click unsubscribe link
+  - SMS/WhatsApp: `Reply STOP to opt out` + link when available
+- Twilio inbound webhook now handles STOP keywords (`STOP`, `UNSUBSCRIBE`, `CANCEL`, etc.) for SMS and WhatsApp:
+  - creates tenant/channel suppression entry
+  - disables member notification preference for matching church phone records
+  - records audit event `communications.unsubscribe_keyword`
+- Communications scheduling now includes AI-assisted draft generation:
+  - draft output includes review checklist
+  - generated drafts default to `DRAFT` status for human approval workflow
+- Remaining comms depth:
+  - Suppression/unsubscribe UX refinement across channels
+  - Transactional template completion for all billing/finance notifications
+
 ### Runtime jobs and env assumptions
 
 - Scheduled tasks expected:

@@ -38,8 +38,15 @@ export default function CommunicationsPage() {
   const [scheduleBody, setScheduleBody] = useState('');
   const [scheduleSendAt, setScheduleSendAt] = useState('');
   const [scheduleInitialStatus, setScheduleInitialStatus] = useState<'QUEUED' | 'DRAFT' | 'PENDING_REVIEW'>('QUEUED');
+  const [draftObjective, setDraftObjective] = useState('');
+  const [draftAudienceHint, setDraftAudienceHint] = useState('');
+  const [draftTone, setDraftTone] = useState<'PASTORAL' | 'INFORMATIVE' | 'URGENT' | 'FRIENDLY'>('PASTORAL');
+  const [draftProvider, setDraftProvider] = useState<'openai' | 'anthropic' | 'google'>('openai');
+  const [draftChecklist, setDraftChecklist] = useState<string[]>([]);
   const [lastScheduleBatchKey, setLastScheduleBatchKey] = useState('');
   const [batchActionStatus, setBatchActionStatus] = useState<string>('');
+  const [calendarWindowDays, setCalendarWindowDays] = useState('14');
+  const [calendarChannel, setCalendarChannel] = useState<'ALL' | (typeof channelOptions)[number]>('ALL');
   const [dripName, setDripName] = useState('');
   const [dripDescription, setDripDescription] = useState('');
   const [selectedDripId, setSelectedDripId] = useState('');
@@ -65,6 +72,24 @@ export default function CommunicationsPage() {
     { churchId: churchId || undefined, limit: 20 },
     { enabled: Boolean(churchId) }
   );
+  const calendarRange = useMemo(() => {
+    const days = Math.max(7, Math.min(60, Number(calendarWindowDays) || 14));
+    const from = new Date();
+    from.setHours(0, 0, 0, 0);
+    const to = new Date(from);
+    to.setDate(to.getDate() + days);
+    return { from, to, days };
+  }, [calendarWindowDays]);
+
+  const { data: calendarSchedules } = trpc.communications.schedulesRange.useQuery(
+    { churchId: churchId || undefined, from: calendarRange.from, to: calendarRange.to, limit: 2000 },
+    { enabled: Boolean(churchId) }
+  );
+
+  const { data: commsAnalytics } = trpc.communications.analytics.useQuery(
+    { churchId: churchId || undefined, days: 30 },
+    { enabled: Boolean(churchId) }
+  );
   const { data: drips } = trpc.communications.drips.useQuery(
     { churchId: churchId || undefined },
     { enabled: Boolean(churchId) }
@@ -76,6 +101,44 @@ export default function CommunicationsPage() {
   const { data: summary } = trpc.communications.summary.useQuery(
     { churchId: churchId || undefined },
     { enabled: Boolean(churchId) }
+  );
+  const parsedSendRecipients = useMemo(
+    () =>
+      sendTo
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean),
+    [sendTo]
+  );
+  const parsedScheduleRecipients = useMemo(
+    () =>
+      scheduleTo
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean),
+    [scheduleTo]
+  );
+
+  const sendPreviewEnabled = Boolean(churchId && (parsedSendRecipients.length || audience));
+  const { data: sendPreview } = trpc.communications.previewAudience.useQuery(
+    {
+      churchId,
+      channel: sendChannel as any,
+      to: parsedSendRecipients.length ? parsedSendRecipients : undefined,
+      audience: audience ? (audience as any) : undefined,
+    },
+    { enabled: sendPreviewEnabled }
+  );
+
+  const schedulePreviewEnabled = Boolean(churchId && (parsedScheduleRecipients.length || scheduleAudience));
+  const { data: schedulePreview } = trpc.communications.previewAudience.useQuery(
+    {
+      churchId,
+      channel: scheduleChannel as any,
+      to: parsedScheduleRecipients.length ? parsedScheduleRecipients : undefined,
+      audience: scheduleAudience ? (scheduleAudience as any) : undefined,
+    },
+    { enabled: schedulePreviewEnabled }
   );
 
   useEffect(() => {
@@ -145,6 +208,47 @@ export default function CommunicationsPage() {
     });
   }, [schedules]);
 
+  const calendarDays = useMemo(() => {
+    const tz = (selectedChurch as any)?.timezone ?? 'UTC';
+    const start = calendarRange.from;
+    const days = calendarRange.days;
+    const buckets = new Map<
+      string,
+      {
+        key: string;
+        label: string;
+        counts: Record<string, number>;
+      }
+    >();
+
+    for (let i = 0; i < days; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const key = d.toLocaleDateString('en-CA', { timeZone: tz });
+      const label = d.toLocaleDateString(undefined, { timeZone: tz, weekday: 'short', month: 'short', day: 'numeric' });
+      buckets.set(key, { key, label, counts: {} });
+    }
+
+    for (const row of calendarSchedules ?? []) {
+      if (calendarChannel !== 'ALL' && row.channel !== calendarChannel) continue;
+      const key = new Date(row.sendAt).toLocaleDateString('en-CA', { timeZone: tz });
+      const bucket = buckets.get(key);
+      if (!bucket) continue;
+      bucket.counts[row.status] = (bucket.counts[row.status] ?? 0) + 1;
+    }
+
+    return Array.from(buckets.values());
+  }, [calendarChannel, calendarRange.from, calendarRange.days, calendarSchedules, selectedChurch]);
+
+  const analyticsTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (const row of commsAnalytics?.messagesDaily ?? []) {
+      const key = `${row.channel}:${row.status}`;
+      totals[key] = (totals[key] ?? 0) + (row.count ?? 0);
+    }
+    return totals;
+  }, [commsAnalytics?.messagesDaily]);
+
   const { mutate: createTemplate, isPending: isCreatingTemplate } = trpc.communications.createTemplate.useMutation({
     onSuccess: async () => {
       setTemplateName('');
@@ -185,6 +289,15 @@ export default function CommunicationsPage() {
       },
       onError: (error) => setBatchActionStatus(error.message),
     });
+
+  const { mutate: generateDraft, isPending: isGeneratingDraft } = trpc.ai.generateCommunicationDraft.useMutation({
+    onSuccess: (data) => {
+      setScheduleBody(data.body);
+      setScheduleSubject(data.subject ?? '');
+      setScheduleInitialStatus('DRAFT');
+      setDraftChecklist(data.reviewChecklist ?? []);
+    },
+  });
 
   const { mutate: dispatchDue, isPending: isDispatching } = trpc.communications.dispatchDue.useMutation({
     onSuccess: async () => {
@@ -447,22 +560,91 @@ export default function CommunicationsPage() {
                   audience: audience ? (audience as any) : undefined,
                   subject: sendChannel === 'EMAIL' ? sendSubject : undefined,
                   body: sendBody || undefined,
-                  to: sendTo
-                    .split(',')
-                    .map((value) => value.trim())
-                    .filter(Boolean),
+                  to: parsedSendRecipients,
                 })
               }
-              disabled={!canWrite || !churchId || (!sendTo && !audience) || isSendingMessage}
+              disabled={
+                !canWrite ||
+                !churchId ||
+                (!sendTo && !audience) ||
+                isSendingMessage ||
+                (sendPreviewEnabled && (sendPreview?.deliverable ?? 0) === 0)
+              }
             >
               {isSendingMessage ? 'Sending…' : 'Send'}
             </Button>
           </div>
+          {sendPreviewEnabled ? (
+            <div className="mt-3 rounded-md border border-border bg-muted/40 p-3 text-xs text-muted">
+              <p>
+                Preview: {sendPreview?.deliverable ?? 0} deliverable of {sendPreview?.total ?? 0}. Blocked:{' '}
+                {sendPreview?.blockedCount ?? 0} (suppressed {sendPreview?.suppressed ?? 0}, opted out{' '}
+                {sendPreview?.optedOut ?? 0}, invalid {sendPreview?.invalid ?? 0}).
+              </p>
+              <p className="mt-1">{sendPreview?.unsubscribeMechanism ?? 'Unsubscribe control not configured.'}</p>
+            </div>
+          ) : null}
         </Card>
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Schedule message</h2>
           <p className="mt-1 text-sm text-muted">Draft, review, and queue messages to be sent later (use dispatch in your cron).</p>
+          <div className="mt-4 rounded-md border border-border bg-muted/40 p-3">
+            <p className="text-sm font-medium text-foreground">AI drafting assistant (human review required)</p>
+            <div className="mt-2 grid gap-2 md:grid-cols-2">
+              <Input
+                placeholder="Draft objective (e.g. remind volunteers for Sunday service)"
+                value={draftObjective}
+                onChange={(event) => setDraftObjective(event.target.value)}
+              />
+              <Input
+                placeholder="Audience hint (optional)"
+                value={draftAudienceHint}
+                onChange={(event) => setDraftAudienceHint(event.target.value)}
+              />
+              <select
+                className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+                value={draftTone}
+                onChange={(event) => setDraftTone(event.target.value as any)}
+              >
+                <option value="PASTORAL">Pastoral</option>
+                <option value="INFORMATIVE">Informative</option>
+                <option value="FRIENDLY">Friendly</option>
+                <option value="URGENT">Urgent</option>
+              </select>
+              <select
+                className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+                value={draftProvider}
+                onChange={(event) => setDraftProvider(event.target.value as any)}
+              >
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Claude</option>
+                <option value="google">Gemini</option>
+              </select>
+              <Button
+                onClick={() =>
+                  generateDraft({
+                    churchId,
+                    channel: scheduleChannel as any,
+                    objective: draftObjective,
+                    audienceHint: draftAudienceHint || undefined,
+                    tone: draftTone,
+                    provider: draftProvider,
+                  })
+                }
+                disabled={!canWrite || !churchId || draftObjective.trim().length < 10 || isGeneratingDraft}
+              >
+                {isGeneratingDraft ? 'Drafting…' : 'Draft with AI'}
+              </Button>
+            </div>
+            {draftChecklist.length ? (
+              <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-muted">
+                {draftChecklist.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <select
               className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
@@ -540,13 +722,16 @@ export default function CommunicationsPage() {
                   body: scheduleBody || undefined,
                   sendAt: scheduleSendAt ? new Date(scheduleSendAt) : new Date(),
                   initialStatus: scheduleInitialStatus,
-                  to: scheduleTo
-                    .split(',')
-                    .map((value) => value.trim())
-                    .filter(Boolean),
+                  to: parsedScheduleRecipients,
                 })
               }
-              disabled={!canWrite || !churchId || (!scheduleTo && !scheduleAudience) || isScheduling}
+              disabled={
+                !canWrite ||
+                !churchId ||
+                (!scheduleTo && !scheduleAudience) ||
+                isScheduling ||
+                (schedulePreviewEnabled && (schedulePreview?.deliverable ?? 0) === 0)
+              }
             >
               {isScheduling ? 'Saving…' : scheduleInitialStatus === 'QUEUED' ? 'Queue' : 'Save'}
             </Button>
@@ -554,6 +739,16 @@ export default function CommunicationsPage() {
               {isDispatching ? 'Dispatching…' : 'Dispatch due now'}
             </Button>
           </div>
+          {schedulePreviewEnabled ? (
+            <div className="mt-3 rounded-md border border-border bg-muted/40 p-3 text-xs text-muted">
+              <p>
+                Preview: {schedulePreview?.deliverable ?? 0} deliverable of {schedulePreview?.total ?? 0}. Blocked:{' '}
+                {schedulePreview?.blockedCount ?? 0} (suppressed {schedulePreview?.suppressed ?? 0}, opted out{' '}
+                {schedulePreview?.optedOut ?? 0}, invalid {schedulePreview?.invalid ?? 0}).
+              </p>
+              <p className="mt-1">{schedulePreview?.unsubscribeMechanism ?? 'Unsubscribe control not configured.'}</p>
+            </div>
+          ) : null}
           {lastScheduleBatchKey ? (
             <p className="mt-3 text-xs text-muted">
               Batch key: <span className="font-mono">{lastScheduleBatchKey}</span>
@@ -608,6 +803,109 @@ export default function CommunicationsPage() {
             ))}
             {!schedules?.length && <p>No scheduled messages yet.</p>}
           </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold">Schedule calendar</h2>
+              <p className="mt-1 text-sm text-muted">Upcoming scheduled sends grouped by day (church timezone).</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                className="h-10 rounded-md border border-border bg-white px-3 text-sm"
+                value={calendarWindowDays}
+                onChange={(e) => setCalendarWindowDays(e.target.value)}
+              >
+                <option value="14">Next 14 days</option>
+                <option value="30">Next 30 days</option>
+                <option value="60">Next 60 days</option>
+              </select>
+              <select
+                className="h-10 rounded-md border border-border bg-white px-3 text-sm"
+                value={calendarChannel}
+                onChange={(e) => setCalendarChannel(e.target.value as any)}
+              >
+                <option value="ALL">All channels</option>
+                {channelOptions.map((channel) => (
+                  <option key={channel} value={channel}>
+                    {channel}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-2 md:grid-cols-7">
+            {calendarDays.map((day) => (
+              <div key={day.key} className="rounded-md border border-border bg-white p-3">
+                <div className="text-xs font-medium text-foreground">{day.label}</div>
+                <div className="mt-2 space-y-1 text-xs text-muted">
+                  {Object.keys(day.counts).length ? (
+                    <>
+                      {Object.entries(day.counts)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([status, count]) => (
+                          <div key={status} className="flex items-center justify-between gap-2">
+                            <span>{status}</span>
+                            <span className="font-mono text-foreground">{count}</span>
+                          </div>
+                        ))}
+                    </>
+                  ) : (
+                    <div>No sends</div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Delivery analytics (last 30 days)</h2>
+          <p className="mt-1 text-sm text-muted">Counts based on communication messages sent/failed/queued.</p>
+
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[520px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-border text-xs text-muted">
+                  <th className="py-2 pr-4">Channel</th>
+                  <th className="py-2 pr-4">SENT</th>
+                  <th className="py-2 pr-4">FAILED</th>
+                  <th className="py-2 pr-4">QUEUED</th>
+                </tr>
+              </thead>
+              <tbody>
+                {channelOptions.map((channel) => (
+                  <tr key={channel} className="border-b border-border last:border-0">
+                    <td className="py-2 pr-4 font-medium">{channel}</td>
+                    <td className="py-2 pr-4 font-mono">{analyticsTotals[`${channel}:SENT`] ?? 0}</td>
+                    <td className="py-2 pr-4 font-mono">{analyticsTotals[`${channel}:FAILED`] ?? 0}</td>
+                    <td className="py-2 pr-4 font-mono">{analyticsTotals[`${channel}:QUEUED`] ?? 0}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {(commsAnalytics?.topFailures?.length ?? 0) > 0 ? (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold">Top failures</h3>
+              <div className="mt-2 space-y-2">
+                {commsAnalytics?.topFailures?.map((row, idx) => (
+                  <div key={`${row.source}-${row.channel}-${idx}`} className="rounded-md border border-border bg-white p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="text-xs text-muted">
+                        {row.source} · {row.channel}
+                      </div>
+                      <div className="text-xs font-mono text-foreground">{row.count}</div>
+                    </div>
+                    <div className="mt-1 text-sm text-foreground">{row.error}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </Card>
 
         <Card className="p-6">

@@ -3,7 +3,7 @@ import { router, protectedProcedure } from '../trpc';
 import { prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { generateTextSimple, type AIProvider } from '@faithflow-ai/ai';
-import { AuditActorType, UserRole } from '@faithflow-ai/database';
+import { AuditActorType, CommunicationChannel, UserRole } from '@faithflow-ai/database';
 import { recordAuditLog } from '../audit';
 import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 
@@ -53,6 +53,40 @@ function redactEmail(value: string) {
 
 function redactLabel(label: string) {
   return redactEmail(label);
+}
+
+function parseJsonDraft(raw: string) {
+  const trimmed = raw.trim();
+  const unwrapped = trimmed.startsWith('```')
+    ? trimmed
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/\s*```$/i, '')
+        .trim()
+    : trimmed;
+  try {
+    const json = JSON.parse(unwrapped) as {
+      subject?: string;
+      body?: string;
+      reviewChecklist?: string[];
+    };
+    return {
+      subject: typeof json.subject === 'string' ? json.subject.trim() : '',
+      body: typeof json.body === 'string' ? json.body.trim() : '',
+      reviewChecklist: Array.isArray(json.reviewChecklist)
+        ? json.reviewChecklist.map((entry) => String(entry).trim()).filter(Boolean)
+        : [],
+    };
+  } catch {
+    return {
+      subject: '',
+      body: trimmed,
+      reviewChecklist: [
+        'Confirm message accuracy and theology before sending.',
+        'Confirm no private member details are present.',
+      ],
+    };
+  }
 }
 
 async function collectSources(input: {
@@ -261,6 +295,105 @@ export const aiRouter = router({
         model,
         answer,
         sources,
+        createdAt: interaction.createdAt,
+      };
+    }),
+
+  generateCommunicationDraft: protectedProcedure
+    .input(
+      z.object({
+        churchId: z.string().optional(),
+        channel: z.nativeEnum(CommunicationChannel),
+        objective: z.string().trim().min(10).max(1200),
+        audienceHint: z.string().trim().max(300).optional(),
+        tone: z.enum(['PASTORAL', 'INFORMATIVE', 'URGENT', 'FRIENDLY']).default('PASTORAL'),
+        provider: providerSchema.optional(),
+        model: z.string().trim().max(120).optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const staff = await requireStaff(ctx.tenantId!, ctx.userId!);
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
+      await ensureFeatureWriteAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Communications are not enabled on your current plan.'
+      );
+
+      const provider = (input.provider ?? 'openai') as AIProvider;
+      const model = input.model?.trim() || defaultModel(provider);
+      const sources = await collectSources({
+        tenantId: ctx.tenantId!,
+        churchId: input.churchId ?? null,
+        question: input.objective,
+        allowFinanceSources: staff.role === UserRole.ADMIN,
+      });
+
+      const prompt = [
+        'You are FaithFlow AI generating a church communication draft.',
+        'Return ONLY valid JSON with keys: subject, body, reviewChecklist.',
+        'subject: short line; leave empty for SMS/WhatsApp.',
+        'body: ready-to-send message using plain language; no markdown.',
+        'reviewChecklist: array of 3-5 short review items for a human approver.',
+        'Do not include private member data, emails, phone numbers, addresses, or legal claims.',
+        'Do not guarantee outcomes or imply emergency unless explicitly asked.',
+        `Channel: ${input.channel}`,
+        `Tone: ${input.tone}`,
+        `Audience hint: ${input.audienceHint ?? 'General church audience'}`,
+        `Objective: ${input.objective}`,
+      ].join('\n');
+
+      const answer = await generateTextSimple({
+        provider,
+        model,
+        prompt,
+        temperature: 0.2,
+        maxTokens: 700,
+      });
+
+      const parsed = parseJsonDraft(answer);
+      if (!parsed.body) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'AI draft did not include message body' });
+      }
+
+      const interaction = await prisma.aiInteraction.create({
+        data: {
+          tenantId: ctx.tenantId!,
+          churchId: input.churchId,
+          clerkUserId: ctx.userId,
+          provider,
+          model,
+          question: `COMMUNICATION_DRAFT: ${input.objective}`,
+          answer,
+          sources: sources as any,
+        },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        churchId: input.churchId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'ai.communication_draft_generated',
+        targetType: 'AiInteraction',
+        targetId: interaction.id,
+        metadata: {
+          provider,
+          model,
+          channel: input.channel,
+          tone: input.tone,
+          sourcesCount: sources.length,
+        },
+      });
+
+      return {
+        id: interaction.id,
+        provider,
+        model,
+        channel: input.channel,
+        subject: parsed.subject,
+        body: parsed.body,
+        reviewChecklist: parsed.reviewChecklist,
         createdAt: interaction.createdAt,
       };
     }),

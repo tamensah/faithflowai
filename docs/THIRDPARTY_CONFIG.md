@@ -56,12 +56,16 @@ This doc lists the required provider‑side configuration to run the alpha. Once
 - Configure the SMS webhook on the phone number:
   - `POST /webhooks/twilio/sms`
 - (Optional) Enable WhatsApp sandbox or business‑approved sender.
+- Configure WhatsApp inbound webhook (sandbox or production sender):
+  - `POST /webhooks/twilio/whatsapp`
 - Required env:
   - `TWILIO_ACCOUNT_SID`
   - `TWILIO_AUTH_TOKEN`
   - `TWILIO_SMS_NUMBER`
   - `TWILIO_WHATSAPP_NUMBER` (for WhatsApp outbound)
   - `TWILIO_WEBHOOK_URL` (if you need strict signature validation behind a proxy)
+  - `TWILIO_SMS_WEBHOOK_URL` (optional, overrides `TWILIO_WEBHOOK_URL` for SMS signature validation)
+  - `TWILIO_WHATSAPP_WEBHOOK_URL` (optional, overrides `TWILIO_WEBHOOK_URL` for WhatsApp signature validation)
 
 Optional communications policy env:
 
@@ -72,6 +76,7 @@ Optional communications policy env:
 - `COMMS_UNSUBSCRIBE_SECRET` (required to generate/verify one-click unsubscribe links)
 
 When enabled, queued SMS/WhatsApp messages are automatically deferred out of quiet hours using the church timezone.
+Inbound STOP/unsubscribe keywords (`STOP`, `UNSUBSCRIBE`, `CANCEL`, etc.) are processed on Twilio webhooks and create channel suppressions automatically.
 
 ## 5. Resend (Email Delivery)
 

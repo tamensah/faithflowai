@@ -45,6 +45,7 @@ import { extractBearerToken, verifyClerkToken } from './auth';
 import { provisionTenant } from './context';
 import {
   AuditActorType,
+  CommunicationChannel,
   CommunicationSuppressionReason,
   DisputeEvidenceType,
   EventVisibility,
@@ -1028,12 +1029,19 @@ async function start() {
     }
   });
 
-  server.post('/webhooks/twilio/sms', async (request, reply) => {
+  const stopKeywords = new Set(['STOP', 'STOPALL', 'UNSUBSCRIBE', 'CANCEL', 'END', 'QUIT']);
+
+  async function handleTwilioInbound(request: any, reply: any) {
     const body = (request.body ?? {}) as Record<string, string>;
     const from = body.From ?? '';
     const to = body.To ?? '';
     const messageBody = body.Body ?? '';
     const messageSid = body.MessageSid ?? undefined;
+    const uppercaseBody = messageBody.trim().toUpperCase();
+    const inboundChannel =
+      from.startsWith('whatsapp:') || to.startsWith('whatsapp:') || request.raw.url.includes('/whatsapp')
+        ? CommunicationChannel.WHATSAPP
+        : CommunicationChannel.SMS;
 
     const signature = Array.isArray(request.headers['x-twilio-signature'])
       ? request.headers['x-twilio-signature'][0]
@@ -1044,9 +1052,11 @@ async function start() {
         reply.type('text/xml').send(buildTwimlMessage('Missing signature.'));
         return;
       }
-      const url =
-        env.TWILIO_WEBHOOK_URL ??
-        `${request.protocol}://${request.headers.host}${request.raw.url}`;
+      const configuredUrl =
+        inboundChannel === CommunicationChannel.WHATSAPP
+          ? env.TWILIO_WHATSAPP_WEBHOOK_URL ?? env.TWILIO_WEBHOOK_URL
+          : env.TWILIO_SMS_WEBHOOK_URL ?? env.TWILIO_WEBHOOK_URL;
+      const url = configuredUrl ?? `${request.protocol}://${request.headers.host}${request.raw.url}`;
       const valid = verifyTwilioSignature({
         url,
         params: body,
@@ -1067,6 +1077,82 @@ async function start() {
       where: { phoneNumber: normalizedTo },
       include: { church: { include: { organization: true } } },
     });
+
+    const looksLikeStop = stopKeywords.has(uppercaseBody);
+    if (looksLikeStop) {
+      let tenantId = number?.church?.organization.tenantId ?? null;
+      let churchId = number?.churchId ?? null;
+
+      if (!tenantId) {
+        const recentMessage = await prisma.communicationMessage.findFirst({
+          where: {
+            channel: inboundChannel,
+            to: normalizedFrom,
+            createdAt: { gte: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000) },
+          },
+          orderBy: { createdAt: 'desc' },
+          include: { church: { include: { organization: true } } },
+        });
+        tenantId = recentMessage?.church.organization.tenantId ?? null;
+        churchId = recentMessage?.churchId ?? null;
+      }
+
+      if (!tenantId || !churchId) {
+        reply
+          .type('text/xml')
+          .send(buildTwimlMessage('We could not process your unsubscribe request for this number. Contact your church admin.'));
+        return;
+      }
+
+      const suppression = await prisma.communicationSuppression.upsert({
+        where: {
+          tenantId_channel_address: {
+            tenantId,
+            channel: inboundChannel,
+            address: normalizedFrom,
+          },
+        },
+        update: { reason: CommunicationSuppressionReason.USER_UNSUBSCRIBE },
+        create: {
+          tenantId,
+          channel: inboundChannel,
+          address: normalizedFrom,
+          reason: CommunicationSuppressionReason.USER_UNSUBSCRIBE,
+        },
+      });
+
+      const prefChannel = inboundChannel === CommunicationChannel.SMS ? NotificationChannel.SMS : NotificationChannel.WHATSAPP;
+      const members = await prisma.member.findMany({
+        where: { churchId, phone: normalizedFrom },
+        select: { id: true },
+      });
+      for (const member of members) {
+        await prisma.notificationPreference.upsert({
+          where: { memberId_channel: { memberId: member.id, channel: prefChannel } },
+          update: { enabled: false },
+          create: { memberId: member.id, channel: prefChannel, enabled: false },
+        });
+      }
+
+      await recordAuditLog({
+        tenantId,
+        churchId,
+        actorType: AuditActorType.WEBHOOK,
+        action: 'communications.unsubscribe_keyword',
+        targetType: 'CommunicationSuppression',
+        targetId: suppression.id,
+        metadata: {
+          channel: inboundChannel,
+          address: normalizedFrom,
+          keyword: uppercaseBody,
+          memberLinks: members.length,
+        },
+      });
+
+      const channelLabel = inboundChannel === CommunicationChannel.SMS ? 'SMS' : 'WhatsApp';
+      reply.type('text/xml').send(buildTwimlMessage(`You are unsubscribed from ${channelLabel} messages.`));
+      return;
+    }
 
     if (!number || !number.church) {
       reply.type('text/xml').send(buildTwimlMessage('This giving number is not configured.'));
@@ -1091,9 +1177,7 @@ async function start() {
         where: { id: messageRecord.id },
         data: { status: 'FAILED', error: 'Missing amount' },
       });
-      reply
-        .type('text/xml')
-        .send(buildTwimlMessage('Reply with an amount, e.g. GIVE 50 USD.'));
+      reply.type('text/xml').send(buildTwimlMessage('Reply with an amount, e.g. GIVE 50 USD.'));
       return;
     }
 
@@ -1106,9 +1190,7 @@ async function start() {
         where: { id: messageRecord.id },
         data: { status: 'FAILED', error: 'Missing email for Paystack' },
       });
-      reply
-        .type('text/xml')
-        .send(buildTwimlMessage('Paystack requires an email. Reply like: GIVE 50 GHS you@email.com'));
+      reply.type('text/xml').send(buildTwimlMessage('Paystack requires an email. Reply like: GIVE 50 GHS you@email.com'));
       return;
     }
 
@@ -1162,11 +1244,12 @@ async function start() {
         where: { id: messageRecord.id },
         data: { status: 'FAILED', error: error instanceof Error ? error.message : 'Checkout failed' },
       });
-      reply
-        .type('text/xml')
-        .send(buildTwimlMessage('Unable to start checkout. Please try again later.'));
+      reply.type('text/xml').send(buildTwimlMessage('Unable to start checkout. Please try again later.'));
     }
-  });
+  }
+
+  server.post('/webhooks/twilio/sms', handleTwilioInbound);
+  server.post('/webhooks/twilio/whatsapp', handleTwilioInbound);
 
   server.get('/health', async () => ({ ok: true, timestamp: new Date().toISOString() }));
 

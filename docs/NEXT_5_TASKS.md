@@ -41,9 +41,9 @@ Acceptance criteria:
 ## 3) Communications Foundations (Activation + Retention)
 
 - [~] Consent + quiet hours enforcement (server-side)
-- [~] Suppression list + unsubscribe flows (per channel)
+- [x] Suppression list + unsubscribe flows (per channel, with admin reporting baseline + STOP keyword handling)
 - [~] Transactional templates (welcome, trial ending, failed payment, receipts)
-- [~] Scheduling UX upgrades (draft/review/approve + analytics)
+- [x] Scheduling UX upgrades (draft/review/approve + analytics + calendar view)
 
 Acceptance criteria:
 - No outbound SMS/WhatsApp/email is sent if the member opted out.

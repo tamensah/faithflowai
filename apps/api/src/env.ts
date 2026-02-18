@@ -30,6 +30,8 @@ const envSchema = z.object({
   TWILIO_AUTH_TOKEN: z.string().optional(),
   TWILIO_SMS_NUMBER: z.string().optional(),
   TWILIO_WEBHOOK_URL: z.string().url().optional(),
+  TWILIO_SMS_WEBHOOK_URL: z.string().url().optional(),
+  TWILIO_WHATSAPP_WEBHOOK_URL: z.string().url().optional(),
   NEXT_PUBLIC_WEB_URL: z.string().url().optional(),
   NEXT_PUBLIC_ADMIN_URL: z.string().url().optional(),
   INTEGRATION_API_KEY: z.string().optional(),

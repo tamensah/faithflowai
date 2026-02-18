@@ -65,16 +65,18 @@ Deliverables:
 - [ ] Resend transactional templates:
   - [~] Welcome/onboarding
   - [~] Trial ending reminders
-  - [ ] Receipt resend / tithing statement notice
-  - [ ] Failed payment / past-due notices
+  - [x] Receipt resend / tithing statement notice
+  - [x] Failed payment / past-due notices
 - [ ] Messaging consent + compliance:
   - [x] Opt-in capture per channel (email/sms/whatsapp/push)
   - [x] Quiet hours per church + per member override
-  - [~] Suppression list and unsubscribe flows
-- [ ] Campaign scheduling UX:
-  - [ ] Calendar view
+  - [x] Suppression list and unsubscribe flows
+    - [x] Admin suppression summary (by channel/reason + recent user unsubscribes)
+    - [x] STOP keyword unsubscribe for inbound Twilio SMS/WhatsApp webhooks
+- [x] Campaign scheduling UX:
+  - [x] Calendar view
   - [x] Draft -> review -> approve -> schedule workflow
-  - [ ] Delivery analytics improvements
+  - [x] Delivery analytics improvements
 
 Deliverables:
 - Churches can send compliant comms and automate reminders.
@@ -115,8 +117,8 @@ Deliverables:
   - [ ] Lapsed donor watchlist
   - [ ] Volunteer gap summaries
 - [ ] Guardrails:
-  - [ ] Human review UI (approve before sending comms)
-  - [ ] Safety filters for sensitive content
+  - [x] Human review UI (approve before sending comms)
+  - [~] Safety filters for sensitive content
 
 Deliverables:
 - AI reduces work and is auditable; no “black box” decisions.

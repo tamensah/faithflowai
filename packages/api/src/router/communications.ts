@@ -55,6 +55,17 @@ const scheduleSchema = sendSchema.extend({
     .default('QUEUED'),
 });
 
+const previewAudienceSchema = z
+  .object({
+    churchId: z.string(),
+    channel: z.nativeEnum(CommunicationChannel),
+    to: z.array(z.string()).optional(),
+    audience: audienceSchema.optional(),
+  })
+  .refine((data) => (data.to && data.to.length > 0) || data.audience, {
+    message: 'Provide recipients or an audience',
+  });
+
 const createDripSchema = z.object({
   churchId: z.string(),
   name: z.string().min(2),
@@ -142,6 +153,24 @@ function appendUnsubscribeFooter(html: string, unsubscribeUrl: string | null) {
     `<a href="${unsubscribeUrl}" style="color:#0f172a;text-decoration:underline">Unsubscribe</a>`,
     `</p>`,
   ].join('\n');
+}
+
+function appendSmsUnsubscribeFooter(body: string, unsubscribeUrl: string | null) {
+  const normalized = body.toLowerCase();
+  if (normalized.includes('reply stop') || normalized.includes('unsubscribe')) return body;
+  const oneClick = unsubscribeUrl ? ` Manage: ${unsubscribeUrl}` : '';
+  return `${body}\n\nReply STOP to opt out.${oneClick}`;
+}
+
+function decorateMessageWithUnsubscribe(input: {
+  channel: CommunicationChannel;
+  body: string;
+  unsubscribeUrl: string | null;
+}) {
+  if (input.channel === CommunicationChannel.EMAIL) {
+    return appendUnsubscribeFooter(input.body, input.unsubscribeUrl);
+  }
+  return appendSmsUnsubscribeFooter(input.body, input.unsubscribeUrl);
 }
 
 async function loadSuppressionsAndPrefs(input: {
@@ -285,6 +314,39 @@ export const communicationsRouter = router({
         orderBy: { createdAt: 'desc' },
         take: input?.limit ?? 50,
       });
+    }),
+
+  suppressionSummary: protectedProcedure
+    .input(z.object({ days: z.number().int().min(1).max(365).default(30) }).optional())
+    .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
+
+      const since = new Date(Date.now() - (input?.days ?? 30) * 24 * 60 * 60 * 1000);
+      const byChannelReason = await prisma.communicationSuppression.groupBy({
+        by: ['channel', 'reason'],
+        where: { tenantId: ctx.tenantId! },
+        _count: true,
+      });
+      const recentUnsubscribes = await prisma.communicationSuppression.groupBy({
+        by: ['channel'],
+        where: {
+          tenantId: ctx.tenantId!,
+          reason: CommunicationSuppressionReason.USER_UNSUBSCRIBE,
+          createdAt: { gte: since },
+        },
+        _count: true,
+      });
+
+      return {
+        since,
+        byChannelReason,
+        recentUnsubscribes,
+      };
     }),
 
   addSuppression: protectedProcedure
@@ -472,6 +534,202 @@ export const communicationsRouter = router({
       });
     }),
 
+  previewAudience: protectedProcedure.input(previewAudienceSchema).query(async ({ input, ctx }) => {
+    await ensureFeatureReadAccess(
+      ctx.tenantId!,
+      'communications_enabled',
+      'Your subscription does not include communications.'
+    );
+    await requireTenantStaff(ctx.tenantId!, ctx.userId!);
+
+    const church = await prisma.church.findFirst({
+      where: { id: input.churchId, organization: { tenantId: ctx.tenantId! } },
+    });
+    if (!church) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Church not found' });
+    }
+
+    const recipients = new Map<string, RecipientContext>();
+    if (input.audience) {
+      const resolved = await resolveAudienceRecipients({
+        churchId: input.churchId,
+        channel: input.channel,
+        audience: input.audience,
+      });
+      for (const [to, context] of resolved.recipients.entries()) {
+        recipients.set(to, context);
+      }
+    }
+    for (const recipient of input.to ?? []) {
+      const trimmed = recipient.trim();
+      if (!trimmed) continue;
+      if (!recipients.has(trimmed)) {
+        recipients.set(trimmed, {
+          email: input.channel === CommunicationChannel.EMAIL ? trimmed : undefined,
+          phone: input.channel !== CommunicationChannel.EMAIL ? trimmed : undefined,
+          churchName: church.name,
+        });
+      }
+    }
+
+    const recipientList = Array.from(recipients.entries()).map(([to, context]) => ({
+      to,
+      memberId: context.memberId ?? null,
+    }));
+    const { suppressionMap, prefMap } = await loadSuppressionsAndPrefs({
+      tenantId: ctx.tenantId!,
+      channel: input.channel,
+      recipients: recipientList,
+    });
+
+    let deliverable = 0;
+    let suppressed = 0;
+    let optedOut = 0;
+    let invalid = 0;
+    const blocked: Array<{ to: string; reason: string; memberId?: string | null }> = [];
+
+    for (const [to, context] of recipients.entries()) {
+      const normalizedAddress = normalizeRecipientAddress(input.channel, to);
+      if (!normalizedAddress) {
+        invalid += 1;
+        continue;
+      }
+      const suppressionReason = suppressionMap.get(normalizedAddress);
+      if (suppressionReason) {
+        suppressed += 1;
+        if (blocked.length < 100) {
+          blocked.push({ to, reason: `Suppressed (${suppressionReason})`, memberId: context.memberId ?? null });
+        }
+        continue;
+      }
+      const memberPref = context.memberId ? prefMap.get(context.memberId) : undefined;
+      if (memberPref === false) {
+        optedOut += 1;
+        if (blocked.length < 100) {
+          blocked.push({ to, reason: 'Recipient opted out for this channel', memberId: context.memberId ?? null });
+        }
+        continue;
+      }
+      deliverable += 1;
+    }
+
+    return {
+      channel: input.channel,
+      total: recipients.size,
+      deliverable,
+      blockedCount: suppressed + optedOut + invalid,
+      suppressed,
+      optedOut,
+      invalid,
+      blocked,
+      unsubscribeMechanism:
+        input.channel === CommunicationChannel.EMAIL
+          ? 'One-click unsubscribe link'
+          : 'Reply STOP keyword and optional unsubscribe link',
+    };
+  }),
+
+  analytics: protectedProcedure
+    .input(
+      z.object({
+        churchId: z.string().optional(),
+        days: z.number().int().min(1).max(365).default(30),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
+
+      const churches = await prisma.church.findMany({
+        where: {
+          organization: { tenantId: ctx.tenantId! },
+          ...(input.churchId ? { id: input.churchId } : {}),
+        },
+        select: { id: true },
+      });
+      if (input.churchId && churches.length === 0) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Church not found' });
+      }
+
+      const churchIds = churches.map((c) => c.id);
+      const to = new Date();
+      const from = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+
+      if (churchIds.length === 0) {
+        return { from, to, messagesDaily: [], schedulesDaily: [], topFailures: [] };
+      }
+
+      const messagesDaily = await prisma.$queryRaw<
+        Array<{ day: Date; channel: CommunicationChannel; status: CommunicationStatus; count: number }>
+      >(Prisma.sql`
+        SELECT
+          date_trunc('day', COALESCE("sentAt", "createdAt"))::date AS day,
+          "channel",
+          "status",
+          COUNT(*)::int AS count
+        FROM "CommunicationMessage"
+        WHERE "churchId" IN (${Prisma.join(churchIds)})
+          AND "createdAt" >= ${from}
+        GROUP BY 1, 2, 3
+        ORDER BY 1 ASC
+      `);
+
+      const schedulesDaily = await prisma.$queryRaw<
+        Array<{ day: Date; channel: CommunicationChannel; status: CommunicationScheduleStatus; count: number }>
+      >(Prisma.sql`
+        SELECT
+          date_trunc('day', "sendAt")::date AS day,
+          "channel",
+          "status",
+          COUNT(*)::int AS count
+        FROM "CommunicationSchedule"
+        WHERE "churchId" IN (${Prisma.join(churchIds)})
+          AND "sendAt" >= ${from}
+          AND "sendAt" <= ${to}
+        GROUP BY 1, 2, 3
+        ORDER BY 1 ASC
+      `);
+
+      const topFailures = await prisma.$queryRaw<
+        Array<{ source: 'MESSAGE' | 'SCHEDULE'; channel: CommunicationChannel; error: string; count: number }>
+      >(Prisma.sql`
+        (
+          SELECT
+            'MESSAGE'::text AS source,
+            "channel",
+            COALESCE(NULLIF("error", ''), 'Unknown error') AS error,
+            COUNT(*)::int AS count
+          FROM "CommunicationMessage"
+          WHERE "churchId" IN (${Prisma.join(churchIds)})
+            AND "status" = 'FAILED'
+            AND "createdAt" >= ${from}
+          GROUP BY 2, 3
+        )
+        UNION ALL
+        (
+          SELECT
+            'SCHEDULE'::text AS source,
+            "channel",
+            COALESCE(NULLIF("error", ''), 'Unknown error') AS error,
+            COUNT(*)::int AS count
+          FROM "CommunicationSchedule"
+          WHERE "churchId" IN (${Prisma.join(churchIds)})
+            AND "status" = 'FAILED'
+            AND "sendAt" >= ${from}
+            AND "sendAt" <= ${to}
+          GROUP BY 2, 3
+        )
+        ORDER BY count DESC
+        LIMIT 10
+      `);
+
+      return { from, to, messagesDaily, schedulesDaily, topFailures };
+    }),
+
   schedules: protectedProcedure
     .input(z.object({ churchId: z.string().optional(), limit: z.number().min(1).max(200).default(50) }))
     .query(async ({ input, ctx }) => {
@@ -485,6 +743,33 @@ export const communicationsRouter = router({
         where: {
           church: { organization: { tenantId: ctx.tenantId! } },
           ...(input.churchId ? { churchId: input.churchId } : {}),
+        },
+        orderBy: { sendAt: 'asc' },
+        take: input.limit,
+      });
+    }),
+
+  schedulesRange: protectedProcedure
+    .input(
+      z.object({
+        churchId: z.string().optional(),
+        from: z.coerce.date(),
+        to: z.coerce.date(),
+        limit: z.number().int().min(1).max(2000).default(500),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(
+        ctx.tenantId!,
+        'communications_enabled',
+        'Your subscription does not include communications.'
+      );
+      await requireTenantStaff(ctx.tenantId!, ctx.userId!);
+      return prisma.communicationSchedule.findMany({
+        where: {
+          church: { organization: { tenantId: ctx.tenantId! } },
+          ...(input.churchId ? { churchId: input.churchId } : {}),
+          sendAt: { gte: input.from, lte: input.to },
         },
         orderBy: { sendAt: 'asc' },
         take: input.limit,
@@ -573,20 +858,20 @@ export const communicationsRouter = router({
       const memberPref = context.memberId ? prefMap.get(context.memberId) : undefined;
       const optedOut = memberPref === false;
 
-      const unsubscribeToken =
-        input.channel === CommunicationChannel.EMAIL && normalizedAddress
-          ? createUnsubscribeToken({
-              tenantId: ctx.tenantId!,
-              channel: input.channel,
-              address: normalizedAddress,
-              memberId: context.memberId ?? null,
-            })
-          : null;
+      const unsubscribeToken = normalizedAddress
+        ? createUnsubscribeToken({
+            tenantId: ctx.tenantId!,
+            channel: input.channel,
+            address: normalizedAddress,
+            memberId: context.memberId ?? null,
+          })
+        : null;
       const unsubscribeUrl = unsubscribeToken ? buildUnsubscribeUrl(unsubscribeToken) : null;
-      const resolvedBody =
-        input.channel === CommunicationChannel.EMAIL
-          ? appendUnsubscribeFooter(resolvedBodyRaw, unsubscribeUrl)
-          : resolvedBodyRaw;
+      const resolvedBody = decorateMessageWithUnsubscribe({
+        channel: input.channel,
+        body: resolvedBodyRaw,
+        unsubscribeUrl,
+      });
       scheduleRecords.push({
         churchId: input.churchId,
         templateId: template?.id ?? null,
@@ -939,20 +1224,20 @@ export const communicationsRouter = router({
         const resolvedSubject = subjectBase ? renderTemplate(subjectBase, context) : undefined;
         const resolvedBodyRaw = renderTemplate(bodyBase, context);
         const normalizedAddress = normalizeRecipientAddress(step.channel, recipient);
-        const unsubscribeToken =
-          step.channel === CommunicationChannel.EMAIL && normalizedAddress
-            ? createUnsubscribeToken({
-                tenantId: ctx.tenantId!,
-                channel: step.channel,
-                address: normalizedAddress,
-                memberId: context.memberId ?? null,
-              })
-            : null;
+        const unsubscribeToken = normalizedAddress
+          ? createUnsubscribeToken({
+              tenantId: ctx.tenantId!,
+              channel: step.channel,
+              address: normalizedAddress,
+              memberId: context.memberId ?? null,
+            })
+          : null;
         const unsubscribeUrl = unsubscribeToken ? buildUnsubscribeUrl(unsubscribeToken) : null;
-        const resolvedBody =
-          step.channel === CommunicationChannel.EMAIL
-            ? appendUnsubscribeFooter(resolvedBodyRaw, unsubscribeUrl)
-            : resolvedBodyRaw;
+        const resolvedBody = decorateMessageWithUnsubscribe({
+          channel: step.channel,
+          body: resolvedBodyRaw,
+          unsubscribeUrl,
+        });
 
         await prisma.communicationSchedule.create({
           data: {
@@ -1085,20 +1370,20 @@ export const communicationsRouter = router({
         continue;
       }
 
-      const unsubscribeToken =
-        input.channel === CommunicationChannel.EMAIL && normalizedAddress
-          ? createUnsubscribeToken({
-              tenantId: ctx.tenantId!,
-              channel: input.channel,
-              address: normalizedAddress,
-              memberId: context.memberId ?? null,
-            })
-          : null;
+      const unsubscribeToken = normalizedAddress
+        ? createUnsubscribeToken({
+            tenantId: ctx.tenantId!,
+            channel: input.channel,
+            address: normalizedAddress,
+            memberId: context.memberId ?? null,
+          })
+        : null;
       const unsubscribeUrl = unsubscribeToken ? buildUnsubscribeUrl(unsubscribeToken) : null;
-      const resolvedBody =
-        input.channel === CommunicationChannel.EMAIL
-          ? appendUnsubscribeFooter(resolvedBodyRaw, unsubscribeUrl)
-          : resolvedBodyRaw;
+      const resolvedBody = decorateMessageWithUnsubscribe({
+        channel: input.channel,
+        body: resolvedBodyRaw,
+        unsubscribeUrl,
+      });
 
       const message = await prisma.communicationMessage.create({
         data: {

@@ -6,6 +6,7 @@ This guide explains how the AI layer works in FaithFlow AI today, how it is gove
 
 - **Admin assistant ("Ask FaithFlow")**: staff-only Q&A over tenant data with citations and audit logging.
 - **Starter insights**: quick operational metrics (attendance, giving, volunteer gaps) for the last 30 days.
+- **Communication draft assistant**: AI-generated outbound message drafts with required human review checklist.
 - **Interaction history**: recent questions/answers are stored per tenant.
 
 Where it lives:
@@ -79,6 +80,7 @@ tRPC procedures (router: `ai`):
 - `ai.starterInsights` (query): returns operational stats (tenant-scoped; optional `churchId`)
 - `ai.recent` (query): returns recent `AiInteraction` rows for the tenant
 - `ai.ask` (mutation): generates an answer and persists `AiInteraction` + audit log
+- `ai.generateCommunicationDraft` (mutation): generates `subject/body/reviewChecklist`, logs interaction, and supports draft-first comms workflow
 
 ## 6) Operational Expectations (Beta)
 
@@ -108,6 +110,6 @@ If you later introduce a vector store:
 ## 8) Known Gaps (Next Iteration)
 
 - **Redaction depth**: current token filtering is minimal; add structured redaction for sensitive fields (emails, phone numbers, addresses, notes).
-- **Human review**: for AI-generated outbound comms, add an approval UI and store the approved prompt/output.
+- **Human review traceability**: connect approved draft metadata directly to schedule batch IDs for stronger audit lineage.
 - **Rate limiting**: add per-tenant and per-user throttles to avoid runaway spend.
 - **Evaluation**: add "thumbs up/down" + incident reporting on AI answers.

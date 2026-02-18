@@ -6,6 +6,8 @@ import { ensureDonationReceipt, getReceiptByNumber, renderReceiptHtml } from '..
 import { sendEmail } from '../email';
 import { recordAuditLog } from '../audit';
 import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
+import { renderReceiptResendEmail } from '../email-templates';
+import { apiPublicBaseUrl } from '../unsubscribe';
 
 export const receiptRouter = router({
   list: protectedProcedure
@@ -117,10 +119,19 @@ export const receiptRouter = router({
       }
 
       const html = renderReceiptHtml(receipt);
+      const receiptUrl = `${apiPublicBaseUrl()}/public/receipts/${encodeURIComponent(receipt.receiptNumber)}`;
+      const noticeHtml = renderReceiptResendEmail({
+        churchName: church.name,
+        receiptNumber: receipt.receiptNumber,
+        amount: receipt.donation.amount.toString(),
+        currency: receipt.donation.currency,
+        issuedAtIso: receipt.issuedAt.toISOString(),
+        receiptUrl,
+      });
       await sendEmail({
         to: input.to,
         subject: `Your donation receipt ${receipt.receiptNumber}`,
-        html,
+        html: `${noticeHtml}<div style="margin-top:16px">${html}</div>`,
       });
 
       await recordAuditLog({
