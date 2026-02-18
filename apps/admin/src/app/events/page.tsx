@@ -423,16 +423,48 @@ export default function EventsPage() {
         />
       ) : (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold">Events</h1>
-          <p className="mt-2 text-muted">
-            Plan services, gatherings, and classes with attendance tracking.
-          </p>
-        </div>
+        <Card className="border-primary/10 bg-gradient-to-r from-slate-950 to-primary p-6 text-primary-foreground shadow-lg">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70">Event operations</p>
+              <h1 className="mt-2 font-display text-3xl font-semibold">Events</h1>
+              <p className="mt-2 max-w-2xl text-sm text-white/80">
+                Schedule services, manage registrations, run check-in, and coordinate teams from one flow.
+              </p>
+            </div>
+            <Badge className="border-white/30 bg-white/10 text-white">
+              {selectedChurch ? selectedChurch.name : 'No church selected'}
+            </Badge>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Events loaded</p>
+              <p className="mt-1 text-2xl font-semibold">{events?.length ?? 0}</p>
+            </div>
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Registrations</p>
+              <p className="mt-1 text-2xl font-semibold">
+                {eventAnalytics?.registrations?.reduce((sum, entry) => sum + (entry._count?._all ?? 0), 0) ?? 0}
+              </p>
+            </div>
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Attendance</p>
+              <p className="mt-1 text-2xl font-semibold">{eventAnalytics?.attendanceCount ?? 0}</p>
+            </div>
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Selected event</p>
+              <p className="mt-1 text-sm font-semibold">{events?.find((event) => event.id === selectedEventId)?.title ?? 'None'}</p>
+            </div>
+          </div>
+        </Card>
 
         {gate.readOnly ? <ReadOnlyNotice /> : null}
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold">Church workspace</h2>
+            <p className="text-xs text-muted">Select the church context for event scheduling and reporting.</p>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             {churches?.map((church) => (
               <button
@@ -451,7 +483,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold">Event analytics</h2>
@@ -499,7 +531,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Event registrations</h2>
           <p className="mt-1 text-sm text-muted">Track guest and member registrations.</p>
           <div className="mt-4 space-y-2 text-sm text-muted">
@@ -529,7 +561,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Event assignments</h2>
           <p className="mt-1 text-sm text-muted">Assign speakers, hosts, and volunteers.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -618,7 +650,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Event media</h2>
           <p className="mt-1 text-sm text-muted">Upload photos, videos, or documents for this event.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -682,7 +714,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Create event</h2>
           <p className="mt-1 text-sm text-muted">
             {selectedChurch ? `Creating events for ${selectedChurch.name}.` : 'Select a church first.'}
@@ -876,7 +908,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Recurring events</h2>
           <p className="mt-1 text-sm text-muted">Schedule recurring services or classes.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -1114,7 +1146,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Event list</h2>
             <Badge variant="default">{events?.length ?? 0} total</Badge>
@@ -1166,7 +1198,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Event tickets</h2>
           <p className="mt-1 text-sm text-muted">Create ticket types and review orders.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -1254,7 +1286,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Event badges</h2>
           <p className="mt-1 text-sm text-muted">Generate printable credentials for registrations and tickets.</p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -1318,7 +1350,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Event communications</h2>
           <p className="mt-1 text-sm text-muted">
             Launch a default playbook (reminder, day-of update, follow-up) for registrations and RSVP going.
@@ -1370,7 +1402,7 @@ export default function EventsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold">Event check-in</h2>

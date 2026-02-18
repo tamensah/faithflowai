@@ -22,7 +22,7 @@ export function BillingStatusBanner() {
   if (entitlements?.entitlements?.source === 'inactive_subscription') {
     return (
       <div className="border-b border-destructive/20 bg-destructive/5">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-10">
           <div className="text-sm">
             <span className="font-semibold text-foreground">Subscription inactive.</span>{' '}
             <span className="text-muted">Choose a plan to restore access.</span>
@@ -42,7 +42,7 @@ export function BillingStatusBanner() {
     if (left !== null && left <= 3) {
       return (
         <div className="border-b border-accent/30 bg-accent/10">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-10">
             <div className="text-sm">
               <span className="font-semibold text-foreground">Trial ending soon.</span>{' '}
               <span className="text-muted">
@@ -63,7 +63,7 @@ export function BillingStatusBanner() {
   if (current.status === 'PAST_DUE') {
     return (
       <div className="border-b border-destructive/20 bg-destructive/5">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-10">
           <div className="text-sm">
             <span className="font-semibold text-foreground">Payment issue.</span>{' '}
             <span className="text-muted">Update billing to avoid service suspension.</span>
@@ -78,4 +78,3 @@ export function BillingStatusBanner() {
 
   return null;
 }
-

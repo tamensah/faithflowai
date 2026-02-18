@@ -13,9 +13,46 @@
   --muted: 220 8% 46%;
   --border: 220 13% 91%;
   --ring: 210 63% 23%;
+  --surface: 0 0% 100%;
+  --surface-2: 212 52% 99%;
 }
 
 body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+main select,
+main textarea {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.625rem;
+  background: hsl(var(--surface));
+  color: hsl(var(--foreground));
+}
+
+main select:focus-visible,
+main textarea:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+main pre {
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--surface-2));
+}
+
+.ff-surface {
+  border-color: hsl(var(--border) / 0.9);
+  background: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface-2)) 100%);
+  box-shadow: 0 1px 0 hsl(var(--border) / 0.55), 0 18px 40px -32px rgba(15, 23, 42, 0.45);
+}
+
+.ff-kpi {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  background: hsl(var(--surface));
+  padding: 0.875rem;
 }

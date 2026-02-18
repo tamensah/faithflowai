@@ -673,16 +673,46 @@ export default function MembersPage() {
         />
       ) : (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold">Members</h1>
-          <p className="mt-2 text-muted">
-            Manage your congregation with accurate profiles and status tracking.
-          </p>
-        </div>
+        <Card className="border-primary/10 bg-gradient-to-r from-slate-950 to-primary p-6 text-primary-foreground shadow-lg">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70">Membership ops</p>
+              <h1 className="mt-2 font-display text-3xl font-semibold">Members</h1>
+              <p className="mt-2 max-w-2xl text-sm text-white/80">
+                Manage profiles, engagement, directory privacy, onboarding workflows, and volunteer readiness.
+              </p>
+            </div>
+            <Badge className="border-white/30 bg-white/10 text-white">
+              {selectedChurch ? selectedChurch.name : 'No church selected'}
+            </Badge>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Total members</p>
+              <p className="mt-1 text-2xl font-semibold">{memberAnalytics?.totalMembers ?? 0}</p>
+            </div>
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Active</p>
+              <p className="mt-1 text-2xl font-semibold">{memberAnalytics?.activeMembers ?? 0}</p>
+            </div>
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">New (lookback)</p>
+              <p className="mt-1 text-2xl font-semibold">{memberAnalytics?.newMembers ?? 0}</p>
+            </div>
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Directory records</p>
+              <p className="mt-1 text-2xl font-semibold">{filteredDirectory.length}</p>
+            </div>
+          </div>
+        </Card>
 
         {gate.readOnly ? <ReadOnlyNotice /> : null}
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold">Church workspace</h2>
+            <p className="text-xs text-muted">Select the church context for all membership actions.</p>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             {churches?.map((church) => (
               <button
@@ -701,7 +731,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Add member</h2>
           <p className="mt-1 text-sm text-muted">
             {selectedChurch ? `Adding members to ${selectedChurch.name}.` : 'Select a church first.'}
@@ -730,7 +760,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold">Member analytics</h2>
@@ -792,7 +822,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold">Member segments</h2>
@@ -837,7 +867,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Member list</h2>
             <Badge variant="default">{members?.length ?? 0} total</Badge>
@@ -899,7 +929,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Member import</h2>
           <p className="mt-1 text-sm text-muted">
             Import members from CSV. Supports firstName, lastName, email, phone, householdName, preferredName, status,
@@ -949,7 +979,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Member profile</h2>
           <p className="mt-1 text-sm text-muted">
             {selectedMemberId ? 'Profile overview and engagement.' : 'Select a member to view details.'}
@@ -978,7 +1008,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Member messaging</h2>
           <p className="mt-1 text-sm text-muted">
             Send direct messages from church staff to the selected member.
@@ -1074,7 +1104,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Member relationships</h2>
           <p className="mt-1 text-sm text-muted">Build relationship graphs for pastoral care.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -1184,7 +1214,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Directory privacy</h2>
           <p className="mt-1 text-sm text-muted">Control visibility for the selected member.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -1240,7 +1270,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Quiet hours override</h2>
           <p className="mt-1 text-sm text-muted">
             Allow this member to receive SMS/WhatsApp messages during quiet hours (use sparingly).
@@ -1270,7 +1300,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Directory preview</h2>
             <Badge variant="default">{filteredDirectory.length} shown</Badge>
@@ -1336,7 +1366,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Households</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Input placeholder="Household name" value={householdName} onChange={(e) => setHouseholdName(e.target.value)} />
@@ -1433,7 +1463,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Onboarding workflows</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Input placeholder="Workflow name" value={workflowName} onChange={(e) => setWorkflowName(e.target.value)} />
@@ -1525,7 +1555,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Groups & ministries</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <Input placeholder="Group name" value={groupName} onChange={(e) => setGroupName(e.target.value)} />
@@ -1572,7 +1602,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Group events</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <select
@@ -1623,7 +1653,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Tags</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Input placeholder="Tag name" value={tagName} onChange={(e) => setTagName(e.target.value)} />
@@ -1655,7 +1685,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Milestones</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <select
@@ -1692,7 +1722,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Volunteer roles</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Input
@@ -1738,7 +1768,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Volunteer availability</h2>
           <p className="mt-1 text-sm text-muted">
             Capture when the selected member is available to serve.
@@ -1830,7 +1860,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Volunteer shifts</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <select
@@ -1982,7 +2012,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold">Staffing gaps</h2>
@@ -2023,7 +2053,7 @@ export default function MembersPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Surveys</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Input placeholder="Survey title" value={surveyTitle} onChange={(e) => setSurveyTitle(e.target.value)} />

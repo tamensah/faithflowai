@@ -370,14 +370,48 @@ export default function FinancePage() {
         />
       ) : (
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-semibold">Finance</h1>
-          <p className="mt-2 text-muted">Reconciliation, pledges, recurring giving, budgets, and expenses.</p>
-        </div>
+        <Card className="border-primary/10 bg-gradient-to-r from-slate-950 to-primary p-6 text-primary-foreground shadow-lg">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/70">Finance operations</p>
+              <h1 className="mt-2 font-display text-3xl font-semibold">Finance</h1>
+              <p className="mt-2 max-w-2xl text-sm text-white/80">
+                Reconciliation, giving operations, disputes, payouts, and accounting workflows in one control plane.
+              </p>
+            </div>
+            <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold text-white">
+              {(churches?.find((church) => church.id === churchId)?.name ?? 'No church selected')}
+            </span>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Donations</p>
+              <p className="mt-1 text-2xl font-semibold">
+                {(dashboard?.donations ?? []).reduce((sum, item) => sum + item._count, 0)}
+              </p>
+            </div>
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Expenses</p>
+              <p className="mt-1 text-2xl font-semibold">
+                {(dashboard?.expenses ?? []).reduce((sum, item) => sum + item._count, 0)}
+              </p>
+            </div>
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Refund cases</p>
+              <p className="mt-1 text-2xl font-semibold">{refunds?.length ?? 0}</p>
+            </div>
+            <div className="rounded-lg border border-white/20 bg-white/10 p-3">
+              <p className="text-xs uppercase tracking-[0.08em] text-white/70">Open disputes</p>
+              <p className="mt-1 text-2xl font-semibold">
+                {disputes?.filter((item) => item.status !== 'WON' && item.status !== 'LOST').length ?? 0}
+              </p>
+            </div>
+          </div>
+        </Card>
 
         {gate.readOnly ? <ReadOnlyNotice /> : null}
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold">Import donations (CSV)</h2>
@@ -461,7 +495,7 @@ export default function FinancePage() {
           ) : null}
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Reconciliation</h2>
           <div className="mt-4 text-sm text-muted">
             <p>Dashboard (YTD totals by currency)</p>
@@ -502,7 +536,7 @@ export default function FinancePage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Donor insights</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2 text-sm text-muted">
             <div>
@@ -520,7 +554,7 @@ export default function FinancePage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Donation trends</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <Input
@@ -542,7 +576,7 @@ export default function FinancePage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Donor segments</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <Input
@@ -559,7 +593,7 @@ export default function FinancePage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Refund analytics</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <Input
@@ -576,7 +610,7 @@ export default function FinancePage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">AI donor insights</h2>
             <Button variant="outline" onClick={() => refetchInsights()} disabled={isFetchingInsights}>
@@ -595,7 +629,7 @@ export default function FinancePage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Tithing statement</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <Input
@@ -655,7 +689,7 @@ export default function FinancePage() {
         </Card>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="p-6">
+          <Card className="ff-surface p-6">
             <h2 className="text-lg font-semibold">Pledges</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
               {pledges?.map((pledge) => (
@@ -701,7 +735,7 @@ export default function FinancePage() {
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="ff-surface p-6">
             <h2 className="text-lg font-semibold">Recurring Donations</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
               {recurring?.map((item) => (
@@ -781,7 +815,7 @@ export default function FinancePage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="p-6">
+          <Card className="ff-surface p-6">
             <h2 className="text-lg font-semibold">Expense Categories</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
               {categories?.map((category) => (
@@ -817,7 +851,7 @@ export default function FinancePage() {
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="ff-surface p-6">
             <h2 className="text-lg font-semibold">Expenses</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
               {expenses?.map((expense) => (
@@ -890,7 +924,7 @@ export default function FinancePage() {
           </Card>
         </div>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Budgets</h2>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {budgets?.map((budget) => (
@@ -990,7 +1024,7 @@ export default function FinancePage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Receipts</h2>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {receipts?.map((receipt) => (
@@ -1042,7 +1076,7 @@ export default function FinancePage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Refunds & disputes</h2>
           <div className="mt-3 text-sm text-muted">
             {disputeSummary?.length ? (
@@ -1202,7 +1236,7 @@ export default function FinancePage() {
           )}
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Payout reconciliation</h2>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button variant="outline" onClick={() => syncStripePayouts({})} disabled={isSyncingStripe}>
@@ -1246,7 +1280,7 @@ export default function FinancePage() {
           )}
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Finance exports</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             {['donations', 'expenses', 'pledges', 'recurring', 'receipts', 'payouts', 'refunds', 'disputes'].map(
@@ -1275,7 +1309,7 @@ export default function FinancePage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Recent audit logs</h2>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {auditLogs?.map((log) => (
