@@ -70,12 +70,7 @@ function isRouteActive(pathname: string, href: string) {
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
-    Workspace: true,
-    Ministry: false,
-    Intelligence: false,
-    Platform: false,
-  });
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const { data: entitlementsStatus } = trpc.billing.entitlements.useQuery(undefined, {
     retry: false,
   });
@@ -112,27 +107,20 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    setOpenGroups((current) => {
-      const next = { ...current };
-      let changed = false;
-      groups.forEach((group) => {
-        if (next[group.label] === undefined) {
-          next[group.label] = group.label === 'Workspace';
-          changed = true;
-        }
-      });
-      return changed ? next : current;
-    });
-  }, [groups]);
-
-  useEffect(() => {
     const activeGroup = groups.find((group) =>
       group.items.some((item) => isRouteActive(pathname, item.href))
     );
-    if (!activeGroup) return;
-    setOpenGroups((current) =>
-      current[activeGroup.label] ? current : { ...current, [activeGroup.label]: true }
-    );
+    const fallback = groups.find((group) => group.label === 'Workspace') ?? groups[0];
+    const openLabel = activeGroup?.label ?? fallback?.label;
+    if (!openLabel) return;
+    setOpenGroups((current) => {
+      const next: Record<string, boolean> = {};
+      groups.forEach((group) => {
+        next[group.label] = group.label === openLabel;
+      });
+      const unchanged = groups.every((group) => current[group.label] === next[group.label]);
+      return unchanged ? current : next;
+    });
   }, [groups, pathname]);
 
   const renderNav = (mobile = false) => (
@@ -144,10 +132,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
             className="flex w-full items-center justify-between rounded-lg px-2 py-1 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-muted hover:bg-slate-200/50"
             aria-expanded={openGroups[group.label] ?? group.label === 'Workspace'}
             onClick={() =>
-              setOpenGroups((current) => ({
-                ...current,
-                [group.label]: !(current[group.label] ?? group.label === 'Workspace'),
-              }))
+              setOpenGroups(() => {
+                const next: Record<string, boolean> = {};
+                groups.forEach((entry) => {
+                  next[entry.label] = entry.label === group.label;
+                });
+                return next;
+              })
             }
           >
             <span>{group.label}</span>

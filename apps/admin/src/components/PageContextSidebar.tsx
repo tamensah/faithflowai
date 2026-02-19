@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type ContextSection = {
   id: string;
@@ -31,11 +31,11 @@ export function PageContextSidebar({
 
   const sectionIds = useMemo(() => sections.map((section) => section.id), [sections]);
 
-  useEffect(() => {
+  const scanSections = useCallback(() => {
     const root = document.getElementById(rootId);
     if (!root) {
-      setSections([]);
-      setActiveId('');
+      setSections((current) => (current.length ? [] : current));
+      setActiveId((current) => (current ? '' : current));
       return;
     }
 
@@ -49,14 +49,43 @@ export function PageContextSidebar({
       const count = seen.get(base) ?? 0;
       seen.set(base, count + 1);
       const id = count > 0 ? `${base}-${count + 1}` : base;
-      heading.id = id;
-      heading.classList.add('scroll-mt-24');
+      if (heading.id !== id) {
+        heading.id = id;
+      }
+      if (!heading.classList.contains('scroll-mt-24')) {
+        heading.classList.add('scroll-mt-24');
+      }
       return { id, label };
     });
 
-    setSections(nextSections);
+    setSections((current) => {
+      const sameLength = current.length === nextSections.length;
+      const unchanged =
+        sameLength &&
+        current.every((section, index) => {
+          const nextSection = nextSections[index];
+          return section.id === nextSection.id && section.label === nextSection.label;
+        });
+      return unchanged ? current : nextSections;
+    });
     setActiveId((current) => (current && nextSections.some((section) => section.id === current) ? current : nextSections[0]?.id ?? ''));
+  }, [rootId]);
 
+  useEffect(() => {
+    scanSections();
+    const root = document.getElementById(rootId);
+    if (!root) return;
+    const observer = new MutationObserver(() => scanSections());
+    observer.observe(root, { childList: true, subtree: true });
+    window.addEventListener('resize', scanSections);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', scanSections);
+    };
+  }, [rootId, scanSections]);
+
+  useEffect(() => {
+    if (!sectionIds.length) return;
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
@@ -68,10 +97,12 @@ export function PageContextSidebar({
       },
       { rootMargin: '-28% 0px -58% 0px', threshold: [0, 1] }
     );
-
-    headings.forEach((heading) => observer.observe(heading));
+    sectionIds.forEach((id) => {
+      const heading = document.getElementById(id);
+      if (heading) observer.observe(heading);
+    });
     return () => observer.disconnect();
-  }, [rootId]);
+  }, [sectionIds]);
 
   useEffect(() => {
     if (!sectionIds.length) return;
@@ -84,8 +115,8 @@ export function PageContextSidebar({
   if (sections.length < minSections) return null;
 
   return (
-    <aside className="hidden xl:block">
-      <div className="sticky top-24 rounded-2xl border border-border/70 bg-white/85 p-4 shadow-sm backdrop-blur">
+    <aside className="hidden lg:block lg:self-start">
+      <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-2xl border border-border/70 bg-white/85 p-4 shadow-sm backdrop-blur">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted">{title}</p>
         <nav className="mt-3 space-y-1.5">
           {sections.map((section) => {

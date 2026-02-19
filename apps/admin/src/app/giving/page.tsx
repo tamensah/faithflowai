@@ -186,7 +186,7 @@ export default function GivingPage() {
           description="Your current subscription does not include giving and donation workflows. Upgrade to restore access."
         />
       ) : (
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_240px] xl:items-start">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start">
         <div id="giving-page-sections" className="space-y-8">
           <div>
             <h1 className="text-3xl font-semibold">Giving</h1>

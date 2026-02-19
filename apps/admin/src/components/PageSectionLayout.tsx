@@ -16,7 +16,7 @@ export function PageSectionLayout({
   className = 'space-y-8',
 }: PageSectionLayoutProps) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_240px] xl:items-start">
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_240px] lg:items-start">
       <div id={rootId} className={className}>
         {children}
       </div>
