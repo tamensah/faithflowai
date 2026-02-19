@@ -10,6 +10,24 @@ This file is the running operations log for implementation details, runtime cons
 
 ## Snapshot (2026-02-11)
 
+## Update (2026-02-19)
+
+### Admin UX shell and page navigation
+
+- Global admin sidebar now behaves as a focused accordion:
+  - active domain group auto-expands
+  - non-active groups auto-collapse
+- Contextual section sidebars are now sticky and available on major admin pages, including billing, comms, staff, platform pages, and ops pages.
+- New operational standard for feature delivery:
+  - avoid single extremely long pages for new scope
+  - default to contextual sub-sections with sticky navigation and clear action states
+
+### Billing reliability improvements
+
+- Billing UI now includes a manual provider-state refresh action (`Refresh provider status`) to reconcile Stripe/Paystack state without waiting for webhook retries.
+- Paystack in-app cancellation now immediately updates local subscription state to `CANCELED` after successful provider disable call; webhooks still reconcile metadata/status afterward.
+- Billing cache invalidation now refreshes entitlements after cancel/resume actions so locked/unlocked UX updates immediately.
+
 ### Deployment state (Render hybrid backend)
 
 - Workspace: `tea-csuufv56l47c7382nnrg` (`My Workspace`)

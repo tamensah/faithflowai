@@ -185,6 +185,7 @@ Implemented tenant routes:
 - `billing.catalog` (signed-in onboarding-safe active plans list)
 - `billing.plans`
 - `billing.currentSubscription`
+- `billing.refreshCurrentSubscription` (manual Stripe/Paystack provider-state sync)
 - `billing.startCheckout`
 - `billing.changePlan` (Stripe: schedule next-cycle changes; optional immediate upgrades)
 - `billing.cancelSubscription` (Stripe + Paystack)
@@ -197,6 +198,12 @@ Catalog resilience behavior:
 - API auto-creates baseline `starter` / `growth` / `enterprise` plans (with feature presets) if those plan codes are missing.
 - This prevents blank onboarding plan dropdowns in fresh environments where DB seed was not run yet.
 - Checkout still enforces tenant admin role before creating provider checkout sessions.
+
+Cancellation and sync behavior:
+
+- Stripe cancel/resume updates provider and local state immediately.
+- Paystack cancel now updates local subscription state to `CANCELED` immediately on successful disable call, then webhooks can continue metadata reconciliation.
+- Billing UI exposes a manual “refresh provider status” action to reconcile Stripe/Paystack status when webhook delivery is delayed.
 
 Platform billing ops routes:
 

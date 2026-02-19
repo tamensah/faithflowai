@@ -25,6 +25,8 @@ Status legend:
   - [x] Subscription cancel/resume UX (in-app)
 - [ ] Paystack:
   - [~] Manage subscription guidance + cancel flow (provider-specific)
+  - [x] In-app cancel now updates local state immediately after successful disable
+  - [x] Add manual provider-state refresh action in billing UI
   - [~] Ensure webhook sync covers status transitions reliably
 - [~] Entitlements polish:
   - [~] "What's locked" UI across admin modules
@@ -33,6 +35,19 @@ Status legend:
 Deliverables:
 - Admin: `/billing` supports plan changes and trial visibility end-to-end
 - Platform: clear policy for trials, conversion, dunning, and entitlements
+
+---
+
+## UX Guardrails for Remaining Work
+
+- [~] Keep global navigation focused by active domain (single expanded group)
+- [x] Keep contextual section sidebar sticky on long pages
+- [ ] Split new large surfaces into contextual sub-pages/tabs instead of single long forms
+- [ ] Require empty/loading/error states and consistent required/validation messaging on all new forms
+
+Acceptance criteria:
+- New feature pages must ship with contextual section navigation and focused, non-overloaded information architecture.
+- Feature additions should follow the current admin layout system (hero summary, section cards, sticky context nav).
 
 ---
 

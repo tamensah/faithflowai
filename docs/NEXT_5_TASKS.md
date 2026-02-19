@@ -13,6 +13,7 @@ Legend:
 
 - [~] Stripe plan change (admin self-serve)
 - [~] Paystack tier change (checkout + best-effort old subscription disable)
+- [~] Provider-state refresh + cancellation reliability in `/billing`
 - [x] Trial -> grace -> read-only lockout policy (server-side)
 - [~] Cancel/resume flows (Stripe + Paystack cancel)
 - [~] “What’s locked” UX everywhere (pages + actions + empty states)
@@ -22,6 +23,9 @@ Acceptance criteria:
 - Paystack tier change starts checkout from admin and avoids double-billing (best-effort auto-disable).
 - Trials: reminders send; after grace days, entitlements lock (without suspending tenant access to billing).
 - Billing page shows current status, cancel/resume, invoices, and actionable next step when locked.
+
+Design note:
+- All billing/monetization surfaces must follow the new admin UX model: focused nav groups + sticky contextual section navigation + clear action states.
 
 ---
 

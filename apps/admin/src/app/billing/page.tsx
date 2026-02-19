@@ -91,7 +91,7 @@ export default function BillingPage() {
   const { mutate: cancelSubscription, isPending: isCanceling } = trpc.billing.cancelSubscription.useMutation({
     onSuccess: async () => {
       setActionMessage('Cancellation requested.');
-      await utils.billing.currentSubscription.invalidate();
+      await Promise.all([utils.billing.currentSubscription.invalidate(), utils.billing.entitlements.invalidate()]);
     },
     onError: (error) => setActionMessage(error.message),
   });
@@ -99,10 +99,23 @@ export default function BillingPage() {
   const { mutate: resumeSubscription, isPending: isResuming } = trpc.billing.resumeSubscription.useMutation({
     onSuccess: async () => {
       setActionMessage('Subscription resumed.');
-      await utils.billing.currentSubscription.invalidate();
+      await Promise.all([utils.billing.currentSubscription.invalidate(), utils.billing.entitlements.invalidate()]);
     },
     onError: (error) => setActionMessage(error.message),
   });
+
+  const { mutate: refreshCurrentSubscription, isPending: isRefreshingSubscription } =
+    trpc.billing.refreshCurrentSubscription.useMutation({
+      onSuccess: async (data) => {
+        setActionMessage(`Provider state refreshed (${data.provider} · ${data.status}).`);
+        await Promise.all([
+          utils.billing.currentSubscription.invalidate(),
+          utils.billing.entitlements.invalidate(),
+          utils.billing.invoices.invalidate({ provider, limit: 20 }),
+        ]);
+      },
+      onError: (error) => setActionMessage(error.message),
+    });
 
   const lockedModules = useMemo(() => {
     const ent = entitlementsStatus?.entitlements?.entitlements ?? {};
@@ -179,6 +192,14 @@ export default function BillingPage() {
                 {current.currentPeriodEnd ? new Date(current.currentPeriodEnd).toLocaleDateString() : 'N/A'}
               </p>
               <div className="mt-3 flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={isRefreshingSubscription}
+                  onClick={() => refreshCurrentSubscription()}
+                >
+                  {isRefreshingSubscription ? 'Refreshing...' : 'Refresh provider status'}
+                </Button>
                 <Button
                   size="sm"
                   onClick={() => createPortalSession({})}

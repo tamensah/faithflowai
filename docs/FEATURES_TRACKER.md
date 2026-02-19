@@ -128,9 +128,18 @@ This is the live checklist for product scope, implementation status, and next st
 - E2E reliability checks:
   - Webhook idempotency replay tests (platform Stripe + Paystack webhook paths)
   - Support SLA breach + transition tests (automation + route transitions)
+- Admin IA + navigation hardening:
+  - Focused global navigation groups (single active group expanded)
+  - Sticky contextual sidebars across admin feature pages
+  - Long-form pages migrated to contextual section layout shell
+- Billing provider sync reliability:
+  - Manual provider-state refresh action in `/billing`
+  - Paystack in-app cancellation now updates local subscription state immediately on success
 
 ## In Progress
-- None
+- Revenue operations hardening:
+  - Paystack tier-change/cancellation edge cases and webhook-state reconciliation
+  - Locked-state UX parity across all write actions and empty states
 
 ## Next Up (High Priority)
 1. Revenue operations hardening

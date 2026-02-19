@@ -136,6 +136,37 @@ const cancelInput = z.object({
   atPeriodEnd: z.boolean().default(true),
 });
 
+const stripeStatusMap: Record<string, TenantSubscriptionStatus> = {
+  trialing: TenantSubscriptionStatus.TRIALING,
+  active: TenantSubscriptionStatus.ACTIVE,
+  past_due: TenantSubscriptionStatus.PAST_DUE,
+  unpaid: TenantSubscriptionStatus.PAST_DUE,
+  paused: TenantSubscriptionStatus.PAUSED,
+  canceled: TenantSubscriptionStatus.CANCELED,
+  incomplete_expired: TenantSubscriptionStatus.EXPIRED,
+  incomplete: TenantSubscriptionStatus.PAST_DUE,
+};
+
+function mapStripeStatus(status?: string | null) {
+  if (!status) return TenantSubscriptionStatus.ACTIVE;
+  return stripeStatusMap[status] ?? TenantSubscriptionStatus.ACTIVE;
+}
+
+function mapPaystackStatus(status?: string | null) {
+  if (!status) return TenantSubscriptionStatus.ACTIVE;
+  if (status === 'active') return TenantSubscriptionStatus.ACTIVE;
+  if (status === 'non-renewing') return TenantSubscriptionStatus.PAUSED;
+  if (status === 'attention') return TenantSubscriptionStatus.PAST_DUE;
+  if (status === 'complete' || status === 'cancelled' || status === 'canceled') return TenantSubscriptionStatus.CANCELED;
+  return TenantSubscriptionStatus.ACTIVE;
+}
+
+function parseDate(value: unknown) {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 function readPlanMetaString(meta: Record<string, unknown>, key: string) {
   const value = meta[key];
   return typeof value === 'string' && value.trim() ? value.trim() : null;
@@ -316,7 +347,9 @@ async function fetchPaystackSubscriptionDetails(subscriptionRef: string, secret:
   const rawCode = typeof data.subscription_code === 'string' ? data.subscription_code : null;
   const emailToken = typeof data.email_token === 'string' ? data.email_token : null;
   const subscriptionCode = rawCode && /^SUB_[A-Za-z0-9]+$/.test(rawCode) ? rawCode : null;
-  return { subscriptionCode, emailToken };
+  const status = typeof data.status === 'string' ? data.status : null;
+  const nextPaymentDate = parseDate(data.next_payment_date);
+  return { subscriptionCode, emailToken, status, nextPaymentDate };
 }
 
 async function ensureBaselinePlans() {
@@ -389,6 +422,122 @@ export const billingRouter = router({
   currentSubscription: protectedProcedure.query(async ({ ctx }) => {
     await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
     return getActiveSubscription(ctx.tenantId!);
+  }),
+
+  refreshCurrentSubscription: protectedProcedure.mutation(async ({ ctx }) => {
+    await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
+    const active = await getActiveSubscription(ctx.tenantId!);
+    if (!active) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'No active subscription found.' });
+    }
+
+    if (active.provider === SubscriptionProvider.STRIPE) {
+      if (!active.providerRef) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Stripe subscription reference missing. Sync webhooks first.',
+        });
+      }
+      const stripe = new Stripe(requireStripeSecret());
+      const providerSub = await stripe.subscriptions.retrieve(active.providerRef);
+      const primaryItem = providerSub.items.data[0];
+      const stripeCustomerId =
+        typeof providerSub.customer === 'string' ? providerSub.customer : providerSub.customer?.id ?? null;
+
+      const mergedMeta =
+        active.metadata && typeof active.metadata === 'object' && !Array.isArray(active.metadata)
+          ? ({ ...(active.metadata as Record<string, unknown>) } as Record<string, unknown>)
+          : ({} as Record<string, unknown>);
+
+      mergedMeta.stripeSubscriptionId = providerSub.id;
+      if (stripeCustomerId) mergedMeta.stripeCustomerId = stripeCustomerId;
+      if (primaryItem?.price?.id) mergedMeta.stripePriceId = primaryItem.price.id;
+
+      const next = await prisma.tenantSubscription.update({
+        where: { id: active.id },
+        data: {
+          status: mapStripeStatus(providerSub.status),
+          currentPeriodStart: primaryItem?.current_period_start
+            ? new Date(primaryItem.current_period_start * 1000)
+            : active.currentPeriodStart,
+          currentPeriodEnd: primaryItem?.current_period_end
+            ? new Date(primaryItem.current_period_end * 1000)
+            : active.currentPeriodEnd,
+          trialEndsAt: providerSub.trial_end ? new Date(providerSub.trial_end * 1000) : null,
+          cancelAtPeriodEnd: providerSub.cancel_at_period_end,
+          canceledAt: providerSub.canceled_at ? new Date(providerSub.canceled_at * 1000) : active.canceledAt,
+          metadata: mergedMeta as Prisma.InputJsonValue,
+        },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.subscription_refreshed',
+        targetType: 'TenantSubscription',
+        targetId: active.id,
+        metadata: { provider: active.provider, status: next.status },
+      });
+
+      return { ok: true, provider: PaymentProvider.STRIPE, status: next.status };
+    }
+
+    if (active.provider === SubscriptionProvider.PAYSTACK) {
+      const secret = requirePaystackSecret();
+      const fromMeta = extractPaystackSubscriptionCode(active.metadata);
+      const providerRef =
+        typeof active.providerRef === 'string' && /^SUB_[A-Za-z0-9]+$/.test(active.providerRef)
+          ? active.providerRef
+          : null;
+      const reference = fromMeta ?? providerRef;
+      if (!reference) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Paystack subscription code is missing. Sync via webhook or metadata backfill first.',
+        });
+      }
+
+      const details = await fetchPaystackSubscriptionDetails(reference, secret);
+      if (!details) {
+        throw new TRPCError({
+          code: 'BAD_GATEWAY',
+          message: 'Paystack subscription lookup failed. Try again after webhook delivery.',
+        });
+      }
+
+      const mergedMeta =
+        active.metadata && typeof active.metadata === 'object' && !Array.isArray(active.metadata)
+          ? ({ ...(active.metadata as Record<string, unknown>) } as Record<string, unknown>)
+          : ({} as Record<string, unknown>);
+      if (details.subscriptionCode) mergedMeta.paystackSubscriptionCode = details.subscriptionCode;
+      if (details.emailToken) mergedMeta.paystackEmailToken = details.emailToken;
+
+      const mappedStatus = mapPaystackStatus(details.status);
+      const next = await prisma.tenantSubscription.update({
+        where: { id: active.id },
+        data: {
+          status: mappedStatus,
+          currentPeriodEnd: details.nextPaymentDate ?? active.currentPeriodEnd,
+          canceledAt: mappedStatus === TenantSubscriptionStatus.CANCELED ? active.canceledAt ?? new Date() : null,
+          metadata: mergedMeta as Prisma.InputJsonValue,
+        },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.subscription_refreshed',
+        targetType: 'TenantSubscription',
+        targetId: active.id,
+        metadata: { provider: active.provider, status: next.status },
+      });
+
+      return { ok: true, provider: PaymentProvider.PAYSTACK, status: next.status };
+    }
+
+    throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Unsupported billing provider.' });
   }),
 
   changePlan: protectedProcedure.input(planChangeInput).mutation(async ({ ctx, input }) => {
@@ -709,6 +858,16 @@ export const billingRouter = router({
         throw new TRPCError({ code: 'BAD_GATEWAY', message: `Paystack cancel failed: ${text}` });
       }
 
+      await prisma.tenantSubscription.update({
+        where: { id: active.id },
+        data: {
+          status: TenantSubscriptionStatus.CANCELED,
+          canceledAt: new Date(),
+          cancelAtPeriodEnd: false,
+          currentPeriodEnd: active.currentPeriodEnd,
+        },
+      });
+
       await recordAuditLog({
         tenantId: ctx.tenantId,
         actorType: AuditActorType.USER,
@@ -719,7 +878,7 @@ export const billingRouter = router({
         metadata: { provider: active.provider, subscriptionCode },
       });
 
-      // Webhooks will eventually sync the canceled state.
+      // Webhooks can still update metadata/status afterward, but we mark canceled immediately for reliable UX.
       return { ok: true, provider: PaymentProvider.PAYSTACK, atPeriodEnd: false };
     }
 
