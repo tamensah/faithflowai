@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
@@ -75,7 +76,7 @@ export default function StreamingPage() {
           description="Your current subscription does not include streaming operations. Upgrade to unlock channels and sessions."
         />
       ) : (
-        <div className="space-y-8">
+        <PageSectionLayout rootId="streaming-page-sections" title="Streaming sections" className="space-y-8">
           <div>
             <h1 className="text-3xl font-semibold">Streaming Ops</h1>
             <p className="mt-2 text-sm text-muted">
@@ -253,7 +254,7 @@ export default function StreamingPage() {
             <p>Total views: {analytics?.totals.totalViews ?? 0}</p>
           </div>
         </Card>
-        </div>
+        </PageSectionLayout>
       )}
     </Shell>
   );

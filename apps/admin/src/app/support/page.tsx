@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
@@ -115,7 +116,7 @@ export default function SupportPage() {
           description="Your current subscription does not include the support center. Upgrade to restore access."
         />
       ) : (
-      <div className="space-y-8">
+      <PageSectionLayout rootId="support-page-sections" title="Support sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Support Center</h1>
           <p className="mt-2 text-sm text-muted">Open support tickets, collaborate on resolution, and track escalation status.</p>
@@ -352,7 +353,7 @@ export default function SupportPage() {
             </div>
           </Card>
         ) : null}
-      </div>
+      </PageSectionLayout>
       )}
     </Shell>
   );

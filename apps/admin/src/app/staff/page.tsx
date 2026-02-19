@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 
 const roleOptions = ['ADMIN', 'STAFF'] as const;
@@ -89,7 +90,7 @@ export default function StaffPage() {
 
   return (
     <Shell>
-      <div className="space-y-8">
+      <PageSectionLayout rootId="staff-page-sections" title="Staff sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Staff access</h1>
           <p className="mt-2 text-sm text-muted">
@@ -331,7 +332,7 @@ export default function StaffPage() {
             </Card>
           ) : null}
         </div>
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

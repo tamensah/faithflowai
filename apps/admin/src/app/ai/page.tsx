@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
@@ -35,7 +36,7 @@ export default function AiAssistantPage() {
           description="Your current subscription does not include AI insights. Upgrade to unlock Ask FaithFlow."
         />
       ) : (
-      <div className="space-y-8">
+      <PageSectionLayout rootId="ai-page-sections" title="Intelligence sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Ask FaithFlow</h1>
           <p className="mt-2 text-sm text-muted">Tenant-scoped assistant with sources and audit logging.</p>
@@ -144,7 +145,7 @@ export default function AiAssistantPage() {
             {!recent?.length ? <p>No interactions yet.</p> : null}
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
       )}
     </Shell>
   );

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 
 const statusOptions = ['PENDING', 'APPROVED', 'DENIED'] as const;
@@ -40,7 +41,7 @@ export default function AccessRequestsPage() {
 
   return (
     <Shell>
-      <div className="space-y-6">
+      <PageSectionLayout rootId="access-requests-page-sections" title="Access sections" className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold">Member access requests</h1>
           <p className="mt-2 text-sm text-muted">Approve members requesting portal access.</p>
@@ -115,7 +116,7 @@ export default function AccessRequestsPage() {
             </Card>
           )}
         </div>
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 
 function formatNumber(value: number | string) {
@@ -38,7 +39,7 @@ export default function OperationsPage() {
 
   return (
     <Shell>
-      <div className="space-y-8">
+      <PageSectionLayout rootId="operations-page-sections" title="Ops sections" className="space-y-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-3xl font-semibold">Headquarters Operations</h1>
@@ -109,7 +110,7 @@ export default function OperationsPage() {
             {!campuses?.length ? <p className="text-sm text-muted">No campus data found for current filters.</p> : null}
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

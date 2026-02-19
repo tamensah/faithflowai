@@ -70,6 +70,12 @@ function isRouteActive(pathname: string, href: string) {
 export function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    Workspace: true,
+    Ministry: false,
+    Intelligence: false,
+    Platform: false,
+  });
   const { data: entitlementsStatus } = trpc.billing.entitlements.useQuery(undefined, {
     retry: false,
   });
@@ -105,12 +111,60 @@ export function Shell({ children }: { children: React.ReactNode }) {
     setMobileOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    setOpenGroups((current) => {
+      const next = { ...current };
+      let changed = false;
+      groups.forEach((group) => {
+        if (next[group.label] === undefined) {
+          next[group.label] = group.label === 'Workspace';
+          changed = true;
+        }
+      });
+      return changed ? next : current;
+    });
+  }, [groups]);
+
+  useEffect(() => {
+    const activeGroup = groups.find((group) =>
+      group.items.some((item) => isRouteActive(pathname, item.href))
+    );
+    if (!activeGroup) return;
+    setOpenGroups((current) =>
+      current[activeGroup.label] ? current : { ...current, [activeGroup.label]: true }
+    );
+  }, [groups, pathname]);
+
   const renderNav = (mobile = false) => (
     <nav className="space-y-6">
       {groups.map((group) => (
         <div key={group.label} className="space-y-1.5">
-          <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">{group.label}</p>
-          {group.items.map((item) => {
+          <button
+            type="button"
+            className="flex w-full items-center justify-between rounded-lg px-2 py-1 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-muted hover:bg-slate-200/50"
+            aria-expanded={openGroups[group.label] ?? group.label === 'Workspace'}
+            onClick={() =>
+              setOpenGroups((current) => ({
+                ...current,
+                [group.label]: !(current[group.label] ?? group.label === 'Workspace'),
+              }))
+            }
+          >
+            <span>{group.label}</span>
+            <svg
+              viewBox="0 0 20 20"
+              className={`h-3.5 w-3.5 transition ${
+                openGroups[group.label] ?? group.label === 'Workspace' ? 'rotate-90' : ''
+              }`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+            >
+              <path d="M7 5l6 5-6 5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          {(openGroups[group.label] ?? group.label === 'Workspace')
+            ? group.items.map((item) => {
             const isLocked = Boolean(
               !isBillingReadOnly && item.featureKey && entitlements?.[item.featureKey] && !entitlements[item.featureKey]?.enabled
             );
@@ -141,7 +195,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 ) : null}
               </Link>
             );
-          })}
+          })
+            : null}
         </div>
       ))}
     </nav>

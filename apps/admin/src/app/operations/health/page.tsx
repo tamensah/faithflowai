@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
+import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
 
 function formatDate(value?: string | Date | null) {
@@ -37,7 +38,7 @@ export default function OperationsHealthPage() {
 
   return (
     <Shell>
-      <div className="space-y-8">
+      <PageSectionLayout rootId="operations-health-page-sections" title="Health sections" className="space-y-8">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-3xl font-semibold">Operational Health</h1>
@@ -192,7 +193,7 @@ export default function OperationsHealthPage() {
             </Card>
           </div>
         ) : null}
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

@@ -8,6 +8,7 @@ import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
 import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
+import { PageContextSidebar } from '../../components/PageContextSidebar';
 
 const providerOptions = [
   { value: 'STRIPE', label: 'Stripe' },
@@ -185,11 +186,12 @@ export default function GivingPage() {
           description="Your current subscription does not include giving and donation workflows. Upgrade to restore access."
         />
       ) : (
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-semibold">Giving</h1>
-          <p className="mt-2 text-muted">Create funds, campaigns, and live checkout links.</p>
-        </div>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_240px] xl:items-start">
+        <div id="giving-page-sections" className="space-y-8">
+          <div>
+            <h1 className="text-3xl font-semibold">Giving</h1>
+            <p className="mt-2 text-muted">Create funds, campaigns, and live checkout links.</p>
+          </div>
 
         {gate.readOnly ? <ReadOnlyNotice /> : null}
 
@@ -608,6 +610,8 @@ export default function GivingPage() {
             {!donations?.length && <p>No donations yet.</p>}
           </div>
         </Card>
+        </div>
+        <PageContextSidebar rootId="giving-page-sections" title="Giving sections" />
       </div>
       )}
     </Shell>

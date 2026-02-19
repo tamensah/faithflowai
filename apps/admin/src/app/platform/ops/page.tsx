@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
+import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
 
 export default function PlatformOpsPage() {
@@ -106,7 +107,7 @@ export default function PlatformOpsPage() {
 
   return (
     <Shell>
-      <div className="space-y-8">
+      <PageSectionLayout rootId="platform-ops-page-sections" title="Platform ops sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Platform Ops</h1>
           <p className="mt-2 text-sm text-muted">Manage tenant domains, platform health posture, and security policies.</p>
@@ -281,7 +282,7 @@ export default function PlatformOpsPage() {
             </Button>
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

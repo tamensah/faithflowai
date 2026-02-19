@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
@@ -348,7 +349,7 @@ export default function CommunicationsPage() {
           description="Your current subscription does not include communications. Upgrade to restore access."
         />
       ) : (
-      <div className="space-y-6">
+      <PageSectionLayout rootId="communications-page-sections" title="Communications sections" className="space-y-6">
         {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
@@ -1088,7 +1089,7 @@ export default function CommunicationsPage() {
             {!messages?.length && <p>No messages yet.</p>}
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
       )}
     </Shell>
   );

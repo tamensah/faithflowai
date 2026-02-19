@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
+import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
 
 type TenantStatusFilter = 'ALL' | 'ACTIVE' | 'SUSPENDED';
@@ -102,7 +103,7 @@ export default function PlatformTenantsPage() {
 
   return (
     <Shell>
-      <div className="space-y-6">
+      <PageSectionLayout rootId="platform-tenants-page-sections" title="Tenants sections" className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold">Platform tenants</h1>
           <p className="mt-2 text-sm text-muted">
@@ -339,7 +340,7 @@ export default function PlatformTenantsPage() {
             </div>
           </Card>
         ) : null}
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

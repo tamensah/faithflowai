@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 
 const checkoutProviders = ['STRIPE', 'PAYSTACK'] as const;
@@ -118,7 +119,7 @@ export default function BillingPage() {
 
   return (
     <Shell>
-      <div className="space-y-8">
+      <PageSectionLayout rootId="billing-page-sections" title="Billing sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Billing</h1>
           <p className="mt-2 text-sm text-muted">Self-serve subscription upgrades, payment method updates, and invoice visibility.</p>
@@ -369,7 +370,7 @@ export default function BillingPage() {
             {!invoices?.invoices.length ? <p className="text-sm text-muted">No invoices available.</p> : null}
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

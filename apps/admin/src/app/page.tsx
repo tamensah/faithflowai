@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { trpc } from '../lib/trpc';
 import { Shell } from '../components/Shell';
+import { PageSectionLayout } from '../components/PageSectionLayout';
 
 function toNumber(value: unknown) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
@@ -133,7 +134,7 @@ export default function AdminHome() {
 
   return (
     <Shell>
-      <div className="space-y-6">
+      <PageSectionLayout rootId="overview-page-sections" title="Overview sections" className="space-y-6">
         <Card className="border-primary/10 bg-gradient-to-r from-slate-950 to-primary p-6 text-primary-foreground shadow-lg">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
@@ -433,7 +434,7 @@ export default function AdminHome() {
             {!recentEvents?.length ? <p className="text-sm text-muted">No events yet. Create your first event to begin scheduling.</p> : null}
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

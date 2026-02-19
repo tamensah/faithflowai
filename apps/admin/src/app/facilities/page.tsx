@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
@@ -78,7 +79,7 @@ export default function FacilitiesPage() {
           description="Your current subscription does not include facility management. Upgrade to restore access."
         />
       ) : (
-      <div className="space-y-8">
+      <PageSectionLayout rootId="facilities-page-sections" title="Facilities sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Facilities & Scheduling</h1>
           <p className="mt-2 text-sm text-muted">Manage facility inventory, booking conflicts, and utilization across campuses.</p>
@@ -232,7 +233,7 @@ export default function FacilitiesPage() {
             {!bookings?.length ? <p className="text-sm text-muted">No bookings found.</p> : null}
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
       )}
     </Shell>
   );

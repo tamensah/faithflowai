@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 
 const roleOptions = [
@@ -60,7 +61,7 @@ export default function PlatformAdminPage() {
 
   return (
     <Shell>
-      <div className="space-y-8">
+      <PageSectionLayout rootId="platform-page-sections" title="Platform sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Platform administration</h1>
           <p className="mt-2 text-sm text-muted">Assign platform roles and oversee access.</p>
@@ -147,7 +148,7 @@ export default function PlatformAdminPage() {
             </Card>
           )}
         </div>
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

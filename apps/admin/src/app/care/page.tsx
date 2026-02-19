@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
@@ -114,7 +115,7 @@ export default function CarePage() {
           description="Your current subscription does not include pastoral care workflows. Upgrade to restore access."
         />
       ) : (
-      <div className="space-y-8">
+      <PageSectionLayout rootId="care-page-sections" title="Care sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Pastoral Care</h1>
           <p className="mt-2 text-sm text-muted">Manage care intake, assignment, follow-ups, and status transitions.</p>
@@ -325,7 +326,7 @@ export default function CarePage() {
             {!requests?.length ? <p className="text-sm text-muted">No care requests found for this scope.</p> : null}
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
       )}
     </Shell>
   );

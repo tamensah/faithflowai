@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
@@ -106,7 +107,7 @@ export default function ContentPage() {
           description="Your current subscription does not include the content library. Upgrade to restore access."
         />
       ) : (
-      <div className="space-y-8">
+      <PageSectionLayout rootId="content-page-sections" title="Content sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Sermons & Content Library</h1>
           <p className="mt-2 text-sm text-muted">Publish sermons and resources with campus-aware visibility controls.</p>
@@ -317,7 +318,7 @@ export default function ContentPage() {
             {!resources?.length ? <p className="text-sm text-muted">No resources yet.</p> : null}
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
       )}
     </Shell>
   );

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
+import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
 
 const channelOptions = ['EMAIL', 'SMS', 'WHATSAPP'] as const;
@@ -67,7 +68,7 @@ export default function SuppressionsPage() {
 
   return (
     <Shell>
-      <div className="space-y-8">
+      <PageSectionLayout rootId="communications-suppressions-page-sections" title="Suppression sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Comms Suppressions</h1>
           <p className="mt-2 text-sm text-muted">
@@ -211,7 +212,7 @@ export default function SuppressionsPage() {
             {!data?.length && !isLoading ? <p className="text-sm text-muted">No suppressions.</p> : null}
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

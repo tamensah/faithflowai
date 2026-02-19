@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { trpc } from '../../lib/trpc';
 import { Shell } from '../../components/Shell';
+import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { useAuth } from '@clerk/nextjs';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
@@ -86,7 +87,7 @@ export default function LivePage() {
           description="Your current subscription does not include events operations. Upgrade to unlock realtime attendance activity."
         />
       ) : (
-        <div className="space-y-6">
+        <PageSectionLayout rootId="live-page-sections" title="Live sections" className="space-y-6">
           <div>
             <h1 className="text-3xl font-semibold">Live feed</h1>
             <p className="mt-2 text-muted">Realtime attendance and giving activity.</p>
@@ -195,7 +196,7 @@ export default function LivePage() {
             {!events.length && <p className="text-sm text-muted">Waiting for events…</p>}
           </div>
         </Card>
-        </div>
+        </PageSectionLayout>
       )}
     </Shell>
   );

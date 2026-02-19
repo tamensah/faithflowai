@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import QRCode from 'qrcode';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
+import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
 
 function EventBadgesPageContent() {
@@ -66,7 +67,7 @@ function EventBadgesPageContent() {
           }
         }
       `}</style>
-      <div className="space-y-6">
+      <PageSectionLayout rootId="event-badges-page-sections" title="Badge sections" className="space-y-6">
         <Card className="print-hidden p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -115,7 +116,7 @@ function EventBadgesPageContent() {
             );
           })}
         </div>
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

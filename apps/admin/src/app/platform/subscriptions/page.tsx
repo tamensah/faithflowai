@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
+import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
 
 const intervalOptions = ['MONTHLY', 'YEARLY', 'CUSTOM'] as const;
@@ -146,7 +147,7 @@ export default function PlatformSubscriptionsPage() {
 
   return (
     <Shell>
-      <div className="space-y-8">
+      <PageSectionLayout rootId="platform-subscriptions-page-sections" title="Subscriptions sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Platform subscriptions</h1>
           <p className="mt-2 text-sm text-muted">
@@ -443,7 +444,7 @@ export default function PlatformSubscriptionsPage() {
             {!tenantOptions.length ? <p className="text-sm text-muted">No tenants found.</p> : null}
           </div>
         </Card>
-      </div>
+      </PageSectionLayout>
     </Shell>
   );
 }

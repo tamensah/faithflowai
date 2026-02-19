@@ -10,6 +10,7 @@ import { FeatureLocked } from '../../components/FeatureLocked';
 import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 import { EmptyState } from '../../components/EmptyState';
 import { LoadingSkeleton } from '../../components/LoadingSkeleton';
+import { PageContextSidebar } from '../../components/PageContextSidebar';
 import { useKeyboardShortcuts } from '../../lib/useKeyboardShortcuts';
 
 export default function EventsPage() {
@@ -444,7 +445,8 @@ export default function EventsPage() {
           description="Your current subscription does not include event management. Upgrade to restore access."
         />
       ) : (
-      <div className="space-y-6">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_240px] xl:items-start">
+        <div id="events-page-sections" className="space-y-6">
         <Card className="border-primary/10 bg-gradient-to-r from-slate-950 to-primary p-6 text-primary-foreground shadow-lg">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -1670,6 +1672,8 @@ export default function EventsPage() {
             )}
           </div>
         </Card>
+        </div>
+        <PageContextSidebar rootId="events-page-sections" title="Events sections" />
       </div>
       )}
     </Shell>
