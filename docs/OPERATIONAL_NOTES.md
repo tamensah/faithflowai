@@ -27,6 +27,7 @@ This file is the running operations log for implementation details, runtime cons
 - Billing UI now includes a manual provider-state refresh action (`Refresh provider status`) to reconcile Stripe/Paystack state without waiting for webhook retries.
 - Paystack in-app cancellation now immediately updates local subscription state to `CANCELED` after successful provider disable call; webhooks still reconcile metadata/status afterward.
 - Billing cache invalidation now refreshes entitlements after cancel/resume actions so locked/unlocked UX updates immediately.
+- Billing now has a Paystack checkout verification fallback (`billing.verifyPaystackCheckout`) that can activate subscription state from a checkout reference when webhook processing is delayed.
 
 ### Deployment state (Render hybrid backend)
 

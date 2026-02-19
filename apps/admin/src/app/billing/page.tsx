@@ -38,6 +38,7 @@ export default function BillingPage() {
   const [selectedPlanCode, setSelectedPlanCode] = useState('');
   const [effective, setEffective] = useState<(typeof changeEffectiveOptions)[number]>('NEXT_CYCLE');
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [checkoutReferenceHandled, setCheckoutReferenceHandled] = useState(false);
 
   const { data: plans } = trpc.billing.plans.useQuery();
   const { data: current } = trpc.billing.currentSubscription.useQuery();
@@ -117,6 +118,33 @@ export default function BillingPage() {
       onError: (error) => setActionMessage(error.message),
     });
 
+  const { mutate: verifyPaystackCheckout, isPending: isVerifyingPaystackCheckout } =
+    trpc.billing.verifyPaystackCheckout.useMutation({
+      onSuccess: async (data) => {
+        setProvider('PAYSTACK');
+        setActionMessage(`Paystack checkout verified (${data.status}).`);
+        await Promise.all([
+          utils.billing.currentSubscription.invalidate(),
+          utils.billing.entitlements.invalidate(),
+          utils.billing.invoices.invalidate({ provider: 'PAYSTACK', limit: 20 }),
+        ]);
+      },
+      onError: (error) => setActionMessage(error.message),
+    });
+
+  useEffect(() => {
+    if (checkoutReferenceHandled || typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    const status = (url.searchParams.get('status') ?? '').toLowerCase();
+    const reference = url.searchParams.get('reference') ?? url.searchParams.get('trxref');
+    setCheckoutReferenceHandled(true);
+    if (!reference || status === 'cancel') return;
+    verifyPaystackCheckout({ reference });
+    url.searchParams.delete('reference');
+    url.searchParams.delete('trxref');
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+  }, [checkoutReferenceHandled, verifyPaystackCheckout]);
+
   const lockedModules = useMemo(() => {
     const ent = entitlementsStatus?.entitlements?.entitlements ?? {};
     const keys = ['membership_enabled', 'events_enabled', 'finance_enabled', 'communications_enabled', 'support_center_enabled'];
@@ -195,7 +223,7 @@ export default function BillingPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={isRefreshingSubscription}
+                  disabled={isRefreshingSubscription || isVerifyingPaystackCheckout}
                   onClick={() => refreshCurrentSubscription()}
                 >
                   {isRefreshingSubscription ? 'Refreshing...' : 'Refresh provider status'}

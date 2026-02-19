@@ -186,6 +186,7 @@ Implemented tenant routes:
 - `billing.plans`
 - `billing.currentSubscription`
 - `billing.refreshCurrentSubscription` (manual Stripe/Paystack provider-state sync)
+- `billing.verifyPaystackCheckout` (checkout reference verification fallback)
 - `billing.startCheckout`
 - `billing.changePlan` (Stripe: schedule next-cycle changes; optional immediate upgrades)
 - `billing.cancelSubscription` (Stripe + Paystack)

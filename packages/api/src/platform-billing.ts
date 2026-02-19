@@ -153,6 +153,20 @@ function normalizePaystackMetadata(event: { event: string; data?: Record<string,
   } as Prisma.InputJsonValue;
 }
 
+async function fetchPaystackSubscriptionDetails(subscriptionRef: string, secret: string) {
+  const response = await fetch(`https://api.paystack.co/subscription/${encodeURIComponent(subscriptionRef)}`, {
+    headers: { Authorization: `Bearer ${secret}` },
+  });
+  if (!response.ok) return null;
+  const payload = (await response.json()) as { status?: boolean; data?: unknown };
+  if (!payload.status || !payload.data || typeof payload.data !== 'object' || Array.isArray(payload.data)) return null;
+  const data = payload.data as Record<string, unknown>;
+  const rawCode = typeof data.subscription_code === 'string' ? data.subscription_code : null;
+  const emailToken = typeof data.email_token === 'string' ? data.email_token : null;
+  const subscriptionCode = rawCode && /^SUB_[A-Za-z0-9]+$/.test(rawCode) ? rawCode : null;
+  return { subscriptionCode, emailToken };
+}
+
 async function resolveTenantAndPlan(options: {
   tenantId?: string | null;
   clerkOrgId?: string | null;
@@ -467,9 +481,53 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
 
           for (const previous of previousSubs) {
             const previousMeta = (previous.metadata ?? {}) as Record<string, any>;
-            const subscriptionCode = typeof previousMeta.paystackSubscriptionCode === 'string' ? previousMeta.paystackSubscriptionCode : null;
-            const emailToken = typeof previousMeta.paystackEmailToken === 'string' ? previousMeta.paystackEmailToken : null;
-            if (!subscriptionCode || !emailToken) continue;
+            let previousSubscriptionCode =
+              typeof previousMeta.paystackSubscriptionCode === 'string' ? previousMeta.paystackSubscriptionCode : null;
+            let previousEmailToken =
+              typeof previousMeta.paystackEmailToken === 'string' ? previousMeta.paystackEmailToken : null;
+
+            if (
+              (!previousSubscriptionCode || !previousEmailToken) &&
+              typeof previous.providerRef === 'string' &&
+              /^SUB_[A-Za-z0-9]+$/.test(previous.providerRef)
+            ) {
+              const details = await fetchPaystackSubscriptionDetails(previous.providerRef, paystackSecret);
+              if (details?.subscriptionCode) previousSubscriptionCode = details.subscriptionCode;
+              if (details?.emailToken) previousEmailToken = details.emailToken;
+
+              if (details?.subscriptionCode || details?.emailToken) {
+                const mergedMeta =
+                  previous.metadata && typeof previous.metadata === 'object' && !Array.isArray(previous.metadata)
+                    ? ({ ...(previous.metadata as Record<string, unknown>) } as Record<string, unknown>)
+                    : ({} as Record<string, unknown>);
+                if (details.subscriptionCode) mergedMeta.paystackSubscriptionCode = details.subscriptionCode;
+                if (details.emailToken) mergedMeta.paystackEmailToken = details.emailToken;
+                await prisma.tenantSubscription.update({
+                  where: { id: previous.id },
+                  data: { metadata: mergedMeta as Prisma.InputJsonValue },
+                });
+              }
+            }
+
+            if (!previousSubscriptionCode || !previousEmailToken) {
+              await recordAuditLog({
+                tenantId: tenant.id,
+                actorType: AuditActorType.SYSTEM,
+                action: 'platform.subscription.plan_change_paystack_disable_skipped',
+                targetType: 'TenantSubscription',
+                targetId: previous.id,
+                metadata: {
+                  fromPlan: planChangeFrom,
+                  toPlan: plan.code,
+                  reason: 'missing_subscription_code_or_email_token',
+                },
+              });
+              continue;
+            }
+
+            if (subscriptionCode && previousSubscriptionCode === subscriptionCode) {
+              continue;
+            }
 
             try {
               const response = await fetch('https://api.paystack.co/subscription/disable', {
@@ -478,7 +536,7 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
                   Authorization: `Bearer ${paystackSecret}`,
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ code: subscriptionCode, token: emailToken }),
+                body: JSON.stringify({ code: previousSubscriptionCode, token: previousEmailToken }),
               });
 
               if (response.ok) {
@@ -497,7 +555,7 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
                 metadata: {
                   fromPlan: planChangeFrom,
                   toPlan: plan.code,
-                  subscriptionCode,
+                  subscriptionCode: previousSubscriptionCode,
                   ok: response.ok,
                 },
               });
@@ -511,7 +569,7 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
                 metadata: {
                   fromPlan: planChangeFrom,
                   toPlan: plan.code,
-                  subscriptionCode,
+                  subscriptionCode: previousSubscriptionCode,
                   ok: false,
                   error: error instanceof Error ? error.message : 'disable_failed',
                 },

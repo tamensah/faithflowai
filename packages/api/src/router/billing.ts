@@ -126,6 +126,9 @@ const checkoutInput = z.object({
   successUrl: z.string().url().optional(),
   cancelUrl: z.string().url().optional(),
 });
+const verifyPaystackCheckoutInput = z.object({
+  reference: z.string().trim().min(3).max(200),
+});
 
 const planChangeInput = z.object({
   planCode: z.string().trim().min(2).max(64),
@@ -165,6 +168,11 @@ function parseDate(value: unknown) {
   if (typeof value !== 'string' || !value.trim()) return null;
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
 }
 
 function readPlanMetaString(meta: Record<string, unknown>, key: string) {
@@ -539,6 +547,161 @@ export const billingRouter = router({
 
     throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Unsupported billing provider.' });
   }),
+
+  verifyPaystackCheckout: protectedProcedure
+    .input(verifyPaystackCheckoutInput)
+    .mutation(async ({ ctx, input }) => {
+      await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
+      await ensureBaselinePlans();
+
+      const secret = requirePaystackSecret();
+      const response = await fetch(
+        `https://api.paystack.co/transaction/verify/${encodeURIComponent(input.reference)}`,
+        {
+          headers: { Authorization: `Bearer ${secret}` },
+        }
+      );
+      if (!response.ok) {
+        const text = await response.text();
+        throw new TRPCError({ code: 'BAD_GATEWAY', message: `Paystack verify failed: ${text}` });
+      }
+
+      const payload = (await response.json()) as { status?: boolean; data?: unknown; message?: string };
+      if (!payload.status || !payload.data) {
+        throw new TRPCError({ code: 'BAD_GATEWAY', message: payload.message || 'Paystack verify failed' });
+      }
+
+      const data = asRecord(payload.data);
+      if (!data) {
+        throw new TRPCError({ code: 'BAD_GATEWAY', message: 'Paystack verify payload is malformed' });
+      }
+      const transactionStatus = typeof data.status === 'string' ? data.status.toLowerCase() : '';
+      if (transactionStatus && transactionStatus !== 'success') {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: `Paystack transaction is ${transactionStatus}.`,
+        });
+      }
+
+      const metadata = asRecord(data.metadata);
+      const metadataTenantId = typeof metadata?.tenantId === 'string' ? metadata.tenantId : null;
+      if (metadataTenantId && metadataTenantId !== ctx.tenantId) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Checkout reference does not belong to this tenant.' });
+      }
+
+      const metadataPlanCode = typeof metadata?.planCode === 'string' ? metadata.planCode : null;
+      const planNode = data.plan;
+      const paystackPlanCode =
+        typeof planNode === 'string'
+          ? planNode
+          : asRecord(planNode) && typeof asRecord(planNode)?.plan_code === 'string'
+            ? (asRecord(planNode)!.plan_code as string)
+            : null;
+      const subscriptionNode = data.subscription;
+      const rawSubscriptionCode =
+        typeof subscriptionNode === 'string'
+          ? subscriptionNode
+          : asRecord(subscriptionNode) && typeof asRecord(subscriptionNode)?.subscription_code === 'string'
+            ? (asRecord(subscriptionNode)!.subscription_code as string)
+            : null;
+      const paystackSubscriptionCode =
+        rawSubscriptionCode && /^SUB_[A-Za-z0-9]+$/.test(rawSubscriptionCode) ? rawSubscriptionCode : null;
+      const paystackEmailToken =
+        (asRecord(subscriptionNode) && typeof asRecord(subscriptionNode)?.email_token === 'string'
+          ? (asRecord(subscriptionNode)!.email_token as string)
+          : null) ??
+        (typeof data.email_token === 'string' ? data.email_token : null);
+      const customerCode =
+        asRecord(data.customer) && typeof asRecord(data.customer)?.customer_code === 'string'
+          ? (asRecord(data.customer)!.customer_code as string)
+          : null;
+
+      let plan =
+        metadataPlanCode
+          ? await prisma.subscriptionPlan.findUnique({ where: { code: metadataPlanCode } })
+          : null;
+      if (!plan && paystackPlanCode) {
+        plan = await prisma.subscriptionPlan.findFirst({
+          where: {
+            OR: [
+              { metadata: { path: ['paystackPlanCode'], equals: paystackPlanCode } },
+              { metadata: { path: ['paystackTrialPlanCode'], equals: paystackPlanCode } },
+            ],
+          },
+        });
+      }
+      if (!plan) {
+        plan = await prisma.subscriptionPlan.findFirst({ where: { isDefault: true, isActive: true } });
+      }
+      if (!plan) {
+        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'No active subscription plan is configured.' });
+      }
+
+      const providerRef = paystackSubscriptionCode ?? paystackPlanCode ?? input.reference;
+      const currentPeriodEnd = parseDate(data.next_payment_date);
+      const paidAt = parseDate(data.paid_at) ?? parseDate(data.created_at) ?? new Date();
+
+      const normalizedMeta = {
+        ...(metadata ?? {}),
+        paystackReference: input.reference,
+        ...(paystackPlanCode ? { paystackPlanCode } : {}),
+        ...(paystackSubscriptionCode ? { paystackSubscriptionCode } : {}),
+        ...(paystackEmailToken ? { paystackEmailToken } : {}),
+        ...(customerCode ? { paystackCustomerCode: customerCode } : {}),
+      } as Prisma.InputJsonValue;
+
+      const existing = await prisma.tenantSubscription.findFirst({
+        where: { provider: SubscriptionProvider.PAYSTACK, providerRef },
+      });
+      const record = existing
+        ? await prisma.tenantSubscription.update({
+            where: { id: existing.id },
+            data: {
+              tenantId: ctx.tenantId!,
+              planId: plan.id,
+              status: TenantSubscriptionStatus.ACTIVE,
+              currentPeriodStart: existing.currentPeriodStart ?? paidAt,
+              currentPeriodEnd,
+              canceledAt: null,
+              cancelAtPeriodEnd: false,
+              metadata: normalizedMeta,
+            },
+          })
+        : await prisma.tenantSubscription.create({
+            data: {
+              tenantId: ctx.tenantId!,
+              planId: plan.id,
+              provider: SubscriptionProvider.PAYSTACK,
+              providerRef,
+              status: TenantSubscriptionStatus.ACTIVE,
+              currentPeriodStart: paidAt,
+              currentPeriodEnd,
+              cancelAtPeriodEnd: false,
+              metadata: normalizedMeta,
+            },
+          });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.paystack_checkout_verified',
+        targetType: 'TenantSubscription',
+        targetId: record.id,
+        metadata: {
+          reference: input.reference,
+          providerRef,
+          planCode: plan.code,
+        },
+      });
+
+      return {
+        ok: true,
+        provider: PaymentProvider.PAYSTACK,
+        subscriptionId: record.id,
+        status: record.status,
+      };
+    }),
 
   changePlan: protectedProcedure.input(planChangeInput).mutation(async ({ ctx, input }) => {
     await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
