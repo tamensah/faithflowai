@@ -5,6 +5,8 @@ import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
 import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
+import { useWriteAccess } from '../../../lib/entitlements';
+import { ReadOnlyNotice } from '../../../components/ReadOnlyNotice';
 
 type TenantStatusFilter = 'ALL' | 'ACTIVE' | 'SUSPENDED';
 type AuditActorTypeFilter = 'ALL' | 'USER' | 'SYSTEM' | 'WEBHOOK';
@@ -27,7 +29,9 @@ function escapeCsvCell(value: unknown) {
 }
 
 export default function PlatformTenantsPage() {
+  const writeGate = useWriteAccess();
   const utils = trpc.useUtils();
+  const canWrite = writeGate.canWrite;
   const { data: platformSelf } = trpc.platform.self.useQuery();
 
   const [query, setQuery] = useState('');
@@ -111,6 +115,8 @@ export default function PlatformTenantsPage() {
           </p>
         </div>
 
+        {writeGate.readOnly ? <ReadOnlyNotice /> : null}
+
         <Card className="p-6">
           <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
             <Input
@@ -192,7 +198,7 @@ export default function PlatformTenantsPage() {
                     size="sm"
                     variant="outline"
                     className="border-red-300 text-red-600 hover:bg-red-50"
-                    disabled={isChangingStatus}
+                    disabled={!canWrite || isChangingStatus}
                     onClick={() => {
                       const reason = window.prompt('Optional suspension reason');
                       setTenantStatus({
@@ -207,7 +213,7 @@ export default function PlatformTenantsPage() {
                 ) : (
                   <Button
                     size="sm"
-                    disabled={isChangingStatus}
+                    disabled={!canWrite || isChangingStatus}
                     onClick={() => setTenantStatus({ tenantId: tenant.id, status: 'ACTIVE' })}
                   >
                     Activate

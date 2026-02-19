@@ -6,6 +6,8 @@ import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { trpc } from '../lib/trpc';
 import { Shell } from '../components/Shell';
 import { PageSectionLayout } from '../components/PageSectionLayout';
+import { useWriteAccess } from '../lib/entitlements';
+import { ReadOnlyNotice } from '../components/ReadOnlyNotice';
 
 function toNumber(value: unknown) {
   if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
@@ -31,7 +33,9 @@ function formatWhen(value: string | Date) {
 }
 
 export default function AdminHome() {
+  const writeGate = useWriteAccess();
   const utils = trpc.useUtils();
+  const canWrite = writeGate.canWrite;
   const [orgName, setOrgName] = useState('');
   const [churchName, setChurchName] = useState('');
   const [churchSlug, setChurchSlug] = useState('');
@@ -164,6 +168,8 @@ export default function AdminHome() {
           </div>
         </Card>
 
+        {writeGate.readOnly ? <ReadOnlyNotice /> : null}
+
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="ff-surface p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">Members</p>
@@ -230,18 +236,22 @@ export default function AdminHome() {
               <Button
                 className="self-end"
                 onClick={() => {
+                  if (!canWrite) return;
                   if (!orgName.trim()) {
                     setOrgError('Organization name is required.');
                     return;
                   }
                   createOrganization({ name: orgName.trim() });
                 }}
-                disabled={!orgName || isCreatingOrg}
+                disabled={!canWrite || !orgName || isCreatingOrg}
               >
                 {isCreatingOrg ? 'Creating...' : 'Create organization'}
               </Button>
             </div>
             {orgError ? <p className="mt-2 text-xs text-destructive">{orgError}</p> : null}
+            {writeGate.readOnly ? (
+              <p className="mt-2 text-xs text-muted">Organization creation is disabled in view-only mode.</p>
+            ) : null}
           </Card>
 
           <Card className="ff-surface p-6">
@@ -345,6 +355,7 @@ export default function AdminHome() {
             <Button
               className="self-end"
               onClick={() => {
+                if (!canWrite) return;
                 const name = churchName.trim();
                 const slug = churchSlug.trim();
                 const country = churchCountry.trim().toUpperCase();
@@ -367,7 +378,7 @@ export default function AdminHome() {
                   countryCode: country || undefined,
                 });
               }}
-              disabled={!churchName || !churchSlug || !selectedOrg || isCreatingChurch}
+              disabled={!canWrite || !churchName || !churchSlug || !selectedOrg || isCreatingChurch}
             >
               {isCreatingChurch ? 'Creating...' : 'Create church'}
             </Button>
@@ -390,6 +401,7 @@ export default function AdminHome() {
               variant="outline"
               className="self-end"
               onClick={() => {
+                if (!canWrite) return;
                 const country = updateCountry.trim().toUpperCase();
                 if (!selectedChurchId) {
                   setUpdateError('Select a church first.');
@@ -404,12 +416,15 @@ export default function AdminHome() {
                   countryCode: country || undefined,
                 });
               }}
-              disabled={!selectedChurchId || isUpdatingChurch}
+              disabled={!canWrite || !selectedChurchId || isUpdatingChurch}
             >
               {isUpdatingChurch ? 'Updating...' : 'Update country'}
             </Button>
           </div>
           {updateError ? <p className="mt-2 text-xs text-destructive">{updateError}</p> : null}
+          {writeGate.readOnly ? (
+            <p className="mt-2 text-xs text-muted">Church setup actions are disabled in view-only mode.</p>
+          ) : null}
         </Card>
 
         <Card className="ff-surface p-6">

@@ -5,11 +5,15 @@ import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
+import { useWriteAccess } from '../../lib/entitlements';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const roleOptions = ['ADMIN', 'STAFF'] as const;
 
 export default function StaffPage() {
+  const writeGate = useWriteAccess();
   const utils = trpc.useUtils();
+  const canWrite = writeGate.canWrite;
   const { data: churches } = trpc.church.list.useQuery({ organizationId: undefined });
   const { data: staff } = trpc.staff.list.useQuery({ churchId: undefined });
   const { data: invites } = trpc.staff.listInvites.useQuery({ status: 'PENDING' });
@@ -98,6 +102,8 @@ export default function StaffPage() {
           </p>
         </div>
 
+        {writeGate.readOnly ? <ReadOnlyNotice /> : null}
+
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Add staff member</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -154,6 +160,7 @@ export default function StaffPage() {
           <div className="mt-4">
             <Button
               onClick={() => {
+                if (!canWrite) return;
                 const trimmedEmail = email.trim().toLowerCase();
                 const trimmedClerkUserId = clerkUserId.trim();
                 if (!trimmedClerkUserId || !trimmedEmail || !churchId) {
@@ -172,7 +179,7 @@ export default function StaffPage() {
                   role,
                 });
               }}
-              disabled={!clerkUserId.trim() || !email.trim() || !churchId || isPending}
+              disabled={!canWrite || !clerkUserId.trim() || !email.trim() || !churchId || isPending}
             >
               {isPending ? 'Saving…' : 'Grant access'}
             </Button>
@@ -232,6 +239,7 @@ export default function StaffPage() {
           <div className="mt-4">
             <Button
               onClick={() => {
+                if (!canWrite) return;
                 const trimmedEmail = inviteEmail.trim().toLowerCase();
                 if (!trimmedEmail || !inviteChurchId) {
                   setInviteFormError('Invite email and church are required.');
@@ -248,7 +256,7 @@ export default function StaffPage() {
                   role: inviteRole,
                 });
               }}
-              disabled={!inviteEmail.trim() || !inviteChurchId || isInviting}
+              disabled={!canWrite || !inviteEmail.trim() || !inviteChurchId || isInviting}
             >
               {isInviting ? 'Sending…' : 'Send invite'}
             </Button>
@@ -270,7 +278,7 @@ export default function StaffPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant="default">{invite.status}</Badge>
-                    <Button size="sm" variant="outline" onClick={() => cancelInvite({ id: invite.id })}>
+                    <Button size="sm" variant="outline" disabled={!canWrite} onClick={() => cancelInvite({ id: invite.id })}>
                       Cancel
                     </Button>
                   </div>
@@ -304,6 +312,7 @@ export default function StaffPage() {
                           <select
                             className="h-9 rounded-md border border-border bg-white px-2 text-sm"
                             value={entry.role}
+                            disabled={!canWrite}
                             onChange={(e) =>
                               updateRole({ id: entry.id, role: e.target.value as typeof roleOptions[number] })
                             }
@@ -314,7 +323,7 @@ export default function StaffPage() {
                               </option>
                             ))}
                           </select>
-                          <Button size="sm" variant="outline" onClick={() => removeStaff({ id: entry.id })}>
+                          <Button size="sm" variant="outline" disabled={!canWrite} onClick={() => removeStaff({ id: entry.id })}>
                             Remove
                           </Button>
                         </div>
@@ -328,7 +337,11 @@ export default function StaffPage() {
           })}
           {!groupedStaff.length ? (
             <Card className="p-6">
-              <p className="text-sm text-muted">No staff memberships yet.</p>
+              <p className="text-sm text-muted">
+                {writeGate.readOnly
+                  ? 'No staff memberships in view-only mode. Update billing to add or edit staff access.'
+                  : 'No staff memberships yet.'}
+              </p>
             </Card>
           ) : null}
         </div>

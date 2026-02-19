@@ -5,9 +5,13 @@ import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
 import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
+import { useWriteAccess } from '../../../lib/entitlements';
+import { ReadOnlyNotice } from '../../../components/ReadOnlyNotice';
 
 export default function PlatformOpsPage() {
+  const writeGate = useWriteAccess();
   const utils = trpc.useUtils();
+  const canWrite = writeGate.canWrite;
   const { data: platformSelf } = trpc.platform.self.useQuery();
   const { data: tenants } = trpc.platform.listTenants.useQuery(
     { limit: 100 },
@@ -113,6 +117,8 @@ export default function PlatformOpsPage() {
           <p className="mt-2 text-sm text-muted">Manage tenant domains, platform health posture, and security policies.</p>
         </div>
 
+        {writeGate.readOnly ? <ReadOnlyNotice /> : null}
+
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Tenant scope</h2>
           <div className="mt-4">
@@ -143,7 +149,7 @@ export default function PlatformOpsPage() {
           </div>
           <div className="mt-4">
             <Button
-              disabled={!tenantId || !domain.trim() || isSavingDomain}
+              disabled={!canWrite || !tenantId || !domain.trim() || isSavingDomain}
               onClick={() => upsertDomain({ tenantId, domain: domain.trim(), dnsTarget: dnsTarget.trim() || undefined })}
             >
               {isSavingDomain ? 'Saving...' : 'Save domain'}
@@ -160,6 +166,7 @@ export default function PlatformOpsPage() {
                   <Button
                     size="sm"
                     variant="outline"
+                    disabled={!canWrite}
                     onClick={() => verifyDomain({ id: entry.id, activate: true, sslStatus: 'PROVISIONED' })}
                   >
                     Verify + Activate
@@ -193,7 +200,7 @@ export default function PlatformOpsPage() {
           </p>
           <div className="mt-4">
             <Button
-              disabled={!tenantId || isRunningDomainAutomation}
+              disabled={!canWrite || !tenantId || isRunningDomainAutomation}
               onClick={() =>
                 runDomainAutomation({
                   ...domainAutomationInput,
@@ -209,7 +216,7 @@ export default function PlatformOpsPage() {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Health checks</h2>
-            <Button disabled={!tenantId || isRunningSweep} onClick={() => runHealthSweep({ tenantId })}>
+            <Button disabled={!canWrite || !tenantId || isRunningSweep} onClick={() => runHealthSweep({ tenantId })}>
               {isRunningSweep ? 'Running...' : 'Run health sweep'}
             </Button>
           </div>
@@ -266,7 +273,7 @@ export default function PlatformOpsPage() {
           </div>
           <div className="mt-4">
             <Button
-              disabled={!tenantId || isUpdatingPolicy}
+              disabled={!canWrite || !tenantId || isUpdatingPolicy}
               onClick={() =>
                 updateSecurityPolicy({
                   tenantId,

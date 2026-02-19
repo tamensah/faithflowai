@@ -5,11 +5,16 @@ import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
+import { useFeatureGate } from '../../lib/entitlements';
+import { FeatureLocked } from '../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const statusOptions = ['PENDING', 'APPROVED', 'DENIED'] as const;
 
 export default function AccessRequestsPage() {
+  const gate = useFeatureGate('membership_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const { data: churches } = trpc.church.list.useQuery({ organizationId: undefined });
   const [churchId, setChurchId] = useState('');
   const [status, setStatus] = useState<typeof statusOptions[number]>('PENDING');
@@ -41,11 +46,20 @@ export default function AccessRequestsPage() {
 
   return (
     <Shell>
+      {!gate.isLoading && gate.access === 'locked' ? (
+        <FeatureLocked
+          featureKey="membership_enabled"
+          title="Member access is locked"
+          description="Your current subscription does not include membership access workflows. Upgrade to restore approvals."
+        />
+      ) : (
       <PageSectionLayout rootId="access-requests-page-sections" title="Access sections" className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold">Member access requests</h1>
           <p className="mt-2 text-sm text-muted">Approve members requesting portal access.</p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <div className="flex flex-wrap gap-3">
@@ -92,7 +106,7 @@ export default function AccessRequestsPage() {
                       <Button
                         size="sm"
                         onClick={() => approveRequest({ id: request.id })}
-                        disabled={isApproving}
+                        disabled={!canWrite || isApproving}
                       >
                         Approve
                       </Button>
@@ -100,7 +114,7 @@ export default function AccessRequestsPage() {
                         size="sm"
                         variant="outline"
                         onClick={() => denyRequest({ id: request.id })}
-                        disabled={isDenying}
+                        disabled={!canWrite || isDenying}
                       >
                         Deny
                       </Button>
@@ -112,11 +126,16 @@ export default function AccessRequestsPage() {
           ))}
           {!requests?.length && (
             <Card className="p-6">
-              <p className="text-sm text-muted">No access requests yet.</p>
+              <p className="text-sm text-muted">
+                {gate.readOnly
+                  ? 'No pending requests in view-only mode. Update billing to process new approvals.'
+                  : 'No access requests yet.'}
+              </p>
             </Card>
           )}
         </div>
       </PageSectionLayout>
+      )}
     </Shell>
   );
 }

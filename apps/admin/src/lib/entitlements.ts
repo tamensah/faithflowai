@@ -24,3 +24,18 @@ export function useFeatureGate(featureKey: string) {
     planCode: data?.entitlements?.plan?.code ?? null,
   };
 }
+
+export function useWriteAccess() {
+  const { data, isLoading, error } = trpc.billing.entitlements.useQuery(undefined, { retry: false });
+  const source = data?.entitlements?.source ?? null;
+  const readOnly = source === 'inactive_subscription';
+
+  return {
+    isLoading,
+    error,
+    source,
+    readOnly,
+    canWrite: !readOnly,
+    planCode: data?.entitlements?.plan?.code ?? null,
+  };
+}

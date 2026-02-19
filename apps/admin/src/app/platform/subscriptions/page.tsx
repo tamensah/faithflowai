@@ -5,6 +5,8 @@ import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
 import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
+import { useWriteAccess } from '../../../lib/entitlements';
+import { ReadOnlyNotice } from '../../../components/ReadOnlyNotice';
 
 const intervalOptions = ['MONTHLY', 'YEARLY', 'CUSTOM'] as const;
 const subscriptionStatusOptions = ['TRIALING', 'ACTIVE', 'PAST_DUE', 'PAUSED', 'CANCELED', 'EXPIRED'] as const;
@@ -55,7 +57,9 @@ function getTrialDays(metadata: unknown) {
 }
 
 export default function PlatformSubscriptionsPage() {
+  const writeGate = useWriteAccess();
   const utils = trpc.useUtils();
+  const canWrite = writeGate.canWrite;
   const { data: platformSelf } = trpc.platform.self.useQuery();
   const { data: plans } = trpc.platform.listPlans.useQuery(
     { includeInactive: true },
@@ -155,6 +159,8 @@ export default function PlatformSubscriptionsPage() {
           </p>
         </div>
 
+        {writeGate.readOnly ? <ReadOnlyNotice /> : null}
+
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Create or update plan</h2>
           <p className="mt-1 text-xs text-muted">Feature format: one line per feature as key,enabled,limit</p>
@@ -228,7 +234,7 @@ export default function PlatformSubscriptionsPage() {
                   features: parseFeaturesInput(featuresRaw),
                 })
               }
-              disabled={!code.trim() || !name.trim() || isSavingPlan}
+              disabled={!canWrite || !code.trim() || !name.trim() || isSavingPlan}
             >
               {isSavingPlan ? 'Saving plan...' : 'Save plan'}
             </Button>
@@ -304,7 +310,7 @@ export default function PlatformSubscriptionsPage() {
                   reason: reason.trim() || undefined,
                 })
               }
-              disabled={!tenantId || !planCode || isAssigningPlan}
+              disabled={!canWrite || !tenantId || !planCode || isAssigningPlan}
             >
               {isAssigningPlan ? 'Assigning plan...' : 'Assign plan'}
             </Button>
@@ -336,7 +342,7 @@ export default function PlatformSubscriptionsPage() {
           <div className="mt-4">
             <Button
               onClick={() => runDunning(dunningInput)}
-              disabled={isRunningDunning}
+              disabled={!canWrite || isRunningDunning}
             >
               {isRunningDunning ? 'Queuing reminders...' : 'Run dunning now'}
             </Button>
@@ -359,7 +365,7 @@ export default function PlatformSubscriptionsPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
               variant="outline"
-              disabled={isRunningMetadataBackfill}
+              disabled={!canWrite || isRunningMetadataBackfill}
               onClick={() =>
                 runMetadataBackfill({
                   limit: Number.isFinite(Number(metadataBackfillLimit)) ? Number(metadataBackfillLimit) : 250,
@@ -370,7 +376,7 @@ export default function PlatformSubscriptionsPage() {
               {isRunningMetadataBackfill ? 'Running...' : 'Preview backfill'}
             </Button>
             <Button
-              disabled={isRunningMetadataBackfill}
+              disabled={!canWrite || isRunningMetadataBackfill}
               onClick={() =>
                 runMetadataBackfill({
                   limit: Number.isFinite(Number(metadataBackfillLimit)) ? Number(metadataBackfillLimit) : 250,

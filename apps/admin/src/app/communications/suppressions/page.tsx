@@ -5,12 +5,17 @@ import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
 import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
+import { useFeatureGate } from '../../../lib/entitlements';
+import { FeatureLocked } from '../../../components/FeatureLocked';
+import { ReadOnlyNotice } from '../../../components/ReadOnlyNotice';
 
 const channelOptions = ['EMAIL', 'SMS', 'WHATSAPP'] as const;
 const reasonOptions = ['USER_UNSUBSCRIBE', 'ADMIN_SUPPRESS', 'BOUNCE', 'COMPLAINT'] as const;
 
 export default function SuppressionsPage() {
+  const gate = useFeatureGate('communications_enabled');
   const utils = trpc.useUtils();
+  const canWrite = gate.canWrite;
   const [channel, setChannel] = useState<(typeof channelOptions)[number] | ''>('');
   const [q, setQ] = useState('');
   const [windowDays, setWindowDays] = useState('30');
@@ -68,6 +73,13 @@ export default function SuppressionsPage() {
 
   return (
     <Shell>
+      {!gate.isLoading && gate.access === 'locked' ? (
+        <FeatureLocked
+          featureKey="communications_enabled"
+          title="Communications suppressions are locked"
+          description="Your current subscription does not include communications controls. Upgrade to manage suppressions."
+        />
+      ) : (
       <PageSectionLayout rootId="communications-suppressions-page-sections" title="Suppression sections" className="space-y-8">
         <div>
           <h1 className="text-3xl font-semibold">Comms Suppressions</h1>
@@ -75,6 +87,8 @@ export default function SuppressionsPage() {
             Durable unsubscribe/suppression list. Suppressed recipients will not receive scheduled communications.
           </p>
         </div>
+
+        {gate.readOnly ? <ReadOnlyNotice /> : null}
 
         <Card className="p-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
@@ -145,7 +159,7 @@ export default function SuppressionsPage() {
               ))}
             </select>
             <Button
-              disabled={isAdding || newAddress.trim().length < 3}
+              disabled={!canWrite || isAdding || newAddress.trim().length < 3}
               onClick={() =>
                 addSuppression({
                   channel: newChannel,
@@ -201,7 +215,7 @@ export default function SuppressionsPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={isRemoving}
+                  disabled={!canWrite || isRemoving}
                   onClick={() => removeSuppression({ id: row.id })}
                 >
                   Remove
@@ -209,10 +223,17 @@ export default function SuppressionsPage() {
               </div>
             ))}
 
-            {!data?.length && !isLoading ? <p className="text-sm text-muted">No suppressions.</p> : null}
+            {!data?.length && !isLoading ? (
+              <p className="text-sm text-muted">
+                {gate.readOnly
+                  ? 'No suppressions found in view-only mode. Update billing to add or remove entries.'
+                  : 'No suppressions.'}
+              </p>
+            ) : null}
           </div>
         </Card>
       </PageSectionLayout>
+      )}
     </Shell>
   );
 }

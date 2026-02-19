@@ -6,6 +6,8 @@ import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
+import { useWriteAccess } from '../../lib/entitlements';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const roleOptions = [
   'SUPER_ADMIN',
@@ -20,7 +22,9 @@ const roleOptions = [
 ] as const;
 
 export default function PlatformAdminPage() {
+  const writeGate = useWriteAccess();
   const utils = trpc.useUtils();
+  const canWrite = writeGate.canWrite;
   const { data: platformSelf } = trpc.platform.self.useQuery();
   const { data: users } = trpc.platform.listUsers.useQuery(undefined, {
     enabled: Boolean(platformSelf?.platformUser),
@@ -86,6 +90,8 @@ export default function PlatformAdminPage() {
           </div>
         </div>
 
+        {writeGate.readOnly ? <ReadOnlyNotice /> : null}
+
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Assign role</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -105,7 +111,7 @@ export default function PlatformAdminPage() {
           <div className="mt-4">
             <Button
               onClick={() => assignRole({ email: email.trim(), role })}
-              disabled={!email.trim() || isPending}
+              disabled={!canWrite || !email.trim() || isPending}
             >
               {isPending ? 'Assigning…' : 'Assign role'}
             </Button>
@@ -134,6 +140,7 @@ export default function PlatformAdminPage() {
                     key={entry}
                     size="sm"
                     variant="outline"
+                    disabled={!canWrite}
                     onClick={() => removeRole({ platformUserId: user.id, role: entry as any })}
                   >
                     Remove {entry}
@@ -144,7 +151,11 @@ export default function PlatformAdminPage() {
           ))}
           {!users?.length && (
             <Card className="p-6">
-              <p className="text-sm text-muted">No platform users yet.</p>
+              <p className="text-sm text-muted">
+                {writeGate.readOnly
+                  ? 'No platform users listed in view-only mode. Update billing to manage roles.'
+                  : 'No platform users yet.'}
+              </p>
             </Card>
           )}
         </div>

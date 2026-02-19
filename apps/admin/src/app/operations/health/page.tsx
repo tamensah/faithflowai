@@ -5,6 +5,8 @@ import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
 import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
+import { useWriteAccess } from '../../../lib/entitlements';
+import { ReadOnlyNotice } from '../../../components/ReadOnlyNotice';
 
 function formatDate(value?: string | Date | null) {
   if (!value) return 'N/A';
@@ -13,7 +15,9 @@ function formatDate(value?: string | Date | null) {
 }
 
 export default function OperationsHealthPage() {
+  const writeGate = useWriteAccess();
   const utils = trpc.useUtils();
+  const canWrite = writeGate.canWrite;
   const [message, setMessage] = useState<string | null>(null);
   const { data, isLoading, error } = trpc.operations.health.useQuery(undefined, { retry: false });
   const { data: checklist } = trpc.operations.goLiveChecklist.useQuery(undefined, { retry: false });
@@ -53,6 +57,8 @@ export default function OperationsHealthPage() {
             Refresh
           </Button>
         </div>
+
+        {writeGate.readOnly ? <ReadOnlyNotice /> : null}
 
         {isLoading ? <p className="text-sm text-muted">Loading health...</p> : null}
         {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
@@ -101,7 +107,7 @@ export default function OperationsHealthPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={isSendingTestEmail || !data.providers.resend}
+                  disabled={!canWrite || isSendingTestEmail || !data.providers.resend}
                   onClick={() => sendTestEmail({})}
                 >
                   {isSendingTestEmail ? 'Sending...' : 'Send test email'}
@@ -109,12 +115,15 @@ export default function OperationsHealthPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={isRunningUploadTest || !data.providers.storage}
+                  disabled={!canWrite || isRunningUploadTest || !data.providers.storage}
                   onClick={() => runUploadTest({})}
                 >
                   {isRunningUploadTest ? 'Testing...' : 'Run storage upload test'}
                 </Button>
               </div>
+              {writeGate.readOnly ? (
+                <p className="mt-2 text-xs text-muted">Provider test actions are disabled in view-only mode.</p>
+              ) : null}
             </Card>
 
             <Card className="p-6 lg:col-span-2">
