@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card, Input, Badge } from '@faithflow-ai/ui';
 import QRCode from 'qrcode';
 import { trpc } from '../../lib/trpc';
@@ -8,13 +8,18 @@ import { Shell } from '../../components/Shell';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
 import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
+import { EmptyState } from '../../components/EmptyState';
+import { LoadingSkeleton } from '../../components/LoadingSkeleton';
+import { useKeyboardShortcuts } from '../../lib/useKeyboardShortcuts';
 
 export default function EventsPage() {
   const gate = useFeatureGate('events_enabled');
   const utils = trpc.useUtils();
   const canWrite = gate.canWrite;
-  const { data: churches } = trpc.church.list.useQuery({});
+  const { data: churches, isLoading: isChurchesLoading } = trpc.church.list.useQuery({});
   const [churchId, setChurchId] = useState<string>('');
+  const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
+  const [createEventError, setCreateEventError] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [eventType, setEventType] = useState('SERVICE');
@@ -86,6 +91,8 @@ export default function EventsPage() {
   const [badgeStats, setBadgeStats] = useState<{ created?: number }>({});
   const [playbookChannels, setPlaybookChannels] = useState<string[]>(['EMAIL', 'SMS']);
   const [playbookStats, setPlaybookStats] = useState<{ scheduled?: number }>({});
+  const createEventTitleRef = useRef<HTMLInputElement | null>(null);
+  const checkInSearchRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!churchId && churches?.length) {
@@ -164,6 +171,7 @@ export default function EventsPage() {
 
   const { mutate: createEvent, isPending } = trpc.event.create.useMutation({
     onSuccess: async () => {
+      setCreateEventError(null);
       setTitle('');
       setDescription('');
       setEventType('SERVICE');
@@ -329,6 +337,20 @@ export default function EventsPage() {
     () => churches?.find((church) => church.id === churchId),
     [churches, churchId]
   );
+  const tableCellClass = density === 'compact' ? 'py-1.5 text-xs' : 'py-2.5 text-sm';
+  const listItemClass = density === 'compact' ? 'rounded-md border border-border px-3 py-2' : 'rounded-md border border-border p-3';
+
+  useKeyboardShortcuts([
+    {
+      key: '/',
+      onTrigger: () => checkInSearchRef.current?.focus(),
+    },
+    {
+      key: 'n',
+      shift: true,
+      onTrigger: () => createEventTitleRef.current?.focus(),
+    },
+  ]);
 
   const addRegistrationField = () => {
     if (!fieldLabel) return;
@@ -458,7 +480,43 @@ export default function EventsPage() {
           </div>
         </Card>
 
+        <Card className="ff-surface p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-sm text-muted">
+              Shortcuts: <kbd className="rounded border px-1.5 py-0.5 text-xs">/</kbd> check-in search ·{' '}
+              <kbd className="rounded border px-1.5 py-0.5 text-xs">Shift</kbd>+
+              <kbd className="rounded border px-1.5 py-0.5 text-xs">N</kbd> new event
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium uppercase tracking-[0.1em] text-muted">Density</span>
+              <div className="rounded-md border border-border bg-white p-1">
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${density === 'comfortable' ? 'bg-primary text-primary-foreground' : 'text-muted'}`}
+                  onClick={() => setDensity('comfortable')}
+                >
+                  Comfortable
+                </button>
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${density === 'compact' ? 'bg-primary text-primary-foreground' : 'text-muted'}`}
+                  onClick={() => setDensity('compact')}
+                >
+                  Compact
+                </button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         {gate.readOnly ? <ReadOnlyNotice /> : null}
+
+        {isChurchesLoading ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <LoadingSkeleton lines={4} />
+            <LoadingSkeleton lines={5} />
+          </div>
+        ) : null}
 
         <Card className="ff-surface p-6">
           <div className="mb-3 flex items-center justify-between gap-2">
@@ -536,7 +594,7 @@ export default function EventsPage() {
           <p className="mt-1 text-sm text-muted">Track guest and member registrations.</p>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {registrations?.map((registration) => (
-              <div key={registration.id} className="rounded-md border border-border p-3">
+              <div key={registration.id} className={listItemClass}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="font-medium text-foreground">
@@ -557,7 +615,12 @@ export default function EventsPage() {
                 ) : null}
               </div>
             ))}
-            {!registrations?.length && <p className="text-sm text-muted">No registrations yet.</p>}
+            {!registrations?.length ? (
+              <EmptyState
+                title="No registrations yet"
+                description="Registrations will appear once RSVP or registration opens for selected events."
+              />
+            ) : null}
           </div>
         </Card>
 
@@ -624,7 +687,7 @@ export default function EventsPage() {
           </div>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {assignments?.map((assignment) => (
-              <div key={assignment.id} className="rounded-md border border-border p-3">
+              <div key={assignment.id} className={listItemClass}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="font-medium text-foreground">
@@ -646,7 +709,12 @@ export default function EventsPage() {
                 {assignment.notes ? <p className="mt-2 text-xs text-muted">{assignment.notes}</p> : null}
               </div>
             ))}
-            {!assignments?.length && <p className="text-sm text-muted">No assignments yet.</p>}
+            {!assignments?.length ? (
+              <EmptyState
+                title="No assignments yet"
+                description="Assign speakers and volunteers to lock execution plans."
+              />
+            ) : null}
           </div>
         </Card>
 
@@ -692,7 +760,7 @@ export default function EventsPage() {
           </div>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {eventMedia?.map((media) => (
-              <div key={media.id} className="rounded-md border border-border p-3">
+              <div key={media.id} className={listItemClass}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="font-medium text-foreground">{media.title ?? media.asset.filename ?? media.type}</p>
@@ -710,7 +778,12 @@ export default function EventsPage() {
                 {media.description ? <p className="mt-2 text-xs text-muted">{media.description}</p> : null}
               </div>
             ))}
-            {!eventMedia?.length && <p className="text-sm text-muted">No media uploaded yet.</p>}
+            {!eventMedia?.length ? (
+              <EmptyState
+                title="No media uploaded yet"
+                description="Upload photos, sermon assets, or documents to enrich post-event archives."
+              />
+            ) : null}
           </div>
         </Card>
 
@@ -720,7 +793,16 @@ export default function EventsPage() {
             {selectedChurch ? `Creating events for ${selectedChurch.name}.` : 'Select a church first.'}
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <Input
+              ref={createEventTitleRef}
+              placeholder="Title *"
+              value={title}
+              onChange={(e) => {
+                setCreateEventError(null);
+                setTitle(e.target.value);
+              }}
+              aria-invalid={Boolean(createEventError && !title.trim())}
+            />
             <Input placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} />
             <textarea
               className="min-h-[80px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
@@ -879,10 +961,27 @@ export default function EventsPage() {
           ) : null}
           <div className="mt-4">
             <Button
-              onClick={() =>
+              onClick={() => {
+                if (!churchId) {
+                  setCreateEventError('Select a church before creating an event.');
+                  return;
+                }
+                if (!title.trim()) {
+                  setCreateEventError('Event title is required.');
+                  return;
+                }
+                if (!startAt || !endAt) {
+                  setCreateEventError('Start and end date/time are required.');
+                  return;
+                }
+                if (new Date(endAt).getTime() <= new Date(startAt).getTime()) {
+                  setCreateEventError('End date/time must be after start date/time.');
+                  return;
+                }
+                setCreateEventError(null);
                 createEvent({
                   churchId,
-                  title,
+                  title: title.trim(),
                   description: description || undefined,
                   type: eventType as any,
                   format: eventFormat as any,
@@ -899,12 +998,17 @@ export default function EventsPage() {
                   waitlistEnabled,
                   registrationFields: registrationFields.length ? registrationFields : undefined,
                   allowGuestRegistration,
-                })
-              }
+                });
+              }}
               disabled={!canWrite || !churchId || !title || !startAt || !endAt || isPending}
             >
               {isPending ? 'Saving…' : 'Save event'}
             </Button>
+            {createEventError ? (
+              <p className="mt-2 text-xs font-medium text-destructive">{createEventError}</p>
+            ) : (
+              <p className="mt-2 text-xs text-muted">Required fields are marked with *.</p>
+            )}
           </div>
         </Card>
 
@@ -1155,29 +1259,29 @@ export default function EventsPage() {
             <table className="min-w-full text-sm">
               <thead className="text-muted">
                 <tr className="text-left">
-                  <th className="py-2">Title</th>
-                  <th className="py-2">Start</th>
-                  <th className="py-2">End</th>
-                  <th className="py-2">Location</th>
-                  <th className="py-2">RSVPs</th>
-                  <th className="py-2">Registrations</th>
-                  <th className="py-2">Visibility</th>
-                  <th className="py-2">Actions</th>
+                  <th className={tableCellClass}>Title</th>
+                  <th className={tableCellClass}>Start</th>
+                  <th className={tableCellClass}>End</th>
+                  <th className={tableCellClass}>Location</th>
+                  <th className={tableCellClass}>RSVPs</th>
+                  <th className={tableCellClass}>Registrations</th>
+                  <th className={tableCellClass}>Visibility</th>
+                  <th className={tableCellClass}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {events?.map((event) => (
                   <tr key={event.id} className="border-t border-border">
-                    <td className="py-2">{event.title}</td>
-                    <td className="py-2">{new Date(event.startAt).toLocaleString()}</td>
-                    <td className="py-2">{new Date(event.endAt).toLocaleString()}</td>
-                    <td className="py-2">{event.location ?? '—'}</td>
-                    <td className="py-2">
+                    <td className={tableCellClass}>{event.title}</td>
+                    <td className={tableCellClass}>{new Date(event.startAt).toLocaleString()}</td>
+                    <td className={tableCellClass}>{new Date(event.endAt).toLocaleString()}</td>
+                    <td className={tableCellClass}>{event.location ?? '—'}</td>
+                    <td className={tableCellClass}>
                       {event.requiresRsvp ? event._count?.rsvps ?? 0 : '—'}
                     </td>
-                    <td className="py-2">{event.registrationEnabled ? event._count?.registrations ?? 0 : '—'}</td>
-                    <td className="py-2">{event.visibility ?? 'PUBLIC'}</td>
-                    <td className="py-2">
+                    <td className={tableCellClass}>{event.registrationEnabled ? event._count?.registrations ?? 0 : '—'}</td>
+                    <td className={tableCellClass}>{event.visibility ?? 'PUBLIC'}</td>
+                    <td className={tableCellClass}>
                       <Button
                         variant="outline"
                         size="sm"
@@ -1196,6 +1300,16 @@ export default function EventsPage() {
               </tbody>
             </table>
           </div>
+          {!events?.length ? (
+            <div className="mt-4">
+              <EmptyState
+                title="No events created yet"
+                description="Create your first event to unlock RSVP, check-in, tickets, and analytics."
+                actionLabel="Jump to create event"
+                onAction={() => createEventTitleRef.current?.focus()}
+              />
+            </div>
+          ) : null}
         </Card>
 
         <Card className="ff-surface p-6">
@@ -1427,6 +1541,7 @@ export default function EventsPage() {
               ))}
             </select>
             <Input
+              ref={checkInSearchRef}
               placeholder="Search attendees"
               value={checkInSearch}
               onChange={(e) => setCheckInSearch(e.target.value)}
@@ -1499,29 +1614,29 @@ export default function EventsPage() {
             <table className="min-w-full">
               <thead className="text-left text-xs uppercase text-muted">
                 <tr>
-                  <th className="py-2">Member</th>
-                  <th className="py-2">Email</th>
-                  <th className="py-2">Phone</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Check-in</th>
-                  <th className="py-2">Actions</th>
+                  <th className={tableCellClass}>Member</th>
+                  <th className={tableCellClass}>Email</th>
+                  <th className={tableCellClass}>Phone</th>
+                  <th className={tableCellClass}>Status</th>
+                  <th className={tableCellClass}>Check-in</th>
+                  <th className={tableCellClass}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {roster?.roster?.map((entry) => (
                   <tr key={entry.member.id} className="border-t border-border">
-                    <td className="py-2">{entry.member.firstName} {entry.member.lastName}</td>
-                    <td className="py-2">{entry.member.email ?? '—'}</td>
-                    <td className="py-2">{entry.member.phone ?? '—'}</td>
-                    <td className="py-2">
+                    <td className={tableCellClass}>{entry.member.firstName} {entry.member.lastName}</td>
+                    <td className={tableCellClass}>{entry.member.email ?? '—'}</td>
+                    <td className={tableCellClass}>{entry.member.phone ?? '—'}</td>
+                    <td className={tableCellClass}>
                       <Badge variant={entry.status === 'CHECKED_IN' ? 'success' : 'default'}>
                         {entry.status}
                       </Badge>
                     </td>
-                    <td className="py-2">
+                    <td className={tableCellClass}>
                       {entry.checkInAt ? new Date(entry.checkInAt).toLocaleString() : '—'}
                     </td>
-                    <td className="py-2">
+                    <td className={tableCellClass}>
                       {entry.status === 'CHECKED_IN' ? (
                         <Button
                           size="sm"
@@ -1546,7 +1661,12 @@ export default function EventsPage() {
               </tbody>
             </table>
             {!roster?.roster?.length && (
-              <p className="mt-3 text-sm text-muted">No attendees found for this event.</p>
+              <div className="mt-3">
+                <EmptyState
+                  title="No attendees found"
+                  description="Attendance roster appears when registrations or member RSVP activity exists."
+                />
+              </div>
             )}
           </div>
         </Card>

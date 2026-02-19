@@ -1,19 +1,24 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card, Input, Badge } from '@faithflow-ai/ui';
 import { trpc } from '../../lib/trpc';
 import { Shell } from '../../components/Shell';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
 import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
+import { EmptyState } from '../../components/EmptyState';
+import { LoadingSkeleton } from '../../components/LoadingSkeleton';
+import { useKeyboardShortcuts } from '../../lib/useKeyboardShortcuts';
 
 export default function MembersPage() {
   const gate = useFeatureGate('membership_enabled');
   const utils = trpc.useUtils();
   const canWrite = gate.canWrite;
-  const { data: churches } = trpc.church.list.useQuery({});
+  const { data: churches, isLoading: isChurchesLoading } = trpc.church.list.useQuery({});
   const [churchId, setChurchId] = useState<string>('');
+  const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
+  const [addMemberError, setAddMemberError] = useState<string | null>(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -95,6 +100,8 @@ export default function MembersPage() {
   const [staffAttachmentName, setStaffAttachmentName] = useState('');
   const [pendingStaffAttachments, setPendingStaffAttachments] = useState<{ url: string; name?: string; assetId?: string }[]>([]);
   const [uploadingStaffAttachment, setUploadingStaffAttachment] = useState(false);
+  const memberSearchRef = useRef<HTMLInputElement | null>(null);
+  const addMemberFirstNameRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!churchId && churches?.length) {
@@ -361,6 +368,7 @@ export default function MembersPage() {
 
   const { mutate: createMember, isPending } = trpc.member.create.useMutation({
     onSuccess: async () => {
+      setAddMemberError(null);
       setFirstName('');
       setLastName('');
       setEmail('');
@@ -596,6 +604,21 @@ export default function MembersPage() {
     () => churches?.find((church) => church.id === churchId),
     [churches, churchId]
   );
+  const tableCellClass = density === 'compact' ? 'py-1.5 text-xs' : 'py-2.5 text-sm';
+
+  useKeyboardShortcuts([
+    {
+      key: '/',
+      onTrigger: () => memberSearchRef.current?.focus(),
+      enabled: true,
+    },
+    {
+      key: 'n',
+      shift: true,
+      onTrigger: () => addMemberFirstNameRef.current?.focus(),
+      enabled: true,
+    },
+  ]);
 
   useEffect(() => {
     if (!groupIdForEvent && groups?.length) {
@@ -706,7 +729,43 @@ export default function MembersPage() {
           </div>
         </Card>
 
+        <Card className="ff-surface p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-sm text-muted">
+              Shortcuts: <kbd className="rounded border px-1.5 py-0.5 text-xs">/</kbd> search ·{' '}
+              <kbd className="rounded border px-1.5 py-0.5 text-xs">Shift</kbd>+
+              <kbd className="rounded border px-1.5 py-0.5 text-xs">N</kbd> add member
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium uppercase tracking-[0.1em] text-muted">Density</span>
+              <div className="rounded-md border border-border bg-white p-1">
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${density === 'comfortable' ? 'bg-primary text-primary-foreground' : 'text-muted'}`}
+                  onClick={() => setDensity('comfortable')}
+                >
+                  Comfortable
+                </button>
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${density === 'compact' ? 'bg-primary text-primary-foreground' : 'text-muted'}`}
+                  onClick={() => setDensity('compact')}
+                >
+                  Compact
+                </button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         {gate.readOnly ? <ReadOnlyNotice /> : null}
+
+        {isChurchesLoading ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <LoadingSkeleton lines={4} />
+            <LoadingSkeleton lines={5} />
+          </div>
+        ) : null}
 
         <Card className="ff-surface p-6">
           <div className="mb-3 flex items-center justify-between gap-2">
@@ -737,26 +796,57 @@ export default function MembersPage() {
             {selectedChurch ? `Adding members to ${selectedChurch.name}.` : 'Select a church first.'}
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-            <Input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+            <Input
+              ref={addMemberFirstNameRef}
+              placeholder="First name *"
+              value={firstName}
+              onChange={(e) => {
+                setAddMemberError(null);
+                setFirstName(e.target.value);
+              }}
+              aria-invalid={Boolean(addMemberError && !firstName.trim())}
+            />
+            <Input
+              placeholder="Last name *"
+              value={lastName}
+              onChange={(e) => {
+                setAddMemberError(null);
+                setLastName(e.target.value);
+              }}
+              aria-invalid={Boolean(addMemberError && !lastName.trim())}
+            />
             <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
             <Input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
           </div>
           <div className="mt-4">
             <Button
-              onClick={() =>
+              onClick={() => {
+                if (!churchId) {
+                  setAddMemberError('Select a church before creating a member.');
+                  return;
+                }
+                if (!firstName.trim() || !lastName.trim()) {
+                  setAddMemberError('First name and last name are required.');
+                  return;
+                }
+                setAddMemberError(null);
                 createMember({
                   churchId,
-                  firstName,
-                  lastName,
+                  firstName: firstName.trim(),
+                  lastName: lastName.trim(),
                   email: email || undefined,
                   phone: phone || undefined,
-                })
-              }
+                });
+              }}
               disabled={!canWrite || !churchId || !firstName || !lastName || isPending}
             >
               {isPending ? 'Saving…' : 'Save member'}
             </Button>
+            {addMemberError ? (
+              <p className="mt-2 text-xs font-medium text-destructive">{addMemberError}</p>
+            ) : (
+              <p className="mt-2 text-xs text-muted">Required fields are marked with *.</p>
+            )}
           </div>
         </Card>
 
@@ -874,6 +964,7 @@ export default function MembersPage() {
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <Input
+              ref={memberSearchRef}
               placeholder="Search members"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
@@ -883,25 +974,25 @@ export default function MembersPage() {
             <table className="min-w-full text-sm">
               <thead className="text-muted">
                 <tr className="text-left">
-                  <th className="py-2">Name</th>
-                  <th className="py-2">Email</th>
-                  <th className="py-2">Phone</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Household</th>
-                  <th className="py-2">Actions</th>
+                  <th className={tableCellClass}>Name</th>
+                  <th className={tableCellClass}>Email</th>
+                  <th className={tableCellClass}>Phone</th>
+                  <th className={tableCellClass}>Status</th>
+                  <th className={tableCellClass}>Household</th>
+                  <th className={tableCellClass}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {members?.map((member) => (
                   <tr key={member.id} className="border-t border-border">
-                    <td className="py-2">{member.firstName} {member.lastName}</td>
-                    <td className="py-2">{member.email ?? '—'}</td>
-                    <td className="py-2">{member.phone ?? '—'}</td>
-                    <td className="py-2">
+                    <td className={tableCellClass}>{member.firstName} {member.lastName}</td>
+                    <td className={tableCellClass}>{member.email ?? '—'}</td>
+                    <td className={tableCellClass}>{member.phone ?? '—'}</td>
+                    <td className={tableCellClass}>
                       <Badge variant="success">{member.status}</Badge>
                     </td>
-                    <td className="py-2">{member.household?.name ?? '—'}</td>
-                    <td className="py-2">
+                    <td className={tableCellClass}>{member.household?.name ?? '—'}</td>
+                    <td className={tableCellClass}>
                       <Button
                         variant="outline"
                         size="sm"
@@ -927,6 +1018,16 @@ export default function MembersPage() {
               </tbody>
             </table>
           </div>
+          {!members?.length ? (
+            <div className="mt-4">
+              <EmptyState
+                title="No members yet"
+                description="Add your first member or import a CSV to start engagement tracking."
+                actionLabel="Jump to add member"
+                onAction={() => addMemberFirstNameRef.current?.focus()}
+              />
+            </div>
+          ) : null}
         </Card>
 
         <Card className="ff-surface p-6">

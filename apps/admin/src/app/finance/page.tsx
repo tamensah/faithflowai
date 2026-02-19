@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
@@ -8,6 +8,9 @@ import { useAuth } from '@clerk/nextjs';
 import { useFeatureGate } from '../../lib/entitlements';
 import { FeatureLocked } from '../../components/FeatureLocked';
 import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
+import { EmptyState } from '../../components/EmptyState';
+import { LoadingSkeleton } from '../../components/LoadingSkeleton';
+import { useKeyboardShortcuts } from '../../lib/useKeyboardShortcuts';
 
 const evidenceTypeOptions = [
   'UNCATEGORIZED',
@@ -30,6 +33,8 @@ export default function FinancePage() {
   const { getToken } = useAuth();
   const canWrite = gate.canWrite;
   const [churchId, setChurchId] = useState('');
+  const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
+  const [statementError, setStatementError] = useState<string | null>(null);
   const [statementYear, setStatementYear] = useState(String(new Date().getFullYear()));
   const [statementMemberId, setStatementMemberId] = useState('');
   const [statementEmail, setStatementEmail] = useState('');
@@ -81,8 +86,10 @@ export default function FinancePage() {
   const [donationImportFilename, setDonationImportFilename] = useState('');
   const [donationImportResult, setDonationImportResult] = useState<any>(null);
   const [donationImportBatchId, setDonationImportBatchId] = useState<string>('');
+  const statementEmailRef = useRef<HTMLInputElement | null>(null);
+  const donationImportRef = useRef<HTMLTextAreaElement | null>(null);
 
-  const { data: churches } = trpc.church.list.useQuery({ organizationId: undefined });
+  const { data: churches, isLoading: isChurchesLoading } = trpc.church.list.useQuery({ organizationId: undefined });
   const { data: members } = trpc.member.list.useQuery({ churchId: churchId || undefined }, { enabled: Boolean(churchId) });
 
   useEffect(() => {
@@ -90,6 +97,19 @@ export default function FinancePage() {
       setChurchId(churches[0].id);
     }
   }, [churchId, churches]);
+  const rowClass = density === 'compact' ? 'py-1.5 text-xs' : 'py-2.5 text-sm';
+
+  useKeyboardShortcuts([
+    {
+      key: '/',
+      onTrigger: () => statementEmailRef.current?.focus(),
+    },
+    {
+      key: 'i',
+      shift: true,
+      onTrigger: () => donationImportRef.current?.focus(),
+    },
+  ]);
 
   const { data: summary } = trpc.finance.reconciliationSummary.useQuery(
     { churchId: churchId || undefined },
@@ -409,7 +429,43 @@ export default function FinancePage() {
           </div>
         </Card>
 
+        <Card className="ff-surface p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="text-sm text-muted">
+              Shortcuts: <kbd className="rounded border px-1.5 py-0.5 text-xs">/</kbd> statement email ·{' '}
+              <kbd className="rounded border px-1.5 py-0.5 text-xs">Shift</kbd>+
+              <kbd className="rounded border px-1.5 py-0.5 text-xs">I</kbd> import CSV
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium uppercase tracking-[0.1em] text-muted">Density</span>
+              <div className="rounded-md border border-border bg-white p-1">
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${density === 'comfortable' ? 'bg-primary text-primary-foreground' : 'text-muted'}`}
+                  onClick={() => setDensity('comfortable')}
+                >
+                  Comfortable
+                </button>
+                <button
+                  type="button"
+                  className={`rounded px-2 py-1 text-xs ${density === 'compact' ? 'bg-primary text-primary-foreground' : 'text-muted'}`}
+                  onClick={() => setDensity('compact')}
+                >
+                  Compact
+                </button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         {gate.readOnly ? <ReadOnlyNotice /> : null}
+
+        {isChurchesLoading ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            <LoadingSkeleton lines={4} />
+            <LoadingSkeleton lines={5} />
+          </div>
+        ) : null}
 
         <Card className="ff-surface p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -439,6 +495,7 @@ export default function FinancePage() {
           </div>
 
           <textarea
+            ref={donationImportRef}
             className="mt-4 min-h-[140px] w-full rounded-md border border-border bg-white p-3 text-sm"
             placeholder="Paste donation CSV here..."
             value={donationImportCsv}
@@ -654,13 +711,16 @@ export default function FinancePage() {
               ))}
             </select>
             <Input
+              ref={statementEmailRef}
               placeholder="Or donor email"
               value={statementEmail}
               onChange={(event) => {
+                setStatementError(null);
                 setStatementSendStatus('');
                 setStatementEmail(event.target.value);
                 setStatementMemberId('');
               }}
+              aria-invalid={Boolean(statementError && !statementEmail && !statementMemberId)}
             />
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -668,6 +728,15 @@ export default function FinancePage() {
               variant="outline"
               disabled={!canWrite || !churchId || !statementYear || !(statementMemberId || statementEmail) || isSendingStatement}
               onClick={() => {
+                if (!statementYear || Number.isNaN(Number(statementYear))) {
+                  setStatementError('Enter a valid year for the statement.');
+                  return;
+                }
+                if (!statementMemberId && !statementEmail.trim()) {
+                  setStatementError('Select a member or provide donor email.');
+                  return;
+                }
+                setStatementError(null);
                 setStatementSendStatus('');
                 sendTithingStatementEmail({
                   churchId,
@@ -679,6 +748,7 @@ export default function FinancePage() {
             >
               {isSendingStatement ? 'Sending…' : 'Email statement'}
             </Button>
+            {statementError ? <p className="text-xs font-medium text-destructive">{statementError}</p> : null}
             {statementSendStatus ? <p className="text-xs text-muted">{statementSendStatus}</p> : null}
           </div>
           <div className="mt-4 text-sm text-muted">
@@ -693,14 +763,19 @@ export default function FinancePage() {
             <h2 className="text-lg font-semibold">Pledges</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
               {pledges?.map((pledge) => (
-                <div key={pledge.id} className="flex items-center justify-between">
+                <div key={pledge.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                   <span>
                     {pledge.amount.toString()} {pledge.currency}
                   </span>
                   <span>{pledge.status}</span>
                 </div>
               ))}
-              {!pledges?.length && <p>No pledges yet.</p>}
+              {!pledges?.length ? (
+                <EmptyState
+                  title="No pledges yet"
+                  description="Create your first pledge to track commitment-based giving."
+                />
+              ) : null}
             </div>
             <div className="mt-4 grid gap-3">
               <Input
@@ -739,7 +814,7 @@ export default function FinancePage() {
             <h2 className="text-lg font-semibold">Recurring Donations</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
               {recurring?.map((item) => (
-                <div key={item.id} className="flex items-center justify-between">
+                <div key={item.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                   <span>
                     {item.amount.toString()} {item.currency} · {item.interval}
                   </span>
@@ -749,7 +824,12 @@ export default function FinancePage() {
                   </Button>
                 </div>
               ))}
-              {!recurring?.length && <p>No recurring donations yet.</p>}
+              {!recurring?.length ? (
+                <EmptyState
+                  title="No recurring donations yet"
+                  description="Set up recurring contributions to stabilize monthly cash flow."
+                />
+              ) : null}
             </div>
             <div className="mt-4 grid gap-3">
               <Input
@@ -819,11 +899,16 @@ export default function FinancePage() {
             <h2 className="text-lg font-semibold">Expense Categories</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
               {categories?.map((category) => (
-                <div key={category.id} className="flex items-center justify-between">
+                <div key={category.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                   <span>{category.name}</span>
                 </div>
               ))}
-              {!categories?.length && <p>No categories yet.</p>}
+              {!categories?.length ? (
+                <EmptyState
+                  title="No expense categories"
+                  description="Create categories so reports and budgets stay structured."
+                />
+              ) : null}
             </div>
             <div className="mt-4 grid gap-3">
               <Input
@@ -855,7 +940,7 @@ export default function FinancePage() {
             <h2 className="text-lg font-semibold">Expenses</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
               {expenses?.map((expense) => (
-                <div key={expense.id} className="rounded-md border border-border px-3 py-2">
+                <div key={expense.id} className={`rounded-md border border-border ${density === 'compact' ? 'px-3 py-2' : 'p-3'}`}>
                   <div className="flex items-center justify-between">
                     <span>
                       {expense.amount.toString()} {expense.currency}
@@ -875,7 +960,12 @@ export default function FinancePage() {
                   </div>
                 </div>
               ))}
-              {!expenses?.length && <p>No expenses yet.</p>}
+              {!expenses?.length ? (
+                <EmptyState
+                  title="No expenses yet"
+                  description="Submitted and approved expenses will appear here for reconciliation."
+                />
+              ) : null}
             </div>
             <div className="mt-4 grid gap-3">
               <Input
@@ -928,7 +1018,7 @@ export default function FinancePage() {
           <h2 className="text-lg font-semibold">Budgets</h2>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {budgets?.map((budget) => (
-              <div key={budget.id} className="rounded-md border border-border px-3 py-2">
+              <div key={budget.id} className={`rounded-md border border-border ${density === 'compact' ? 'px-3 py-2' : 'p-3'}`}>
                 <div className="flex items-center justify-between">
                   <span>{budget.name}</span>
                   <span>{budget.status}</span>
@@ -938,7 +1028,12 @@ export default function FinancePage() {
                 </div>
               </div>
             ))}
-            {!budgets?.length && <p>No budgets yet.</p>}
+            {!budgets?.length ? (
+              <EmptyState
+                title="No budgets yet"
+                description="Create a budget to track allocation and spending discipline."
+              />
+            ) : null}
           </div>
           <div className="mt-6 grid gap-3 md:grid-cols-3">
             <Input
@@ -1028,14 +1123,19 @@ export default function FinancePage() {
           <h2 className="text-lg font-semibold">Receipts</h2>
           <div className="mt-4 space-y-2 text-sm text-muted">
             {receipts?.map((receipt) => (
-              <div key={receipt.id} className="flex items-center justify-between">
+              <div key={receipt.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                 <span>
                   {receipt.receiptNumber} · {receipt.status}
                 </span>
                 <span>{new Date(receipt.issuedAt).toLocaleDateString()}</span>
               </div>
             ))}
-            {!receipts?.length && <p>No receipts yet.</p>}
+            {!receipts?.length ? (
+              <EmptyState
+                title="No receipts yet"
+                description="Receipts appear after successful donations or statement issuance."
+              />
+            ) : null}
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <Input
@@ -1124,14 +1224,19 @@ export default function FinancePage() {
           <div className="mt-4 space-y-2 text-sm text-muted">
             <p className="font-medium text-foreground">Recent refunds</p>
             {refunds?.map((refund) => (
-              <div key={refund.id} className="flex items-center justify-between">
+              <div key={refund.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                 <span>
                   {refund.amount.toString()} {refund.currency} · {refund.provider}
                 </span>
                 <span>{refund.status}</span>
               </div>
             ))}
-            {!refunds?.length && <p>No refunds yet.</p>}
+            {!refunds?.length ? (
+              <EmptyState
+                title="No refunds yet"
+                description="Refund records will appear after approved reversals."
+              />
+            ) : null}
           </div>
           <div className="mt-4 space-y-2 text-sm text-muted">
             <p className="font-medium text-foreground">Recent disputes</p>
@@ -1139,7 +1244,7 @@ export default function FinancePage() {
               <button
                 key={dispute.id}
                 type="button"
-                className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm ${
+                className={`flex w-full items-center justify-between rounded-md border px-3 text-left ${rowClass} ${
                   dispute.id === selectedDisputeId ? 'border-primary text-primary' : 'border-border text-muted'
                 }`}
                 onClick={() => setSelectedDisputeId(dispute.id)}
@@ -1150,7 +1255,12 @@ export default function FinancePage() {
                 <span>{dispute.status}</span>
               </button>
             ))}
-            {!disputes?.length && <p>No disputes yet.</p>}
+            {!disputes?.length ? (
+              <EmptyState
+                title="No disputes yet"
+                description="Disputes will surface here when providers report chargeback cases."
+              />
+            ) : null}
           </div>
           {selectedDisputeId && (
             <div className="mt-6 space-y-3 text-sm text-muted">
@@ -1223,14 +1333,19 @@ export default function FinancePage() {
               </div>
               <div className="mt-4 space-y-2">
                 {disputeEvidence?.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between">
+                  <div key={item.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                     <span>
                       {item.type} · {item.status}
                     </span>
                     <span>{item.fileName ?? item.text?.slice(0, 20) ?? ''}</span>
                   </div>
                 ))}
-                {!disputeEvidence?.length && <p>No evidence uploaded yet.</p>}
+                {!disputeEvidence?.length ? (
+                  <EmptyState
+                    title="No evidence uploaded"
+                    description="Attach receipts, communication logs, or policies before submitting the dispute."
+                  />
+                ) : null}
               </div>
             </div>
           )}
@@ -1250,7 +1365,7 @@ export default function FinancePage() {
             {payouts?.map((payout) => (
               <button
                 key={payout.id}
-                className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm ${
+                className={`flex w-full items-center justify-between rounded-md border px-3 text-left ${rowClass} ${
                   payout.id === selectedPayoutId ? 'border-primary text-primary' : 'border-border text-muted'
                 }`}
                 onClick={() => setSelectedPayoutId(payout.id)}
@@ -1262,20 +1377,30 @@ export default function FinancePage() {
                 <span>{payout.status}</span>
               </button>
             ))}
-            {!payouts?.length && <p>No payouts synced yet.</p>}
+            {!payouts?.length ? (
+              <EmptyState
+                title="No payouts synced"
+                description="Run payout sync to load settlement records from Stripe and Paystack."
+              />
+            ) : null}
           </div>
           {selectedPayoutId && (
             <div className="mt-4 space-y-2 text-sm text-muted">
               <p className="font-medium text-foreground">Payout transactions</p>
               {payoutTransactions?.map((txn) => (
-                <div key={txn.id} className="flex items-center justify-between">
+                <div key={txn.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                   <span>
                     {txn.amount.toString()} {txn.currency} · {txn.type ?? 'transaction'}
                   </span>
                   <span>{txn.sourceRef ?? txn.providerRef}</span>
                 </div>
               ))}
-              {!payoutTransactions?.length && <p>No transactions for this payout.</p>}
+              {!payoutTransactions?.length ? (
+                <EmptyState
+                  title="No transactions for this payout"
+                  description="Select another payout or run sync if provider records are still processing."
+                />
+              ) : null}
             </div>
           )}
         </Card>
