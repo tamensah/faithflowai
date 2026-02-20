@@ -1,5 +1,6 @@
 'use client';
 
+import { useClerk } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -141,6 +142,7 @@ export function MemberPortalShell({
   actions,
   children,
 }: MemberPortalShellProps) {
+  const { signOut } = useClerk();
   const pathname = usePathname();
   const activeGroup = useMemo(() => findActiveGroup(pathname), [pathname]);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() =>
@@ -150,6 +152,7 @@ export function MemberPortalShell({
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [readAlertIds, setReadAlertIds] = useState<string[]>([]);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const alertsPanelRef = useRef<HTMLDivElement | null>(null);
   const profilePanelRef = useRef<HTMLDivElement | null>(null);
 
@@ -239,6 +242,18 @@ export function MemberPortalShell({
   const focusSection = (id: string) => {
     setActiveSection(id);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut({ redirectUrl: '/' });
+    } catch {
+      window.location.assign('/');
+    } finally {
+      setIsSigningOut(false);
+      setProfileMenuOpen(false);
+    }
   };
 
   return (
@@ -371,10 +386,11 @@ export function MemberPortalShell({
                   <button
                     type="button"
                     role="menuitem"
-                    onClick={() => setProfileMenuOpen(false)}
-                    className="block w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                    className="block w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-400"
                   >
-                    Sign out (coming soon)
+                    {isSigningOut ? 'Signing out...' : 'Sign out'}
                   </button>
                 </div>
               ) : null}
