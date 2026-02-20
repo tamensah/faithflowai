@@ -21,6 +21,7 @@ import {
   type SVGProps,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -146,6 +147,33 @@ export function MemberPortalShell({
     Object.fromEntries(NAV_GROUPS.map((group) => [group.id, group.id === activeGroup]))
   );
   const [activeSection, setActiveSection] = useState(sectionLinks[0]?.id ?? '');
+  const [alertsOpen, setAlertsOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [readAlertIds, setReadAlertIds] = useState<string[]>([]);
+  const alertsPanelRef = useRef<HTMLDivElement | null>(null);
+  const profilePanelRef = useRef<HTMLDivElement | null>(null);
+
+  const alertItems = [
+    {
+      id: 'profile',
+      title: 'Complete your profile',
+      detail: 'Required fields are missing for full directory access.',
+      href: '/portal/profile',
+    },
+    {
+      id: 'events',
+      title: 'No RSVPs yet',
+      detail: 'Join your next event to stay updated with ministry schedules.',
+      href: '/portal/events',
+    },
+    {
+      id: 'giving',
+      title: 'Set your giving plan',
+      detail: 'Add recurring giving to simplify monthly support.',
+      href: '/portal/giving',
+    },
+  ];
+  const unreadCount = alertItems.filter((alert) => !readAlertIds.includes(alert.id)).length;
 
   useEffect(() => {
     setOpenGroups(Object.fromEntries(NAV_GROUPS.map((group) => [group.id, group.id === activeGroup])));
@@ -178,6 +206,32 @@ export function MemberPortalShell({
     return () => observer.disconnect();
   }, [sectionLinks, pathname]);
 
+  useEffect(() => {
+    const closeMenusOnOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (alertsPanelRef.current && !alertsPanelRef.current.contains(target)) {
+        setAlertsOpen(false);
+      }
+      if (profilePanelRef.current && !profilePanelRef.current.contains(target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    const closeMenusOnEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setAlertsOpen(false);
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', closeMenusOnOutsideClick);
+    document.addEventListener('keydown', closeMenusOnEsc);
+    return () => {
+      document.removeEventListener('mousedown', closeMenusOnOutsideClick);
+      document.removeEventListener('keydown', closeMenusOnEsc);
+    };
+  }, []);
+
   const toggleGroup = (groupId: string) => {
     setOpenGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
   };
@@ -201,15 +255,129 @@ export function MemberPortalShell({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
-            >
-              <BellIcon className="h-4 w-4" />
-              Alerts
-            </button>
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700">
-              TM
+            <div ref={alertsPanelRef} className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setAlertsOpen((open) => !open);
+                  setProfileMenuOpen(false);
+                }}
+                aria-haspopup="dialog"
+                aria-expanded={alertsOpen}
+                aria-controls="member-alerts-panel"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:text-slate-900"
+              >
+                <BellIcon className="h-4 w-4" />
+                Alerts
+                {unreadCount > 0 ? (
+                  <span className="inline-flex min-w-5 items-center justify-center rounded-full bg-slate-900 px-1.5 py-0.5 text-xs font-semibold text-white">
+                    {unreadCount}
+                  </span>
+                ) : null}
+              </button>
+
+              {alertsOpen ? (
+                <div
+                  id="member-alerts-panel"
+                  role="dialog"
+                  aria-label="Member alerts"
+                  className="absolute right-0 z-50 mt-2 w-[22rem] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl"
+                >
+                  <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                    <p className="text-sm font-semibold text-slate-900">Alerts</p>
+                    <button
+                      type="button"
+                      onClick={() => setReadAlertIds(alertItems.map((item) => item.id))}
+                      className="text-xs font-medium text-slate-600 hover:text-slate-900"
+                    >
+                      Mark all read
+                    </button>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {alertItems.map((alert) => {
+                      const isUnread = !readAlertIds.includes(alert.id);
+                      return (
+                        <Link
+                          key={alert.id}
+                          href={alert.href}
+                          onClick={() => {
+                            setReadAlertIds((current) =>
+                              current.includes(alert.id) ? current : [...current, alert.id]
+                            );
+                            setAlertsOpen(false);
+                          }}
+                          className="block border-b border-slate-100 px-4 py-3 last:border-b-0 hover:bg-slate-50"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-sm font-medium text-slate-900">{alert.title}</p>
+                            {isUnread ? (
+                              <span className="mt-0.5 h-2 w-2 rounded-full bg-blue-600" aria-hidden="true" />
+                            ) : null}
+                          </div>
+                          <p className="mt-1 text-xs text-slate-600">{alert.detail}</p>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div ref={profilePanelRef} className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setProfileMenuOpen((open) => !open);
+                  setAlertsOpen(false);
+                }}
+                aria-haspopup="menu"
+                aria-expanded={profileMenuOpen}
+                aria-controls="member-profile-menu"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-xs font-semibold text-slate-700 transition hover:bg-slate-300"
+              >
+                TM
+              </button>
+
+              {profileMenuOpen ? (
+                <div
+                  id="member-profile-menu"
+                  role="menu"
+                  className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl"
+                >
+                  <Link
+                    href="/portal/profile"
+                    role="menuitem"
+                    className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                    onClick={() => setProfileMenuOpen(false)}
+                  >
+                    My profile
+                  </Link>
+                  <Link
+                    href="/portal/messages"
+                    role="menuitem"
+                    className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                    onClick={() => setProfileMenuOpen(false)}
+                  >
+                    Messages
+                  </Link>
+                  <Link
+                    href="/portal/prayer"
+                    role="menuitem"
+                    className="block px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                    onClick={() => setProfileMenuOpen(false)}
+                  >
+                    Prayer requests
+                  </Link>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => setProfileMenuOpen(false)}
+                    className="block w-full px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                  >
+                    Sign out (coming soon)
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
