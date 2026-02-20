@@ -1,10 +1,15 @@
+'use client';
+
 import {
   EVENTS_SECTION_LINKS,
   MemberPortalShell,
   MemberSectionCard,
 } from '../../../components/member-portal/member-portal-shell';
+import { setMemberStepComplete, useMemberProgress } from '../../../components/member-portal/member-progress';
 
 export default function EventsPage() {
+  const { progress } = useMemberProgress();
+
   return (
     <MemberPortalShell
       title="Events and attendance"
@@ -26,6 +31,13 @@ export default function EventsPage() {
             className="mt-4 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
           >
             Refresh events
+          </button>
+          <button
+            type="button"
+            onClick={() => setMemberStepComplete('events', !progress.events)}
+            className="mt-3 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            {progress.events ? 'Mark RSVP as pending' : 'Mark RSVP complete'}
           </button>
         </div>
       </MemberSectionCard>

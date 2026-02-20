@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { setMemberStepComplete } from '../../../components/member-portal/member-progress';
 import {
   MemberPortalShell,
   MemberSectionCard,
@@ -31,6 +32,8 @@ export default function ProfilePage() {
     sms: false,
     whatsapp: false,
   });
+  const [identitySaved, setIdentitySaved] = useState(false);
+  const [privacySaved, setPrivacySaved] = useState(false);
 
   const missingFields = useMemo(
     () => REQUIRED_FIELDS.filter((field) => profile[field].trim().length === 0),
@@ -53,7 +56,13 @@ export default function ProfilePage() {
       >
         <form
           className="space-y-5"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={(event) => {
+            event.preventDefault();
+            setTouched(true);
+            if (!isValid) return;
+            setMemberStepComplete('identity', true);
+            setIdentitySaved(true);
+          }}
           onChange={() => setTouched(true)}
         >
           <div className="grid gap-4 md:grid-cols-2">
@@ -112,6 +121,7 @@ export default function ProfilePage() {
           >
             Save profile
           </button>
+          {identitySaved ? <p className="text-sm text-emerald-700">Saved. Identity step completed.</p> : null}
         </form>
       </MemberSectionCard>
 
@@ -120,27 +130,40 @@ export default function ProfilePage() {
         title="Directory privacy"
         description="Control which profile details are visible in the church directory."
       >
-        <div className="grid gap-6 lg:grid-cols-2">
-          <label className="space-y-1">
-            <span className="text-sm font-medium text-slate-700">Visibility level</span>
-            <select className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
-              <option>Members only</option>
-              <option>Leaders only</option>
-              <option>Hidden</option>
-            </select>
-          </label>
-          <div className="grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
-            {['Show email', 'Show phone', 'Show city', 'Show photo'].map((option) => (
-              <label key={option} className="flex items-center gap-2">
-                <input
-                  defaultChecked
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500"
-                />
-                {option}
-              </label>
-            ))}
+        <div className="space-y-4">
+          <div className="grid gap-6 lg:grid-cols-2">
+            <label className="space-y-1">
+              <span className="text-sm font-medium text-slate-700">Visibility level</span>
+              <select className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm outline-none transition focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10">
+                <option>Members only</option>
+                <option>Leaders only</option>
+                <option>Hidden</option>
+              </select>
+            </label>
+            <div className="grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
+              {['Show email', 'Show phone', 'Show city', 'Show photo'].map((option) => (
+                <label key={option} className="flex items-center gap-2">
+                  <input
+                    defaultChecked
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500"
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              setMemberStepComplete('privacy', true);
+              setPrivacySaved(true);
+            }}
+            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+          >
+            Save privacy and notifications
+          </button>
+          {privacySaved ? <p className="text-sm text-emerald-700">Saved. Privacy step completed.</p> : null}
         </div>
       </MemberSectionCard>
 
