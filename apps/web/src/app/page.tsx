@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
 export default function Home() {
+  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'https://admin-gamma-beryl.vercel.app';
+
   return (
     <main className="min-h-screen bg-slate-100">
       <div className="mx-auto max-w-5xl px-6 py-20">
@@ -35,10 +37,10 @@ export default function Home() {
               Continue validating platform ops and contextual sidebars in the admin app.
             </p>
             <a
-              href="http://localhost:3001/dashboard"
+              href={adminUrl}
               className="mt-5 inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
             >
-              Open admin (local)
+              Open admin
             </a>
           </article>
         </div>

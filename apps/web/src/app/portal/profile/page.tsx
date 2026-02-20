@@ -60,7 +60,7 @@ export default function ProfilePage() {
             event.preventDefault();
             setTouched(true);
             if (!isValid) return;
-            setMemberStepComplete('identity', true);
+            void setMemberStepComplete('identity', true);
             setIdentitySaved(true);
           }}
           onChange={() => setTouched(true)}
@@ -156,7 +156,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => {
-              setMemberStepComplete('privacy', true);
+              void setMemberStepComplete('privacy', true);
               setPrivacySaved(true);
             }}
             className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"

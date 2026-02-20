@@ -34,7 +34,7 @@ export default function EventsPage() {
           </button>
           <button
             type="button"
-            onClick={() => setMemberStepComplete('events', !progress.events)}
+            onClick={() => void setMemberStepComplete('events', !progress.events)}
             className="mt-3 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
           >
             {progress.events ? 'Mark RSVP as pending' : 'Mark RSVP complete'}

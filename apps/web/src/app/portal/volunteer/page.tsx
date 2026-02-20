@@ -95,7 +95,7 @@ export default function VolunteerPage() {
           <button
             type="button"
             disabled={!canSave}
-            onClick={() => setMemberStepComplete('volunteer', true)}
+            onClick={() => void setMemberStepComplete('volunteer', true)}
             className="w-fit rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             {progress.volunteer ? 'Availability saved' : 'Save availability'}

@@ -16,6 +16,8 @@ const DEFAULT_PROGRESS: MemberProgress = {
   volunteer: false,
 };
 
+let cachedProgress: MemberProgress = DEFAULT_PROGRESS;
+
 function isBrowser() {
   return typeof window !== 'undefined';
 }
@@ -43,30 +45,73 @@ function readMemberProgress(): MemberProgress {
 }
 
 function writeMemberProgress(progress: MemberProgress) {
+  cachedProgress = progress;
   if (!isBrowser()) return;
   window.localStorage.setItem(MEMBER_PROGRESS_STORAGE_KEY, JSON.stringify(progress));
   window.dispatchEvent(new CustomEvent(MEMBER_PROGRESS_EVENT, { detail: progress }));
 }
 
-export function setMemberStepComplete(step: MemberStepKey, completed: boolean) {
-  const progress = readMemberProgress();
-  writeMemberProgress({ ...progress, [step]: completed });
+async function fetchProgressFromBackend() {
+  const response = await fetch('/api/member/progress', { method: 'GET', cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error('Failed to fetch member progress');
+  }
+  const payload = (await response.json()) as { progress?: unknown };
+  return normalizeProgress(payload.progress);
+}
+
+async function syncProgressToBackend(progress: MemberProgress) {
+  const response = await fetch('/api/member/progress', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ progress }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to persist member progress');
+  }
+}
+
+export async function setMemberStepComplete(step: MemberStepKey, completed: boolean) {
+  const progress = cachedProgress ?? readMemberProgress();
+  const next = { ...progress, [step]: completed };
+  writeMemberProgress(next);
+
+  try {
+    await syncProgressToBackend(next);
+  } catch {
+    // Keep local optimistic state; hook will reconcile on next backend read.
+  }
 }
 
 export function useMemberProgress() {
   const [progress, setProgress] = useState<MemberProgress>(DEFAULT_PROGRESS);
 
   useEffect(() => {
-    setProgress(readMemberProgress());
+    const local = readMemberProgress();
+    cachedProgress = local;
+    setProgress(local);
+
+    fetchProgressFromBackend()
+      .then((serverProgress) => {
+        writeMemberProgress(serverProgress);
+        setProgress(serverProgress);
+      })
+      .catch(() => {
+        // Anonymous/local sessions keep local fallback until authenticated backend sync is available.
+      });
 
     const handleStorage = (event: StorageEvent) => {
       if (event.key === MEMBER_PROGRESS_STORAGE_KEY) {
-        setProgress(readMemberProgress());
+        const next = readMemberProgress();
+        cachedProgress = next;
+        setProgress(next);
       }
     };
 
     const handleProgressUpdated = () => {
-      setProgress(readMemberProgress());
+      const next = readMemberProgress();
+      cachedProgress = next;
+      setProgress(next);
     };
 
     window.addEventListener('storage', handleStorage);
