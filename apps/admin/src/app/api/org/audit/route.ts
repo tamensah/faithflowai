@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createOrgCaller } from '@/lib/org-caller';
 
+function toCsvCell(value: unknown): string {
+	if (value === null || value === undefined) return '';
+	const text = String(value);
+	const escaped = text.replace(/"/g, '""');
+	return `"${escaped}"`;
+}
+
 export async function GET(request: NextRequest) {
 	const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
 	const action = request.nextUrl.searchParams.get('action') ?? undefined;
+	const query = request.nextUrl.searchParams.get('query') ?? undefined;
+	const format = request.nextUrl.searchParams.get('format');
+	const requestedLimit = Number(request.nextUrl.searchParams.get('limit') ?? '100');
+	const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 1000) : 100;
 	const result = request.nextUrl.searchParams.get('result') as
 		| 'SUCCESS'
 		| 'DENIED'
@@ -18,8 +29,44 @@ export async function GET(request: NextRequest) {
 			cursor,
 			action,
 			result: result ?? undefined,
-			limit: 100,
+			query,
+			limit,
 		});
+
+		if (format === 'csv') {
+			const header = [
+				'id',
+				'createdAt',
+				'action',
+				'result',
+				'entityType',
+				'entityId',
+				'actorId',
+				'reason',
+			];
+			const rows = audit.items.map((event) =>
+				[
+					toCsvCell(event.id),
+					toCsvCell(event.createdAt),
+					toCsvCell(event.action),
+					toCsvCell(event.result),
+					toCsvCell(event.entityType),
+					toCsvCell(event.entityId),
+					toCsvCell(event.actorId),
+					toCsvCell(event.reason),
+				].join(',')
+			);
+			const csv = [header.join(','), ...rows].join('\n');
+
+			return new NextResponse(csv, {
+				status: 200,
+				headers: {
+					'Content-Type': 'text/csv; charset=utf-8',
+					'Content-Disposition': `attachment; filename="faithflow-audit-${organizationId}.csv"`,
+				},
+			});
+		}
+
 		return NextResponse.json(audit);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Unknown error';

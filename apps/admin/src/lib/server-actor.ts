@@ -1,5 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
+import { prisma } from '@faithflow/database';
 import type { PolicyActor } from '../../../api/src/security/policy';
+import { coerceAdminSecurityPolicy, enforceAdminSecurityPolicy } from './admin-security-policy';
 
 type ClerkClaims = Record<string, unknown> & {
 	org_id?: string;
@@ -58,6 +60,26 @@ export async function getActorFromClerk(
 	if (!organizationId) {
 		throw new Error('Forbidden: no organization context in Clerk session');
 	}
+
+	const organization = await prisma.organization.findUnique({
+		where: { id: organizationId },
+		select: { id: true, settings: true },
+	});
+	if (!organization) {
+		throw new Error('Forbidden: organization context was not found in platform data.');
+	}
+
+	const settings =
+		organization.settings && typeof organization.settings === 'object' && !Array.isArray(organization.settings)
+			? (organization.settings as Record<string, unknown>)
+			: {};
+	const policyOverride = coerceAdminSecurityPolicy(settings.securityPolicy);
+
+	enforceAdminSecurityPolicy({
+		roles,
+		sessionClaims: claims,
+		policyOverride,
+	});
 
 	return {
 		id: userId,

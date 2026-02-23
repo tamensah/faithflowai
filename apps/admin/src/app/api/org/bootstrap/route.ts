@@ -1,25 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createOrgCaller } from '@/lib/org-caller';
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
 	try {
 		const { caller, actor } = await createOrgCaller();
 		const organizationId = actor.organizationId;
-		const [units, roleTemplates, members, assignments, audit] = await Promise.all([
-			caller.org.listUnits({ organizationId }),
-			caller.org.listRoleTemplates({ organizationId }),
-			caller.org.listMembers({ organizationId, limit: 500 }),
-			caller.org.listRoleAssignments({ organizationId, limit: 500 }),
-			caller.org.listAuditEvents({ organizationId, limit: 100 }),
-		]);
+		const [units, aliases, hierarchyOverview, roleTemplates, members, assignmentsPage, audit] =
+			await Promise.all([
+				caller.org.listUnits({ organizationId }),
+				caller.org.listUnitAliases({ organizationId }),
+				caller.org.getHierarchyOverview({ organizationId }),
+				caller.org.listRoleTemplates({ organizationId }),
+				caller.org.listMembers({ organizationId, limit: 500 }),
+				caller.org.listRoleAssignments({ organizationId, limit: 20 }),
+				caller.org.listAuditEvents({ organizationId, limit: 20 }),
+			]);
 
 		return NextResponse.json({
 			organizationId,
 			units,
+			aliases,
+			hierarchyOverview,
 			roleTemplates,
 			members,
-			assignments,
+			assignments: assignmentsPage.items,
+			assignmentsNextCursor: assignmentsPage.nextCursor,
 			audit: audit.items,
+			auditNextCursor: audit.nextCursor,
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Unknown error';
