@@ -10,14 +10,24 @@ function resolveProvider(method: (typeof paymentMethodValues)[number]): 'MANUAL'
   return 'MANUAL';
 }
 
-export async function GET(request: NextRequest) {
-  const { prisma } = await import('@faithflow-ai/database');
-  const statusParam = request.nextUrl.searchParams.get('status');
-  const churchIdParam = request.nextUrl.searchParams.get('churchId');
-  const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
-  const limit = Number(request.nextUrl.searchParams.get('limit') ?? '50');
+function toErrorResponse(error: unknown) {
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  if (error instanceof SyntaxError) {
+    return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
+  }
+  if (message.startsWith('Unauthorized') || message.startsWith('Forbidden')) {
+    return NextResponse.json({ error: message }, { status: 401 });
+  }
+  return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+}
 
+export async function GET(request: NextRequest) {
   try {
+    const { prisma } = await import('@faithflow-ai/database');
+    const statusParam = request.nextUrl.searchParams.get('status');
+    const churchIdParam = request.nextUrl.searchParams.get('churchId');
+    const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
+    const limit = Number(request.nextUrl.searchParams.get('limit') ?? '50');
     const context = await resolveTenantContext();
     const status =
       statusParam && paymentStatusValues.includes(statusParam as (typeof paymentStatusValues)[number])
@@ -99,32 +109,30 @@ export async function GET(request: NextRequest) {
       churches,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    const status = message.startsWith('Unauthorized') ? 401 : 403;
-    return NextResponse.json({ error: message }, { status });
+    return toErrorResponse(error);
   }
 }
 
 export async function POST(request: NextRequest) {
-  const { prisma } = await import('@faithflow-ai/database');
-  const payload = (await request.json()) as {
-    churchId?: string;
-    memberId?: string;
-    amount?: number;
-    currency?: string;
-    paymentMethod?: 'CARD' | 'BANK_TRANSFER' | 'MOBILE_MONEY';
-    reference?: string;
-    status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
-  };
-
-  if (!payload.amount || !payload.reference || !payload.paymentMethod) {
-    return NextResponse.json(
-      { error: 'amount, reference, and paymentMethod are required' },
-      { status: 400 }
-    );
-  }
-
   try {
+    const { prisma } = await import('@faithflow-ai/database');
+    const payload = (await request.json()) as {
+      churchId?: string;
+      memberId?: string;
+      amount?: number;
+      currency?: string;
+      paymentMethod?: 'CARD' | 'BANK_TRANSFER' | 'MOBILE_MONEY';
+      reference?: string;
+      status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
+    };
+
+    if (!payload.amount || !payload.reference || !payload.paymentMethod) {
+      return NextResponse.json(
+        { error: 'amount, reference, and paymentMethod are required' },
+        { status: 400 }
+      );
+    }
+
     const context = await resolveTenantContext();
     const churchId =
       payload.churchId && context.churchIds.includes(payload.churchId)
@@ -177,25 +185,23 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    const status = message.startsWith('Unauthorized') ? 401 : 403;
-    return NextResponse.json({ error: message }, { status });
+    return toErrorResponse(error);
   }
 }
 
 export async function PATCH(request: NextRequest) {
-  const { prisma } = await import('@faithflow-ai/database');
-  const payload = (await request.json()) as {
-    action?: 'status' | 'refund';
-    paymentId?: string;
-    status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
-  };
-
-  if (!payload.paymentId || !payload.action) {
-    return NextResponse.json({ error: 'paymentId and action are required' }, { status: 400 });
-  }
-
   try {
+    const { prisma } = await import('@faithflow-ai/database');
+    const payload = (await request.json()) as {
+      action?: 'status' | 'refund';
+      paymentId?: string;
+      status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
+    };
+
+    if (!payload.paymentId || !payload.action) {
+      return NextResponse.json({ error: 'paymentId and action are required' }, { status: 400 });
+    }
+
     const context = await resolveTenantContext();
     const existing = await prisma.donation.findUnique({
       where: { id: payload.paymentId },
@@ -244,8 +250,6 @@ export async function PATCH(request: NextRequest) {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    const status = message.startsWith('Unauthorized') ? 401 : 403;
-    return NextResponse.json({ error: message }, { status });
+    return toErrorResponse(error);
   }
 }

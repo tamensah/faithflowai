@@ -3,8 +3,14 @@ import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 const isPublicRoute = createRouteMatcher(['/sign-in(.*)']);
+const isApiRoute = createRouteMatcher(['/api(.*)', '/trpc(.*)']);
 
 const baseMiddleware = clerkMiddleware((auth, req) => {
+  // Let API handlers return JSON auth errors instead of middleware-level hard failures.
+  if (isApiRoute(req)) {
+    return;
+  }
+
   if (!isPublicRoute(req)) {
     auth.protect();
   }

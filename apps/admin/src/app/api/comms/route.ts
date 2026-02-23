@@ -14,13 +14,23 @@ function resolveChannel(channel: (typeof channelValues)[number]): 'EMAIL' | 'SMS
   return channel;
 }
 
-export async function GET(request: NextRequest) {
-  const { prisma } = await import('@faithflow-ai/database');
-  const roomId = request.nextUrl.searchParams.get('roomId') ?? undefined;
-  const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
-  const limit = Number(request.nextUrl.searchParams.get('limit') ?? '50');
+function toErrorResponse(error: unknown) {
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  if (error instanceof SyntaxError) {
+    return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
+  }
+  if (message.startsWith('Unauthorized') || message.startsWith('Forbidden')) {
+    return NextResponse.json({ error: message }, { status: 401 });
+  }
+  return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+}
 
+export async function GET(request: NextRequest) {
   try {
+    const { prisma } = await import('@faithflow-ai/database');
+    const roomId = request.nextUrl.searchParams.get('roomId') ?? undefined;
+    const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
+    const limit = Number(request.nextUrl.searchParams.get('limit') ?? '50');
     const context = await resolveTenantContext();
     const resolvedLimit = Number.isFinite(limit) ? Math.min(Math.max(limit, 1), 200) : 50;
 
@@ -96,34 +106,32 @@ export async function GET(request: NextRequest) {
       churches,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    const status = message.startsWith('Unauthorized') ? 401 : 403;
-    return NextResponse.json({ error: message }, { status });
+    return toErrorResponse(error);
   }
 }
 
 export async function POST(request: NextRequest) {
-  const { prisma } = await import('@faithflow-ai/database');
-  const payload = (await request.json()) as {
-    action?: 'createRoom' | 'sendMessage' | 'dispatch';
-    name?: string;
-    type?: string;
-    churchId?: string;
-    roomId?: string;
-    content?: string;
-    channel?: 'EMAIL' | 'SMS' | 'WHATSAPP' | 'PUSH';
-    recipient?: string;
-    subject?: string;
-    body?: string;
-    templateKey?: string;
-    metadata?: Record<string, unknown>;
-  };
-
-  if (!payload.action) {
-    return NextResponse.json({ error: 'action is required' }, { status: 400 });
-  }
-
   try {
+    const { prisma } = await import('@faithflow-ai/database');
+    const payload = (await request.json()) as {
+      action?: 'createRoom' | 'sendMessage' | 'dispatch';
+      name?: string;
+      type?: string;
+      churchId?: string;
+      roomId?: string;
+      content?: string;
+      channel?: 'EMAIL' | 'SMS' | 'WHATSAPP' | 'PUSH';
+      recipient?: string;
+      subject?: string;
+      body?: string;
+      templateKey?: string;
+      metadata?: Record<string, unknown>;
+    };
+
+    if (!payload.action) {
+      return NextResponse.json({ error: 'action is required' }, { status: 400 });
+    }
+
     const context = await resolveTenantContext();
 
     if (payload.action === 'createRoom') {
@@ -242,8 +250,6 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    const status = message.startsWith('Unauthorized') ? 401 : 403;
-    return NextResponse.json({ error: message }, { status });
+    return toErrorResponse(error);
   }
 }
