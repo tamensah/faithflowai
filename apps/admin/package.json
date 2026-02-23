@@ -11,7 +11,9 @@
   "dependencies": {
     "@clerk/nextjs": "^6.37.3",
     "@faithflow-ai/api": "workspace:*",
+    "@faithflow-ai/database": "workspace:*",
     "@faithflow-ai/ui": "workspace:*",
+    "@heroicons/react": "^2.2.0",
     "@tanstack/react-query": "^5.90.20",
     "@trpc/client": "^11.9.0",
     "@trpc/react-query": "^11.9.0",

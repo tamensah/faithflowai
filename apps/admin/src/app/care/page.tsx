@@ -92,6 +92,7 @@ export default function CarePage() {
 
   const { mutate: addNote } = trpc.care.addNote.useMutation({
     onSuccess: async (_, vars) => {
+      if (!vars) return;
       setNoteDrafts((current) => ({ ...current, [vars.careRequestId]: '' }));
       await utils.care.listRequests.invalidate();
     },
