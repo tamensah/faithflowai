@@ -14,6 +14,14 @@ function resolveChannel(channel: (typeof channelValues)[number]): 'EMAIL' | 'SMS
   return channel;
 }
 
+function requireSignedInRequest(request: NextRequest) {
+  const authStatus = request.headers.get('x-clerk-auth-status');
+  if (authStatus && authStatus !== 'signed-in') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  return null;
+}
+
 function toErrorResponse(error: unknown) {
   const message = error instanceof Error ? error.message : 'Unknown error';
   if (error instanceof SyntaxError) {
@@ -26,6 +34,9 @@ function toErrorResponse(error: unknown) {
 }
 
 export async function GET(request: NextRequest) {
+  const authFailure = requireSignedInRequest(request);
+  if (authFailure) return authFailure;
+
   try {
     const { prisma } = await import('@faithflow-ai/database');
     const roomId = request.nextUrl.searchParams.get('roomId') ?? undefined;
@@ -111,6 +122,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const authFailure = requireSignedInRequest(request);
+  if (authFailure) return authFailure;
+
   try {
     const { prisma } = await import('@faithflow-ai/database');
     const payload = (await request.json()) as {
