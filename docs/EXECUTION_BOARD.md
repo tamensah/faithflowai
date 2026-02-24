@@ -102,6 +102,10 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Runbooks for failed webhooks, reconciliation drift, and support escalation.
 - Smoke scripts expanded for auth + org + payment + comms.
 
+**Current implementation (this batch)**
+- Added third-party provider setup matrix and env checklist (`docs/THIRDPARTY_CONFIG.md`).
+- Added operational incident runbook for webhook failures, reconciliation drift, and comms recovery (`docs/OPERATIONS_RUNBOOK.md`).
+
 ---
 
 ### 7) AI intelligence packs (P2)

@@ -79,6 +79,9 @@ POST /api/webhooks/resend
 POST /api/webhooks/twilio
 ```
 
+Full provider setup checklist and env ownership matrix:
+`docs/THIRDPARTY_CONFIG.md`
+
 ## Development Workflow
 
 ### 1. Start Development Environment
