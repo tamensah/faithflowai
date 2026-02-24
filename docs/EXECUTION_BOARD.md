@@ -100,6 +100,11 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Next-step CTA links to plan/enablement flows.
 - Empty-state guidance tied to permissions and plan.
 
+**Current implementation (this batch)**
+- Added explicit lock panels for Analytics and Groups with actionable next-step CTAs.
+- Added sidebar lock badges for gated modules to set expectations before navigation.
+- Added action-level provider lock messaging in Payments and Comms (disabled actions when provider credentials are missing).
+
 ---
 
 ### 6) Operability hardening (P1)

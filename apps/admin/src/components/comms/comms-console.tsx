@@ -4,6 +4,11 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { OutboxQueuePanel } from '@/components/ops/outbox-queue-panel';
 
 type Channel = 'EMAIL' | 'SMS' | 'WHATSAPP' | 'PUSH';
+type CommsProviderConfig = {
+	resendConfigured: boolean;
+	twilioConfigured: boolean;
+	whatsappConfigured: boolean;
+};
 
 type Room = {
 	id: string;
@@ -56,7 +61,7 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
 	return payload as T;
 }
 
-export function CommsConsole() {
+export function CommsConsole({ providerConfig }: { providerConfig: CommsProviderConfig }) {
 	const [data, setData] = useState<CommsBootstrap | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -98,6 +103,15 @@ export function CommsConsole() {
 		() => data?.rooms.items.find((item) => item.id === selectedRoomId) ?? null,
 		[data?.rooms.items, selectedRoomId]
 	);
+
+	function channelEnabled(channel: Channel): boolean {
+		if (channel === 'EMAIL') return providerConfig.resendConfigured;
+		if (channel === 'SMS') return providerConfig.twilioConfigured;
+		if (channel === 'WHATSAPP') return providerConfig.whatsappConfigured;
+		return true;
+	}
+
+	const dispatchChannelLocked = !channelEnabled(dispatchForm.channel);
 
 	async function loadData() {
 		setLoading(true);
@@ -230,6 +244,12 @@ export function CommsConsole() {
 				<p className="mt-1 text-sm text-slate-600">
 					Create rooms, send internal messages, and queue channel dispatches.
 				</p>
+				<div className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+					<span className="font-medium">Channel readiness:</span> Email{' '}
+					{providerConfig.resendConfigured ? 'configured' : 'locked'} | SMS{' '}
+					{providerConfig.twilioConfigured ? 'configured' : 'locked'} | WhatsApp{' '}
+					{providerConfig.whatsappConfigured ? 'configured' : 'locked'}
+				</div>
 				{error ? (
 					<div className="mt-4 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
 						{error}
@@ -364,7 +384,7 @@ export function CommsConsole() {
 							className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
 						>
 							{channels.map((channel) => (
-								<option key={channel} value={channel}>
+								<option key={channel} value={channel} disabled={!channelEnabled(channel)}>
 									{channel}
 								</option>
 							))}
@@ -434,10 +454,15 @@ export function CommsConsole() {
 				<button
 					type="submit"
 					className="mt-4 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-					disabled={loading}
+					disabled={loading || dispatchChannelLocked}
 				>
 					Queue dispatch
 				</button>
+				{dispatchChannelLocked ? (
+					<p className="mt-2 text-xs text-amber-700">
+						Selected channel is locked in this environment. Configure provider credentials to dispatch.
+					</p>
+				) : null}
 			</form>
 
 			<div className="grid gap-6 xl:grid-cols-[1.1fr_1.4fr]">

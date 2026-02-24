@@ -1,6 +1,19 @@
 import { CommsConsole } from '@/components/comms/comms-console';
 
+function hasEnv(name: string): boolean {
+	return Boolean(process.env[name]?.trim());
+}
+
 export default function CommsPage() {
+	const providerConfig = {
+		resendConfigured: hasEnv('RESEND_API_KEY') && hasEnv('RESEND_FROM_EMAIL'),
+		twilioConfigured: hasEnv('TWILIO_ACCOUNT_SID') && hasEnv('TWILIO_AUTH_TOKEN'),
+		whatsappConfigured:
+			hasEnv('TWILIO_ACCOUNT_SID') &&
+			hasEnv('TWILIO_AUTH_TOKEN') &&
+			hasEnv('TWILIO_WHATSAPP_NUMBER'),
+	};
+
 	return (
 		<div className="space-y-6">
 			<div>
@@ -10,7 +23,7 @@ export default function CommsPage() {
 				</p>
 			</div>
 
-			<CommsConsole />
+			<CommsConsole providerConfig={providerConfig} />
 		</div>
 	);
 }

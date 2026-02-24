@@ -26,10 +26,10 @@ const sections = [
 			{ name: 'Overview', href: '/dashboard', icon: HomeIcon },
 			{ name: 'Members', href: '/dashboard/members', icon: UsersIcon },
 			{ name: 'Events', href: '/dashboard/events', icon: CalendarIcon },
-			{ name: 'Groups', href: '/dashboard/groups', icon: UserGroupIcon },
+			{ name: 'Groups', href: '/dashboard/groups', icon: UserGroupIcon, locked: true },
 			{ name: 'Payments', href: '/dashboard/payments', icon: CurrencyDollarIcon },
 			{ name: 'Comms', href: '/dashboard/comms', icon: ChatBubbleLeftRightIcon },
-			{ name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon },
+			{ name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, locked: true },
 		],
 	},
 	{
@@ -79,7 +79,17 @@ export function Sidebar() {
 										)}
 									>
 										<item.icon className="h-5 w-5" />
-										{item.name}
+										<span className="flex-1">{item.name}</span>
+										{item.locked ? (
+											<span
+												className={cn(
+													'rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide',
+													isActive ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'
+												)}
+											>
+												Locked
+											</span>
+										) : null}
 									</Link>
 								);
 							})}

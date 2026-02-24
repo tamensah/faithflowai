@@ -6,6 +6,10 @@ import { OutboxQueuePanel } from '@/components/ops/outbox-queue-panel';
 type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
 type PaymentMethod = 'CARD' | 'BANK_TRANSFER' | 'MOBILE_MONEY';
 type PaymentProvider = 'AUTO' | 'STRIPE' | 'PAYSTACK';
+type PaymentProviderConfig = {
+	stripeConfigured: boolean;
+	paystackConfigured: boolean;
+};
 
 type PaymentItem = {
 	id: string;
@@ -75,7 +79,7 @@ function formatAmount(value: string | number, currency: string): string {
 	}
 }
 
-export function PaymentConsole() {
+export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProviderConfig }) {
 	const [data, setData] = useState<PaymentBootstrap | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -116,6 +120,26 @@ export function PaymentConsole() {
 		() => data?.items.find((item) => item.id === actionForm.paymentId) ?? null,
 		[data?.items, actionForm.paymentId]
 	);
+	const selectedPaymentProviderRaw =
+		selectedPayment?.metadata && typeof selectedPayment.metadata.provider === 'string'
+			? selectedPayment.metadata.provider.toUpperCase()
+			: 'AUTO';
+	const selectedPaymentProvider: PaymentProvider =
+		selectedPaymentProviderRaw === 'STRIPE' || selectedPaymentProviderRaw === 'PAYSTACK'
+			? (selectedPaymentProviderRaw as PaymentProvider)
+			: 'AUTO';
+
+	function providerEnabled(provider: PaymentProvider): boolean {
+		if (provider === 'AUTO') return true;
+		if (provider === 'STRIPE') return providerConfig.stripeConfigured;
+		return providerConfig.paystackConfigured;
+	}
+
+	const createProviderLocked = !providerEnabled(createForm.paymentProvider);
+	const refundProviderLocked =
+		actionForm.action === 'refund' &&
+		selectedPaymentProvider !== 'AUTO' &&
+		!providerEnabled(selectedPaymentProvider);
 
 	async function loadData() {
 		setLoading(true);
@@ -226,6 +250,11 @@ export function PaymentConsole() {
 				<p className="mt-1 text-sm text-slate-600">
 					Record giving transactions, update payment states, and trigger refunds.
 				</p>
+				<div className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+					<span className="font-medium">Provider readiness:</span> Stripe{' '}
+					{providerConfig.stripeConfigured ? 'configured' : 'locked'} | Paystack{' '}
+					{providerConfig.paystackConfigured ? 'configured' : 'locked'}
+				</div>
 
 				{error ? (
 					<div className="mt-4 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
@@ -356,7 +385,7 @@ export function PaymentConsole() {
 								className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
 							>
 								{paymentProviders.map((provider) => (
-									<option key={provider} value={provider}>
+									<option key={provider} value={provider} disabled={!providerEnabled(provider)}>
 										{provider}
 									</option>
 								))}
@@ -417,10 +446,15 @@ export function PaymentConsole() {
 					<button
 						type="submit"
 						className="mt-4 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-						disabled={loading}
+						disabled={loading || createProviderLocked}
 					>
 						Save payment
 					</button>
+					{createProviderLocked ? (
+						<p className="mt-2 text-xs text-amber-700">
+							This provider is locked in the current environment. Configure provider credentials to continue.
+						</p>
+					) : null}
 				</form>
 
 				<form onSubmit={handleAction} className="rounded-xl border border-slate-200 bg-white p-5">
@@ -503,10 +537,15 @@ export function PaymentConsole() {
 					<button
 						type="submit"
 						className="mt-4 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-						disabled={loading}
+						disabled={loading || refundProviderLocked}
 					>
 						Apply action
 					</button>
+					{refundProviderLocked ? (
+						<p className="mt-2 text-xs text-amber-700">
+							Refund is locked because the selected provider ({selectedPaymentProvider}) is not configured.
+						</p>
+					) : null}
 				</form>
 			</div>
 

@@ -1,6 +1,15 @@
 import { PaymentConsole } from '@/components/payment/payment-console';
 
+function hasEnv(name: string): boolean {
+	return Boolean(process.env[name]?.trim());
+}
+
 export default function PaymentsPage() {
+	const providerConfig = {
+		stripeConfigured: hasEnv('STRIPE_SECRET_KEY') && hasEnv('STRIPE_WEBHOOK_SECRET'),
+		paystackConfigured: hasEnv('PAYSTACK_SECRET_KEY'),
+	};
+
 	return (
 		<div className="space-y-6">
 			<div>
@@ -10,7 +19,7 @@ export default function PaymentsPage() {
 				</p>
 			</div>
 
-			<PaymentConsole />
+			<PaymentConsole providerConfig={providerConfig} />
 		</div>
 	);
 }
