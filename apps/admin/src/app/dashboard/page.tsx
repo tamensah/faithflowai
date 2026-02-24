@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
-import { getExecutiveRollups } from '@/lib/executive-rollups';
+import { getExecutiveRollups, listOrganizationUnits } from '@/lib/executive-rollups';
 
 function formatCurrency(amount: number): string {
 	return new Intl.NumberFormat('en-US', {
@@ -16,9 +16,31 @@ function trendLabel(trend: 'up' | 'down' | 'flat'): string {
 	return 'flat vs previous 30d';
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+	searchParams,
+}: {
+	searchParams: Record<string, string | string[] | undefined>;
+}) {
 	const { userId, orgId } = await auth();
-	const rollups = orgId ? await getExecutiveRollups(orgId) : null;
+	const orgUnitParam = searchParams.orgUnitId;
+	const includeDescendantsParam = searchParams.includeDescendants;
+	const orgUnitId =
+		typeof orgUnitParam === 'string' && orgUnitParam.trim().length > 0 ? orgUnitParam : null;
+	const includeDescendants =
+		typeof includeDescendantsParam === 'string' ? includeDescendantsParam === 'true' : true;
+	const scopedUnits = orgId ? await listOrganizationUnits(orgId) : [];
+	const rollups = orgId
+		? await getExecutiveRollups({
+				organizationId: orgId,
+				orgUnitId,
+				includeDescendants,
+		  })
+		: null;
+	const defaultScope = rollups?.scope.selectedOrgUnitId ?? '';
+	const includeDescendantsChecked = rollups?.scope.includeDescendants ?? true;
+	const scopedQuery = rollups?.scope.selectedOrgUnitId
+		? `?orgUnitId=${encodeURIComponent(rollups.scope.selectedOrgUnitId)}&includeDescendants=${rollups.scope.includeDescendants}`
+		: '';
 
 	return (
 		<div className="space-y-6">
@@ -64,6 +86,51 @@ export default async function DashboardPage() {
 
 			{rollups ? (
 				<>
+					<div className="rounded-xl border border-slate-200 bg-white p-4">
+						<form className="grid gap-3 md:grid-cols-[2fr_1fr_auto] md:items-end">
+							<label className="text-sm font-medium text-slate-700">
+								Scope org unit
+								<select
+									name="orgUnitId"
+									defaultValue={defaultScope}
+									className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+								>
+									<option value="">All organization units</option>
+									{scopedUnits.map((unit) => (
+										<option key={unit.id} value={unit.id}>
+											{unit.name} ({unit.type})
+										</option>
+									))}
+								</select>
+							</label>
+							<label className="text-sm font-medium text-slate-700">
+								Descendant scope
+								<select
+									name="includeDescendants"
+									defaultValue={includeDescendantsChecked ? 'true' : 'false'}
+									className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+								>
+									<option value="true">Include descendants</option>
+									<option value="false">Selected unit only</option>
+								</select>
+							</label>
+							<button
+								type="submit"
+								className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+							>
+								Apply scope
+							</button>
+						</form>
+						{rollups.scope.selectedOrgUnitName ? (
+							<p className="mt-2 text-xs text-slate-500">
+								Current scope: {rollups.scope.selectedOrgUnitName} ({rollups.scope.unitIds.length} units,{' '}
+								{rollups.scope.churchIds.length} churches)
+							</p>
+						) : (
+							<p className="mt-2 text-xs text-slate-500">Current scope: full organization</p>
+						)}
+					</div>
+
 					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
 						<div className="rounded-xl border border-slate-200 bg-white p-4">
 							<p className="text-xs uppercase tracking-[0.14em] text-slate-500">Members</p>
@@ -112,25 +179,25 @@ export default async function DashboardPage() {
 							</div>
 							<div className="mt-4 grid gap-3 sm:grid-cols-2">
 								<Link
-									href="/dashboard/members"
+									href={`/dashboard/members${scopedQuery}`}
 									className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:border-blue-300 hover:text-blue-700"
 								>
 									Open member management
 								</Link>
 								<Link
-									href="/dashboard/events"
+									href={`/dashboard/events${scopedQuery}`}
 									className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:border-blue-300 hover:text-blue-700"
 								>
 									Open events operations
 								</Link>
 								<Link
-									href="/dashboard/payments"
+									href={`/dashboard/payments${scopedQuery}`}
 									className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:border-blue-300 hover:text-blue-700"
 								>
 									Open giving and billing
 								</Link>
 								<Link
-									href="/dashboard/org"
+									href={`/dashboard/org${scopedQuery}`}
 									className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:border-blue-300 hover:text-blue-700"
 								>
 									Open org hierarchy
@@ -146,7 +213,7 @@ export default async function DashboardPage() {
 								{rollups.readiness.items.map((item) => (
 									<Link
 										key={item.id}
-										href={item.href}
+										href={`${item.href}${scopedQuery}`}
 										className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 text-sm"
 									>
 										<span className="text-slate-700">{item.label}</span>

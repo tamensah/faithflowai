@@ -86,6 +86,8 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added executive overview rollups on `/dashboard` for members, giving trend, events, leadership, and readiness.
 - Added drill-down quick actions from overview to members/events/payments/org surfaces.
 - Added readiness checklist with direct action links for setup completion.
+- Added org-unit scope filter (selected unit vs descendants) to executive rollups.
+- Added scoped role-assignment filtering (org unit + descendants) with server-side pagination in Organization Builder.
 
 ---
 

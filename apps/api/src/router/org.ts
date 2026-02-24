@@ -176,6 +176,8 @@ const roleAssignmentListSchema = z.object({
 	limit: z.number().min(1).max(200).default(50),
 	cursor: z.string().optional(),
 	query: z.string().min(1).max(120).optional(),
+	orgUnitId: z.string().min(1).optional(),
+	includeDescendants: z.boolean().default(true),
 });
 
 const auditListSchema = z.object({
@@ -215,6 +217,44 @@ function getOrganizationSecurityPolicy(value: unknown) {
 	const candidate = settings.securityPolicy;
 	const parsed = adminSecurityPolicySchema.safeParse(candidate);
 	return parsed.success ? parsed.data : null;
+}
+
+async function resolveScopedOrgUnitIds(input: {
+	organizationId: string;
+	orgUnitId: string;
+	includeDescendants: boolean;
+}): Promise<string[]> {
+	if (!input.includeDescendants) return [input.orgUnitId];
+
+	const units = await prisma.orgUnit.findMany({
+		where: { organizationId: input.organizationId },
+		select: { id: true, parentUnitId: true },
+	});
+	const selectedExists = units.some((unit) => unit.id === input.orgUnitId);
+	if (!selectedExists) return [];
+
+	const childrenByParent = new Map<string, string[]>();
+	for (const unit of units) {
+		if (!unit.parentUnitId) continue;
+		const existing = childrenByParent.get(unit.parentUnitId) ?? [];
+		existing.push(unit.id);
+		childrenByParent.set(unit.parentUnitId, existing);
+	}
+
+	const scoped: string[] = [];
+	const stack = [input.orgUnitId];
+	const seen = new Set<string>();
+
+	while (stack.length > 0) {
+		const current = stack.pop() as string;
+		if (seen.has(current)) continue;
+		seen.add(current);
+		scoped.push(current);
+		const children = childrenByParent.get(current) ?? [];
+		for (const child of children) stack.push(child);
+	}
+
+	return scoped;
 }
 
 type OrgMutationEvent = {
@@ -1166,10 +1206,22 @@ export const orgRouter = router({
 				organizationId: input.organizationId,
 			});
 
+			const scopedOrgUnitIds = input.orgUnitId
+				? await resolveScopedOrgUnitIds({
+						organizationId: input.organizationId,
+						orgUnitId: input.orgUnitId,
+						includeDescendants: input.includeDescendants,
+				  })
+				: [];
+			const orgUnitFilter = input.orgUnitId
+				? { in: scopedOrgUnitIds.length > 0 ? scopedOrgUnitIds : ['__none__'] }
+				: undefined;
+
 			const items = await prisma.unitRoleAssignment.findMany({
 				where: {
 					organizationId: input.organizationId,
 					status: input.status,
+					orgUnitId: orgUnitFilter,
 					OR: input.query
 						? [
 								{

@@ -2,6 +2,7 @@
 
 import { FormEvent, useMemo, useState } from 'react';
 import { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 type OrgUnitRollup = {
 	directChildren: number;
@@ -179,6 +180,8 @@ export function OrgConsole() {
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 	const [assignmentSearch, setAssignmentSearch] = useState('');
 	const [assignmentStatusFilter, setAssignmentStatusFilter] = useState('ALL');
+	const [assignmentOrgUnitFilter, setAssignmentOrgUnitFilter] = useState('');
+	const [assignmentIncludeDescendants, setAssignmentIncludeDescendants] = useState(true);
 	const [assignmentLimit, setAssignmentLimit] = useState(20);
 	const [auditSearch, setAuditSearch] = useState('');
 	const [auditResultFilter, setAuditResultFilter] = useState('ALL');
@@ -242,6 +245,7 @@ export function OrgConsole() {
 			})),
 		[aliasMap]
 	);
+	const searchParams = useSearchParams();
 
 	useEffect(() => {
 		void loadBootstrapData();
@@ -261,10 +265,24 @@ export function OrgConsole() {
 	}, [aliasMap]);
 
 	useEffect(() => {
+		const scopedUnitId = searchParams.get('orgUnitId') ?? '';
+		const includeDescendants = searchParams.get('includeDescendants') !== 'false';
+		setAssignmentOrgUnitFilter(scopedUnitId);
+		setAssignmentIncludeDescendants(includeDescendants);
+	}, [searchParams]);
+
+	useEffect(() => {
 		if (!bootstrap) return;
 		void loadAssignmentsPage();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [bootstrap?.organizationId, assignmentStatusFilter, assignmentSearch, assignmentLimit]);
+	}, [
+		bootstrap?.organizationId,
+		assignmentStatusFilter,
+		assignmentSearch,
+		assignmentOrgUnitFilter,
+		assignmentIncludeDescendants,
+		assignmentLimit,
+	]);
 
 	useEffect(() => {
 		if (!bootstrap) return;
@@ -298,6 +316,8 @@ export function OrgConsole() {
 			params.set('limit', String(assignmentLimit));
 			if (assignmentStatusFilter !== 'ALL') params.set('status', assignmentStatusFilter);
 			if (assignmentSearch.trim()) params.set('query', assignmentSearch.trim());
+			if (assignmentOrgUnitFilter) params.set('orgUnitId', assignmentOrgUnitFilter);
+			params.set('includeDescendants', assignmentIncludeDescendants ? 'true' : 'false');
 			if (options?.cursor) params.set('cursor', options.cursor);
 
 			const payload = await requestJson<RoleAssignmentListPayload>(
@@ -928,7 +948,7 @@ export function OrgConsole() {
 					<h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
 						Role assignments
 					</h3>
-					<div className="mt-3 grid gap-2 md:grid-cols-3">
+					<div className="mt-3 grid gap-2 md:grid-cols-5">
 						<input
 							value={assignmentSearch}
 							onChange={(event) => setAssignmentSearch(event.target.value)}
@@ -945,6 +965,26 @@ export function OrgConsole() {
 							<option value="ACTIVE">Active</option>
 							<option value="SUSPENDED">Suspended</option>
 							<option value="ENDED">Ended</option>
+						</select>
+						<select
+							value={assignmentOrgUnitFilter}
+							onChange={(event) => setAssignmentOrgUnitFilter(event.target.value)}
+							className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+						>
+							<option value="">All units</option>
+							{unitOptions.map((unit) => (
+								<option key={unit.id} value={unit.id}>
+									{unit.name}
+								</option>
+							))}
+						</select>
+						<select
+							value={assignmentIncludeDescendants ? 'true' : 'false'}
+							onChange={(event) => setAssignmentIncludeDescendants(event.target.value === 'true')}
+							className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+						>
+							<option value="true">With descendants</option>
+							<option value="false">Selected unit only</option>
 						</select>
 						<select
 							value={assignmentLimit}

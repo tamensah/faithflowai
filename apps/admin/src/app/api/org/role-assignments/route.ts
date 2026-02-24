@@ -5,6 +5,8 @@ export async function GET(request: NextRequest) {
 	const status = request.nextUrl.searchParams.get('status') ?? undefined;
 	const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
 	const query = request.nextUrl.searchParams.get('query') ?? undefined;
+	const orgUnitId = request.nextUrl.searchParams.get('orgUnitId') ?? undefined;
+	const includeDescendants = request.nextUrl.searchParams.get('includeDescendants') !== 'false';
 	const requestedLimit = Number(request.nextUrl.searchParams.get('limit') ?? '20');
 	const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 200) : 20;
 
@@ -20,6 +22,8 @@ export async function GET(request: NextRequest) {
 			cursor,
 			query,
 			limit,
+			orgUnitId,
+			includeDescendants,
 		});
 		return NextResponse.json(assignments);
 	} catch (error) {

@@ -2,7 +2,22 @@ import { prisma } from '@faithflow/database';
 
 type Trend = 'up' | 'down' | 'flat';
 
+type OrgUnitOption = {
+	id: string;
+	name: string;
+	type: string;
+	parentUnitId: string | null;
+	churchId: string | null;
+};
+
 export type ExecutiveRollups = {
+	scope: {
+		selectedOrgUnitId: string | null;
+		selectedOrgUnitName: string | null;
+		includeDescendants: boolean;
+		unitIds: string[];
+		churchIds: string[];
+	};
 	members: {
 		total: number;
 		newLast30Days: number;
@@ -33,6 +48,37 @@ export type ExecutiveRollups = {
 	};
 };
 
+function resolveScopedUnitIds(
+	units: OrgUnitOption[],
+	selectedOrgUnitId: string,
+	includeDescendants: boolean
+): string[] {
+	if (!includeDescendants) return [selectedOrgUnitId];
+
+	const childrenByParent = new Map<string, string[]>();
+	for (const unit of units) {
+		if (!unit.parentUnitId) continue;
+		const existing = childrenByParent.get(unit.parentUnitId) ?? [];
+		existing.push(unit.id);
+		childrenByParent.set(unit.parentUnitId, existing);
+	}
+
+	const scoped: string[] = [];
+	const stack = [selectedOrgUnitId];
+	const seen = new Set<string>();
+
+	while (stack.length > 0) {
+		const current = stack.pop() as string;
+		if (seen.has(current)) continue;
+		seen.add(current);
+		scoped.push(current);
+		const children = childrenByParent.get(current) ?? [];
+		for (const child of children) stack.push(child);
+	}
+
+	return scoped;
+}
+
 function asNumber(value: unknown): number {
 	if (typeof value === 'number') return value;
 	if (value && typeof value === 'object' && 'toNumber' in value && typeof value.toNumber === 'function') {
@@ -51,12 +97,68 @@ function resolveTrend(current: number, previous: number): Trend {
 	return 'flat';
 }
 
-export async function getExecutiveRollups(organizationId: string): Promise<ExecutiveRollups> {
+export async function listOrganizationUnits(organizationId: string): Promise<OrgUnitOption[]> {
+	return prisma.orgUnit.findMany({
+		where: { organizationId },
+		orderBy: [{ type: 'asc' }, { name: 'asc' }],
+		select: {
+			id: true,
+			name: true,
+			type: true,
+			parentUnitId: true,
+			churchId: true,
+		},
+	});
+}
+
+export async function getExecutiveRollups(input: {
+	organizationId: string;
+	orgUnitId?: string | null;
+	includeDescendants?: boolean;
+}): Promise<ExecutiveRollups> {
+	const organizationId = input.organizationId;
+	const includeDescendants = input.includeDescendants ?? true;
 	const now = new Date();
 	const last30Start = new Date(now);
 	last30Start.setDate(last30Start.getDate() - 30);
 	const previous30Start = new Date(last30Start);
 	previous30Start.setDate(previous30Start.getDate() - 30);
+
+	let scopedUnitIds: string[] = [];
+	let scopedChurchIds: string[] = [];
+	let selectedOrgUnitId: string | null = null;
+	let selectedOrgUnitName: string | null = null;
+	let scopeSelected = false;
+
+	if (input.orgUnitId) {
+		const units = await listOrganizationUnits(organizationId);
+		const selectedUnit = units.find((unit) => unit.id === input.orgUnitId) ?? null;
+		if (selectedUnit) {
+			scopeSelected = true;
+			selectedOrgUnitId = selectedUnit.id;
+			selectedOrgUnitName = selectedUnit.name;
+			scopedUnitIds = resolveScopedUnitIds(units, selectedUnit.id, includeDescendants);
+			scopedChurchIds = Array.from(
+				new Set(
+					units
+						.filter((unit) => scopedUnitIds.includes(unit.id))
+						.map((unit) => unit.churchId)
+						.filter((churchId): churchId is string => Boolean(churchId))
+				)
+			);
+		}
+	}
+
+	const memberWhere =
+		scopedChurchIds.length > 0 ? { churchId: { in: scopedChurchIds } } : { church: { organizationId } };
+	const eventWhere =
+		scopedChurchIds.length > 0 ? { churchId: { in: scopedChurchIds } } : { church: { organizationId } };
+	const paymentWhere =
+		scopedChurchIds.length > 0 ? { churchId: { in: scopedChurchIds } } : { church: { organizationId } };
+	const assignmentWhere =
+		scopedUnitIds.length > 0
+			? { organizationId, orgUnitId: { in: scopedUnitIds } }
+			: { organizationId };
 
 	const [
 		membersTotal,
@@ -73,17 +175,17 @@ export async function getExecutiveRollups(organizationId: string): Promise<Execu
 		organization,
 	] = await Promise.all([
 		prisma.member.count({
-			where: { church: { organizationId } },
+			where: memberWhere,
 		}),
 		prisma.member.count({
 			where: {
-				church: { organizationId },
+				...memberWhere,
 				createdAt: { gte: last30Start },
 			},
 		}),
 		prisma.event.count({
 			where: {
-				church: { organizationId },
+				...eventWhere,
 				startDate: {
 					gte: now,
 					lte: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30),
@@ -92,7 +194,7 @@ export async function getExecutiveRollups(organizationId: string): Promise<Execu
 		}),
 		prisma.event.count({
 			where: {
-				church: { organizationId },
+				...eventWhere,
 				startDate: {
 					gte: last30Start,
 					lt: now,
@@ -101,7 +203,7 @@ export async function getExecutiveRollups(organizationId: string): Promise<Execu
 		}),
 		prisma.payment.aggregate({
 			where: {
-				church: { organizationId },
+				...paymentWhere,
 				status: 'COMPLETED',
 				createdAt: { gte: last30Start },
 			},
@@ -109,7 +211,7 @@ export async function getExecutiveRollups(organizationId: string): Promise<Execu
 		}),
 		prisma.payment.aggregate({
 			where: {
-				church: { organizationId },
+				...paymentWhere,
 				status: 'COMPLETED',
 				createdAt: { gte: previous30Start, lt: last30Start },
 			},
@@ -117,13 +219,13 @@ export async function getExecutiveRollups(organizationId: string): Promise<Execu
 		}),
 		prisma.unitRoleAssignment.count({
 			where: {
-				organizationId,
+				...assignmentWhere,
 				status: 'ACTIVE',
 			},
 		}),
 		prisma.unitRoleAssignment.count({
 			where: {
-				organizationId,
+				...assignmentWhere,
 				status: 'ACTIVE',
 				roleTemplate: { isLeadership: true },
 			},
@@ -158,13 +260,13 @@ export async function getExecutiveRollups(organizationId: string): Promise<Execu
 		{
 			id: 'church',
 			label: 'At least one church created',
-			done: churchCount > 0,
+			done: scopeSelected ? scopedChurchIds.length > 0 : churchCount > 0,
 			href: '/dashboard/org',
 		},
 		{
 			id: 'org-units',
 			label: 'Org hierarchy configured',
-			done: orgUnitCount > 0,
+			done: scopeSelected ? scopedUnitIds.length > 0 : orgUnitCount > 0,
 			href: '/dashboard/org',
 		},
 		{
@@ -192,6 +294,13 @@ export async function getExecutiveRollups(organizationId: string): Promise<Execu
 	const percent = totalChecks === 0 ? 0 : Math.round((completedChecks / totalChecks) * 100);
 
 	return {
+		scope: {
+			selectedOrgUnitId,
+			selectedOrgUnitName,
+			includeDescendants,
+			unitIds: scopedUnitIds,
+			churchIds: scopedChurchIds,
+		},
 		members: {
 			total: membersTotal,
 			newLast30Days: membersNewLast30Days,
