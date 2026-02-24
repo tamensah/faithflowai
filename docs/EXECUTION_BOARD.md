@@ -138,6 +138,10 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Care-routing suggestions with audit-safe attribution.
 - Explainable insight cards in admin.
 
+**Current implementation (this batch)**
+- Added initial explainable analytics insight cards (attendance momentum, giving risk, care routing) in `/dashboard/analytics` when module is enabled.
+- Signals are derived from platform event/payment/member data with transparent metric attribution.
+
 ---
 
 ### 8) Add-on framework (P2)
