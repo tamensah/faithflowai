@@ -105,6 +105,9 @@ This board consolidates the active backlog into one ordered sequence so implemen
 **Current implementation (this batch)**
 - Added third-party provider setup matrix and env checklist (`docs/THIRDPARTY_CONFIG.md`).
 - Added operational incident runbook for webhook failures, reconciliation drift, and comms recovery (`docs/OPERATIONS_RUNBOOK.md`).
+- Added explicit monitoring endpoints for provider readiness and outbox worker readiness:
+  - `/api/health/provider-ops`
+  - `/api/health/outbox-worker`
 
 ---
 

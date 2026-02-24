@@ -61,6 +61,11 @@ FAITHFLOW_OUTBOX_RETRY_DELAY_SECONDS=30
 FAITHFLOW_OUTBOX_RETRY_BACKOFF_MULTIPLIER=2
 FAITHFLOW_ALLOW_UNSIGNED_WEBHOOKS=false
 FAITHFLOW_WEBHOOK_TOLERANCE_SECONDS=300
+FAITHFLOW_HEALTHCHECK_TOKEN=YOUR_SHARED_HEALTHCHECK_TOKEN
+FAITHFLOW_PROVIDER_OPS_STRICT_HEALTH=false
+FAITHFLOW_PROVIDER_OPS_PROCESSABLE_THRESHOLD=500
+FAITHFLOW_OUTBOX_STALE_SECONDS=900
+FAITHFLOW_OUTBOX_ACTIVITY_GRACE_SECONDS=180
 ```
 
 ## 3) Provider-side webhook endpoints
@@ -117,3 +122,15 @@ Set these on your provider dashboards (production admin domain):
 
 - Provider Ops page, queue processing, replay actions, and webhook handlers are implemented.
 - Remaining blocker to full live provider verification is production env/provider dashboard setup.
+- Monitoring endpoints are available for provider readiness and outbox worker readiness.
+
+## 7) Monitoring endpoints (automation friendly)
+
+Use a bearer token (`Authorization: Bearer $FAITHFLOW_HEALTHCHECK_TOKEN`) or `x-healthcheck-token`.
+
+- `GET /api/health/provider-ops`
+  - Returns provider configuration/readiness and queue pressure.
+  - Returns `503` when strict config checks fail or processable backlog exceeds threshold.
+- `GET /api/health/outbox-worker`
+  - Returns per-domain worker readiness using stale backlog + activity lag thresholds.
+  - Returns `503` when stale processable backlog indicates worker drift.

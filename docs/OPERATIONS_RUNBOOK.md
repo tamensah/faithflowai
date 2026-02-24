@@ -68,7 +68,18 @@ pnpm test:payment-comms-e2e
 pnpm test:provider-webhooks-e2e
 pnpm outbox:process -- --domain=PAYMENT --maxEvents=25
 pnpm outbox:process -- --domain=COMMS --maxEvents=25
+curl -sS -H "Authorization: Bearer $FAITHFLOW_HEALTHCHECK_TOKEN" https://admin-gamma-beryl.vercel.app/api/health/provider-ops
+curl -sS -H "Authorization: Bearer $FAITHFLOW_HEALTHCHECK_TOKEN" https://admin-gamma-beryl.vercel.app/api/health/outbox-worker
 ```
+
+### Health-check response interpretation
+
+- `provider-ops`:
+  - `status=ok`: provider ops baseline healthy.
+  - `status=degraded`: missing strict provider config and/or backlog threshold breach.
+- `outbox-worker`:
+  - `status=ready`: worker backlog/activity within thresholds.
+  - `status=degraded`: stale processable queue without fresh worker activity.
 
 ## 5) Incident record template
 
