@@ -37,6 +37,12 @@ export default async function DashboardPage() {
 					>
 						Open Settings
 					</Link>
+					<Link
+						href="/dashboard/provider-ops"
+						className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white"
+					>
+						Open Provider Ops
+					</Link>
 				</div>
 			</div>
 		</div>

@@ -12,6 +12,7 @@ import {
 	HomeIcon,
 	UserGroupIcon,
 	UsersIcon,
+	WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
 
 function cn(...classes: Array<string | false>) {
@@ -35,6 +36,7 @@ const sections = [
 		label: 'Governance',
 		items: [
 			{ name: 'Organization', href: '/dashboard/org', icon: BuildingOffice2Icon },
+			{ name: 'Provider Ops', href: '/dashboard/provider-ops', icon: WrenchScrewdriverIcon },
 			{ name: 'Settings', href: '/dashboard/settings', icon: CogIcon },
 		],
 	},

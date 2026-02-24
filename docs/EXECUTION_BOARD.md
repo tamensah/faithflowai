@@ -58,6 +58,17 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Comms dispatch provider routing (email/SMS/WhatsApp) with outbox processing.
 - Retry and dead-letter visibility in admin ops screens.
 
+**Current implementation (this batch)**
+- Added a scoped outbox router with domain-level policy checks for payment/comms queues.
+- Added admin outbox API (`/api/outbox`) with list/filter, retry, and dead-letter actions.
+- Added shared queue UI panel to both Payments and Comms consoles for live retry/dead-letter operations.
+- Added provider dispatch processor for Stripe/Paystack verification-refund paths and Resend/Twilio delivery paths.
+- Added on-demand queue processing mutation (`outbox.process`) and admin trigger (`Process now`) for direct dashboard exercise.
+- Added one-shot worker script for cron/job execution (`pnpm outbox:process`).
+- Added provider webhook ingestion handlers (Stripe, Paystack, Resend, Twilio) with signature validation and reconciliation updates.
+- Added a dedicated Provider Ops admin surface with webhook health, last delivery outcomes, and replay actions.
+- Expanded payment/comms smoke script to validate dead-letter and retry behavior end-to-end.
+
 **Done when**
 - Real provider calls run through replay-safe mutation paths with observable delivery state.
 

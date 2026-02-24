@@ -51,11 +51,32 @@ S3_SECRET_KEY="your-secret-key"
 STRIPE_PUBLIC_KEY="pk_test_..."
 STRIPE_SECRET_KEY="sk_test_..."
 PAYSTACK_SECRET_KEY="sk_test_..."
+PAYSTACK_SUPPORTED_CURRENCIES="NGN,GHS,ZAR,KES,USD"
 
 # Communication
 RESEND_API_KEY="re_..."
+RESEND_FROM_EMAIL="FaithFlow <onboarding@yourdomain.com>"
 TWILIO_ACCOUNT_SID="AC..."
 TWILIO_AUTH_TOKEN="your-auth-token"
+TWILIO_PHONE_NUMBER="+15551234567"
+TWILIO_WHATSAPP_NUMBER="whatsapp:+15551234567"
+STRIPE_WEBHOOK_SECRET="whsec_..."
+RESEND_WEBHOOK_SECRET="whsec_..."
+FAITHFLOW_ALLOW_UNSIGNED_WEBHOOKS="false"
+
+# Outbox Processing
+FAITHFLOW_PROVIDER_STRICT_MODE="false"
+FAITHFLOW_OUTBOX_MAX_RETRIES="5"
+FAITHFLOW_OUTBOX_RETRY_DELAY_SECONDS="30"
+FAITHFLOW_OUTBOX_RETRY_BACKOFF_MULTIPLIER="2"
+```
+
+Webhook endpoints to register on provider dashboards (admin host):
+```text
+POST /api/webhooks/stripe
+POST /api/webhooks/paystack
+POST /api/webhooks/resend
+POST /api/webhooks/twilio
 ```
 
 ## Development Workflow
@@ -98,6 +119,11 @@ pnpm test
 pnpm test:unit
 pnpm test:integration
 pnpm test:e2e
+pnpm test:payment-comms-e2e
+pnpm test:provider-webhooks-e2e
+
+# Process outbox domains once (for cron/job workers)
+pnpm outbox:process
 
 # Run tests in watch mode
 pnpm test:watch

@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { OutboxQueuePanel } from '@/components/ops/outbox-queue-panel';
 
 type Channel = 'EMAIL' | 'SMS' | 'WHATSAPP' | 'PUSH';
 
@@ -511,6 +512,12 @@ export function CommsConsole() {
 					</div>
 				</div>
 			</div>
+
+			<OutboxQueuePanel
+				domain="COMMS"
+				title="Comms delivery queue"
+				description="Observe outbound dispatch lifecycle, retry failed deliveries, and park unresolved events."
+			/>
 		</div>
 	);
 }

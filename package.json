@@ -1,22 +1,60 @@
 {
-	"name": "faithflow",
-	"private": true,
-	"packageManager": "pnpm@8.0.0",
-	"workspaces": [
-		"apps/*",
-		"packages/*"
-	],
-	"scripts": {
-		"dev": "turbo run dev",
-		"build": "turbo run build",
-		"test": "turbo run test",
-		"lint": "turbo run lint",
-		"format": "prettier --write \"**/*.{ts,tsx,md}\""
-	},
-	"devDependencies": {
-		"turbo": "latest",
-		"prettier": "latest",
-		"typescript": "latest"
-	}
+  "name": "faithflow",
+  "private": true,
+  "packageManager": "pnpm@10.17.1",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "ports": "chmod +x scripts/manage-ports.sh && ./scripts/manage-ports.sh",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:migrate": "cd packages/database && pnpm prisma migrate dev",
+    "db:migrate:enterprise": "cd packages/database && pnpm prisma db execute --file prisma/migrations/202602201315_enterprise_org_units/migration.sql --schema prisma/schema.prisma",
+    "db:migrate:policy-audit": "cd packages/database && pnpm prisma db execute --file prisma/migrations/202602201345_policy_audit_events/migration.sql --schema prisma/schema.prisma",
+    "db:migrate:reliability": "cd packages/database && pnpm prisma db execute --file prisma/migrations/202602202000_reliability_read_models/migration.sql --schema prisma/schema.prisma",
+    "db:push": "cd packages/database && pnpm prisma db push",
+    "db:seed": "tsx scripts/create-admin.ts",
+    "setup": "pnpm db:push && pnpm db:seed",
+    "test:org-e2e": "tsx scripts/org-e2e-smoke.ts",
+    "test:payment-comms-e2e": "tsx scripts/payment-comms-e2e-smoke.ts",
+    "test:provider-webhooks-e2e": "tsx scripts/provider-webhooks-smoke.ts",
+    "outbox:process": "tsx scripts/process-outbox.ts"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.54.0",
+    "postcss": "^8.4.31",
+    "prettier": "latest",
+    "tailwindcss": "^3.3.5",
+    "tsup": "^8.0.0",
+    "turbo": "latest",
+    "typescript": "latest",
+    "tsx": "^4.7.0"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.7.4",
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
+    "@tanstack/react-table": "^8.11.2",
+    "bcryptjs": "^2.4.3",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "date-fns": "^2.30.0",
+    "next": "^14.0.0",
+    "next-auth": "^4.24.11",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.10.3",
+    "tailwind-merge": "^2.0.0",
+    "zod": "^3.22.4"
+  }
 }
-

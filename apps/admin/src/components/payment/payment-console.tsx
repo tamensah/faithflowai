@@ -1,9 +1,11 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { OutboxQueuePanel } from '@/components/ops/outbox-queue-panel';
 
 type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
 type PaymentMethod = 'CARD' | 'BANK_TRANSFER' | 'MOBILE_MONEY';
+type PaymentProvider = 'AUTO' | 'STRIPE' | 'PAYSTACK';
 
 type PaymentItem = {
 	id: string;
@@ -11,6 +13,7 @@ type PaymentItem = {
 	currency: string;
 	status: PaymentStatus;
 	paymentMethod: PaymentMethod;
+	metadata?: Record<string, unknown> | null;
 	reference: string;
 	description: string | null;
 	createdAt: string;
@@ -35,6 +38,7 @@ type PaymentBootstrap = {
 
 const paymentStatuses: PaymentStatus[] = ['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED'];
 const paymentMethods: PaymentMethod[] = ['CARD', 'BANK_TRANSFER', 'MOBILE_MONEY'];
+const paymentProviders: PaymentProvider[] = ['AUTO', 'STRIPE', 'PAYSTACK'];
 
 function createIdempotencyKey(prefix: string): string {
 	const random =
@@ -86,6 +90,8 @@ export function PaymentConsole() {
 		amount: '',
 		currency: 'USD',
 		paymentMethod: 'CARD' as PaymentMethod,
+		paymentProvider: 'AUTO' as PaymentProvider,
+		providerReference: '',
 		reference: '',
 		description: '',
 		status: 'PENDING' as PaymentStatus,
@@ -156,6 +162,10 @@ export function PaymentConsole() {
 					amount: Number(createForm.amount),
 					currency: createForm.currency.toUpperCase(),
 					paymentMethod: createForm.paymentMethod,
+					metadata: {
+						provider: createForm.paymentProvider,
+						providerReference: createForm.providerReference || undefined,
+					},
 					reference: createForm.reference,
 					description: createForm.description || undefined,
 					status: createForm.status,
@@ -166,6 +176,7 @@ export function PaymentConsole() {
 				memberId: '',
 				amount: '',
 				reference: '',
+				providerReference: '',
 				description: '',
 			}));
 			setSuccess('Payment recorded.');
@@ -333,6 +344,25 @@ export function PaymentConsole() {
 							</select>
 						</label>
 						<label className="space-y-1 text-sm">
+							<span className="text-slate-700">Provider</span>
+							<select
+								value={createForm.paymentProvider}
+								onChange={(event) =>
+									setCreateForm((current) => ({
+										...current,
+										paymentProvider: event.target.value as PaymentProvider,
+									}))
+								}
+								className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+							>
+								{paymentProviders.map((provider) => (
+									<option key={provider} value={provider}>
+										{provider}
+									</option>
+								))}
+							</select>
+						</label>
+						<label className="space-y-1 text-sm">
 							<span className="text-slate-700">Initial status</span>
 							<select
 								value={createForm.status}
@@ -357,6 +387,20 @@ export function PaymentConsole() {
 								}
 								className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
 								placeholder="TXN-2026-0001"
+							/>
+						</label>
+						<label className="space-y-1 text-sm sm:col-span-2">
+							<span className="text-slate-700">Provider reference</span>
+							<input
+								value={createForm.providerReference}
+								onChange={(event) =>
+									setCreateForm((current) => ({
+										...current,
+										providerReference: event.target.value,
+									}))
+								}
+								className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+								placeholder="pi_..., ch_..., or paystack reference"
 							/>
 						</label>
 						<label className="space-y-1 text-sm sm:col-span-2">
@@ -516,6 +560,7 @@ export function PaymentConsole() {
 								<th className="px-3 py-2">Amount</th>
 								<th className="px-3 py-2">Status</th>
 								<th className="px-3 py-2">Method</th>
+								<th className="px-3 py-2">Provider</th>
 								<th className="px-3 py-2">Church</th>
 								<th className="px-3 py-2">Member</th>
 							</tr>
@@ -533,6 +578,11 @@ export function PaymentConsole() {
 										<td className="px-3 py-2">{formatAmount(item.amount, item.currency)}</td>
 										<td className="px-3 py-2">{item.status}</td>
 										<td className="px-3 py-2">{item.paymentMethod}</td>
+										<td className="px-3 py-2">
+											{typeof item.metadata?.provider === 'string'
+												? item.metadata.provider
+												: 'AUTO'}
+										</td>
 										<td className="px-3 py-2">{item.church.name}</td>
 										<td className="px-3 py-2">
 											{item.member
@@ -543,7 +593,7 @@ export function PaymentConsole() {
 								))
 							) : (
 								<tr>
-									<td colSpan={6} className="px-3 py-6 text-center text-sm text-slate-500">
+									<td colSpan={7} className="px-3 py-6 text-center text-sm text-slate-500">
 										{loading ? 'Loading payments...' : 'No payments found for the selected filters.'}
 									</td>
 								</tr>
@@ -552,6 +602,12 @@ export function PaymentConsole() {
 					</table>
 				</div>
 			</div>
+
+			<OutboxQueuePanel
+				domain="PAYMENT"
+				title="Payment delivery queue"
+				description="Track payment outbox retries, failures, and dead-letter actions for provider delivery."
+			/>
 		</div>
 	);
 }

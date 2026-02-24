@@ -12,6 +12,7 @@ function toTitle(pathname: string): string {
 	if (pathname.startsWith('/dashboard/groups')) return 'Groups';
 	if (pathname.startsWith('/dashboard/payments')) return 'Payments';
 	if (pathname.startsWith('/dashboard/comms')) return 'Comms';
+	if (pathname.startsWith('/dashboard/provider-ops')) return 'Provider Ops';
 	if (pathname.startsWith('/dashboard/settings')) return 'Settings';
 	return 'Dashboard';
 }
