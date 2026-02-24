@@ -48,6 +48,14 @@ export type ExecutiveRollups = {
 	};
 };
 
+export type OrganizationScope = {
+	selectedOrgUnitId: string | null;
+	selectedOrgUnitName: string | null;
+	includeDescendants: boolean;
+	unitIds: string[];
+	churchIds: string[];
+};
+
 function resolveScopedUnitIds(
 	units: OrgUnitOption[],
 	selectedOrgUnitId: string,
@@ -111,6 +119,53 @@ export async function listOrganizationUnits(organizationId: string): Promise<Org
 	});
 }
 
+export async function resolveOrganizationScope(input: {
+	organizationId: string;
+	orgUnitId?: string | null;
+	includeDescendants?: boolean;
+}): Promise<OrganizationScope> {
+	const includeDescendants = input.includeDescendants ?? true;
+	if (!input.orgUnitId) {
+		return {
+			selectedOrgUnitId: null,
+			selectedOrgUnitName: null,
+			includeDescendants,
+			unitIds: [],
+			churchIds: [],
+		};
+	}
+
+	const units = await listOrganizationUnits(input.organizationId);
+	const selectedUnit = units.find((unit) => unit.id === input.orgUnitId) ?? null;
+	if (!selectedUnit) {
+		return {
+			selectedOrgUnitId: null,
+			selectedOrgUnitName: null,
+			includeDescendants,
+			unitIds: [],
+			churchIds: [],
+		};
+	}
+
+	const scopedUnitIds = resolveScopedUnitIds(units, selectedUnit.id, includeDescendants);
+	const scopedChurchIds = Array.from(
+		new Set(
+			units
+				.filter((unit) => scopedUnitIds.includes(unit.id))
+				.map((unit) => unit.churchId)
+				.filter((churchId): churchId is string => Boolean(churchId))
+		)
+	);
+
+	return {
+		selectedOrgUnitId: selectedUnit.id,
+		selectedOrgUnitName: selectedUnit.name,
+		includeDescendants,
+		unitIds: scopedUnitIds,
+		churchIds: scopedChurchIds,
+	};
+}
+
 export async function getExecutiveRollups(input: {
 	organizationId: string;
 	orgUnitId?: string | null;
@@ -124,30 +179,14 @@ export async function getExecutiveRollups(input: {
 	const previous30Start = new Date(last30Start);
 	previous30Start.setDate(previous30Start.getDate() - 30);
 
-	let scopedUnitIds: string[] = [];
-	let scopedChurchIds: string[] = [];
-	let selectedOrgUnitId: string | null = null;
-	let selectedOrgUnitName: string | null = null;
-	let scopeSelected = false;
-
-	if (input.orgUnitId) {
-		const units = await listOrganizationUnits(organizationId);
-		const selectedUnit = units.find((unit) => unit.id === input.orgUnitId) ?? null;
-		if (selectedUnit) {
-			scopeSelected = true;
-			selectedOrgUnitId = selectedUnit.id;
-			selectedOrgUnitName = selectedUnit.name;
-			scopedUnitIds = resolveScopedUnitIds(units, selectedUnit.id, includeDescendants);
-			scopedChurchIds = Array.from(
-				new Set(
-					units
-						.filter((unit) => scopedUnitIds.includes(unit.id))
-						.map((unit) => unit.churchId)
-						.filter((churchId): churchId is string => Boolean(churchId))
-				)
-			);
-		}
-	}
+	const scope = await resolveOrganizationScope({
+		organizationId,
+		orgUnitId: input.orgUnitId,
+		includeDescendants,
+	});
+	const scopedUnitIds = scope.unitIds;
+	const scopedChurchIds = scope.churchIds;
+	const scopeSelected = Boolean(scope.selectedOrgUnitId);
 
 	const memberWhere =
 		scopedChurchIds.length > 0 ? { churchId: { in: scopedChurchIds } } : { church: { organizationId } };
@@ -295,8 +334,8 @@ export async function getExecutiveRollups(input: {
 
 	return {
 		scope: {
-			selectedOrgUnitId,
-			selectedOrgUnitName,
+			selectedOrgUnitId: scope.selectedOrgUnitId,
+			selectedOrgUnitName: scope.selectedOrgUnitName,
 			includeDescendants,
 			unitIds: scopedUnitIds,
 			churchIds: scopedChurchIds,

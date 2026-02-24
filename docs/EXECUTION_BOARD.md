@@ -88,6 +88,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added readiness checklist with direct action links for setup completion.
 - Added org-unit scope filter (selected unit vs descendants) to executive rollups.
 - Added scoped role-assignment filtering (org unit + descendants) with server-side pagination in Organization Builder.
+- Added server-filtered Members and Events pages with org-unit scope controls and URL-driven pagination.
 
 ---
 
