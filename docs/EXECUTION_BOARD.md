@@ -124,6 +124,9 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added API baseline and reconciliation monitoring endpoints:
   - `/api/health/api-core`
   - `/api/health/reconciliation`
+- Added admin health smoke script and a consolidated platform smoke command:
+  - `pnpm test:admin-health`
+  - `pnpm test:platform-smoke`
 
 ---
 

@@ -66,6 +66,8 @@ Operational response for provider integrations (Stripe, Paystack, Resend, Twilio
 ```bash
 pnpm test:payment-comms-e2e
 pnpm test:provider-webhooks-e2e
+pnpm test:admin-health
+pnpm test:platform-smoke
 pnpm outbox:process -- --domain=PAYMENT --maxEvents=25
 pnpm outbox:process -- --domain=COMMS --maxEvents=25
 curl -sS -H "Authorization: Bearer $FAITHFLOW_HEALTHCHECK_TOKEN" https://admin-gamma-beryl.vercel.app/api/health/provider-ops

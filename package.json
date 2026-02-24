@@ -23,6 +23,8 @@
     "test:org-e2e": "tsx scripts/org-e2e-smoke.ts",
     "test:payment-comms-e2e": "tsx scripts/payment-comms-e2e-smoke.ts",
     "test:provider-webhooks-e2e": "tsx scripts/provider-webhooks-smoke.ts",
+    "test:admin-health": "tsx scripts/admin-health-smoke.ts",
+    "test:platform-smoke": "pnpm test:org-e2e && pnpm test:payment-comms-e2e && pnpm test:provider-webhooks-e2e && pnpm test:admin-health",
     "outbox:process": "tsx scripts/process-outbox.ts"
   },
   "devDependencies": {
