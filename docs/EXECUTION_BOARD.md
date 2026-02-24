@@ -82,6 +82,11 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Trend surfaces for attendance/giving/leaders.
 - Fast filters and server-side pagination.
 
+**Current implementation (this batch)**
+- Added executive overview rollups on `/dashboard` for members, giving trend, events, leadership, and readiness.
+- Added drill-down quick actions from overview to members/events/payments/org surfaces.
+- Added readiness checklist with direct action links for setup completion.
+
 ---
 
 ### 5) Lock-state parity and entitlement UX (P1)
