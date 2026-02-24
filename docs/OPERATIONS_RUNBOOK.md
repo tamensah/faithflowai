@@ -70,6 +70,8 @@ pnpm outbox:process -- --domain=PAYMENT --maxEvents=25
 pnpm outbox:process -- --domain=COMMS --maxEvents=25
 curl -sS -H "Authorization: Bearer $FAITHFLOW_HEALTHCHECK_TOKEN" https://admin-gamma-beryl.vercel.app/api/health/provider-ops
 curl -sS -H "Authorization: Bearer $FAITHFLOW_HEALTHCHECK_TOKEN" https://admin-gamma-beryl.vercel.app/api/health/outbox-worker
+curl -sS -H "Authorization: Bearer $FAITHFLOW_HEALTHCHECK_TOKEN" https://admin-gamma-beryl.vercel.app/api/health/api-core
+curl -sS -H "Authorization: Bearer $FAITHFLOW_HEALTHCHECK_TOKEN" https://admin-gamma-beryl.vercel.app/api/health/reconciliation
 ```
 
 ### Health-check response interpretation
@@ -80,6 +82,12 @@ curl -sS -H "Authorization: Bearer $FAITHFLOW_HEALTHCHECK_TOKEN" https://admin-g
 - `outbox-worker`:
   - `status=ready`: worker backlog/activity within thresholds.
   - `status=degraded`: stale processable queue without fresh worker activity.
+- `api-core`:
+  - `status=ok`: DB + core auth config healthy.
+  - `status=degraded/down`: DB unavailable or missing baseline auth envs.
+- `reconciliation`:
+  - `status=ok`: reconciliation queue within stale threshold.
+  - `status=degraded/down`: stale or broken reconciliation processing path.
 
 ## 5) Incident record template
 

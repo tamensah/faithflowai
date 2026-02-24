@@ -116,6 +116,9 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added explicit monitoring endpoints for provider readiness and outbox worker readiness:
   - `/api/health/provider-ops`
   - `/api/health/outbox-worker`
+- Added API baseline and reconciliation monitoring endpoints:
+  - `/api/health/api-core`
+  - `/api/health/reconciliation`
 
 ---
 

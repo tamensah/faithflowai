@@ -66,6 +66,7 @@ FAITHFLOW_PROVIDER_OPS_STRICT_HEALTH=false
 FAITHFLOW_PROVIDER_OPS_PROCESSABLE_THRESHOLD=500
 FAITHFLOW_OUTBOX_STALE_SECONDS=900
 FAITHFLOW_OUTBOX_ACTIVITY_GRACE_SECONDS=180
+FAITHFLOW_RECONCILIATION_STALE_SECONDS=900
 ```
 
 ## 3) Provider-side webhook endpoints
@@ -134,3 +135,8 @@ Use a bearer token (`Authorization: Bearer $FAITHFLOW_HEALTHCHECK_TOKEN`) or `x-
 - `GET /api/health/outbox-worker`
   - Returns per-domain worker readiness using stale backlog + activity lag thresholds.
   - Returns `503` when stale processable backlog indicates worker drift.
+- `GET /api/health/api-core`
+  - Returns API baseline health (DB connectivity + core auth env checks).
+- `GET /api/health/reconciliation`
+  - Returns reconciliation queue health for `payment.provider.reconciled` events.
+  - Returns `503` when reconciliation backlog is stale beyond threshold.
