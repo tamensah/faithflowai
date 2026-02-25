@@ -87,6 +87,7 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 
 	const [filterStatus, setFilterStatus] = useState<PaymentStatus | ''>('');
 	const [filterChurchId, setFilterChurchId] = useState('');
+	const [filterAddonCode, setFilterAddonCode] = useState('');
 
 	const [createForm, setCreateForm] = useState({
 		churchId: '',
@@ -115,7 +116,7 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 	useEffect(() => {
 		void loadData();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [filterStatus, filterChurchId]);
+	}, [filterStatus, filterChurchId, filterAddonCode]);
 
 	const selectedPayment = useMemo(
 		() => data?.items.find((item) => item.id === actionForm.paymentId) ?? null,
@@ -149,6 +150,7 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 			const params = new URLSearchParams();
 			if (activeStatus) params.set('status', activeStatus);
 			if (activeChurchId) params.set('churchId', activeChurchId);
+			if (filterAddonCode.trim()) params.set('addonCode', filterAddonCode.trim().toUpperCase());
 			const query = params.toString();
 			const payload = await requestJson<PaymentBootstrap>(`/api/payment${query ? `?${query}` : ''}`);
 			setData(payload);
@@ -599,6 +601,15 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 							))}
 						</select>
 					</label>
+					<label className="space-y-1 text-sm">
+						<span className="text-slate-700">Filter add-on</span>
+						<input
+							value={filterAddonCode}
+							onChange={(event) => setFilterAddonCode(event.target.value.toUpperCase())}
+							className="rounded-md border border-slate-300 px-3 py-2 text-sm"
+							placeholder="STREAMING_SUITE"
+						/>
+					</label>
 					<button
 						type="button"
 						onClick={() => void loadData()}
@@ -617,6 +628,7 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 								<th className="px-3 py-2">Status</th>
 								<th className="px-3 py-2">Method</th>
 								<th className="px-3 py-2">Provider</th>
+								<th className="px-3 py-2">Add-on</th>
 								<th className="px-3 py-2">Church</th>
 								<th className="px-3 py-2">Member</th>
 							</tr>
@@ -639,6 +651,11 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 												? item.metadata.provider
 												: 'AUTO'}
 										</td>
+										<td className="px-3 py-2">
+											{typeof item.metadata?.addonCode === 'string'
+												? item.metadata.addonCode
+												: '—'}
+										</td>
 										<td className="px-3 py-2">{item.church.name}</td>
 										<td className="px-3 py-2">
 											{item.member
@@ -649,7 +666,7 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 								))
 							) : (
 								<tr>
-									<td colSpan={7} className="px-3 py-6 text-center text-sm text-slate-500">
+									<td colSpan={8} className="px-3 py-6 text-center text-sm text-slate-500">
 										{loading ? 'Loading payments...' : 'No payments found for the selected filters.'}
 									</td>
 								</tr>

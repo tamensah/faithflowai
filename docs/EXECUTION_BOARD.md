@@ -67,6 +67,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added one-shot worker script for cron/job execution (`pnpm outbox:process`).
 - Added provider webhook ingestion handlers (Stripe, Paystack, Resend, Twilio) with signature validation and reconciliation updates.
 - Wired billing outcomes (dispatch + webhooks) to auto-toggle tenant add-on entitlements from payment metadata/webhook metadata.
+- Added Provider Ops visibility for billing-driven add-on entitlement sync history and payment filtering by add-on code.
 - Added a dedicated Provider Ops admin surface with webhook health, last delivery outcomes, and replay actions.
 - Expanded payment/comms smoke script to validate dead-letter and retry behavior end-to-end.
 

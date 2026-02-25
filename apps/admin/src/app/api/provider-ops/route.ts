@@ -7,6 +7,7 @@ export const runtime = 'nodejs';
 
 type Domain = 'PAYMENT' | 'COMMS';
 type Provider = 'STRIPE' | 'PAYSTACK' | 'RESEND' | 'TWILIO';
+type BillingProvider = 'STRIPE' | 'PAYSTACK';
 
 function isDomain(value: string): value is Domain {
 	return value === 'PAYMENT' || value === 'COMMS';
@@ -153,6 +154,23 @@ export async function GET(request: NextRequest) {
 			}),
 		]);
 
+		const addonSyncEvents = await prisma.auditEvent.findMany({
+			where: {
+				organizationId,
+				action: 'ADDON_ENTITLEMENT_BILLING_SYNC',
+			},
+			orderBy: { createdAt: 'desc' },
+			take: 20,
+			select: {
+				id: true,
+				createdAt: true,
+				actorId: true,
+				entityId: true,
+				result: true,
+				metadata: true,
+			},
+		});
+
 		const recentOutcomes = events.map((event) => {
 			const domain: Domain = event.eventType.startsWith('payment.') ? 'PAYMENT' : 'COMMS';
 			const providerInfo = parseProviderFromEvent(event.eventType, event.payload);
@@ -183,6 +201,31 @@ export async function GET(request: NextRequest) {
 				}))
 			),
 			recentOutcomes,
+			addonSyncEvents: addonSyncEvents.map((event) => {
+				const metadata = asRecord(event.metadata);
+				const providerValue = typeof metadata.provider === 'string' ? metadata.provider : null;
+				const provider =
+					providerValue === 'STRIPE' || providerValue === 'PAYSTACK'
+						? (providerValue as BillingProvider)
+						: null;
+				return {
+					id: event.id,
+					createdAt: event.createdAt.toISOString(),
+					actorId: event.actorId,
+					result: event.result,
+					addonCode:
+						typeof metadata.addonCode === 'string' ? metadata.addonCode : event.entityId ?? 'UNKNOWN',
+					enabled: typeof metadata.enabled === 'boolean' ? metadata.enabled : null,
+					paymentStatus: typeof metadata.status === 'string' ? metadata.status : null,
+					provider,
+					providerReference:
+						typeof metadata.providerReference === 'string' ? metadata.providerReference : null,
+					providerEventId:
+						typeof metadata.providerEventId === 'string' ? metadata.providerEventId : null,
+					eventType: typeof metadata.eventType === 'string' ? metadata.eventType : null,
+					paymentId: typeof metadata.paymentId === 'string' ? metadata.paymentId : null,
+				};
+			}),
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Failed to load provider operations';
