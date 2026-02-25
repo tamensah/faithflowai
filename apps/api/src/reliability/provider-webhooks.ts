@@ -1,6 +1,10 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { prisma } from '@faithflow/database';
 import type { Prisma } from '@faithflow/database';
+import {
+	resolveAddonCodeFromPaymentContext,
+	syncAddonEntitlementFromBillingOutcome,
+} from './addon-entitlements';
 
 export class WebhookValidationError extends Error {
 	status: number;
@@ -136,12 +140,18 @@ async function reconcilePaymentFromWebhook(input: {
 		};
 	}
 
+	const resolvedAddonCode = resolveAddonCodeFromPaymentContext({
+		paymentMetadata: metadata,
+		providerPayload: input.payload,
+	});
+
 	const updated = await prisma.payment.update({
 		where: { id: payment.id },
 		data: {
 			status: input.status,
 			metadata: {
 				...metadata,
+				...(resolvedAddonCode ? { addonCode: resolvedAddonCode } : {}),
 				provider: input.provider,
 				providerSync: {
 					...providerSync,
@@ -153,6 +163,19 @@ async function reconcilePaymentFromWebhook(input: {
 				},
 			} as Prisma.InputJsonValue,
 		},
+	});
+
+	const addonSync = await syncAddonEntitlementFromBillingOutcome({
+		organizationId: payment.church.organizationId,
+		addonCode: resolvedAddonCode,
+		provider: input.provider,
+		paymentStatus: input.status,
+		providerReference: input.providerReference,
+		providerEventId: input.providerEventId,
+		eventType: input.eventType,
+		paymentId: updated.id,
+		actorId: `webhook:${input.provider.toLowerCase()}`,
+		actorType: 'INTEGRATION',
 	});
 
 	await prisma.auditEvent.create({
@@ -196,6 +219,7 @@ async function reconcilePaymentFromWebhook(input: {
 		duplicate: false,
 		paymentId: updated.id,
 		status: updated.status,
+		addonSync,
 	};
 }
 

@@ -67,7 +67,20 @@ async function run() {
 			domain: `webhook-${suffix}.faithflow.local`,
 			schemaName: `webhook_${suffix}`,
 			plan: 'ENTERPRISE',
-			settings: {},
+			settings: {
+				addons: {
+					entitlements: {
+						FACILITIES_SUITE: {
+							code: 'FACILITIES_SUITE',
+							enabled: true,
+							source: 'MANUAL',
+							billingReference: null,
+							activatedAt: new Date().toISOString(),
+							updatedAt: new Date().toISOString(),
+						},
+					},
+				},
+			},
 		},
 	});
 	const organization = await prisma.organization.create({
@@ -98,6 +111,7 @@ async function run() {
 			metadata: {
 				provider: 'STRIPE',
 				providerReference: `pi_${suffix}`,
+				addonCode: 'STREAMING_SUITE',
 			},
 		},
 	});
@@ -113,6 +127,7 @@ async function run() {
 			metadata: {
 				provider: 'PAYSTACK',
 				providerReference: `pst_ref_${suffix}`,
+				addonCode: 'FACILITIES_SUITE',
 			},
 		},
 	});
@@ -166,7 +181,7 @@ async function run() {
 	);
 
 	const paystackBody = JSON.stringify({
-		event: 'charge.success',
+		event: 'charge.failed',
 		data: { id: `evt_paystack_${suffix}`, reference: `pst_ref_${suffix}` },
 	});
 	await handlePaystackWebhook(
@@ -197,7 +212,7 @@ async function run() {
 		toTwilioSignature(twilioRaw, twilioUrl, process.env.TWILIO_AUTH_TOKEN!)
 	);
 
-	const [stripeUpdated, paystackUpdated, resendUpdated, twilioUpdated, auditCount] = await Promise.all([
+	const [stripeUpdated, paystackUpdated, resendUpdated, twilioUpdated, tenantUpdated, auditCount] = await Promise.all([
 		prisma.payment.findUnique({ where: { id: stripePayment.id }, select: { status: true } }),
 		prisma.payment.findUnique({ where: { id: paystackPayment.id }, select: { status: true } }),
 		prisma.outboxEvent.findUnique({ where: { id: resendOutbox.id }, select: { status: true, payload: true } }),
@@ -205,14 +220,15 @@ async function run() {
 			where: { id: twilioOutbox.id },
 			select: { status: true, lastError: true, payload: true },
 		}),
+		prisma.tenant.findUnique({ where: { id: tenant.id }, select: { settings: true } }),
 		prisma.auditEvent.count({ where: { organizationId: organization.id } }),
 	]);
 
 	if (stripeUpdated?.status !== 'COMPLETED') {
 		throw new Error('Stripe webhook did not reconcile payment to COMPLETED.');
 	}
-	if (paystackUpdated?.status !== 'COMPLETED') {
-		throw new Error('Paystack webhook did not reconcile payment to COMPLETED.');
+	if (paystackUpdated?.status !== 'FAILED') {
+		throw new Error('Paystack webhook did not reconcile payment to FAILED.');
 	}
 	if (resendUpdated?.status !== 'PROCESSED') {
 		throw new Error('Resend webhook did not keep outbox event as PROCESSED.');
@@ -220,7 +236,16 @@ async function run() {
 	if (twilioUpdated?.status !== 'FAILED' || !twilioUpdated.lastError?.startsWith('DEAD_LETTER:')) {
 		throw new Error('Twilio failure webhook did not move outbox event to failed dead-letter state.');
 	}
-	if (auditCount < 4) {
+	const entitlements = ((tenantUpdated?.settings as Record<string, unknown> | undefined)?.addons as
+		| Record<string, unknown>
+		| undefined)?.entitlements as Record<string, { enabled?: boolean }> | undefined;
+	if (entitlements?.STREAMING_SUITE?.enabled !== true) {
+		throw new Error('Stripe webhook did not enable STREAMING_SUITE entitlement.');
+	}
+	if (entitlements?.FACILITIES_SUITE?.enabled !== false) {
+		throw new Error('Paystack failed webhook did not disable FACILITIES_SUITE entitlement.');
+	}
+	if (auditCount < 6) {
 		throw new Error('Expected webhook audit records were not generated.');
 	}
 
@@ -230,6 +255,8 @@ async function run() {
 				organizationId: organization.id,
 				stripeStatus: stripeUpdated.status,
 				paystackStatus: paystackUpdated.status,
+				streamingEntitled: entitlements?.STREAMING_SUITE?.enabled ?? null,
+				facilitiesEntitled: entitlements?.FACILITIES_SUITE?.enabled ?? null,
 				resendStatus: resendUpdated.status,
 				twilioStatus: twilioUpdated.status,
 				auditCount,

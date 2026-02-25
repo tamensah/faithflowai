@@ -85,11 +85,22 @@ Set these on your provider dashboards (production admin domain):
 - `payment_intent.canceled`
 - `charge.refunded`
 
+Stripe metadata requirement for add-on auto-toggle:
+
+- Include `addonCode` (or `addon_code`) on the payment object metadata (for example `STREAMING_SUITE`).
+- When these events reconcile to `COMPLETED`, entitlement is enabled.
+- When these events reconcile to `FAILED` or `REFUNDED`, entitlement is disabled.
+
 ### Paystack events to subscribe
 
 - `charge.success`
 - `charge.failed`
 - `refund.processed` (and/or `refund.successful` if shown in dashboard)
+
+Paystack metadata requirement for add-on auto-toggle:
+
+- Include `addonCode` (or `addon_code`) in Paystack metadata/custom fields.
+- `charge.success` enables entitlement; `charge.failed` and refund events disable entitlement.
 
 ### Resend events to subscribe
 

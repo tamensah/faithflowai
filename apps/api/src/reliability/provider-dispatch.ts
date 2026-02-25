@@ -1,5 +1,9 @@
 import { prisma } from '@faithflow/database';
 import type { OutboxEvent, Prisma, Payment } from '@faithflow/database';
+import {
+	resolveAddonCodeFromPaymentContext,
+	syncAddonEntitlementFromBillingOutcome,
+} from './addon-entitlements';
 
 export type OutboxDomain = 'PAYMENT' | 'COMMS';
 export const DEAD_LETTER_PREFIX = 'DEAD_LETTER:';
@@ -352,6 +356,18 @@ async function dispatchPaymentEvent(event: OutboxEvent): Promise<DispatchResult>
 			const refund = await refundStripePayment(reference, event.id);
 			if (!refund) return buildSimulatedResult('STRIPE', 'Missing Stripe credentials in non-strict mode.');
 			await updatePaymentMetadata(payment.id, { provider: 'STRIPE', refundId: refund.id }, 'REFUNDED');
+			await syncAddonEntitlementFromBillingOutcome({
+				organizationId: payment.church.organizationId,
+				addonCode: resolveAddonCodeFromPaymentContext({ paymentMetadata: payment.metadata }),
+				provider: 'STRIPE',
+				paymentStatus: 'REFUNDED',
+				providerReference: reference,
+				providerEventId: event.id,
+				eventType: event.eventType,
+				paymentId: payment.id,
+				actorId: 'outbox:stripe',
+				actorType: 'SYSTEM',
+			});
 			return { provider: 'STRIPE', mode: 'LIVE', details: { refundId: refund.id } };
 		}
 
@@ -364,21 +380,45 @@ async function dispatchPaymentEvent(event: OutboxEvent): Promise<DispatchResult>
 			remoteStatus: intent.status,
 			currency: intent.currency,
 		}, nextStatus);
-	return {
-		provider: 'STRIPE',
-		mode: 'LIVE',
-		providerMessageId: intent.id,
-		details: {
+		await syncAddonEntitlementFromBillingOutcome({
+			organizationId: payment.church.organizationId,
+			addonCode: resolveAddonCodeFromPaymentContext({ paymentMetadata: payment.metadata }),
+			provider: 'STRIPE',
+			paymentStatus: nextStatus,
 			providerReference: intent.id,
-			remoteStatus: intent.status,
-		},
-	};
+			providerEventId: event.id,
+			eventType: event.eventType,
+			paymentId: payment.id,
+			actorId: 'outbox:stripe',
+			actorType: 'SYSTEM',
+		});
+		return {
+			provider: 'STRIPE',
+			mode: 'LIVE',
+			providerMessageId: intent.id,
+			details: {
+				providerReference: intent.id,
+				remoteStatus: intent.status,
+			},
+		};
 	}
 
 	if (event.eventType === 'payment.refunded') {
 		const refund = await refundPaystack(reference);
 		if (!refund) return buildSimulatedResult('PAYSTACK', 'Missing Paystack credentials in non-strict mode.');
 		await updatePaymentMetadata(payment.id, { provider: 'PAYSTACK', refund: refund }, 'REFUNDED');
+		await syncAddonEntitlementFromBillingOutcome({
+			organizationId: payment.church.organizationId,
+			addonCode: resolveAddonCodeFromPaymentContext({ paymentMetadata: payment.metadata }),
+			provider: 'PAYSTACK',
+			paymentStatus: 'REFUNDED',
+			providerReference: reference,
+			providerEventId: event.id,
+			eventType: event.eventType,
+			paymentId: payment.id,
+			actorId: 'outbox:paystack',
+			actorType: 'SYSTEM',
+		});
 		return { provider: 'PAYSTACK', mode: 'LIVE', details: { refund: true } };
 	}
 
@@ -395,6 +435,18 @@ async function dispatchPaymentEvent(event: OutboxEvent): Promise<DispatchResult>
 		},
 		nextStatus
 	);
+	await syncAddonEntitlementFromBillingOutcome({
+		organizationId: payment.church.organizationId,
+		addonCode: resolveAddonCodeFromPaymentContext({ paymentMetadata: payment.metadata }),
+		provider: 'PAYSTACK',
+		paymentStatus: nextStatus,
+		providerReference: verification.data?.reference ?? reference,
+		providerEventId: event.id,
+		eventType: event.eventType,
+		paymentId: payment.id,
+		actorId: 'outbox:paystack',
+		actorType: 'SYSTEM',
+	});
 	return {
 		provider: 'PAYSTACK',
 		mode: 'LIVE',
