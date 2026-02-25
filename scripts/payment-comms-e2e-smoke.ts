@@ -9,7 +9,22 @@ async function run(): Promise<void> {
 			domain: `e2e-payments-${suffix}.faithflow.local`,
 			schemaName: `e2e_payments_${suffix}`,
 			plan: 'ENTERPRISE',
-			settings: {},
+			settings: {
+				addons: {
+					catalog: [
+						{
+							code: 'STREAMING_SUITE',
+							name: 'Streaming Suite',
+							active: true,
+							billing: {
+								provider: 'STRIPE',
+								externalPriceId: `price_stream_${suffix}`,
+							},
+						},
+					],
+					entitlements: {},
+				},
+			},
 		},
 	});
 
@@ -60,7 +75,25 @@ async function run(): Promise<void> {
 		reference: `ff-ref-${suffix}`,
 		description: 'E2E test payment',
 		status: 'PENDING',
+		metadata: {
+			provider: 'STRIPE',
+			providerReference: `ff-ref-${suffix}`,
+			checkout: {
+				sessionId: `cs_test_${suffix}`,
+				price: {
+					id: `price_stream_${suffix}`,
+				},
+			},
+		},
 	});
+	const persistedPayment = await prisma.payment.findUnique({
+		where: { id: payment.id },
+		select: { metadata: true },
+	});
+	const metadata = (persistedPayment?.metadata ?? {}) as Record<string, unknown>;
+	if (metadata.addonCode !== 'STREAMING_SUITE') {
+		throw new Error('Payment create did not auto-derive add-on code from checkout/subscription context.');
+	}
 
 	const duplicatePayment = await caller.payment.create({
 		organizationId: organization.id,
@@ -73,6 +106,16 @@ async function run(): Promise<void> {
 		reference: `ff-ref-${suffix}`,
 		description: 'E2E test payment',
 		status: 'PENDING',
+		metadata: {
+			provider: 'STRIPE',
+			providerReference: `ff-ref-${suffix}`,
+			checkout: {
+				sessionId: `cs_test_${suffix}`,
+				price: {
+					id: `price_stream_${suffix}`,
+				},
+			},
+		},
 	});
 	if (duplicatePayment.id !== payment.id) {
 		throw new Error('Payment idempotency failed.');

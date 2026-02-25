@@ -5,6 +5,13 @@ type JsonRecord = Record<string, unknown>;
 type BillingProvider = 'STRIPE' | 'PAYSTACK';
 type BillingPaymentStatus = 'COMPLETED' | 'FAILED' | 'REFUNDED' | 'PENDING';
 
+type BillingAddonDerivation = {
+	addonCode: string | null;
+	source: 'DIRECT_METADATA' | 'CATALOG_REFERENCE' | 'NONE';
+	provider: BillingProvider | null;
+	reference: string | null;
+};
+
 const ADDON_CODE_FIELDS = [
 	'addonCode',
 	'addon_code',
@@ -15,6 +22,37 @@ const ADDON_CODE_FIELDS = [
 	'entitlementCode',
 	'entitlement_code',
 ] as const;
+
+const REFERENCE_KEYS = new Set([
+	'providerreference',
+	'provider_reference',
+	'reference',
+	'price',
+	'priceid',
+	'price_id',
+	'externalpriceid',
+	'external_price_id',
+	'plan',
+	'plancode',
+	'plan_code',
+	'externalplanid',
+	'external_plan_id',
+	'planid',
+	'plan_id',
+	'pricing_plan',
+	'session',
+	'sessionid',
+	'session_id',
+	'checkoutsession',
+	'subscriptionid',
+	'subscription_id',
+	'subscription',
+	'checkoutsessionid',
+	'checkout_session_id',
+]);
+
+const PROVIDER_KEYS = new Set(['provider', 'gateway', 'paymentprovider', 'payment_provider']);
+const ID_CONTEXT_KEYS = new Set(['price', 'plan', 'subscription', 'checkoutsession', 'session']);
 
 function asRecord(value: unknown): JsonRecord {
 	if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
@@ -32,6 +70,21 @@ function toInputJson(value: unknown): Prisma.InputJsonValue {
 function normalizeAddonCode(value: string | null): string | null {
 	if (!value) return null;
 	const normalized = value.trim().toUpperCase().replace(/[^A-Z0-9_]/g, '_');
+	return normalized || null;
+}
+
+function normalizeProvider(value: string | null): BillingProvider | null {
+	const normalized = value?.trim().toUpperCase();
+	if (normalized === 'STRIPE' || normalized === 'PAYSTACK') return normalized;
+	return null;
+}
+
+function normalizeReference(value: string | null): string | null {
+	return value?.trim() || null;
+}
+
+function normalizeLookupKey(value: string | null): string | null {
+	const normalized = value?.trim().toLowerCase();
 	return normalized || null;
 }
 
@@ -73,6 +126,85 @@ function findAddonCodeInRecord(record: JsonRecord): string | null {
 	return null;
 }
 
+function collectContextSignals(
+	value: unknown,
+	references: Set<string>,
+	providers: Set<BillingProvider>,
+	depth = 0,
+	path: string[] = []
+): void {
+	if (depth > 4 || value == null) return;
+
+	if (Array.isArray(value)) {
+		for (const item of value.slice(0, 25)) {
+			collectContextSignals(item, references, providers, depth + 1);
+		}
+		return;
+	}
+
+	if (typeof value !== 'object') return;
+	const record = value as JsonRecord;
+
+	for (const [key, nested] of Object.entries(record)) {
+		const normalizedKey = key.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+		const nextPath = [...path, normalizedKey];
+		if (REFERENCE_KEYS.has(normalizedKey)) {
+			const candidate = normalizeReference(asString(nested));
+			if (candidate) references.add(candidate);
+		}
+		if (normalizedKey === 'id' && nextPath.some((segment) => ID_CONTEXT_KEYS.has(segment))) {
+			const candidate = normalizeReference(asString(nested));
+			if (candidate) references.add(candidate);
+		}
+		if (PROVIDER_KEYS.has(normalizedKey)) {
+			const provider = normalizeProvider(asString(nested));
+			if (provider) providers.add(provider);
+		}
+		collectContextSignals(nested, references, providers, depth + 1, nextPath);
+	}
+}
+
+function extractCatalogAddonCode(input: {
+	settings: unknown;
+	references: Set<string>;
+	provider: BillingProvider | null;
+}): string | null {
+	const root = asRecord(input.settings);
+	const addons = asRecord(root.addons);
+	const catalog = Array.isArray(addons.catalog) ? addons.catalog : [];
+	const referenceKeys = new Set(
+		Array.from(input.references)
+			.map((value) => normalizeLookupKey(value))
+			.filter((value): value is string => Boolean(value))
+	);
+	if (!referenceKeys.size) return null;
+
+	for (const item of catalog) {
+		const catalogItem = asRecord(item);
+		const code = normalizeAddonCode(asString(catalogItem.code));
+		if (!code) continue;
+
+		const billing = asRecord(catalogItem.billing);
+		const catalogProvider = normalizeProvider(asString(billing.provider));
+		if (input.provider && catalogProvider && catalogProvider !== input.provider) continue;
+
+		const billingCandidates = [
+			asString(billing.externalPriceId),
+			asString(billing.externalPlanId),
+			asString(billing.planCode),
+			asString(billing.priceId),
+		]
+			.map((value) => normalizeLookupKey(value))
+			.filter((value): value is string => Boolean(value));
+
+		for (const candidate of billingCandidates) {
+			if (referenceKeys.has(candidate)) return code;
+		}
+	}
+
+	return null;
+}
+
 export function resolveAddonCodeFromPaymentContext(input: {
 	paymentMetadata?: unknown;
 	providerPayload?: unknown;
@@ -91,6 +223,87 @@ export function resolveAddonCodeFromPaymentContext(input: {
 		findAddonCodeInRecord(payloadObject) ??
 		null
 	);
+}
+
+export async function deriveAddonFromBillingContext(input: {
+	organizationId: string;
+	paymentMetadata?: unknown;
+	providerPayload?: unknown;
+	provider?: BillingProvider | null;
+	providerReference?: string | null;
+}): Promise<BillingAddonDerivation> {
+	const directCode = resolveAddonCodeFromPaymentContext({
+		paymentMetadata: input.paymentMetadata,
+		providerPayload: input.providerPayload,
+	});
+	if (directCode) {
+		return {
+			addonCode: directCode,
+			source: 'DIRECT_METADATA',
+			provider: input.provider ?? null,
+			reference: normalizeReference(input.providerReference ?? null),
+		};
+	}
+
+	const references = new Set<string>();
+	const providers = new Set<BillingProvider>();
+	collectContextSignals(input.paymentMetadata, references, providers);
+	collectContextSignals(input.providerPayload, references, providers);
+
+	const explicitReference = normalizeReference(input.providerReference ?? null);
+	if (explicitReference) references.add(explicitReference);
+	const explicitProvider = input.provider ?? null;
+	if (explicitProvider) providers.add(explicitProvider);
+	const provider = explicitProvider ?? Array.from(providers)[0] ?? null;
+
+	if (!references.size) {
+		return {
+			addonCode: null,
+			source: 'NONE',
+			provider,
+			reference: explicitReference,
+		};
+	}
+
+	const organization = await prisma.organization.findUnique({
+		where: { id: input.organizationId },
+		select: {
+			tenant: {
+				select: {
+					settings: true,
+				},
+			},
+		},
+	});
+	if (!organization?.tenant) {
+		return {
+			addonCode: null,
+			source: 'NONE',
+			provider,
+			reference: explicitReference ?? Array.from(references)[0] ?? null,
+		};
+	}
+
+	const matched = extractCatalogAddonCode({
+		settings: organization.tenant.settings,
+		references,
+		provider,
+	});
+	if (matched) {
+		return {
+			addonCode: matched,
+			source: 'CATALOG_REFERENCE',
+			provider,
+			reference: explicitReference ?? Array.from(references)[0] ?? null,
+		};
+	}
+
+	return {
+		addonCode: null,
+		source: 'NONE',
+		provider,
+		reference: explicitReference ?? Array.from(references)[0] ?? null,
+	};
 }
 
 function resolveEntitlementEnabledFromStatus(status: BillingPaymentStatus): boolean | null {

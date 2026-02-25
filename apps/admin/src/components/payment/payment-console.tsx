@@ -97,7 +97,6 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 		paymentMethod: 'CARD' as PaymentMethod,
 		paymentProvider: 'AUTO' as PaymentProvider,
 		providerReference: '',
-		addonCode: '',
 		reference: '',
 		description: '',
 		status: 'PENDING' as PaymentStatus,
@@ -192,7 +191,6 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 					metadata: {
 						provider: createForm.paymentProvider,
 						providerReference: createForm.providerReference || undefined,
-						addonCode: createForm.addonCode.trim() || undefined,
 					},
 					reference: createForm.reference,
 					description: createForm.description || undefined,
@@ -205,7 +203,6 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 				amount: '',
 				reference: '',
 				providerReference: '',
-				addonCode: '',
 				description: '',
 			}));
 			setSuccess('Payment recorded.');
@@ -437,20 +434,9 @@ export function PaymentConsole({ providerConfig }: { providerConfig: PaymentProv
 								placeholder="pi_..., ch_..., or paystack reference"
 							/>
 						</label>
-						<label className="space-y-1 text-sm sm:col-span-2">
-							<span className="text-slate-700">Add-on code</span>
-							<input
-								value={createForm.addonCode}
-								onChange={(event) =>
-									setCreateForm((current) => ({
-										...current,
-										addonCode: event.target.value.toUpperCase(),
-									}))
-								}
-								className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-								placeholder="STREAMING_SUITE"
-							/>
-						</label>
+						<p className="text-xs text-slate-600 sm:col-span-2">
+							Add-on entitlements are derived automatically from checkout or subscription references.
+						</p>
 						<label className="space-y-1 text-sm sm:col-span-2">
 							<span className="text-slate-700">Description</span>
 							<input

@@ -69,6 +69,26 @@ async function run() {
 			plan: 'ENTERPRISE',
 			settings: {
 				addons: {
+					catalog: [
+						{
+							code: 'STREAMING_SUITE',
+							name: 'Streaming Suite',
+							active: true,
+							billing: {
+								provider: 'STRIPE',
+								externalPriceId: `price_stream_${suffix}`,
+							},
+						},
+						{
+							code: 'FACILITIES_SUITE',
+							name: 'Facilities Suite',
+							active: true,
+							billing: {
+								provider: 'PAYSTACK',
+								externalPriceId: `plan_fac_${suffix}`,
+							},
+						},
+					],
 					entitlements: {
 						FACILITIES_SUITE: {
 							code: 'FACILITIES_SUITE',
@@ -111,7 +131,9 @@ async function run() {
 			metadata: {
 				provider: 'STRIPE',
 				providerReference: `pi_${suffix}`,
-				addonCode: 'STREAMING_SUITE',
+				subscription: {
+					priceId: `price_stream_${suffix}`,
+				},
 			},
 		},
 	});
@@ -127,7 +149,9 @@ async function run() {
 			metadata: {
 				provider: 'PAYSTACK',
 				providerReference: `pst_ref_${suffix}`,
-				addonCode: 'FACILITIES_SUITE',
+				checkout: {
+					planId: `plan_fac_${suffix}`,
+				},
 			},
 		},
 	});
@@ -213,8 +237,8 @@ async function run() {
 	);
 
 	const [stripeUpdated, paystackUpdated, resendUpdated, twilioUpdated, tenantUpdated, auditCount] = await Promise.all([
-		prisma.payment.findUnique({ where: { id: stripePayment.id }, select: { status: true } }),
-		prisma.payment.findUnique({ where: { id: paystackPayment.id }, select: { status: true } }),
+		prisma.payment.findUnique({ where: { id: stripePayment.id }, select: { status: true, metadata: true } }),
+		prisma.payment.findUnique({ where: { id: paystackPayment.id }, select: { status: true, metadata: true } }),
 		prisma.outboxEvent.findUnique({ where: { id: resendOutbox.id }, select: { status: true, payload: true } }),
 		prisma.outboxEvent.findUnique({
 			where: { id: twilioOutbox.id },
@@ -229,6 +253,14 @@ async function run() {
 	}
 	if (paystackUpdated?.status !== 'FAILED') {
 		throw new Error('Paystack webhook did not reconcile payment to FAILED.');
+	}
+	const stripeMetadata = (stripeUpdated?.metadata ?? {}) as Record<string, unknown>;
+	const paystackMetadata = (paystackUpdated?.metadata ?? {}) as Record<string, unknown>;
+	if (stripeMetadata.addonCode !== 'STREAMING_SUITE') {
+		throw new Error('Stripe webhook did not derive add-on code from billing context.');
+	}
+	if (paystackMetadata.addonCode !== 'FACILITIES_SUITE') {
+		throw new Error('Paystack webhook did not derive add-on code from billing context.');
 	}
 	if (resendUpdated?.status !== 'PROCESSED') {
 		throw new Error('Resend webhook did not keep outbox event as PROCESSED.');

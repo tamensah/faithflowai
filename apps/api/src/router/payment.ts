@@ -6,6 +6,7 @@ import { protectedProcedure, router } from '../trpc';
 import { executeGuardedMutation } from '../security/audit';
 import { ensurePolicyAllowed } from '../security/policy';
 import { executeIdempotentMutation } from '../reliability/idempotency';
+import { deriveAddonFromBillingContext } from '../reliability/addon-entitlements';
 
 const idempotencyKeySchema = z.string().min(8).max(120).optional();
 const paymentStatusSchema = z.enum(['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED']);
@@ -55,6 +56,36 @@ const paymentSummarySchema = z.object({
 	churchId: z.string().optional(),
 	addonCode: z.string().min(1).max(120).optional(),
 });
+
+type JsonRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): JsonRecord {
+	if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+	return value as JsonRecord;
+}
+
+function resolveBillingProvider(value: unknown): 'STRIPE' | 'PAYSTACK' | null {
+	if (typeof value !== 'string') return null;
+	const normalized = value.trim().toUpperCase();
+	if (normalized === 'STRIPE' || normalized === 'PAYSTACK') return normalized;
+	return null;
+}
+
+function resolveProviderReference(input: {
+	metadata: JsonRecord;
+	fallbackReference: string;
+}): string {
+	const providerReference = input.metadata.providerReference;
+	if (typeof providerReference === 'string' && providerReference.trim()) {
+		return providerReference.trim();
+	}
+	const nestedProvider = asRecord(input.metadata.provider);
+	const nestedReference = nestedProvider.reference;
+	if (typeof nestedReference === 'string' && nestedReference.trim()) {
+		return nestedReference.trim();
+	}
+	return input.fallbackReference;
+}
 
 async function ensureChurchInOrganization(
 	tx: Prisma.TransactionClient,
@@ -106,6 +137,17 @@ export const paymentRouter = router({
 								}
 							}
 
+							const metadata = asRecord(input.metadata);
+							const addonDerivation = await deriveAddonFromBillingContext({
+								organizationId: input.organizationId,
+								paymentMetadata: metadata,
+								provider: resolveBillingProvider(metadata.provider),
+								providerReference: resolveProviderReference({
+									metadata,
+									fallbackReference: input.reference,
+								}),
+							});
+
 							const payment = await tx.payment.create({
 								data: {
 									churchId: input.churchId,
@@ -117,8 +159,17 @@ export const paymentRouter = router({
 									reference: input.reference,
 									description: input.description,
 									metadata: {
-										...((input.metadata ?? {}) as Record<string, unknown>),
+										...metadata,
 										organizationId: input.organizationId,
+										...(addonDerivation.addonCode
+											? { addonCode: addonDerivation.addonCode }
+											: {}),
+										...(addonDerivation.reference
+											? { addonReference: addonDerivation.reference }
+											: {}),
+										...(addonDerivation.source !== 'NONE'
+											? { addonDerivationSource: addonDerivation.source }
+											: {}),
 									} as Prisma.InputJsonValue,
 								},
 							});
