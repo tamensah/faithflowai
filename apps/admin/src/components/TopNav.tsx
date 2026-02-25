@@ -12,7 +12,12 @@ function toTitle(pathname: string): string {
 	if (pathname.startsWith('/dashboard/groups')) return 'Groups';
 	if (pathname.startsWith('/dashboard/payments')) return 'Payments';
 	if (pathname.startsWith('/dashboard/comms')) return 'Comms';
+	if (pathname.startsWith('/dashboard/analytics')) return 'Analytics';
+	if (pathname.startsWith('/dashboard/streaming')) return 'Streaming';
+	if (pathname.startsWith('/dashboard/bible-school')) return 'Bible School';
+	if (pathname.startsWith('/dashboard/facilities')) return 'Facilities';
 	if (pathname.startsWith('/dashboard/provider-ops')) return 'Provider Ops';
+	if (pathname.startsWith('/dashboard/addons')) return 'Add-ons';
 	if (pathname.startsWith('/dashboard/settings')) return 'Settings';
 	return 'Dashboard';
 }

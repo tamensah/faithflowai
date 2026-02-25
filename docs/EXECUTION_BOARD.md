@@ -151,3 +151,14 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Add-on catalog and tenant entitlement binding.
 - Module-level route and action gating.
 - Billing linkage for add-ons.
+
+**Current implementation (this batch)**
+- Added tenant-scoped add-on entitlement library with catalog and entitlement persistence in `Tenant.settings.addons`.
+- Seeded default catalog entries for `STREAMING_SUITE`, `BIBLE_SCHOOL_SUITE`, and `FACILITIES_SUITE` with provider/currency/interval metadata.
+- Added admin add-on API (`/api/addons`) for catalog upsert and entitlement assignment with admin role guardrails.
+- Added module-gated dashboard pages for Streaming, Bible School, and Facilities with lock panels + next-step CTAs.
+- Added module action APIs with entitlement enforcement and audit events:
+  - `/api/streaming` (`STREAMING_CHECKLIST_STARTED`)
+  - `/api/bible-school` (`BIBLE_SCHOOL_COHORT_CREATED`)
+  - `/api/facilities` (`FACILITY_RESERVATION_CREATED`)
+- Added Add-ons admin console for catalog editing, tenant entitlement binding, and snapshot visibility.

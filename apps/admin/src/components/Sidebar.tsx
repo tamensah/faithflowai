@@ -3,13 +3,16 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
+	AcademicCapIcon,
 	BuildingOffice2Icon,
 	CalendarIcon,
 	ChartBarIcon,
 	ChatBubbleLeftRightIcon,
 	CogIcon,
 	CurrencyDollarIcon,
+	CubeIcon,
 	HomeIcon,
+	RectangleStackIcon,
 	UserGroupIcon,
 	UsersIcon,
 	WrenchScrewdriverIcon,
@@ -30,12 +33,16 @@ const sections = [
 			{ name: 'Payments', href: '/dashboard/payments', icon: CurrencyDollarIcon },
 			{ name: 'Comms', href: '/dashboard/comms', icon: ChatBubbleLeftRightIcon },
 			{ name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, locked: true },
+			{ name: 'Streaming', href: '/dashboard/streaming', icon: RectangleStackIcon },
+			{ name: 'Bible school', href: '/dashboard/bible-school', icon: AcademicCapIcon },
+			{ name: 'Facilities', href: '/dashboard/facilities', icon: CubeIcon },
 		],
 	},
 	{
 		label: 'Governance',
 		items: [
 			{ name: 'Organization', href: '/dashboard/org', icon: BuildingOffice2Icon },
+			{ name: 'Add-ons', href: '/dashboard/addons', icon: CubeIcon },
 			{ name: 'Provider Ops', href: '/dashboard/provider-ops', icon: WrenchScrewdriverIcon },
 			{ name: 'Settings', href: '/dashboard/settings', icon: CogIcon },
 		],
