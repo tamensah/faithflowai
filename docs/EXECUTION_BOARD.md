@@ -47,6 +47,8 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Moved assignment and audit list handling to server-driven pagination with cursor-based "Load more" UX.
 - Expanded org smoke tests to validate assignment pagination/query, timeline updates, security policy persistence, and filtered audit reads.
 - Added audit action + org-unit filtering, local saved filter state, and quick presets (Denied/Auth Guardrails/Finance).
+- Added staff assignment queue filters (query/status/org unit) and page-based pagination on `/dashboard/staff`.
+- Added inline assignment audit timeline on `/dashboard/staff` showing latest role-assignment change events.
 
 **Done when**
 - Winners-style hierarchy and leadership assignments can be managed end-to-end from admin UI.
@@ -140,6 +142,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
   - `pnpm test:admin-health`
   - `pnpm test:platform-smoke`
 - Added contextual runbook links on failed Provider Ops outcomes for faster replay remediation.
+- Added consolidated Ops Health dashboard (`/dashboard/ops-health`) that aggregates all `/api/health/*` checks with alert states and module drill-through links.
 
 ---
 

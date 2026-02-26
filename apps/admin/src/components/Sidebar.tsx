@@ -44,6 +44,7 @@ const sections = [
 		items: [
 			{ name: 'Organization', href: '/dashboard/org', icon: BuildingOffice2Icon },
 			{ name: 'Add-ons', href: '/dashboard/addons', icon: CubeIcon },
+			{ name: 'Ops Health', href: '/dashboard/ops-health', icon: ChartBarIcon },
 			{ name: 'Provider Ops', href: '/dashboard/provider-ops', icon: WrenchScrewdriverIcon },
 			{ name: 'Settings', href: '/dashboard/settings', icon: CogIcon },
 		],

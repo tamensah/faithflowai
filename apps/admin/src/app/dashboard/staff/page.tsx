@@ -1,18 +1,70 @@
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
-import { prisma } from '@faithflow/database';
+import { Prisma, prisma } from '@faithflow/database';
 import { createAssignmentAction, updateAssignmentStatusAction } from './actions';
 
-type AssignmentStatus = 'PLANNED' | 'ACTIVE' | 'SUSPENDED' | 'ENDED';
+const STATUS_FILTERS = ['ALL', 'PLANNED', 'ACTIVE', 'SUSPENDED', 'ENDED'] as const;
+type StatusFilter = (typeof STATUS_FILTERS)[number];
+type AssignmentStatus = Exclude<StatusFilter, 'ALL'>;
 type QuickAction = {
 	id: 'activate' | 'suspend' | 'end';
 	label: string;
 	className: string;
 };
+type StaffAuditEntry = {
+	id: string;
+	actorId: string;
+	createdAt: Date;
+	result: string;
+	note: string;
+};
+
+function toPositiveInt(value: string | undefined, fallback: number, min: number, max: number): number {
+	if (!value) return fallback;
+	const parsed = Number(value);
+	if (!Number.isFinite(parsed)) return fallback;
+	return Math.min(Math.max(Math.floor(parsed), min), max);
+}
+
+function toStringParam(value: string | string[] | undefined): string | undefined {
+	if (typeof value === 'string') return value;
+	return undefined;
+}
+
+function buildStaffHref(input: {
+	query?: string;
+	status?: StatusFilter;
+	orgUnitId?: string;
+	page?: number;
+	pageSize?: number;
+}): string {
+	const params = new URLSearchParams();
+	if (input.query) params.set('query', input.query);
+	if (input.status && input.status !== 'ALL') params.set('status', input.status);
+	if (input.orgUnitId) params.set('orgUnitId', input.orgUnitId);
+	if (input.page && input.page > 1) params.set('page', String(input.page));
+	if (input.pageSize && input.pageSize !== 20) params.set('pageSize', String(input.pageSize));
+	const query = params.toString();
+	return `/dashboard/staff${query ? `?${query}` : ''}`;
+}
 
 function formatDateTime(value: Date | null): string {
 	if (!value) return '—';
 	return new Date(value).toLocaleString();
+}
+
+function formatAuditNote(metadata: Prisma.JsonValue | null): string {
+	if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return 'Status updated.';
+	const value = metadata as Record<string, unknown>;
+	const operation = typeof value.operation === 'string' ? value.operation : null;
+	const previousStatus = typeof value.previousStatus === 'string' ? value.previousStatus : null;
+	const nextStatus = typeof value.nextStatus === 'string' ? value.nextStatus : null;
+	if (operation === 'END') return 'Assignment ended.';
+	if (operation === 'UPDATE' && previousStatus && nextStatus) {
+		return `Status changed ${previousStatus} -> ${nextStatus}.`;
+	}
+	if (operation === 'UPDATE' && nextStatus) return `Status set to ${nextStatus}.`;
+	return operation ? `Operation: ${operation}.` : 'Assignment changed.';
 }
 
 function statusBadgeClass(status: AssignmentStatus): string {
@@ -68,7 +120,11 @@ function quickActionsForStatus(status: AssignmentStatus): QuickAction[] {
 	return [];
 }
 
-export default async function StaffPage() {
+export default async function StaffPage({
+	searchParams,
+}: {
+	searchParams: Record<string, string | string[] | undefined>;
+}) {
 	const { orgId } = await auth();
 	if (!orgId) {
 		return (
@@ -78,46 +134,39 @@ export default async function StaffPage() {
 		);
 	}
 
-	const [statusRows, assignments, members, roleTemplates, orgUnits] = await Promise.all([
+	const query = (toStringParam(searchParams.query) ?? '').trim();
+	const statusParam = toStringParam(searchParams.status);
+	const statusFilter: StatusFilter =
+		STATUS_FILTERS.find((item) => item === statusParam) ?? 'ALL';
+	const selectedOrgUnitId = (toStringParam(searchParams.orgUnitId) ?? '').trim() || '';
+	const page = toPositiveInt(toStringParam(searchParams.page), 1, 1, 500);
+	const pageSize = toPositiveInt(toStringParam(searchParams.pageSize), 20, 10, 100);
+
+	const where: Prisma.UnitRoleAssignmentWhereInput = {
+		organizationId: orgId,
+		...(statusFilter !== 'ALL' ? { status: statusFilter } : {}),
+		...(selectedOrgUnitId ? { orgUnitId: selectedOrgUnitId } : {}),
+		...(query
+			? {
+					OR: [
+						{ member: { firstName: { contains: query, mode: 'insensitive' } } },
+						{ member: { lastName: { contains: query, mode: 'insensitive' } } },
+						{ member: { email: { contains: query, mode: 'insensitive' } } },
+						{ roleTemplate: { name: { contains: query, mode: 'insensitive' } } },
+						{ roleTemplate: { code: { contains: query, mode: 'insensitive' } } },
+						{ orgUnit: { name: { contains: query, mode: 'insensitive' } } },
+					],
+				}
+			: {}),
+	};
+
+	const [statusRows, totalAssignments, members, roleTemplates, orgUnits] = await Promise.all([
 		prisma.unitRoleAssignment.groupBy({
 			by: ['status'],
 			where: { organizationId: orgId },
 			_count: { _all: true },
 		}),
-		prisma.unitRoleAssignment.findMany({
-			where: {
-				organizationId: orgId,
-				status: { in: ['PLANNED', 'ACTIVE', 'SUSPENDED'] },
-			},
-			orderBy: [{ status: 'asc' }, { updatedAt: 'desc' }],
-			take: 40,
-			select: {
-				id: true,
-				status: true,
-				startAt: true,
-				endAt: true,
-				member: {
-					select: {
-						firstName: true,
-						lastName: true,
-						email: true,
-					},
-				},
-				roleTemplate: {
-					select: {
-						name: true,
-						code: true,
-						isLeadership: true,
-					},
-				},
-				orgUnit: {
-					select: {
-						name: true,
-						type: true,
-					},
-				},
-			},
-		}),
+		prisma.unitRoleAssignment.count({ where }),
 		prisma.member.findMany({
 			where: { church: { organizationId: orgId } },
 			orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
@@ -149,6 +198,75 @@ export default async function StaffPage() {
 			},
 		}),
 	]);
+	const totalPages = Math.max(1, Math.ceil(totalAssignments / pageSize));
+	const safePage = Math.min(page, totalPages);
+	const assignments = await prisma.unitRoleAssignment.findMany({
+		where,
+		orderBy: [{ status: 'asc' }, { updatedAt: 'desc' }],
+		skip: (safePage - 1) * pageSize,
+		take: pageSize,
+		select: {
+			id: true,
+			status: true,
+			startAt: true,
+			endAt: true,
+			member: {
+				select: {
+					firstName: true,
+					lastName: true,
+					email: true,
+				},
+			},
+			roleTemplate: {
+				select: {
+					name: true,
+					code: true,
+					isLeadership: true,
+				},
+			},
+			orgUnit: {
+				select: {
+					name: true,
+					type: true,
+				},
+			},
+		},
+	});
+	const assignmentIds = assignments.map((assignment) => assignment.id);
+	const assignmentAuditRows = assignmentIds.length
+		? await prisma.auditEvent.findMany({
+				where: {
+					organizationId: orgId,
+					action: 'ROLE_ASSIGNMENT_CHANGE',
+					entityType: 'UnitRoleAssignment',
+					entityId: { in: assignmentIds },
+				},
+				orderBy: { createdAt: 'desc' },
+				take: Math.max(assignmentIds.length * 4, 40),
+				select: {
+					id: true,
+					entityId: true,
+					actorId: true,
+					createdAt: true,
+					result: true,
+					metadata: true,
+				},
+			})
+		: [];
+	const assignmentAuditMap = new Map<string, StaffAuditEntry[]>();
+	for (const row of assignmentAuditRows) {
+		if (!row.entityId) continue;
+		const existing = assignmentAuditMap.get(row.entityId) ?? [];
+		if (existing.length >= 3) continue;
+		existing.push({
+			id: row.id,
+			actorId: row.actorId,
+			createdAt: row.createdAt,
+			result: row.result,
+			note: formatAuditNote(row.metadata),
+		});
+		assignmentAuditMap.set(row.entityId, existing);
+	}
 
 	const statusTotals: Record<AssignmentStatus, number> = {
 		PLANNED: 0,
@@ -159,6 +277,26 @@ export default async function StaffPage() {
 	for (const row of statusRows) {
 		statusTotals[row.status as AssignmentStatus] = row._count._all;
 	}
+	const prevHref =
+		safePage > 1
+			? buildStaffHref({
+					query,
+					status: statusFilter,
+					orgUnitId: selectedOrgUnitId || undefined,
+					page: safePage - 1,
+					pageSize,
+			  })
+			: null;
+	const nextHref =
+		safePage < totalPages
+			? buildStaffHref({
+					query,
+					status: statusFilter,
+					orgUnitId: selectedOrgUnitId || undefined,
+					page: safePage + 1,
+					pageSize,
+			  })
+			: null;
 
 	return (
 		<div className="space-y-6">
@@ -301,9 +439,67 @@ export default async function StaffPage() {
 				<div className="flex items-center justify-between">
 					<h2 className="text-base font-semibold text-slate-900">Current assignment queue</h2>
 					<span className="text-xs uppercase tracking-[0.14em] text-slate-500">
-						{assignments.length} items
+						{totalAssignments} total
 					</span>
 				</div>
+				<form className="mt-4 grid gap-3 md:grid-cols-5 md:items-end">
+					<label className="text-sm font-medium text-slate-700">
+						Search
+						<input
+							name="query"
+							defaultValue={query}
+							placeholder="Member, role, unit..."
+							className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+						/>
+					</label>
+					<label className="text-sm font-medium text-slate-700">
+						Status
+						<select
+							name="status"
+							defaultValue={statusFilter}
+							className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+						>
+							{STATUS_FILTERS.map((status) => (
+								<option key={status} value={status}>
+									{status}
+								</option>
+							))}
+						</select>
+					</label>
+					<label className="text-sm font-medium text-slate-700">
+						Org unit
+						<select
+							name="orgUnitId"
+							defaultValue={selectedOrgUnitId}
+							className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+						>
+							<option value="">All units</option>
+							{orgUnits.map((unit) => (
+								<option key={unit.id} value={unit.id}>
+									{unit.name} ({unit.type})
+								</option>
+							))}
+						</select>
+					</label>
+					<label className="text-sm font-medium text-slate-700">
+						Page size
+						<select
+							name="pageSize"
+							defaultValue={String(pageSize)}
+							className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+						>
+							<option value="20">20</option>
+							<option value="50">50</option>
+							<option value="100">100</option>
+						</select>
+					</label>
+					<button
+						type="submit"
+						className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+					>
+						Apply filters
+					</button>
+				</form>
 				<div className="mt-4 overflow-x-auto">
 					<table className="min-w-full divide-y divide-slate-200 text-sm">
 						<thead className="bg-slate-50 text-left text-xs uppercase tracking-[0.12em] text-slate-500">
@@ -349,6 +545,19 @@ export default async function StaffPage() {
 										<td className="px-3 py-2 text-xs text-slate-600">
 											<div>Start: {formatDateTime(assignment.startAt)}</div>
 											<div>End: {formatDateTime(assignment.endAt)}</div>
+											<div className="mt-2 space-y-1">
+												{(assignmentAuditMap.get(assignment.id) ?? []).map((audit) => (
+													<div key={audit.id} className="rounded border border-slate-200 px-2 py-1">
+														<div className="font-medium text-slate-700">{audit.note}</div>
+														<div className="text-[11px] text-slate-500">
+															{formatDateTime(audit.createdAt)} | {audit.actorId} | {audit.result}
+														</div>
+													</div>
+												))}
+												{!(assignmentAuditMap.get(assignment.id) ?? []).length ? (
+													<div className="text-[11px] text-slate-500">No audit events yet.</div>
+												) : null}
+											</div>
 										</td>
 										<td className="px-3 py-2">
 											<div className="flex flex-wrap gap-2">
@@ -377,6 +586,37 @@ export default async function StaffPage() {
 							)}
 						</tbody>
 					</table>
+				</div>
+			</div>
+			<div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3">
+				<p className="text-xs text-slate-500">
+					Page {safePage} of {totalPages}
+				</p>
+				<div className="flex items-center gap-2">
+					{prevHref ? (
+						<Link
+							href={prevHref}
+							className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700"
+						>
+							Previous
+						</Link>
+					) : (
+						<span className="rounded border border-slate-200 px-3 py-1 text-xs text-slate-400">
+							Previous
+						</span>
+					)}
+					{nextHref ? (
+						<Link
+							href={nextHref}
+							className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700"
+						>
+							Next
+						</Link>
+					) : (
+						<span className="rounded border border-slate-200 px-3 py-1 text-xs text-slate-400">
+							Next
+						</span>
+					)}
 				</div>
 			</div>
 		</div>

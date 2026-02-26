@@ -17,6 +17,7 @@ function toTitle(pathname: string): string {
 	if (pathname.startsWith('/dashboard/streaming')) return 'Streaming';
 	if (pathname.startsWith('/dashboard/bible-school')) return 'Bible School';
 	if (pathname.startsWith('/dashboard/facilities')) return 'Facilities';
+	if (pathname.startsWith('/dashboard/ops-health')) return 'Ops Health';
 	if (pathname.startsWith('/dashboard/provider-ops')) return 'Provider Ops';
 	if (pathname.startsWith('/dashboard/addons')) return 'Add-ons';
 	if (pathname.startsWith('/dashboard/settings')) return 'Settings';

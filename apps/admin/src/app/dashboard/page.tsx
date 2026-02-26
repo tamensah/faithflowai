@@ -174,6 +174,12 @@ export default async function DashboardPage({
 					>
 						Open Provider Ops
 					</Link>
+					<Link
+						href="/dashboard/ops-health"
+						className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white"
+					>
+						Open Ops Health
+					</Link>
 				</div>
 			</div>
 
