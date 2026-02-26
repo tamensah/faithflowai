@@ -200,6 +200,25 @@ async function run(): Promise<void> {
 	if (!filteredAudit.items.some((item) => item.action === 'SECURITY_POLICY_CHANGE')) {
 		throw new Error('Audit query validation failed: expected security policy event.');
 	}
+	const actionFilteredAudit = await caller.org.listAuditEvents({
+		organizationId: organization.id,
+		limit: 20,
+		action: 'ORG_UNIT_HIERARCHY_CHANGE',
+	});
+	if (!actionFilteredAudit.items.every((item) => item.action === 'ORG_UNIT_HIERARCHY_CHANGE')) {
+		throw new Error('Audit action filter validation failed: expected only ORG_UNIT_HIERARCHY_CHANGE.');
+	}
+	const orgUnitFilteredAudit = await caller.org.listAuditEvents({
+		organizationId: organization.id,
+		limit: 20,
+		orgUnitId: branch.id,
+	});
+	if (!orgUnitFilteredAudit.items.length) {
+		throw new Error('Audit orgUnitId filter validation failed: expected scoped events.');
+	}
+	if (!orgUnitFilteredAudit.items.every((item) => item.orgUnitId === branch.id)) {
+		throw new Error('Audit orgUnitId filter validation failed: received event outside selected unit.');
+	}
 
 	const rootRollup = hierarchyOverview.rootUnits.find((item) => item.id === headquarters.id)?.rollup;
 	if (!rootRollup || rootRollup.totalDescendantUnits < 1) {
