@@ -1,6 +1,13 @@
 import { prisma } from '@faithflow/database';
 
 type Trend = 'up' | 'down' | 'flat';
+const EXECUTIVE_TREND_WEEKS = 12;
+
+export type ExecutiveTrendPoint = {
+	weekStart: string;
+	label: string;
+	value: number;
+};
 
 type OrgUnitOption = {
 	id: string;
@@ -45,6 +52,11 @@ export type ExecutiveRollups = {
 			done: boolean;
 			href: string;
 		}>;
+	};
+	trends: {
+		members: ExecutiveTrendPoint[];
+		giving: ExecutiveTrendPoint[];
+		events: ExecutiveTrendPoint[];
 	};
 };
 
@@ -103,6 +115,72 @@ function resolveTrend(current: number, previous: number): Trend {
 	if (current > previous) return 'up';
 	if (current < previous) return 'down';
 	return 'flat';
+}
+
+type WeeklyBucket = {
+	start: Date;
+	key: string;
+	label: string;
+};
+
+function startOfWeekUtc(date: Date): Date {
+	const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+	const day = utcDate.getUTCDay();
+	const offset = (day + 6) % 7;
+	utcDate.setUTCDate(utcDate.getUTCDate() - offset);
+	utcDate.setUTCHours(0, 0, 0, 0);
+	return utcDate;
+}
+
+function addDaysUtc(date: Date, days: number): Date {
+	const next = new Date(date);
+	next.setUTCDate(next.getUTCDate() + days);
+	return next;
+}
+
+function buildWeeklyBuckets(now: Date, weeks: number): WeeklyBucket[] {
+	const currentWeekStart = startOfWeekUtc(now);
+	const buckets: WeeklyBucket[] = [];
+	for (let index = weeks - 1; index >= 0; index -= 1) {
+		const start = addDaysUtc(currentWeekStart, index * -7);
+		buckets.push({
+			start,
+			key: start.toISOString(),
+			label: start.toLocaleDateString('en-US', {
+				month: 'short',
+				day: 'numeric',
+				timeZone: 'UTC',
+			}),
+		});
+	}
+	return buckets;
+}
+
+function getWeekKey(date: Date): string {
+	return startOfWeekUtc(date).toISOString();
+}
+
+function buildTrendSeries<T>(
+	rows: T[],
+	buckets: WeeklyBucket[],
+	getDate: (row: T) => Date,
+	getValue: (row: T) => number
+): ExecutiveTrendPoint[] {
+	const totals = new Map<string, number>();
+	for (const bucket of buckets) totals.set(bucket.key, 0);
+
+	for (const row of rows) {
+		const key = getWeekKey(getDate(row));
+		if (!totals.has(key)) continue;
+		const nextValue = (totals.get(key) ?? 0) + getValue(row);
+		totals.set(key, nextValue);
+	}
+
+	return buckets.map((bucket) => ({
+		weekStart: bucket.key,
+		label: bucket.label,
+		value: totals.get(bucket.key) ?? 0,
+	}));
 }
 
 export async function listOrganizationUnits(organizationId: string): Promise<OrgUnitOption[]> {
@@ -178,6 +256,8 @@ export async function getExecutiveRollups(input: {
 	last30Start.setDate(last30Start.getDate() - 30);
 	const previous30Start = new Date(last30Start);
 	previous30Start.setDate(previous30Start.getDate() - 30);
+	const trendBuckets = buildWeeklyBuckets(now, EXECUTIVE_TREND_WEEKS);
+	const trendStart = trendBuckets[0]?.start ?? previous30Start;
 
 	const scope = await resolveOrganizationScope({
 		organizationId,
@@ -208,6 +288,9 @@ export async function getExecutiveRollups(input: {
 		givingPrevious30Days,
 		activeAssignments,
 		leadershipAssignments,
+		memberTrendRows,
+		givingTrendRows,
+		eventTrendRows,
 		churchCount,
 		orgUnitCount,
 		roleTemplateCount,
@@ -267,6 +350,35 @@ export async function getExecutiveRollups(input: {
 				...assignmentWhere,
 				status: 'ACTIVE',
 				roleTemplate: { isLeadership: true },
+			},
+		}),
+		prisma.member.findMany({
+			where: {
+				...memberWhere,
+				createdAt: { gte: trendStart, lte: now },
+			},
+			select: {
+				createdAt: true,
+			},
+		}),
+		prisma.payment.findMany({
+			where: {
+				...paymentWhere,
+				status: 'COMPLETED',
+				createdAt: { gte: trendStart, lte: now },
+			},
+			select: {
+				createdAt: true,
+				amount: true,
+			},
+		}),
+		prisma.event.findMany({
+			where: {
+				...eventWhere,
+				startDate: { gte: trendStart, lte: now },
+			},
+			select: {
+				startDate: true,
 			},
 		}),
 		prisma.church.count({
@@ -331,6 +443,14 @@ export async function getExecutiveRollups(input: {
 	const completedChecks = readinessItems.filter((item) => item.done).length;
 	const totalChecks = readinessItems.length;
 	const percent = totalChecks === 0 ? 0 : Math.round((completedChecks / totalChecks) * 100);
+	const membersTrend = buildTrendSeries(memberTrendRows, trendBuckets, (row) => row.createdAt, () => 1);
+	const givingTrend = buildTrendSeries(
+		givingTrendRows,
+		trendBuckets,
+		(row) => row.createdAt,
+		(row) => asNumber(row.amount)
+	);
+	const eventsTrend = buildTrendSeries(eventTrendRows, trendBuckets, (row) => row.startDate, () => 1);
 
 	return {
 		scope: {
@@ -362,6 +482,11 @@ export async function getExecutiveRollups(input: {
 			totalChecks,
 			percent,
 			items: readinessItems,
+		},
+		trends: {
+			members: membersTrend,
+			giving: givingTrend,
+			events: eventsTrend,
 		},
 	};
 }

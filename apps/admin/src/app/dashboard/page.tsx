@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
-import { getExecutiveRollups, listOrganizationUnits } from '@/lib/executive-rollups';
+import {
+	type ExecutiveTrendPoint,
+	getExecutiveRollups,
+	listOrganizationUnits,
+} from '@/lib/executive-rollups';
 
 function formatCurrency(amount: number): string {
 	return new Intl.NumberFormat('en-US', {
@@ -14,6 +18,89 @@ function trendLabel(trend: 'up' | 'down' | 'flat'): string {
 	if (trend === 'up') return 'up vs previous 30d';
 	if (trend === 'down') return 'down vs previous 30d';
 	return 'flat vs previous 30d';
+}
+
+function formatTrendValue(value: number, format: 'count' | 'currency'): string {
+	if (format === 'currency') {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: 'USD',
+			maximumFractionDigits: 0,
+		}).format(value);
+	}
+	return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value);
+}
+
+function getWeekOverWeek(points: ExecutiveTrendPoint[]): {
+	label: string;
+	state: 'up' | 'down' | 'flat';
+} {
+	if (points.length < 2) return { label: 'No trend yet', state: 'flat' };
+	const last = points[points.length - 1]?.value ?? 0;
+	const previous = points[points.length - 2]?.value ?? 0;
+	if (last > previous) return { label: 'Up week-over-week', state: 'up' };
+	if (last < previous) return { label: 'Down week-over-week', state: 'down' };
+	return { label: 'Flat week-over-week', state: 'flat' };
+}
+
+function TrendSurface({
+	title,
+	points,
+	format,
+}: {
+	title: string;
+	points: ExecutiveTrendPoint[];
+	format: 'count' | 'currency';
+}) {
+	const maxValue = Math.max(1, ...points.map((point) => point.value));
+	const total = points.reduce((sum, point) => sum + point.value, 0);
+	const latest = points[points.length - 1]?.value ?? 0;
+	const weekOverWeek = getWeekOverWeek(points);
+
+	return (
+		<div className="rounded-xl border border-slate-200 bg-white p-5">
+			<div className="flex items-start justify-between gap-4">
+				<div>
+					<p className="text-xs uppercase tracking-[0.14em] text-slate-500">{title}</p>
+					<p className="mt-2 text-2xl font-semibold text-slate-900">{formatTrendValue(latest, format)}</p>
+					<p
+						className={`mt-1 text-xs ${
+							weekOverWeek.state === 'up'
+								? 'text-emerald-600'
+								: weekOverWeek.state === 'down'
+									? 'text-rose-600'
+									: 'text-slate-500'
+						}`}
+					>
+						{weekOverWeek.label}
+					</p>
+				</div>
+				<p className="text-xs text-slate-500">12-week total: {formatTrendValue(total, format)}</p>
+			</div>
+			<div className="mt-4 flex h-28 items-end gap-1">
+				{points.map((point) => {
+					const ratio = point.value / maxValue;
+					const height = Math.max(6, Math.round(ratio * 100));
+					return (
+						<div key={point.weekStart} className="group relative flex flex-1 justify-center">
+							<span className="sr-only">
+								{point.label}: {formatTrendValue(point.value, format)}
+							</span>
+							<div
+								className="w-full rounded-t-sm bg-blue-200 transition-colors group-hover:bg-blue-500"
+								style={{ height: `${height}%` }}
+								title={`${point.label}: ${formatTrendValue(point.value, format)}`}
+							/>
+						</div>
+					);
+				})}
+			</div>
+			<div className="mt-2 flex justify-between text-[11px] uppercase tracking-[0.12em] text-slate-400">
+				<span>{points[0]?.label ?? '—'}</span>
+				<span>{points[points.length - 1]?.label ?? '—'}</span>
+			</div>
+		</div>
+	);
 }
 
 export default async function DashboardPage({
@@ -68,6 +155,12 @@ export default async function DashboardPage({
 						className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white"
 					>
 						Run Comms Flow
+					</Link>
+					<Link
+						href="/dashboard/staff"
+						className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-sm font-medium text-white"
+					>
+						Open Staff Console
 					</Link>
 					<Link
 						href="/dashboard/settings"
@@ -169,6 +262,12 @@ export default async function DashboardPage({
 						</div>
 					</div>
 
+					<div className="grid gap-4 xl:grid-cols-3">
+						<TrendSurface title="Member growth" points={rollups.trends.members} format="count" />
+						<TrendSurface title="Giving momentum" points={rollups.trends.giving} format="currency" />
+						<TrendSurface title="Event velocity" points={rollups.trends.events} format="count" />
+					</div>
+
 					<div className="grid gap-4 xl:grid-cols-[2fr_1fr]">
 						<div className="rounded-xl border border-slate-200 bg-white p-5">
 							<div className="flex items-center justify-between">
@@ -201,6 +300,12 @@ export default async function DashboardPage({
 									className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:border-blue-300 hover:text-blue-700"
 								>
 									Open org hierarchy
+								</Link>
+								<Link
+									href={`/dashboard/staff${scopedQuery}`}
+									className="rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:border-blue-300 hover:text-blue-700"
+								>
+									Open staff assignments
 								</Link>
 							</div>
 						</div>

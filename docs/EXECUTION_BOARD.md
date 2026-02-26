@@ -94,6 +94,9 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added org-unit scope filter (selected unit vs descendants) to executive rollups.
 - Added scoped role-assignment filtering (org unit + descendants) with server-side pagination in Organization Builder.
 - Added server-filtered Members and Events pages with org-unit scope controls and URL-driven pagination.
+- Added dedicated Staff Console (`/dashboard/staff`) with assignment status totals and active/planned/suspended queue.
+- Added 12-week trend surfaces for member growth, giving momentum, and event velocity on `/dashboard`.
+- Added staff quick actions (activate/suspend/end/reactivate) on `/dashboard/staff` with server-side mutation handling.
 
 ---
 

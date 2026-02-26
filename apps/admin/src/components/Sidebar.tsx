@@ -32,6 +32,7 @@ const sections = [
 			{ name: 'Groups', href: '/dashboard/groups', icon: UserGroupIcon, locked: true },
 			{ name: 'Payments', href: '/dashboard/payments', icon: CurrencyDollarIcon },
 			{ name: 'Comms', href: '/dashboard/comms', icon: ChatBubbleLeftRightIcon },
+			{ name: 'Staff', href: '/dashboard/staff', icon: UserGroupIcon },
 			{ name: 'Analytics', href: '/dashboard/analytics', icon: ChartBarIcon, locked: true },
 			{ name: 'Streaming', href: '/dashboard/streaming', icon: RectangleStackIcon },
 			{ name: 'Bible school', href: '/dashboard/bible-school', icon: AcademicCapIcon },
