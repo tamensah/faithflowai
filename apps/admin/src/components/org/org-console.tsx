@@ -112,6 +112,7 @@ const unitTypes = [
 	'DEPARTMENT',
 	'MINISTRY',
 ] as const;
+const AUDIT_FILTER_STORAGE_KEY = 'faithflow.org.auditFilters.v1';
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -261,6 +262,42 @@ export function OrgConsole() {
 		return Array.from(actions).sort((left, right) => left.localeCompare(right));
 	}, [bootstrap?.audit, auditEvents, auditActionFilter]);
 	const searchParams = useSearchParams();
+
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+		try {
+			const raw = window.localStorage.getItem(AUDIT_FILTER_STORAGE_KEY);
+			if (!raw) return;
+			const parsed = JSON.parse(raw) as {
+				search?: string;
+				action?: string;
+				orgUnitId?: string;
+				result?: string;
+				limit?: number;
+			};
+			if (typeof parsed.search === 'string') setAuditSearch(parsed.search);
+			if (typeof parsed.action === 'string') setAuditActionFilter(parsed.action);
+			if (typeof parsed.orgUnitId === 'string') setAuditOrgUnitFilter(parsed.orgUnitId);
+			if (typeof parsed.result === 'string') setAuditResultFilter(parsed.result);
+			if (parsed.limit === 20 || parsed.limit === 50 || parsed.limit === 100) setAuditLimit(parsed.limit);
+		} catch {
+			// Ignore malformed local storage payload.
+		}
+	}, []);
+
+	useEffect(() => {
+		if (typeof window === 'undefined') return;
+		window.localStorage.setItem(
+			AUDIT_FILTER_STORAGE_KEY,
+			JSON.stringify({
+				search: auditSearch,
+				action: auditActionFilter,
+				orgUnitId: auditOrgUnitFilter,
+				result: auditResultFilter,
+				limit: auditLimit,
+			})
+		);
+	}, [auditActionFilter, auditLimit, auditOrgUnitFilter, auditResultFilter, auditSearch]);
 
 	useEffect(() => {
 		void loadBootstrapData();
@@ -570,6 +607,30 @@ export function OrgConsole() {
 		} catch (requestError) {
 			setError(requestError instanceof Error ? requestError.message : 'Refresh failed');
 		}
+	}
+
+	function applyAuditPreset(preset: 'DENIED_ONLY' | 'AUTH_GUARDRAIL' | 'FINANCE') {
+		if (preset === 'DENIED_ONLY') {
+			setAuditSearch('');
+			setAuditActionFilter('ALL');
+			setAuditOrgUnitFilter('');
+			setAuditResultFilter('DENIED');
+			setAuditLimit(50);
+			return;
+		}
+		if (preset === 'AUTH_GUARDRAIL') {
+			setAuditSearch('');
+			setAuditActionFilter('AUTH_GUARDRAIL_BLOCKED');
+			setAuditOrgUnitFilter('');
+			setAuditResultFilter('DENIED');
+			setAuditLimit(50);
+			return;
+		}
+		setAuditSearch('PAYMENT');
+		setAuditActionFilter('ALL');
+		setAuditOrgUnitFilter('');
+		setAuditResultFilter('ALL');
+		setAuditLimit(50);
 	}
 
 	return (
@@ -1153,13 +1214,36 @@ export function OrgConsole() {
 						<h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
 							Audit viewer
 						</h3>
-						<button
-							type="button"
-							onClick={handleExportAuditCsv}
-							className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700"
-						>
-							Export CSV
-						</button>
+						<div className="flex flex-wrap items-center gap-2">
+							<button
+								type="button"
+								onClick={() => applyAuditPreset('DENIED_ONLY')}
+								className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700"
+							>
+								Denied only
+							</button>
+							<button
+								type="button"
+								onClick={() => applyAuditPreset('AUTH_GUARDRAIL')}
+								className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700"
+							>
+								Auth guardrails
+							</button>
+							<button
+								type="button"
+								onClick={() => applyAuditPreset('FINANCE')}
+								className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700"
+							>
+								Finance
+							</button>
+							<button
+								type="button"
+								onClick={handleExportAuditCsv}
+								className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700"
+							>
+								Export CSV
+							</button>
+						</div>
 					</div>
 					<div className="mt-3 grid gap-2 md:grid-cols-5">
 						<input

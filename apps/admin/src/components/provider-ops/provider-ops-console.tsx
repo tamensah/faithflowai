@@ -60,6 +60,8 @@ type ProviderOpsResponse = {
 	}>;
 };
 
+const RUNBOOK_BASE_URL = 'https://github.com/tamensah/faithflowai/blob/main/docs/OPERATIONS_RUNBOOK.md';
+
 function createIdempotencyKey(prefix: string): string {
 	const random =
 		typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -93,6 +95,25 @@ function outcomeBadgeClass(status: OutcomeStatus): string {
 	return status === 'PROCESSED'
 		? 'border-emerald-200 bg-emerald-50 text-emerald-700'
 		: 'border-rose-200 bg-rose-50 text-rose-700';
+}
+
+function resolveRunbookLink(outcome: DeliveryOutcome): { href: string; label: string } {
+	if (outcome.domain === 'PAYMENT') {
+		return {
+			href: `${RUNBOOK_BASE_URL}#2-reconciliation-drift-payments`,
+			label: 'Reconciliation playbook',
+		};
+	}
+	if (outcome.domain === 'COMMS') {
+		return {
+			href: `${RUNBOOK_BASE_URL}#3-comms-delivery-issues`,
+			label: 'Comms recovery playbook',
+		};
+	}
+	return {
+		href: `${RUNBOOK_BASE_URL}#1-webhook-delivery-failures`,
+		label: 'Webhook triage playbook',
+	};
 }
 
 export function ProviderOpsConsole() {
@@ -343,14 +364,24 @@ export function ProviderOpsConsole() {
 										</td>
 										<td className="px-3 py-2 text-right">
 											{outcome.status === 'FAILED' ? (
-												<button
-													type="button"
-													onClick={() => void replayOutcome(outcome)}
-													disabled={replayingEventId === outcome.id}
-													className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 disabled:opacity-50"
-												>
-													{replayingEventId === outcome.id ? 'Replaying...' : 'Replay'}
-												</button>
+												<div className="flex items-center justify-end gap-2">
+													<button
+														type="button"
+														onClick={() => void replayOutcome(outcome)}
+														disabled={replayingEventId === outcome.id}
+														className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 disabled:opacity-50"
+													>
+														{replayingEventId === outcome.id ? 'Replaying...' : 'Replay'}
+													</button>
+													<a
+														href={resolveRunbookLink(outcome).href}
+														target="_blank"
+														rel="noreferrer"
+														className="text-xs font-medium text-blue-700 underline-offset-2 hover:underline"
+													>
+														{resolveRunbookLink(outcome).label}
+													</a>
+												</div>
 											) : (
 												<span className="text-xs text-slate-400">—</span>
 											)}

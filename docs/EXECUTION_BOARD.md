@@ -46,6 +46,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added audit result filtering controls and CSV export action from admin UI.
 - Moved assignment and audit list handling to server-driven pagination with cursor-based "Load more" UX.
 - Expanded org smoke tests to validate assignment pagination/query, timeline updates, security policy persistence, and filtered audit reads.
+- Added audit action + org-unit filtering, local saved filter state, and quick presets (Denied/Auth Guardrails/Finance).
 
 **Done when**
 - Winners-style hierarchy and leadership assignments can be managed end-to-end from admin UI.
@@ -128,9 +129,12 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added API baseline and reconciliation monitoring endpoints:
   - `/api/health/api-core`
   - `/api/health/reconciliation`
+- Added auth guardrail monitoring endpoint:
+  - `/api/health/auth-guardrails`
 - Added admin health smoke script and a consolidated platform smoke command:
   - `pnpm test:admin-health`
   - `pnpm test:platform-smoke`
+- Added contextual runbook links on failed Provider Ops outcomes for faster replay remediation.
 
 ---
 

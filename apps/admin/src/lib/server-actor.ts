@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@faithflow/database';
+import type { Prisma } from '@faithflow/database';
 import type { PolicyActor } from '../../../api/src/security/policy';
 import {
 	AdminSecurityPolicyError,
@@ -61,6 +62,14 @@ async function auditGuardrailBlock(input: {
 	claims: ClerkClaims;
 }): Promise<void> {
 	try {
+		const metadata = JSON.parse(
+			JSON.stringify({
+				message: input.error.message,
+				details: input.error.details,
+				claims: redactClaimsForAudit(input.claims),
+			})
+		) as Prisma.InputJsonValue;
+
 		await prisma.auditEvent.create({
 			data: {
 				organizationId: input.organizationId,
@@ -70,13 +79,9 @@ async function auditGuardrailBlock(input: {
 				action: 'AUTH_GUARDRAIL_BLOCKED',
 				entityType: 'AdminSession',
 				entityId: input.userId,
-				result: 'DENY',
+				result: 'DENIED',
 				reason: input.error.code,
-				metadata: {
-					message: input.error.message,
-					details: input.error.details,
-					claims: redactClaimsForAudit(input.claims),
-				},
+				metadata,
 			},
 		});
 	} catch {
