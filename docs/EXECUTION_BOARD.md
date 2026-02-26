@@ -113,6 +113,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added explicit lock panels for Analytics and Groups with actionable next-step CTAs.
 - Added sidebar lock badges for gated modules to set expectations before navigation.
 - Added action-level provider lock messaging in Payments and Comms (disabled actions when provider credentials are missing).
+- Added linkable lock-state next-step guidance across gated/admin add-on modules for faster remediation.
 
 ---
 

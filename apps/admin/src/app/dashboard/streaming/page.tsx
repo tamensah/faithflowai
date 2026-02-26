@@ -24,9 +24,9 @@ export default async function StreamingPage() {
 					title="Streaming add-on is not enabled"
 					reason="Streaming operations require the STREAMING_SUITE entitlement for this tenant."
 					nextSteps={[
-						'Open Add-ons and enable STREAMING_SUITE for the tenant.',
-						'Attach billing source/reference (manual or billing).',
-						'Return to this page and run readiness checklist actions.',
+						{ label: 'Open Add-ons and enable STREAMING_SUITE for the tenant.', href: '/dashboard/addons' },
+						{ label: 'Attach billing source/reference (manual or billing).', href: '/dashboard/payments' },
+						{ label: 'Return to this page and run readiness checklist actions.' },
 					]}
 					cta={[
 						{ label: 'Open add-ons', href: '/dashboard/addons' },

@@ -24,9 +24,12 @@ export default async function BibleSchoolPage() {
 					title="Bible school add-on is not enabled"
 					reason="Bible school operations require the BIBLE_SCHOOL_SUITE entitlement for this tenant."
 					nextSteps={[
-						'Open Add-ons and enable BIBLE_SCHOOL_SUITE for the tenant.',
-						'Attach billing source/reference so entitlement provenance stays clear.',
-						'Return here to capture class cohort launch actions.',
+						{ label: 'Open Add-ons and enable BIBLE_SCHOOL_SUITE for the tenant.', href: '/dashboard/addons' },
+						{
+							label: 'Attach billing source/reference so entitlement provenance stays clear.',
+							href: '/dashboard/payments',
+						},
+						{ label: 'Return here to capture class cohort launch actions.' },
 					]}
 					cta={[
 						{ label: 'Open add-ons', href: '/dashboard/addons' },

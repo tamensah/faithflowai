@@ -5,10 +5,12 @@ type Cta = {
 	href: string;
 };
 
+type NextStep = string | { label: string; href?: string };
+
 export function ModuleLockPanel(props: {
 	title: string;
 	reason: string;
-	nextSteps: string[];
+	nextSteps: NextStep[];
 	cta: Cta[];
 }) {
 	return (
@@ -19,9 +21,20 @@ export function ModuleLockPanel(props: {
 			<div className="mt-4">
 				<p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">Next steps</p>
 				<ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-amber-900">
-					{props.nextSteps.map((step) => (
-						<li key={step}>{step}</li>
-					))}
+					{props.nextSteps.map((step, index) => {
+						const value = typeof step === 'string' ? { label: step } : step;
+						return (
+							<li key={`${value.label}-${index}`}>
+								{value.href ? (
+									<Link href={value.href} className="font-medium underline decoration-amber-400">
+										{value.label}
+									</Link>
+								) : (
+									value.label
+								)}
+							</li>
+						);
+					})}
 				</ul>
 			</div>
 			<div className="mt-4 flex flex-wrap gap-2">

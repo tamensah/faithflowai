@@ -21,7 +21,14 @@ export default async function AnalyticsPage() {
 				<ModuleLockPanel
 					title="Analytics rollout is currently gated"
 					reason={gate.reason}
-					nextSteps={gate.nextSteps}
+					nextSteps={[
+						{ label: gate.nextSteps[0] ?? 'Set up organization hierarchy and role assignments.', href: '/dashboard/org' },
+						{
+							label: gate.nextSteps[1] ?? 'Complete provider and reconciliation checks in Provider Ops.',
+							href: '/dashboard/provider-ops',
+						},
+						{ label: gate.nextSteps[2] ?? 'Enable analytics module for this environment when rollout is approved.', href: '/dashboard/settings' },
+					]}
 					cta={[
 						{ label: 'Open organization builder', href: '/dashboard/org' },
 						{ label: 'Open provider ops', href: '/dashboard/provider-ops' },

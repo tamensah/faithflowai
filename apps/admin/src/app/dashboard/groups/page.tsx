@@ -12,7 +12,14 @@ export default function GroupsPage() {
 				<ModuleLockPanel
 					title="Groups rollout is currently gated"
 					reason={gate.reason}
-					nextSteps={gate.nextSteps}
+					nextSteps={[
+						{ label: gate.nextSteps[0] ?? 'Configure org units and leadership role templates.', href: '/dashboard/org' },
+						{
+							label: gate.nextSteps[1] ?? 'Validate member and event drill-down flows for your active unit scope.',
+							href: '/dashboard/members',
+						},
+						{ label: gate.nextSteps[2] ?? 'Enable groups module for this environment when rollout is approved.', href: '/dashboard/settings' },
+					]}
 					cta={[
 						{ label: 'Open organization builder', href: '/dashboard/org' },
 						{ label: 'Open members', href: '/dashboard/members' },

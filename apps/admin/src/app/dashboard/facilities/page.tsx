@@ -24,9 +24,12 @@ export default async function FacilitiesPage() {
 					title="Facilities add-on is not enabled"
 					reason="Facilities operations require the FACILITIES_SUITE entitlement for this tenant."
 					nextSteps={[
-						'Open Add-ons and enable FACILITIES_SUITE for the tenant.',
-						'Set billing source/reference so entitlement provenance is tracked.',
-						'Return here to execute reservation operations.',
+						{ label: 'Open Add-ons and enable FACILITIES_SUITE for the tenant.', href: '/dashboard/addons' },
+						{
+							label: 'Set billing source/reference so entitlement provenance is tracked.',
+							href: '/dashboard/payments',
+						},
+						{ label: 'Return here to execute reservation operations.' },
 					]}
 					cta={[
 						{ label: 'Open add-ons', href: '/dashboard/addons' },
