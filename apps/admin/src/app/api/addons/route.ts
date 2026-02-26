@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@faithflow/database';
 import { createAppCaller } from '@/lib/app-caller';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 import {
 	getAddonStateForOrganization,
 	setTenantAddonEntitlement,
@@ -27,6 +28,9 @@ function parseHttpStatus(error: unknown): number {
 }
 
 export async function GET() {
+	const dbUnavailable = requireDatabaseForApi('addons.get');
+	if (dbUnavailable) return dbUnavailable;
+
 	try {
 		const { actor } = await createAppCaller();
 		const state = await getAddonStateForOrganization(actor.organizationId);
@@ -38,6 +42,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('addons.post');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json().catch(() => ({}))) as {
 		action?: 'upsertCatalogItem';
 		item?: {
@@ -104,6 +111,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('addons.patch');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json().catch(() => ({}))) as {
 		action?: 'setEntitlement';
 		code?: string;

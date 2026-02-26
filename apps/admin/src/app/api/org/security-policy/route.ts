@@ -5,6 +5,7 @@ import {
 	getAdminSecurityPolicy,
 	mergeAdminSecurityPolicy,
 } from '@/lib/admin-security-policy';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 
 function parseCsv(value: unknown, transform: (item: string) => string): string[] {
 	if (!Array.isArray(value)) return [];
@@ -18,6 +19,9 @@ function parseCsv(value: unknown, transform: (item: string) => string): string[]
 }
 
 export async function GET() {
+	const dbUnavailable = requireDatabaseForApi('org.security-policy.get');
+	if (dbUnavailable) return dbUnavailable;
+
 	try {
 		const { caller, actor } = await createOrgCaller();
 		const organizationId = actor.organizationId;
@@ -38,6 +42,9 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('org.security-policy.patch');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json()) as {
 		idempotencyKey?: string;
 		requireVerifiedEmail?: boolean;

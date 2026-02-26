@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 import { createOrgCaller } from '@/lib/org-caller';
 
 function toCsvCell(value: unknown): string {
@@ -9,6 +10,9 @@ function toCsvCell(value: unknown): string {
 }
 
 export async function GET(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('org.audit.get');
+	if (dbUnavailable) return dbUnavailable;
+
 	const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
 	const action = request.nextUrl.searchParams.get('action') ?? undefined;
 	const orgUnitId = request.nextUrl.searchParams.get('orgUnitId') ?? undefined;

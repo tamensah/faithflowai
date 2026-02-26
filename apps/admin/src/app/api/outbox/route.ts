@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAppCaller } from '@/lib/app-caller';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 
 type Domain = 'PAYMENT' | 'COMMS';
 type OutboxStatus = 'PENDING' | 'PROCESSING' | 'PROCESSED' | 'FAILED';
@@ -25,6 +26,9 @@ function resolveHttpStatus(error: unknown): number {
 }
 
 export async function GET(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('outbox.get');
+	if (dbUnavailable) return dbUnavailable;
+
 	const domainParam = request.nextUrl.searchParams.get('domain');
 	if (!isDomain(domainParam)) {
 		return NextResponse.json({ error: 'domain is required (PAYMENT | COMMS)' }, { status: 400 });
@@ -57,6 +61,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('outbox.patch');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json()) as {
 		domain?: Domain;
 		action?: 'retry' | 'deadLetter';
@@ -105,6 +112,9 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('outbox.post');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json().catch(() => ({}))) as {
 		domain?: Domain;
 		maxEvents?: number;

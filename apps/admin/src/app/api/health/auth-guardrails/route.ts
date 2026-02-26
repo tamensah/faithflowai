@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@faithflow/database';
 import { getAdminSecurityPolicy } from '@/lib/admin-security-policy';
+import { requireDatabaseForHealth } from '@/lib/database-guard';
 import { authorizeHealthCheck } from '@/lib/health-auth';
 
 export const runtime = 'nodejs';
@@ -15,6 +16,8 @@ function parsePositiveInt(value: string | null | undefined, fallback: number): n
 export async function GET(request: NextRequest) {
 	const authFailure = authorizeHealthCheck(request);
 	if (authFailure) return authFailure;
+	const dbUnavailable = requireDatabaseForHealth('auth-guardrails');
+	if (dbUnavailable) return dbUnavailable;
 
 	const now = new Date();
 	const windowHours = parsePositiveInt(

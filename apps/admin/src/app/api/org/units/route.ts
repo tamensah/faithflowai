@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 import { createOrgCaller } from '@/lib/org-caller';
 
 export async function GET(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('org.units.get');
+	if (dbUnavailable) return dbUnavailable;
+
 	const parentUnitId = request.nextUrl.searchParams.get('parentUnitId') ?? undefined;
 
 	try {
 		const { caller, actor } = await createOrgCaller();
 		const organizationId = actor.organizationId;
-		const units = await caller.org.listUnits({ organizationId, parentUnitId });
+		const units = await caller.org.listHierarchyNodes({ organizationId, parentUnitId });
 		return NextResponse.json({ units });
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Unknown error';
@@ -16,7 +20,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('org.units.post');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json()) as {
+		idempotencyKey?: string;
 		churchId?: string;
 		parentUnitId?: string;
 		type?: 'HEADQUARTERS' | 'REGION' | 'BRANCH' | 'CAMPUS' | 'DIASPORA' | 'ZONE' | 'DEPARTMENT' | 'MINISTRY';
@@ -38,6 +46,7 @@ export async function POST(request: NextRequest) {
 		const organizationId = actor.organizationId;
 		const unit = await caller.org.createUnit({
 			organizationId,
+			idempotencyKey: payload.idempotencyKey ?? request.headers.get('x-idempotency-key') ?? undefined,
 			churchId: payload.churchId,
 			parentUnitId: payload.parentUnitId,
 			type: payload.type,
@@ -55,7 +64,11 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('org.units.patch');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json()) as {
+		idempotencyKey?: string;
 		operation?: 'update' | 'move';
 		unitId?: string;
 		newParentUnitId?: string;
@@ -79,6 +92,7 @@ export async function PATCH(request: NextRequest) {
 		if (payload.operation === 'move') {
 			const moved = await caller.org.moveUnit({
 				organizationId,
+				idempotencyKey: payload.idempotencyKey ?? request.headers.get('x-idempotency-key') ?? undefined,
 				unitId: payload.unitId,
 				newParentUnitId: payload.newParentUnitId,
 			});
@@ -87,6 +101,7 @@ export async function PATCH(request: NextRequest) {
 
 		const updated = await caller.org.updateUnit({
 			organizationId,
+			idempotencyKey: payload.idempotencyKey ?? request.headers.get('x-idempotency-key') ?? undefined,
 			unitId: payload.unitId,
 			name: payload.name,
 			countryIso2: payload.countryIso2,

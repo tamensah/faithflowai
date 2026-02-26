@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 import {
 	handleStripeWebhook,
 	WebhookValidationError,
@@ -7,6 +8,9 @@ import {
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('webhooks.stripe.post');
+	if (dbUnavailable) return dbUnavailable;
+
 	try {
 		const rawBody = await request.text();
 		const result = await handleStripeWebhook(rawBody, request.headers.get('stripe-signature'));

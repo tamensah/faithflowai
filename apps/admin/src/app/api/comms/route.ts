@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@faithflow/database';
 import { createAppCaller } from '@/lib/app-caller';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 
 const channelValues = ['EMAIL', 'SMS', 'WHATSAPP', 'PUSH'] as const;
 
 export async function GET(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('comms.get');
+	if (dbUnavailable) return dbUnavailable;
+
 	const roomId = request.nextUrl.searchParams.get('roomId') ?? undefined;
 	const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
 	const limit = Number(request.nextUrl.searchParams.get('limit') ?? '50');
@@ -47,6 +51,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('comms.post');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json()) as {
 		action?: 'createRoom' | 'sendMessage' | 'dispatch';
 		idempotencyKey?: string;

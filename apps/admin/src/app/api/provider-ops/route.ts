@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@faithflow/database';
 import { createAppCaller } from '@/lib/app-caller';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 
 export const runtime = 'nodejs';
 
@@ -113,6 +114,9 @@ function resolveWebhookHealth(
 }
 
 export async function GET(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('provider-ops.get');
+	if (dbUnavailable) return dbUnavailable;
+
 	const limitRaw = Number(request.nextUrl.searchParams.get('limit') ?? '40');
 	const limit = Number.isFinite(limitRaw) ? Math.min(Math.max(limitRaw, 10), 100) : 40;
 
@@ -235,6 +239,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('provider-ops.post');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json().catch(() => ({}))) as {
 		action?: 'processDomain' | 'replayEvent';
 		domain?: Domain;

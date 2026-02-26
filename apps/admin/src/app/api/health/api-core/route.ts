@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@faithflow/database';
+import { requireDatabaseForHealth } from '@/lib/database-guard';
 import { authorizeHealthCheck } from '@/lib/health-auth';
 
 export const runtime = 'nodejs';
@@ -12,6 +13,8 @@ function hasEnv(name: string): boolean {
 export async function GET(request: NextRequest) {
 	const authFailure = authorizeHealthCheck(request);
 	if (authFailure) return authFailure;
+	const dbUnavailable = requireDatabaseForHealth('api-core');
+	if (dbUnavailable) return dbUnavailable;
 
 	const now = new Date();
 	try {

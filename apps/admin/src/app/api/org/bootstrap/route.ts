@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 import { createOrgCaller } from '@/lib/org-caller';
 
 export async function GET() {
+	const dbUnavailable = requireDatabaseForApi('org.bootstrap.get');
+	if (dbUnavailable) return dbUnavailable;
+
 	try {
 		const { caller, actor } = await createOrgCaller();
 		const organizationId = actor.organizationId;

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 import { createOrgCaller } from '@/lib/org-caller';
 
 export async function GET(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('org.role-assignments.get');
+	if (dbUnavailable) return dbUnavailable;
+
 	const status = request.nextUrl.searchParams.get('status') ?? undefined;
 	const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
 	const query = request.nextUrl.searchParams.get('query') ?? undefined;
@@ -34,6 +38,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('org.role-assignments.post');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json()) as {
 		idempotencyKey?: string;
 		memberId?: string;
@@ -75,6 +82,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('org.role-assignments.patch');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json()) as {
 		idempotencyKey?: string;
 		operation?: 'end' | 'update';

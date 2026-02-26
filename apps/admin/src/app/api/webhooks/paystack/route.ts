@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 import {
 	handlePaystackWebhook,
 	WebhookValidationError,
@@ -7,6 +8,9 @@ import {
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('webhooks.paystack.post');
+	if (dbUnavailable) return dbUnavailable;
+
 	try {
 		const rawBody = await request.text();
 		const result = await handlePaystackWebhook(rawBody, request.headers.get('x-paystack-signature'));

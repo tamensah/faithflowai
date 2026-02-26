@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@faithflow/database';
 import { createAppCaller } from '@/lib/app-caller';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 
 const paymentStatusValues = ['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED'] as const;
 
 export async function GET(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('payment.get');
+	if (dbUnavailable) return dbUnavailable;
+
 	const statusParam = request.nextUrl.searchParams.get('status');
 	const churchId = request.nextUrl.searchParams.get('churchId') ?? undefined;
 	const addonCode = request.nextUrl.searchParams.get('addonCode') ?? undefined;
@@ -49,6 +53,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('payment.post');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json()) as {
 		idempotencyKey?: string;
 		churchId?: string;
@@ -113,6 +120,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('payment.patch');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json()) as {
 		idempotencyKey?: string;
 		action?: 'status' | 'refund';

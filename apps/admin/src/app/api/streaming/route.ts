@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@faithflow/database';
 import { createAppCaller } from '@/lib/app-caller';
 import { getAddonStateForOrganization, isAddonEnabled } from '@/lib/addon-entitlements';
+import { requireDatabaseForApi } from '@/lib/database-guard';
 
 function parseStatus(error: unknown): number {
 	const message = error instanceof Error ? error.message.toLowerCase() : '';
@@ -12,6 +13,9 @@ function parseStatus(error: unknown): number {
 }
 
 export async function POST(request: NextRequest) {
+	const dbUnavailable = requireDatabaseForApi('streaming.post');
+	if (dbUnavailable) return dbUnavailable;
+
 	const payload = (await request.json().catch(() => ({}))) as {
 		action?: 'startChecklist';
 		streamKey?: string;

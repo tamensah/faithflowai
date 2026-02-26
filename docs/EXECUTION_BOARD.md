@@ -138,6 +138,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
   - `/api/health/reconciliation`
 - Added auth guardrail monitoring endpoint:
   - `/api/health/auth-guardrails`
+- Added graceful `DATABASE_URL` guardrails across admin API routes and health endpoints so missing DB config returns explicit `503 DATABASE_UNCONFIGURED` responses instead of server exceptions.
 - Added admin health smoke script and a consolidated platform smoke command:
   - `pnpm test:admin-health`
   - `pnpm test:platform-smoke`
