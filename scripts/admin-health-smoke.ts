@@ -8,6 +8,7 @@ type EndpointResult = {
 
 const ENDPOINTS = [
 	'/api/health/api-core',
+	'/api/health/auth-guardrails',
 	'/api/health/provider-ops',
 	'/api/health/outbox-worker',
 	'/api/health/reconciliation',

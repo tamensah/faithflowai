@@ -1,7 +1,11 @@
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@faithflow/database';
 import type { PolicyActor } from '../../../api/src/security/policy';
-import { coerceAdminSecurityPolicy, enforceAdminSecurityPolicy } from './admin-security-policy';
+import {
+	AdminSecurityPolicyError,
+	coerceAdminSecurityPolicy,
+	enforceAdminSecurityPolicy,
+} from './admin-security-policy';
 
 type ClerkClaims = Record<string, unknown> & {
 	org_id?: string;
@@ -34,6 +38,50 @@ function extractRoles(claims: ClerkClaims): string[] {
 	if (typeof claims.roles === 'string') roles.push(claims.roles);
 
 	return Array.from(new Set(roles.map(normalizeRole).filter(Boolean)));
+}
+
+function redactClaimsForAudit(claims: ClerkClaims): Record<string, unknown> {
+	const email = typeof claims.email === 'string' ? claims.email : null;
+	const emailDomain = email && email.includes('@') ? email.split('@')[1]?.toLowerCase() ?? null : null;
+	const issuedAt = typeof claims.iat === 'number' ? claims.iat : null;
+	return {
+		emailVerified: claims.email_verified === true,
+		emailDomain,
+		hasAmr: claims.amr !== undefined,
+		hasFva: claims.fva !== undefined,
+		issuedAt,
+	};
+}
+
+async function auditGuardrailBlock(input: {
+	organizationId: string;
+	userId: string;
+	roles: string[];
+	error: AdminSecurityPolicyError;
+	claims: ClerkClaims;
+}): Promise<void> {
+	try {
+		await prisma.auditEvent.create({
+			data: {
+				organizationId: input.organizationId,
+				actorId: input.userId,
+				actorType: 'USER',
+				actorRoles: input.roles,
+				action: 'AUTH_GUARDRAIL_BLOCKED',
+				entityType: 'AdminSession',
+				entityId: input.userId,
+				result: 'DENY',
+				reason: input.error.code,
+				metadata: {
+					message: input.error.message,
+					details: input.error.details,
+					claims: redactClaimsForAudit(input.claims),
+				},
+			},
+		});
+	} catch {
+		// Do not block auth flow when audit logging fails.
+	}
 }
 
 export async function getActorFromClerk(
@@ -75,11 +123,24 @@ export async function getActorFromClerk(
 			: {};
 	const policyOverride = coerceAdminSecurityPolicy(settings.securityPolicy);
 
-	enforceAdminSecurityPolicy({
-		roles,
-		sessionClaims: claims,
-		policyOverride,
-	});
+	try {
+		enforceAdminSecurityPolicy({
+			roles,
+			sessionClaims: claims,
+			policyOverride,
+		});
+	} catch (error) {
+		if (error instanceof AdminSecurityPolicyError) {
+			await auditGuardrailBlock({
+				organizationId: organization.id,
+				userId,
+				roles,
+				error,
+				claims,
+			});
+		}
+		throw error;
+	}
 
 	return {
 		id: userId,

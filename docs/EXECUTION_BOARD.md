@@ -23,6 +23,8 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added settings-page visibility for active policy values.
 - Added organization-persisted security policy storage and update path.
 - Enforced policy override from organization settings during actor resolution.
+- Added auth guardrail denial auditing (`AUTH_GUARDRAIL_BLOCKED`) with structured violation codes.
+- Added guardrail health endpoint for ops monitoring (`/api/health/auth-guardrails`).
 
 **Done when**
 - Privileged users without required controls are blocked with actionable error messages.

@@ -185,6 +185,7 @@ const auditListSchema = z.object({
 	limit: z.number().min(1).max(200).default(50),
 	cursor: z.string().optional(),
 	action: z.string().optional(),
+	orgUnitId: z.string().min(1).optional(),
 	result: z.enum(['SUCCESS', 'DENIED', 'FAILED']).optional(),
 	query: z.string().min(1).max(120).optional(),
 });
@@ -1315,6 +1316,7 @@ export const orgRouter = router({
 				where: {
 					organizationId: input.organizationId,
 					action: input.action,
+					orgUnitId: input.orgUnitId,
 					result: input.result,
 					OR: input.query
 						? [

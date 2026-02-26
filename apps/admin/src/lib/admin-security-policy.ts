@@ -6,6 +6,28 @@ export type AdminSecurityPolicy = {
 	privilegedRoles: string[];
 };
 
+export type AdminSecurityPolicyViolationCode =
+	| 'EMAIL_NOT_VERIFIED'
+	| 'MFA_REQUIRED'
+	| 'SESSION_AGE_EXCEEDED'
+	| 'EMAIL_DOMAIN_NOT_ALLOWED';
+
+export class AdminSecurityPolicyError extends Error {
+	code: AdminSecurityPolicyViolationCode;
+	details: Record<string, unknown>;
+
+	constructor(
+		code: AdminSecurityPolicyViolationCode,
+		message: string,
+		details: Record<string, unknown> = {}
+	) {
+		super(message);
+		this.name = 'AdminSecurityPolicyError';
+		this.code = code;
+		this.details = details;
+	}
+}
+
 type SecurityClaims = Record<string, unknown> & {
 	email?: string;
 	email_verified?: boolean;
@@ -198,24 +220,41 @@ export function enforceAdminSecurityPolicy(input: {
 	const claims = normalizeClaims(input.sessionClaims);
 
 	if (policy.requireVerifiedEmail && claims.email_verified !== true) {
-		throw new Error('Forbidden: verified email is required for privileged access.');
+		throw new AdminSecurityPolicyError(
+			'EMAIL_NOT_VERIFIED',
+			'Forbidden: verified email is required for privileged access.'
+		);
 	}
 
 	if (policy.requireMfaForPrivilegedRoles && !hasMfa(claims)) {
-		throw new Error('Forbidden: MFA is required for privileged access.');
+		throw new AdminSecurityPolicyError('MFA_REQUIRED', 'Forbidden: MFA is required for privileged access.');
 	}
 
 	if (policy.maxSessionAgeMinutes) {
 		const sessionAgeMinutes = getSessionAgeMinutes(claims);
 		if (sessionAgeMinutes === null || sessionAgeMinutes > policy.maxSessionAgeMinutes) {
-			throw new Error('Forbidden: session expired for privileged access. Please sign in again.');
+			throw new AdminSecurityPolicyError(
+				'SESSION_AGE_EXCEEDED',
+				'Forbidden: session expired for privileged access. Please sign in again.',
+				{
+					maxSessionAgeMinutes: policy.maxSessionAgeMinutes,
+					sessionAgeMinutes,
+				}
+			);
 		}
 	}
 
 	if (policy.allowedEmailDomains.length) {
 		const emailDomain = getEmailDomain(claims);
 		if (!emailDomain || !policy.allowedEmailDomains.includes(emailDomain)) {
-			throw new Error('Forbidden: email domain is not allowed for privileged access.');
+			throw new AdminSecurityPolicyError(
+				'EMAIL_DOMAIN_NOT_ALLOWED',
+				'Forbidden: email domain is not allowed for privileged access.',
+				{
+					emailDomain: emailDomain ?? null,
+					allowedEmailDomains: policy.allowedEmailDomains,
+				}
+			);
 		}
 	}
 }

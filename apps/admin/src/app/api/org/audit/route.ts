@@ -11,6 +11,7 @@ function toCsvCell(value: unknown): string {
 export async function GET(request: NextRequest) {
 	const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
 	const action = request.nextUrl.searchParams.get('action') ?? undefined;
+	const orgUnitId = request.nextUrl.searchParams.get('orgUnitId') ?? undefined;
 	const query = request.nextUrl.searchParams.get('query') ?? undefined;
 	const format = request.nextUrl.searchParams.get('format');
 	const requestedLimit = Number(request.nextUrl.searchParams.get('limit') ?? '100');
@@ -28,6 +29,7 @@ export async function GET(request: NextRequest) {
 			organizationId,
 			cursor,
 			action,
+			orgUnitId,
 			result: result ?? undefined,
 			query,
 			limit,
@@ -39,6 +41,7 @@ export async function GET(request: NextRequest) {
 				'createdAt',
 				'action',
 				'result',
+				'orgUnitId',
 				'entityType',
 				'entityId',
 				'actorId',
@@ -50,6 +53,7 @@ export async function GET(request: NextRequest) {
 					toCsvCell(event.createdAt),
 					toCsvCell(event.action),
 					toCsvCell(event.result),
+					toCsvCell(event.orgUnitId),
 					toCsvCell(event.entityType),
 					toCsvCell(event.entityId),
 					toCsvCell(event.actorId),

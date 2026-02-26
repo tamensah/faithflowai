@@ -61,6 +61,7 @@ type AuditEvent = {
 	createdAt: string;
 	action: string;
 	result: string;
+	orgUnitId: string | null;
 	actorId: string;
 	entityType: string;
 	entityId: string | null;
@@ -184,6 +185,8 @@ export function OrgConsole() {
 	const [assignmentIncludeDescendants, setAssignmentIncludeDescendants] = useState(true);
 	const [assignmentLimit, setAssignmentLimit] = useState(20);
 	const [auditSearch, setAuditSearch] = useState('');
+	const [auditActionFilter, setAuditActionFilter] = useState('ALL');
+	const [auditOrgUnitFilter, setAuditOrgUnitFilter] = useState('');
 	const [auditResultFilter, setAuditResultFilter] = useState('ALL');
 	const [auditLimit, setAuditLimit] = useState(20);
 	const [assignments, setAssignments] = useState<RoleAssignment[]>([]);
@@ -228,6 +231,11 @@ export function OrgConsole() {
 	});
 
 	const unitOptions = useMemo(() => bootstrap?.units ?? [], [bootstrap]);
+	const unitNameById = useMemo(() => {
+		const map = new Map<string, string>();
+		for (const unit of unitOptions) map.set(unit.id, unit.name);
+		return map;
+	}, [unitOptions]);
 	const organizationId = bootstrap?.organizationId ?? '';
 
 	const aliasMap = useMemo(() => {
@@ -245,6 +253,13 @@ export function OrgConsole() {
 			})),
 		[aliasMap]
 	);
+	const auditActionOptions = useMemo(() => {
+		const actions = new Set<string>();
+		for (const event of bootstrap?.audit ?? []) actions.add(event.action);
+		for (const event of auditEvents) actions.add(event.action);
+		if (auditActionFilter !== 'ALL') actions.add(auditActionFilter);
+		return Array.from(actions).sort((left, right) => left.localeCompare(right));
+	}, [bootstrap?.audit, auditEvents, auditActionFilter]);
 	const searchParams = useSearchParams();
 
 	useEffect(() => {
@@ -288,7 +303,7 @@ export function OrgConsole() {
 		if (!bootstrap) return;
 		void loadAuditPage();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [bootstrap?.organizationId, auditResultFilter, auditSearch, auditLimit]);
+	}, [bootstrap?.organizationId, auditResultFilter, auditActionFilter, auditOrgUnitFilter, auditSearch, auditLimit]);
 
 	async function loadBootstrapData() {
 		setLoading(true);
@@ -339,6 +354,8 @@ export function OrgConsole() {
 			const params = new URLSearchParams();
 			params.set('limit', String(auditLimit));
 			if (auditResultFilter !== 'ALL') params.set('result', auditResultFilter);
+			if (auditActionFilter !== 'ALL') params.set('action', auditActionFilter);
+			if (auditOrgUnitFilter) params.set('orgUnitId', auditOrgUnitFilter);
 			if (auditSearch.trim()) params.set('query', auditSearch.trim());
 			if (options?.cursor) params.set('cursor', options.cursor);
 
@@ -514,6 +531,8 @@ export function OrgConsole() {
 			params.set('format', 'csv');
 			params.set('limit', '1000');
 			if (auditResultFilter !== 'ALL') params.set('result', auditResultFilter);
+			if (auditActionFilter !== 'ALL') params.set('action', auditActionFilter);
+			if (auditOrgUnitFilter) params.set('orgUnitId', auditOrgUnitFilter);
 			if (auditSearch.trim()) params.set('query', auditSearch.trim());
 
 			const response = await fetch(`/api/org/audit?${params.toString()}`, {
@@ -1142,13 +1161,37 @@ export function OrgConsole() {
 							Export CSV
 						</button>
 					</div>
-					<div className="mt-3 grid gap-2 md:grid-cols-3">
+					<div className="mt-3 grid gap-2 md:grid-cols-5">
 						<input
 							value={auditSearch}
 							onChange={(event) => setAuditSearch(event.target.value)}
 							placeholder="Filter action/entity/actor..."
 							className="rounded-md border border-gray-300 px-3 py-2 text-sm"
 						/>
+						<select
+							value={auditActionFilter}
+							onChange={(event) => setAuditActionFilter(event.target.value)}
+							className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+						>
+							<option value="ALL">All actions</option>
+							{auditActionOptions.map((action) => (
+								<option key={action} value={action}>
+									{action}
+								</option>
+							))}
+						</select>
+						<select
+							value={auditOrgUnitFilter}
+							onChange={(event) => setAuditOrgUnitFilter(event.target.value)}
+							className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+						>
+							<option value="">All units</option>
+							{unitOptions.map((unit) => (
+								<option key={unit.id} value={unit.id}>
+									{unit.name}
+								</option>
+							))}
+						</select>
 						<select
 							value={auditResultFilter}
 							onChange={(event) => setAuditResultFilter(event.target.value)}
@@ -1180,6 +1223,11 @@ export function OrgConsole() {
 										{event.entityType}
 										{event.entityId ? `#${event.entityId}` : ''} by {event.actorId}
 									</p>
+									{event.orgUnitId ? (
+										<p className="text-xs text-gray-500">
+											Unit: {unitNameById.get(event.orgUnitId) ?? event.orgUnitId}
+										</p>
+									) : null}
 									<p className="text-xs text-gray-500">
 										{new Date(event.createdAt).toLocaleString()}
 									</p>
