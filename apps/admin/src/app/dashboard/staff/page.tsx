@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@faithflow/database';
-import { updateAssignmentStatusAction } from './actions';
+import { createAssignmentAction, updateAssignmentStatusAction } from './actions';
 
 type AssignmentStatus = 'PLANNED' | 'ACTIVE' | 'SUSPENDED' | 'ENDED';
 type QuickAction = {
@@ -78,7 +78,7 @@ export default async function StaffPage() {
 		);
 	}
 
-	const [statusRows, assignments] = await Promise.all([
+	const [statusRows, assignments, members, roleTemplates, orgUnits] = await Promise.all([
 		prisma.unitRoleAssignment.groupBy({
 			by: ['status'],
 			where: { organizationId: orgId },
@@ -116,6 +116,36 @@ export default async function StaffPage() {
 						type: true,
 					},
 				},
+			},
+		}),
+		prisma.member.findMany({
+			where: { church: { organizationId: orgId } },
+			orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+			take: 200,
+			select: {
+				id: true,
+				firstName: true,
+				lastName: true,
+				email: true,
+			},
+		}),
+		prisma.roleTemplate.findMany({
+			where: { organizationId: orgId },
+			orderBy: [{ isLeadership: 'desc' }, { name: 'asc' }],
+			select: {
+				id: true,
+				name: true,
+				code: true,
+				isLeadership: true,
+			},
+		}),
+		prisma.orgUnit.findMany({
+			where: { organizationId: orgId },
+			orderBy: [{ type: 'asc' }, { name: 'asc' }],
+			select: {
+				id: true,
+				name: true,
+				type: true,
 			},
 		}),
 	]);
@@ -165,6 +195,106 @@ export default async function StaffPage() {
 					<p className="text-xs uppercase tracking-[0.16em] text-slate-500">Ended</p>
 					<p className="mt-2 text-2xl font-semibold text-slate-900">{statusTotals.ENDED}</p>
 				</div>
+			</div>
+
+			<div className="rounded-xl border border-slate-200 bg-white p-5">
+				<div className="flex items-center justify-between">
+					<h2 className="text-base font-semibold text-slate-900">Quick assign</h2>
+					<span className="text-xs uppercase tracking-[0.12em] text-slate-500">
+						{members.length} members · {roleTemplates.length} roles · {orgUnits.length} org units
+					</span>
+				</div>
+				{members.length === 0 || roleTemplates.length === 0 || orgUnits.length === 0 ? (
+					<div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+						Missing setup for assignment creation. Ensure members, role templates, and org units exist.
+					</div>
+				) : (
+					<form action={createAssignmentAction} className="mt-4 grid gap-3 md:grid-cols-5 md:items-end">
+						<label className="text-sm font-medium text-slate-700">
+							Member *
+							<select
+								name="memberId"
+								required
+								defaultValue=""
+								className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+							>
+								<option value="" disabled>
+									Select member
+								</option>
+								{members.map((member) => (
+									<option key={member.id} value={member.id}>
+										{member.firstName} {member.lastName}
+										{member.email ? ` (${member.email})` : ''}
+									</option>
+								))}
+							</select>
+						</label>
+						<label className="text-sm font-medium text-slate-700">
+							Role template *
+							<select
+								name="roleTemplateId"
+								required
+								defaultValue=""
+								className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+							>
+								<option value="" disabled>
+									Select role template
+								</option>
+								{roleTemplates.map((role) => (
+									<option key={role.id} value={role.id}>
+										{role.name} ({role.code})
+										{role.isLeadership ? ' · leadership' : ''}
+									</option>
+								))}
+							</select>
+						</label>
+						<label className="text-sm font-medium text-slate-700">
+							Org unit *
+							<select
+								name="orgUnitId"
+								required
+								defaultValue=""
+								className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+							>
+								<option value="" disabled>
+									Select org unit
+								</option>
+								{orgUnits.map((unit) => (
+									<option key={unit.id} value={unit.id}>
+										{unit.name} ({unit.type})
+									</option>
+								))}
+							</select>
+						</label>
+						<label className="text-sm font-medium text-slate-700">
+							Start at
+							<input
+								name="startAt"
+								type="datetime-local"
+								className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+							/>
+						</label>
+						<div className="grid gap-3">
+							<label className="text-sm font-medium text-slate-700">
+								Status
+								<select
+									name="status"
+									defaultValue="ACTIVE"
+									className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700"
+								>
+									<option value="ACTIVE">Active</option>
+									<option value="PLANNED">Planned</option>
+								</select>
+							</label>
+							<button
+								type="submit"
+								className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+							>
+								Create assignment
+							</button>
+						</div>
+					</form>
+				)}
 			</div>
 
 			<div className="rounded-xl border border-slate-200 bg-white p-5">

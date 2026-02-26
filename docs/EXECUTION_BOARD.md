@@ -97,6 +97,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added dedicated Staff Console (`/dashboard/staff`) with assignment status totals and active/planned/suspended queue.
 - Added 12-week trend surfaces for member growth, giving momentum, and event velocity on `/dashboard`.
 - Added staff quick actions (activate/suspend/end/reactivate) on `/dashboard/staff` with server-side mutation handling.
+- Added quick assignment creation workflow on `/dashboard/staff` (member + role + org unit + schedule + status).
 
 ---
 
