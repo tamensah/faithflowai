@@ -1,13 +1,27 @@
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
+import { prisma } from '@faithflow/database';
 import { ModuleLockPanel } from '@/components/locks/module-lock-panel';
 import { getAiInsights } from '@/lib/ai-insights';
 import { getModuleGate } from '@/lib/module-gates';
+import { markInsightReviewedAction } from './actions';
+
+type InsightReview = {
+	actorId: string;
+	createdAt: Date;
+};
 
 function levelClass(level: 'LOW' | 'MEDIUM' | 'HIGH'): string {
 	if (level === 'HIGH') return 'bg-rose-100 text-rose-700';
 	if (level === 'MEDIUM') return 'bg-amber-100 text-amber-700';
 	return 'bg-emerald-100 text-emerald-700';
+}
+
+function resolveInsightHref(key: string): string {
+	if (key === 'attendance-drop') return '/dashboard/events';
+	if (key === 'giving-risk') return '/dashboard/payments';
+	if (key === 'care-routing') return '/dashboard/members';
+	return '/dashboard';
 }
 
 export default async function AnalyticsPage() {
@@ -40,6 +54,31 @@ export default async function AnalyticsPage() {
 	}
 
 	const insights = orgId ? await getAiInsights(orgId) : [];
+	const reviewedRows = orgId
+		? await prisma.auditEvent.findMany({
+				where: {
+					organizationId: orgId,
+					action: 'AI_INSIGHT_REVIEWED',
+					entityType: 'AiInsight',
+				},
+				orderBy: { createdAt: 'desc' },
+				take: 200,
+				select: {
+					entityId: true,
+					actorId: true,
+					createdAt: true,
+				},
+			})
+		: [];
+	const reviewByKey = new Map<string, InsightReview>();
+	for (const row of reviewedRows) {
+		if (!row.entityId) continue;
+		if (reviewByKey.has(row.entityId)) continue;
+		reviewByKey.set(row.entityId, {
+			actorId: row.actorId,
+			createdAt: row.createdAt,
+		});
+	}
 
 	return (
 		<div className="space-y-6">
@@ -73,6 +112,35 @@ export default async function AnalyticsPage() {
 							<p className="mt-3 text-xs font-medium text-slate-700">
 								Recommended: {insight.recommendedAction}
 							</p>
+							<div className="mt-4 flex items-center justify-between gap-2">
+								{reviewByKey.has(insight.key) ? (
+									<p className="text-[11px] text-emerald-700">
+										Reviewed by {reviewByKey.get(insight.key)?.actorId} on{' '}
+										{reviewByKey.get(insight.key)?.createdAt.toLocaleString()}
+									</p>
+								) : (
+									<p className="text-[11px] text-slate-500">Not reviewed yet.</p>
+								)}
+								<div className="flex items-center gap-2">
+									<Link
+										href={resolveInsightHref(insight.key)}
+										className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700"
+									>
+										Open module
+									</Link>
+									<form action={markInsightReviewedAction}>
+										<input type="hidden" name="insightKey" value={insight.key} />
+										<input type="hidden" name="insightTitle" value={insight.title} />
+										<input type="hidden" name="insightLevel" value={insight.level} />
+										<button
+											type="submit"
+											className="rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white"
+										>
+											Mark reviewed
+										</button>
+									</form>
+								</div>
+							</div>
 						</div>
 					))}
 				</div>

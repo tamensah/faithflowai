@@ -158,6 +158,8 @@ This board consolidates the active backlog into one ordered sequence so implemen
 **Current implementation (this batch)**
 - Added initial explainable analytics insight cards (attendance momentum, giving risk, care routing) in `/dashboard/analytics` when module is enabled.
 - Signals are derived from platform event/payment/member data with transparent metric attribution.
+- Added per-insight action links and "mark reviewed" workflow on `/dashboard/analytics`.
+- Added audit-safe attribution for insight review actions via `AI_INSIGHT_REVIEWED` audit events.
 
 ---
 
