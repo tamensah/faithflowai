@@ -1,8 +1,9 @@
 {
-  "name": "database",
+  "name": "@faithflow/database",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./src/client.ts",
+  "types": "./src/client.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

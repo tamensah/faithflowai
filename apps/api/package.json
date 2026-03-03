@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@faithflow/database": "workspace:*",
     "@prisma/client": "^6.2.0",
     "@trpc/server": "^10.45.2",
     "prisma": "^6.2.0",
