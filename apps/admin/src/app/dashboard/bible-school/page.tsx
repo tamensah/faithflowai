@@ -1,14 +1,16 @@
 import { auth } from '@clerk/nextjs/server';
 import { BibleSchoolConsole } from '@/components/addons/bible-school-console';
 import { ModuleLockPanel } from '@/components/locks/module-lock-panel';
+import { OrgContextLockPanel } from '@/components/locks/org-context-lock-panel';
 import { getAddonStateForOrganization, isAddonEnabled } from '@/lib/addon-entitlements';
 
 export default async function BibleSchoolPage() {
 	const { orgId } = await auth();
 	if (!orgId) {
 		return (
-			<div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-				Select an organization to access bible school operations.
+			<div className="space-y-4">
+				<h1 className="text-2xl font-semibold text-slate-900">Bible school</h1>
+				<OrgContextLockPanel moduleName="Bible school" />
 			</div>
 		);
 	}

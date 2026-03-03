@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@faithflow/database';
+import { OrgContextLockPanel } from '@/components/locks/org-context-lock-panel';
 import { SecurityPolicyCard } from '@/components/org/security-policy-card';
 
 function formatViolationReason(reason: string | null): string {
@@ -20,22 +21,29 @@ function formatViolationReason(reason: string | null): string {
 
 export default async function SettingsPage() {
 	const { orgId } = await auth();
-	const guardrailBlocks = orgId
-		? await prisma.auditEvent.findMany({
-				where: {
-					organizationId: orgId,
-					action: 'AUTH_GUARDRAIL_BLOCKED',
-				},
-				orderBy: { createdAt: 'desc' },
-				take: 8,
-				select: {
-					id: true,
-					actorId: true,
-					reason: true,
-					createdAt: true,
-				},
-		  })
-		: [];
+	if (!orgId) {
+		return (
+			<div className="space-y-4">
+				<h1 className="text-2xl font-semibold text-gray-900">Settings</h1>
+				<OrgContextLockPanel moduleName="Settings" />
+			</div>
+		);
+	}
+
+	const guardrailBlocks = await prisma.auditEvent.findMany({
+		where: {
+			organizationId: orgId,
+			action: 'AUTH_GUARDRAIL_BLOCKED',
+		},
+		orderBy: { createdAt: 'desc' },
+		take: 8,
+		select: {
+			id: true,
+			actorId: true,
+			reason: true,
+			createdAt: true,
+		},
+	});
 
 	return (
 		<div className="space-y-6">

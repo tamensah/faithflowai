@@ -1,10 +1,22 @@
+import { auth } from '@clerk/nextjs/server';
 import { CommsConsole } from '@/components/comms/comms-console';
+import { OrgContextLockPanel } from '@/components/locks/org-context-lock-panel';
 
 function hasEnv(name: string): boolean {
 	return Boolean(process.env[name]?.trim());
 }
 
-export default function CommsPage() {
+export default async function CommsPage() {
+	const { orgId } = await auth();
+	if (!orgId) {
+		return (
+			<div className="space-y-4">
+				<h1 className="text-2xl font-semibold text-slate-900">Comms</h1>
+				<OrgContextLockPanel moduleName="Comms" />
+			</div>
+		);
+	}
+
 	const providerConfig = {
 		resendConfigured: hasEnv('RESEND_API_KEY') && hasEnv('RESEND_FROM_EMAIL'),
 		twilioConfigured: hasEnv('TWILIO_ACCOUNT_SID') && hasEnv('TWILIO_AUTH_TOKEN'),

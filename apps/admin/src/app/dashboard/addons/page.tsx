@@ -1,6 +1,18 @@
+import { auth } from '@clerk/nextjs/server';
 import { AddonsConsole } from '@/components/addons/addons-console';
+import { OrgContextLockPanel } from '@/components/locks/org-context-lock-panel';
 
-export default function AddonsPage() {
+export default async function AddonsPage() {
+	const { orgId } = await auth();
+	if (!orgId) {
+		return (
+			<div className="space-y-4">
+				<h1 className="text-2xl font-semibold text-slate-900">Add-ons</h1>
+				<OrgContextLockPanel moduleName="Add-ons" />
+			</div>
+		);
+	}
+
 	return (
 		<div className="space-y-6">
 			<div>

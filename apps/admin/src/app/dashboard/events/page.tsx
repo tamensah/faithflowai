@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@faithflow/database';
+import { OrgContextLockPanel } from '@/components/locks/org-context-lock-panel';
 import { listOrganizationUnits, resolveOrganizationScope } from '@/lib/executive-rollups';
 
 function toPositiveInt(value: string | undefined, fallback: number, min: number, max: number): number {
@@ -37,8 +38,9 @@ export default async function EventsPage({
 	const { orgId } = await auth();
 	if (!orgId) {
 		return (
-			<div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-				Select an organization in Clerk to load events.
+			<div className="space-y-4">
+				<h1 className="text-2xl font-semibold text-gray-900">Events</h1>
+				<OrgContextLockPanel moduleName="Events" />
 			</div>
 		);
 	}

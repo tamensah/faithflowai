@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@faithflow/database';
 import { ModuleLockPanel } from '@/components/locks/module-lock-panel';
+import { OrgContextLockPanel } from '@/components/locks/org-context-lock-panel';
 import { getAiInsights } from '@/lib/ai-insights';
 import { getModuleGate } from '@/lib/module-gates';
 import { markInsightReviewedAction } from './actions';
@@ -54,23 +55,30 @@ export default async function AnalyticsPage() {
 		);
 	}
 
-	const insights = orgId ? await getAiInsights(orgId) : [];
-	const reviewedRows = orgId
-		? await prisma.auditEvent.findMany({
-				where: {
-					organizationId: orgId,
-					action: 'AI_INSIGHT_REVIEWED',
-					entityType: 'AiInsight',
-				},
-				orderBy: { createdAt: 'desc' },
-				take: 200,
-				select: {
-					entityId: true,
-					actorId: true,
-					createdAt: true,
-				},
-			})
-		: [];
+	if (!orgId) {
+		return (
+			<div className="space-y-4">
+				<h1 className="text-2xl font-semibold text-gray-900">Analytics</h1>
+				<OrgContextLockPanel moduleName="Analytics" />
+			</div>
+		);
+	}
+
+	const insights = await getAiInsights(orgId);
+	const reviewedRows = await prisma.auditEvent.findMany({
+		where: {
+			organizationId: orgId,
+			action: 'AI_INSIGHT_REVIEWED',
+			entityType: 'AiInsight',
+		},
+		orderBy: { createdAt: 'desc' },
+		take: 200,
+		select: {
+			entityId: true,
+			actorId: true,
+			createdAt: true,
+		},
+	});
 	const reviewByKey = new Map<string, InsightReview>();
 	for (const row of reviewedRows) {
 		if (!row.entityId) continue;

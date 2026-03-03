@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import { auth } from '@clerk/nextjs/server';
 import { ModuleLockPanel } from '@/components/locks/module-lock-panel';
+import { OrgContextLockPanel } from '@/components/locks/org-context-lock-panel';
 import { getModuleGate } from '@/lib/module-gates';
 
-export default function GroupsPage() {
+export default async function GroupsPage() {
 	const gate = getModuleGate('groups');
 
 	if (gate.locked) {
@@ -26,6 +28,16 @@ export default function GroupsPage() {
 						{ label: 'Open events', href: '/dashboard/events' },
 					]}
 				/>
+			</div>
+		);
+	}
+
+	const { orgId } = await auth();
+	if (!orgId) {
+		return (
+			<div className="space-y-4">
+				<h1 className="text-2xl font-semibold text-gray-900">Small Groups</h1>
+				<OrgContextLockPanel moduleName="Small groups" />
 			</div>
 		);
 	}

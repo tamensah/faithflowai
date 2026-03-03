@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { ModuleLockPanel } from '@/components/locks/module-lock-panel';
+import { OrgContextLockPanel } from '@/components/locks/org-context-lock-panel';
 import { StreamingConsole } from '@/components/addons/streaming-console';
 import { getAddonStateForOrganization, isAddonEnabled } from '@/lib/addon-entitlements';
 
@@ -7,8 +8,9 @@ export default async function StreamingPage() {
 	const { orgId } = await auth();
 	if (!orgId) {
 		return (
-			<div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-				Select an organization to access streaming operations.
+			<div className="space-y-4">
+				<h1 className="text-2xl font-semibold text-slate-900">Streaming</h1>
+				<OrgContextLockPanel moduleName="Streaming" />
 			</div>
 		);
 	}

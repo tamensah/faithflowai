@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { auth } from '@clerk/nextjs/server';
 import { Prisma, prisma } from '@faithflow/database';
+import { OrgContextLockPanel } from '@/components/locks/org-context-lock-panel';
 import { createAssignmentAction, updateAssignmentStatusAction } from './actions';
 
 const STATUS_FILTERS = ['ALL', 'PLANNED', 'ACTIVE', 'SUSPENDED', 'ENDED'] as const;
@@ -128,8 +129,9 @@ export default async function StaffPage({
 	const { orgId } = await auth();
 	if (!orgId) {
 		return (
-			<div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
-				Select an organization from the Clerk switcher to manage staff assignments.
+			<div className="space-y-4">
+				<h1 className="text-2xl font-semibold text-slate-900">Staff</h1>
+				<OrgContextLockPanel moduleName="Staff console" />
 			</div>
 		);
 	}

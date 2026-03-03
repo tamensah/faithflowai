@@ -5,6 +5,7 @@ import {
 	getExecutiveRollups,
 	listOrganizationUnits,
 } from '@/lib/executive-rollups';
+import { OrgContextLockPanel } from '@/components/locks/org-context-lock-panel';
 
 function formatCurrency(amount: number): string {
 	return new Intl.NumberFormat('en-US', {
@@ -345,8 +346,8 @@ export default async function DashboardPage({
 					</div>
 				</>
 			) : (
-				<div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
-					Select an organization from the Clerk switcher to load executive rollups and drill-down dashboards.
+				<div className="space-y-4">
+					<OrgContextLockPanel moduleName="Overview" />
 				</div>
 			)}
 		</div>

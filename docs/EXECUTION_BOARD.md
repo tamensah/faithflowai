@@ -112,7 +112,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 5) Lock-state parity and entitlement UX (P1)
-**Status:** IN PROGRESS
+**Status:** DONE
 **Goal:** Standardize locked-feature behavior across all modules.
 
 **Deliverables**
@@ -125,6 +125,12 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added sidebar lock badges for gated modules to set expectations before navigation.
 - Added action-level provider lock messaging in Payments and Comms (disabled actions when provider credentials are missing).
 - Added linkable lock-state next-step guidance across gated/admin add-on modules for faster remediation.
+- Added shared org-context lock panel UX across remaining admin modules (Members, Events, Staff, Payments, Comms, Add-ons, Provider Ops, Facilities, Settings, Bible School, Streaming, Analytics, Groups, and Organization Builder).
+- Replaced ad-hoc no-org placeholders with consistent lock copy + CTA links to overview and organization builder.
+- Aligned module lock and empty-state guidance so each blocked path includes an explicit remediation path before retry.
+
+**Done when**
+- Every admin module displays a consistent lock-state panel (with actionable next steps) when org context, entitlement, or provider readiness is missing.
 
 ---
 
