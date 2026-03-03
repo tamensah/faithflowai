@@ -21,6 +21,7 @@ function resolveInsightHref(key: string): string {
 	if (key === 'attendance-drop') return '/dashboard/events';
 	if (key === 'giving-risk') return '/dashboard/payments';
 	if (key === 'care-routing') return '/dashboard/members';
+	if (key === 'leadership-coverage') return '/dashboard/staff';
 	return '/dashboard';
 }
 
@@ -84,7 +85,7 @@ export default async function AnalyticsPage() {
 		<div className="space-y-6">
 			<h1 className="text-2xl font-semibold text-gray-900">Analytics</h1>
 			<p className="text-sm text-gray-600">
-				Explainable intelligence signals for attendance, giving, and care routing.
+				Explainable intelligence signals for attendance, giving, care routing, and leadership coverage.
 			</p>
 			{insights.length ? (
 				<div className="grid gap-4 xl:grid-cols-3">
@@ -158,6 +159,9 @@ export default async function AnalyticsPage() {
 				</Link>
 				<Link href="/dashboard/org" className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700">
 					Open organization builder
+				</Link>
+				<Link href="/dashboard/staff" className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700">
+					Open staff
 				</Link>
 			</div>
 		</div>
