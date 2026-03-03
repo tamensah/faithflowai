@@ -10,6 +10,9 @@
     "build": "tsup",
     "dev": "tsup --watch"
   },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.0"
+  },
   "peerDependencies": {
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",

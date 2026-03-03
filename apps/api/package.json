@@ -13,6 +13,7 @@
     "@faithflow/database": "workspace:*",
     "@prisma/client": "^6.2.0",
     "@trpc/server": "^10.45.2",
+    "date-fns": "^2.30.0",
     "prisma": "^6.2.0",
     "superjson": "^2.2.2",
     "zod": "^3.24.1"
