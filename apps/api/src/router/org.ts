@@ -188,7 +188,18 @@ const auditListSchema = z.object({
 	orgUnitId: z.string().min(1).optional(),
 	result: z.enum(['SUCCESS', 'DENIED', 'FAILED']).optional(),
 	query: z.string().min(1).max(120).optional(),
-});
+	createdFrom: z.coerce.date().optional(),
+	createdTo: z.coerce.date().optional(),
+}).refine(
+	(value) =>
+		!value.createdFrom ||
+		!value.createdTo ||
+		value.createdTo.getTime() >= value.createdFrom.getTime(),
+	{
+		message: 'createdTo must be greater than or equal to createdFrom',
+		path: ['createdTo'],
+	}
+);
 
 const hierarchyNodesSchema = z.object({
 	organizationId: z.string().min(1),
@@ -1318,6 +1329,13 @@ export const orgRouter = router({
 					action: input.action,
 					orgUnitId: input.orgUnitId,
 					result: input.result,
+					createdAt:
+						input.createdFrom || input.createdTo
+							? {
+									gte: input.createdFrom,
+									lte: input.createdTo,
+								}
+							: undefined,
 					OR: input.query
 						? [
 								{ action: { contains: input.query, mode: 'insensitive' } },

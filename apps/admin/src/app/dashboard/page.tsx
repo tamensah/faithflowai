@@ -268,10 +268,11 @@ export default async function DashboardPage({
 						</div>
 					</div>
 
-					<div className="grid gap-4 xl:grid-cols-3">
+					<div className="grid gap-4 xl:grid-cols-4">
 						<TrendSurface title="Member growth" points={rollups.trends.members} format="count" />
 						<TrendSurface title="Giving momentum" points={rollups.trends.giving} format="currency" />
-						<TrendSurface title="Event velocity" points={rollups.trends.events} format="count" />
+						<TrendSurface title="Attendance momentum" points={rollups.trends.attendance} format="count" />
+						<TrendSurface title="Leadership bench" points={rollups.trends.leadership} format="count" />
 					</div>
 
 					<div className="grid gap-4 xl:grid-cols-[2fr_1fr]">

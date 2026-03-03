@@ -57,6 +57,8 @@ export type ExecutiveRollups = {
 		members: ExecutiveTrendPoint[];
 		giving: ExecutiveTrendPoint[];
 		events: ExecutiveTrendPoint[];
+		attendance: ExecutiveTrendPoint[];
+		leadership: ExecutiveTrendPoint[];
 	};
 };
 
@@ -291,6 +293,8 @@ export async function getExecutiveRollups(input: {
 		memberTrendRows,
 		givingTrendRows,
 		eventTrendRows,
+		eventAttendanceTrendRows,
+		leadershipTrendRows,
 		churchCount,
 		orgUnitCount,
 		roleTemplateCount,
@@ -381,6 +385,31 @@ export async function getExecutiveRollups(input: {
 				startDate: true,
 			},
 		}),
+		prisma.event.findMany({
+			where: {
+				...eventWhere,
+				startDate: { gte: trendStart, lte: now },
+			},
+			select: {
+				startDate: true,
+				_count: {
+					select: {
+						attendees: true,
+					},
+				},
+			},
+		}),
+		prisma.unitRoleAssignment.findMany({
+			where: {
+				...assignmentWhere,
+				status: 'ACTIVE',
+				roleTemplate: { isLeadership: true },
+				createdAt: { gte: trendStart, lte: now },
+			},
+			select: {
+				createdAt: true,
+			},
+		}),
 		prisma.church.count({
 			where: { organizationId },
 		}),
@@ -451,6 +480,18 @@ export async function getExecutiveRollups(input: {
 		(row) => asNumber(row.amount)
 	);
 	const eventsTrend = buildTrendSeries(eventTrendRows, trendBuckets, (row) => row.startDate, () => 1);
+	const attendanceTrend = buildTrendSeries(
+		eventAttendanceTrendRows,
+		trendBuckets,
+		(row) => row.startDate,
+		(row) => row._count.attendees
+	);
+	const leadershipTrend = buildTrendSeries(
+		leadershipTrendRows,
+		trendBuckets,
+		(row) => row.createdAt,
+		() => 1
+	);
 
 	return {
 		scope: {
@@ -487,6 +528,8 @@ export async function getExecutiveRollups(input: {
 			members: membersTrend,
 			giving: givingTrend,
 			events: eventsTrend,
+			attendance: attendanceTrend,
+			leadership: leadershipTrend,
 		},
 	};
 }

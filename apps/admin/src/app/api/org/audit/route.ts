@@ -18,6 +18,8 @@ export async function GET(request: NextRequest) {
 	const orgUnitId = request.nextUrl.searchParams.get('orgUnitId') ?? undefined;
 	const query = request.nextUrl.searchParams.get('query') ?? undefined;
 	const format = request.nextUrl.searchParams.get('format');
+	const createdFromRaw = request.nextUrl.searchParams.get('createdFrom');
+	const createdToRaw = request.nextUrl.searchParams.get('createdTo');
 	const requestedLimit = Number(request.nextUrl.searchParams.get('limit') ?? '100');
 	const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 1000) : 100;
 	const result = request.nextUrl.searchParams.get('result') as
@@ -25,6 +27,18 @@ export async function GET(request: NextRequest) {
 		| 'DENIED'
 		| 'FAILED'
 		| null;
+	const createdFrom = createdFromRaw ? new Date(createdFromRaw) : undefined;
+	const createdTo = createdToRaw ? new Date(createdToRaw) : undefined;
+
+	if (createdFrom && Number.isNaN(createdFrom.getTime())) {
+		return NextResponse.json({ error: 'createdFrom must be a valid ISO datetime' }, { status: 400 });
+	}
+	if (createdTo && Number.isNaN(createdTo.getTime())) {
+		return NextResponse.json({ error: 'createdTo must be a valid ISO datetime' }, { status: 400 });
+	}
+	if (createdFrom && createdTo && createdTo.getTime() < createdFrom.getTime()) {
+		return NextResponse.json({ error: 'createdTo must be greater than or equal to createdFrom' }, { status: 400 });
+	}
 
 	try {
 		const { caller, actor } = await createOrgCaller();
@@ -36,6 +50,8 @@ export async function GET(request: NextRequest) {
 			orgUnitId,
 			result: result ?? undefined,
 			query,
+			createdFrom,
+			createdTo,
 			limit,
 		});
 

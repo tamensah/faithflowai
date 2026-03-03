@@ -49,6 +49,9 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added audit action + org-unit filtering, local saved filter state, and quick presets (Denied/Auth Guardrails/Finance).
 - Added staff assignment queue filters (query/status/org unit) and page-based pagination on `/dashboard/staff`.
 - Added inline assignment audit timeline on `/dashboard/staff` showing latest role-assignment change events.
+- Hardened Organization Builder form validation (unit/timezone/country, role templates, role assignment timeline) with inline error guidance.
+- Added hierarchy search + page-size pagination with empty-state guidance for large org trees.
+- Added audit date-range filters/presets (24h/7d/30d) and CSV export support with date-scoped payloads.
 
 **Done when**
 - Winners-style hierarchy and leadership assignments can be managed end-to-end from admin UI.
@@ -97,7 +100,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added scoped role-assignment filtering (org unit + descendants) with server-side pagination in Organization Builder.
 - Added server-filtered Members and Events pages with org-unit scope controls and URL-driven pagination.
 - Added dedicated Staff Console (`/dashboard/staff`) with assignment status totals and active/planned/suspended queue.
-- Added 12-week trend surfaces for member growth, giving momentum, and event velocity on `/dashboard`.
+- Added 12-week trend surfaces for member growth, giving momentum, attendance momentum, and leadership bench on `/dashboard`.
 - Added staff quick actions (activate/suspend/end/reactivate) on `/dashboard/staff` with server-side mutation handling.
 - Added quick assignment creation workflow on `/dashboard/staff` (member + role + org unit + schedule + status).
 

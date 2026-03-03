@@ -113,6 +113,11 @@ const unitTypes = [
 	'MINISTRY',
 ] as const;
 const AUDIT_FILTER_STORAGE_KEY = 'faithflow.org.auditFilters.v1';
+const HIERARCHY_PAGE_SIZE_OPTIONS = [8, 16, 32] as const;
+const UNIT_NAME_MAX_LENGTH = 80;
+const ROLE_TEMPLATE_NAME_MAX_LENGTH = 80;
+const ROLE_CODE_PATTERN = /^[A-Z][A-Z0-9_]{2,79}$/;
+const COUNTRY_ISO2_PATTERN = /^[A-Z]{2}$/;
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -122,6 +127,15 @@ function toSlug(value: string): string {
 		.trim()
 		.replace(/[^a-z0-9]+/g, '-')
 		.replace(/(^-|-$)+/g, '');
+}
+
+function isValidTimezone(value: string): boolean {
+	try {
+		new Intl.DateTimeFormat('en-US', { timeZone: value });
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 function createIdempotencyKey(prefix: string): string {
@@ -149,6 +163,13 @@ function toDateTimeLocal(value: string | null | undefined): string {
 }
 
 function fromDateTimeLocal(value: string): string | undefined {
+	if (!value.trim()) return undefined;
+	const parsed = new Date(value);
+	if (Number.isNaN(parsed.getTime())) return undefined;
+	return parsed.toISOString();
+}
+
+function toIsoDateTime(value: string): string | undefined {
 	if (!value.trim()) return undefined;
 	const parsed = new Date(value);
 	if (Number.isNaN(parsed.getTime())) return undefined;
@@ -189,6 +210,8 @@ export function OrgConsole() {
 	const [auditActionFilter, setAuditActionFilter] = useState('ALL');
 	const [auditOrgUnitFilter, setAuditOrgUnitFilter] = useState('');
 	const [auditResultFilter, setAuditResultFilter] = useState('ALL');
+	const [auditCreatedFrom, setAuditCreatedFrom] = useState('');
+	const [auditCreatedTo, setAuditCreatedTo] = useState('');
 	const [auditLimit, setAuditLimit] = useState(20);
 	const [assignments, setAssignments] = useState<RoleAssignment[]>([]);
 	const [assignmentsNextCursor, setAssignmentsNextCursor] = useState<string | undefined>();
@@ -196,6 +219,9 @@ export function OrgConsole() {
 	const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
 	const [auditNextCursor, setAuditNextCursor] = useState<string | undefined>();
 	const [auditLoading, setAuditLoading] = useState(false);
+	const [hierarchySearch, setHierarchySearch] = useState('');
+	const [hierarchyPageSize, setHierarchyPageSize] = useState<(typeof HIERARCHY_PAGE_SIZE_OPTIONS)[number]>(8);
+	const [hierarchyPage, setHierarchyPage] = useState(1);
 
 	const [unitForm, setUnitForm] = useState({
 		name: '',
@@ -254,6 +280,42 @@ export function OrgConsole() {
 			})),
 		[aliasMap]
 	);
+	const filteredHierarchyNodes = useMemo(() => {
+		const nodes = hierarchy?.nodes ?? [];
+		const query = hierarchySearch.trim().toLowerCase();
+		if (!query) return nodes;
+		return nodes.filter((unit) => {
+			const unitTypeLabel = aliasMap.get(unit.type)?.singularLabel ?? humanizeEnum(unit.type);
+			return (
+				unit.name.toLowerCase().includes(query) ||
+				unit.slug.toLowerCase().includes(query) ||
+				unitTypeLabel.toLowerCase().includes(query) ||
+				(unit.countryIso2 ?? '').toLowerCase().includes(query)
+			);
+		});
+	}, [aliasMap, hierarchy?.nodes, hierarchySearch]);
+	const totalHierarchyPages = Math.max(1, Math.ceil(filteredHierarchyNodes.length / hierarchyPageSize));
+	const hierarchyPageIndex = Math.min(hierarchyPage, totalHierarchyPages) - 1;
+	const pagedHierarchyNodes = useMemo(
+		() =>
+			filteredHierarchyNodes.slice(
+				hierarchyPageIndex * hierarchyPageSize,
+				hierarchyPageIndex * hierarchyPageSize + hierarchyPageSize
+			),
+		[filteredHierarchyNodes, hierarchyPageIndex, hierarchyPageSize]
+	);
+	const assignmentFiltersActive =
+		assignmentSearch.trim().length > 0 ||
+		assignmentStatusFilter !== 'ALL' ||
+		assignmentOrgUnitFilter.length > 0 ||
+		assignmentIncludeDescendants === false;
+	const auditFiltersActive =
+		auditSearch.trim().length > 0 ||
+		auditActionFilter !== 'ALL' ||
+		auditOrgUnitFilter.length > 0 ||
+		auditResultFilter !== 'ALL' ||
+		auditCreatedFrom.length > 0 ||
+		auditCreatedTo.length > 0;
 	const auditActionOptions = useMemo(() => {
 		const actions = new Set<string>();
 		for (const event of bootstrap?.audit ?? []) actions.add(event.action);
@@ -273,12 +335,16 @@ export function OrgConsole() {
 				action?: string;
 				orgUnitId?: string;
 				result?: string;
+				createdFrom?: string;
+				createdTo?: string;
 				limit?: number;
 			};
 			if (typeof parsed.search === 'string') setAuditSearch(parsed.search);
 			if (typeof parsed.action === 'string') setAuditActionFilter(parsed.action);
 			if (typeof parsed.orgUnitId === 'string') setAuditOrgUnitFilter(parsed.orgUnitId);
 			if (typeof parsed.result === 'string') setAuditResultFilter(parsed.result);
+			if (typeof parsed.createdFrom === 'string') setAuditCreatedFrom(parsed.createdFrom);
+			if (typeof parsed.createdTo === 'string') setAuditCreatedTo(parsed.createdTo);
 			if (parsed.limit === 20 || parsed.limit === 50 || parsed.limit === 100) setAuditLimit(parsed.limit);
 		} catch {
 			// Ignore malformed local storage payload.
@@ -294,10 +360,20 @@ export function OrgConsole() {
 				action: auditActionFilter,
 				orgUnitId: auditOrgUnitFilter,
 				result: auditResultFilter,
+				createdFrom: auditCreatedFrom,
+				createdTo: auditCreatedTo,
 				limit: auditLimit,
 			})
 		);
-	}, [auditActionFilter, auditLimit, auditOrgUnitFilter, auditResultFilter, auditSearch]);
+	}, [
+		auditActionFilter,
+		auditCreatedFrom,
+		auditCreatedTo,
+		auditLimit,
+		auditOrgUnitFilter,
+		auditResultFilter,
+		auditSearch,
+	]);
 
 	useEffect(() => {
 		void loadBootstrapData();
@@ -340,7 +416,20 @@ export function OrgConsole() {
 		if (!bootstrap) return;
 		void loadAuditPage();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [bootstrap?.organizationId, auditResultFilter, auditActionFilter, auditOrgUnitFilter, auditSearch, auditLimit]);
+	}, [
+		bootstrap?.organizationId,
+		auditResultFilter,
+		auditActionFilter,
+		auditOrgUnitFilter,
+		auditSearch,
+		auditCreatedFrom,
+		auditCreatedTo,
+		auditLimit,
+	]);
+
+	useEffect(() => {
+		setHierarchyPage(1);
+	}, [hierarchyParent, hierarchySearch, hierarchyPageSize, hierarchy?.nodes.length]);
 
 	async function loadBootstrapData() {
 		setLoading(true);
@@ -388,12 +477,19 @@ export function OrgConsole() {
 		if (!bootstrap) return;
 		setAuditLoading(true);
 		try {
+			const dateRange = resolveAuditDateRange();
+			if (!dateRange) {
+				setAuditLoading(false);
+				return;
+			}
 			const params = new URLSearchParams();
 			params.set('limit', String(auditLimit));
 			if (auditResultFilter !== 'ALL') params.set('result', auditResultFilter);
 			if (auditActionFilter !== 'ALL') params.set('action', auditActionFilter);
 			if (auditOrgUnitFilter) params.set('orgUnitId', auditOrgUnitFilter);
 			if (auditSearch.trim()) params.set('query', auditSearch.trim());
+			if (dateRange.createdFrom) params.set('createdFrom', dateRange.createdFrom);
+			if (dateRange.createdTo) params.set('createdTo', dateRange.createdTo);
 			if (options?.cursor) params.set('cursor', options.cursor);
 
 			const payload = await requestJson<AuditListPayload>(`/api/org/audit?${params.toString()}`);
@@ -423,17 +519,60 @@ export function OrgConsole() {
 		setFormErrors({});
 	}
 
+	function clearFormError(key: string) {
+		setFormErrors((current) => {
+			if (!current[key]) return current;
+			const next = { ...current };
+			delete next[key];
+			return next;
+		});
+	}
+
+	function resolveAuditDateRange(): { createdFrom?: string; createdTo?: string } | null {
+		const createdFrom = toIsoDateTime(auditCreatedFrom);
+		const createdTo = toIsoDateTime(auditCreatedTo);
+		if (auditCreatedFrom && !createdFrom) {
+			setFormErrors((current) => ({ ...current, auditRange: 'Created from must be a valid date/time.' }));
+			return null;
+		}
+		if (auditCreatedTo && !createdTo) {
+			setFormErrors((current) => ({ ...current, auditRange: 'Created to must be a valid date/time.' }));
+			return null;
+		}
+		if (createdFrom && createdTo && new Date(createdFrom).getTime() > new Date(createdTo).getTime()) {
+			setFormErrors((current) => ({
+				...current,
+				auditRange: 'Created to must be later than created from.',
+			}));
+			return null;
+		}
+		clearFormError('auditRange');
+		return { createdFrom, createdTo };
+	}
+
 	async function handleCreateUnit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		resetFeedback();
 
-		const generatedSlug = unitForm.slug ? unitForm.slug : toSlug(unitForm.name);
+		const trimmedName = unitForm.name.trim();
+		const generatedSlug = unitForm.slug ? unitForm.slug.trim() : toSlug(trimmedName);
+		const trimmedTimezone = unitForm.timezone.trim();
+		const normalizedCountry = unitForm.countryIso2.trim().toUpperCase();
 		const nextErrors: Record<string, string> = {};
-		if (!unitForm.name.trim()) nextErrors.unitName = 'Unit name is required.';
+		if (!trimmedName) nextErrors.unitName = 'Unit name is required.';
+		if (trimmedName.length > UNIT_NAME_MAX_LENGTH) {
+			nextErrors.unitName = `Unit name must be ${UNIT_NAME_MAX_LENGTH} characters or less.`;
+		}
 		if (!generatedSlug || !slugPattern.test(generatedSlug)) {
 			nextErrors.unitSlug = 'Slug must use lowercase letters, numbers, and hyphens.';
 		}
-		if (!unitForm.timezone.trim()) nextErrors.unitTimezone = 'Timezone is required.';
+		if (!trimmedTimezone) nextErrors.unitTimezone = 'Timezone is required.';
+		else if (!isValidTimezone(trimmedTimezone)) {
+			nextErrors.unitTimezone = 'Use a valid IANA timezone (e.g. Africa/Accra).';
+		}
+		if (normalizedCountry && !COUNTRY_ISO2_PATTERN.test(normalizedCountry)) {
+			nextErrors.unitCountry = 'Country must be a valid 2-letter ISO code.';
+		}
 
 		if (Object.keys(nextErrors).length > 0) {
 			setFormErrors(nextErrors);
@@ -445,12 +584,12 @@ export function OrgConsole() {
 				method: 'POST',
 				body: JSON.stringify({
 					idempotencyKey: createIdempotencyKey('unit-create'),
-					name: unitForm.name.trim(),
+					name: trimmedName,
 					slug: generatedSlug,
 					type: unitForm.type,
 					parentUnitId: unitForm.parentUnitId || undefined,
-					countryIso2: unitForm.countryIso2 || undefined,
-					timezone: unitForm.timezone || 'UTC',
+					countryIso2: normalizedCountry || undefined,
+					timezone: trimmedTimezone || 'UTC',
 				}),
 			});
 			setUnitForm((current) => ({
@@ -468,13 +607,28 @@ export function OrgConsole() {
 	async function handleCreateRoleTemplate(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		resetFeedback();
+		const code = roleTemplateForm.code.trim().toUpperCase();
+		const name = roleTemplateForm.name.trim();
+		const nextErrors: Record<string, string> = {};
+		if (!ROLE_CODE_PATTERN.test(code)) {
+			nextErrors.roleCode =
+				'Role code must start with a letter and use uppercase letters, numbers, or underscores.';
+		}
+		if (!name) nextErrors.roleName = 'Role name is required.';
+		if (name.length > ROLE_TEMPLATE_NAME_MAX_LENGTH) {
+			nextErrors.roleName = `Role name must be ${ROLE_TEMPLATE_NAME_MAX_LENGTH} characters or less.`;
+		}
+		if (Object.keys(nextErrors).length > 0) {
+			setFormErrors(nextErrors);
+			return;
+		}
 		try {
 			await requestJson('/api/org/role-templates', {
 				method: 'POST',
 				body: JSON.stringify({
 					idempotencyKey: createIdempotencyKey('role-template'),
-					code: roleTemplateForm.code.toUpperCase(),
-					name: roleTemplateForm.name,
+					code,
+					name,
 					isLeadership: roleTemplateForm.isLeadership,
 				}),
 			});
@@ -489,6 +643,14 @@ export function OrgConsole() {
 	async function handleAssignRole(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		resetFeedback();
+		const nextErrors: Record<string, string> = {};
+		if (!assignmentForm.memberId) nextErrors.assignmentMember = 'Select a member.';
+		if (!assignmentForm.roleTemplateId) nextErrors.assignmentRoleTemplate = 'Select a role template.';
+		if (!assignmentForm.orgUnitId) nextErrors.assignmentOrgUnit = 'Select an org unit.';
+		if (Object.keys(nextErrors).length > 0) {
+			setFormErrors(nextErrors);
+			return;
+		}
 		try {
 			await requestJson('/api/org/role-assignments', {
 				method: 'POST',
@@ -520,6 +682,22 @@ export function OrgConsole() {
 		event.preventDefault();
 		if (!assignmentEditForm.assignmentId) return;
 		resetFeedback();
+		const nextErrors: Record<string, string> = {};
+		const startAtIso = fromDateTimeLocal(assignmentEditForm.startAt);
+		const endAtIso = assignmentEditForm.endAt.trim() ? fromDateTimeLocal(assignmentEditForm.endAt) : null;
+		if (assignmentEditForm.startAt.trim() && !startAtIso) {
+			nextErrors.assignmentEditStart = 'Start must be a valid date and time.';
+		}
+		if (assignmentEditForm.endAt.trim() && !endAtIso) {
+			nextErrors.assignmentEditEnd = 'End must be a valid date and time.';
+		}
+		if (startAtIso && endAtIso && new Date(endAtIso).getTime() < new Date(startAtIso).getTime()) {
+			nextErrors.assignmentEditEnd = 'End must be later than start.';
+		}
+		if (Object.keys(nextErrors).length > 0) {
+			setFormErrors(nextErrors);
+			return;
+		}
 		try {
 			await requestJson('/api/org/role-assignments', {
 				method: 'PATCH',
@@ -528,10 +706,8 @@ export function OrgConsole() {
 					idempotencyKey: createIdempotencyKey('role-assignment-update'),
 					assignmentId: assignmentEditForm.assignmentId,
 					status: assignmentEditForm.status,
-					startAt: fromDateTimeLocal(assignmentEditForm.startAt),
-					endAt: assignmentEditForm.endAt.trim()
-						? fromDateTimeLocal(assignmentEditForm.endAt)
-						: null,
+					startAt: startAtIso,
+					endAt: endAtIso,
 				}),
 			});
 			setSuccess('Role assignment timeline updated.');
@@ -544,14 +720,23 @@ export function OrgConsole() {
 	async function handleAliasSubmit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		resetFeedback();
+		const singularLabel = aliasForm.singularLabel.trim();
+		const pluralLabel = aliasForm.pluralLabel.trim();
+		const nextErrors: Record<string, string> = {};
+		if (!singularLabel) nextErrors.aliasSingular = 'Singular label is required.';
+		if (!pluralLabel) nextErrors.aliasPlural = 'Plural label is required.';
+		if (Object.keys(nextErrors).length > 0) {
+			setFormErrors(nextErrors);
+			return;
+		}
 		try {
 			await requestJson('/api/org/aliases', {
 				method: 'POST',
 				body: JSON.stringify({
 					idempotencyKey: createIdempotencyKey('alias'),
 					concept: aliasForm.concept,
-					singularLabel: aliasForm.singularLabel.trim(),
-					pluralLabel: aliasForm.pluralLabel.trim(),
+					singularLabel,
+					pluralLabel,
 				}),
 			});
 			setSuccess('Alias updated.');
@@ -564,6 +749,8 @@ export function OrgConsole() {
 	async function handleExportAuditCsv() {
 		resetFeedback();
 		try {
+			const dateRange = resolveAuditDateRange();
+			if (!dateRange) return;
 			const params = new URLSearchParams();
 			params.set('format', 'csv');
 			params.set('limit', '1000');
@@ -571,6 +758,8 @@ export function OrgConsole() {
 			if (auditActionFilter !== 'ALL') params.set('action', auditActionFilter);
 			if (auditOrgUnitFilter) params.set('orgUnitId', auditOrgUnitFilter);
 			if (auditSearch.trim()) params.set('query', auditSearch.trim());
+			if (dateRange.createdFrom) params.set('createdFrom', dateRange.createdFrom);
+			if (dateRange.createdTo) params.set('createdTo', dateRange.createdTo);
 
 			const response = await fetch(`/api/org/audit?${params.toString()}`, {
 				method: 'GET',
@@ -584,7 +773,7 @@ export function OrgConsole() {
 			const downloadUrl = URL.createObjectURL(blob);
 			const anchor = document.createElement('a');
 			anchor.href = downloadUrl;
-			anchor.download = 'faithflow-audit.csv';
+			anchor.download = 'faithflow-audit-export.csv';
 			document.body.appendChild(anchor);
 			anchor.click();
 			anchor.remove();
@@ -631,6 +820,32 @@ export function OrgConsole() {
 		setAuditOrgUnitFilter('');
 		setAuditResultFilter('ALL');
 		setAuditLimit(50);
+	}
+
+	function applyAuditDatePreset(windowDays: 1 | 7 | 30) {
+		const now = new Date();
+		const start = new Date(now.getTime() - windowDays * 24 * 60 * 60 * 1000);
+		setAuditCreatedFrom(toDateTimeLocal(start.toISOString()));
+		setAuditCreatedTo(toDateTimeLocal(now.toISOString()));
+	}
+
+	function clearAuditFilters() {
+		setAuditSearch('');
+		setAuditActionFilter('ALL');
+		setAuditOrgUnitFilter('');
+		setAuditResultFilter('ALL');
+		setAuditCreatedFrom('');
+		setAuditCreatedTo('');
+		setAuditLimit(20);
+		clearFormError('auditRange');
+	}
+
+	function clearAssignmentFilters() {
+		setAssignmentSearch('');
+		setAssignmentStatusFilter('ALL');
+		setAssignmentOrgUnitFilter('');
+		setAssignmentIncludeDescendants(true);
+		setAssignmentLimit(20);
 	}
 
 	return (
@@ -685,9 +900,30 @@ export function OrgConsole() {
 							))}
 						</select>
 					</div>
+					<div className="grid gap-2 sm:grid-cols-2">
+						<input
+							value={hierarchySearch}
+							onChange={(event) => setHierarchySearch(event.target.value)}
+							placeholder="Search unit name, slug, type, country..."
+							className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+						/>
+						<select
+							value={hierarchyPageSize}
+							onChange={(event) =>
+								setHierarchyPageSize(Number(event.target.value) as (typeof HIERARCHY_PAGE_SIZE_OPTIONS)[number])
+							}
+							className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+						>
+							{HIERARCHY_PAGE_SIZE_OPTIONS.map((size) => (
+								<option key={size} value={size}>
+									Show {size}
+								</option>
+							))}
+						</select>
+					</div>
 					<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-						{hierarchy?.nodes.length ? (
-							hierarchy.nodes.map((unit) => (
+						{pagedHierarchyNodes.length ? (
+							pagedHierarchyNodes.map((unit) => (
 								<div key={unit.id} className="rounded border border-slate-200 p-3">
 									<p className="text-sm font-semibold text-slate-900">{unit.name}</p>
 									<p className="text-xs text-slate-500">
@@ -704,8 +940,47 @@ export function OrgConsole() {
 								</div>
 							))
 						) : (
-							<p className="text-sm text-slate-500">No units in this branch of the hierarchy yet.</p>
+							<div className="rounded border border-dashed border-slate-200 bg-slate-50 p-4 sm:col-span-2 lg:col-span-3">
+								<p className="text-sm font-medium text-slate-700">
+									{(hierarchy?.nodes.length ?? 0) === 0
+										? 'No units in this hierarchy branch yet.'
+										: 'No units match your current search.'}
+								</p>
+								<p className="mt-1 text-xs text-slate-500">
+									{(hierarchy?.nodes.length ?? 0) === 0
+										? 'Create a root unit in Org builder, then add region/branch/campus/diaspora children.'
+										: 'Adjust the search query or pick a different parent scope.'}
+								</p>
+							</div>
 						)}
+					</div>
+					<div className="flex items-center justify-between text-xs text-slate-500">
+						<span>
+							Showing {pagedHierarchyNodes.length} of {filteredHierarchyNodes.length} units
+						</span>
+						<div className="flex items-center gap-2">
+							<button
+								type="button"
+								onClick={() => setHierarchyPage((current) => Math.max(1, current - 1))}
+								disabled={hierarchyPage <= 1}
+								className="rounded border border-slate-300 px-2 py-1 font-medium text-slate-700 disabled:opacity-40"
+							>
+								Previous
+							</button>
+							<span>
+								Page {Math.min(hierarchyPage, totalHierarchyPages)} of {totalHierarchyPages}
+							</span>
+							<button
+								type="button"
+								onClick={() =>
+									setHierarchyPage((current) => Math.min(totalHierarchyPages, current + 1))
+								}
+								disabled={hierarchyPage >= totalHierarchyPages}
+								className="rounded border border-slate-300 px-2 py-1 font-medium text-slate-700 disabled:opacity-40"
+							>
+								Next
+							</button>
+						</div>
 					</div>
 				</div>
 				<div className="space-y-2 rounded-lg border border-gray-200 bg-white p-4">
@@ -755,6 +1030,7 @@ export function OrgConsole() {
 							required
 						/>
 					</label>
+					{formErrors.unitName ? <p className="text-xs text-red-600">{formErrors.unitName}</p> : null}
 					<label className="text-sm font-medium text-gray-700">
 						Slug *
 						<input
@@ -836,6 +1112,7 @@ export function OrgConsole() {
 							/>
 						</label>
 					</div>
+					{formErrors.unitCountry ? <p className="text-xs text-red-600">{formErrors.unitCountry}</p> : null}
 					{formErrors.unitTimezone ? (
 						<p className="text-xs text-red-600">{formErrors.unitTimezone}</p>
 					) : null}
@@ -889,6 +1166,9 @@ export function OrgConsole() {
 							required
 						/>
 					</label>
+					{formErrors.aliasSingular ? (
+						<p className="text-xs text-red-600">{formErrors.aliasSingular}</p>
+					) : null}
 					<label className="text-sm font-medium text-gray-700">
 						Plural label *
 						<input
@@ -900,6 +1180,9 @@ export function OrgConsole() {
 							required
 						/>
 					</label>
+					{formErrors.aliasPlural ? (
+						<p className="text-xs text-red-600">{formErrors.aliasPlural}</p>
+					) : null}
 					<button
 						type="submit"
 						disabled={!bootstrap}
@@ -928,6 +1211,7 @@ export function OrgConsole() {
 						placeholder="Code (e.g. REGIONAL_PASTOR)"
 						required
 					/>
+					{formErrors.roleCode ? <p className="text-xs text-red-600">{formErrors.roleCode}</p> : null}
 					<input
 						value={roleTemplateForm.name}
 						onChange={(event) =>
@@ -937,6 +1221,7 @@ export function OrgConsole() {
 						placeholder="Display name"
 						required
 					/>
+					{formErrors.roleName ? <p className="text-xs text-red-600">{formErrors.roleName}</p> : null}
 					<label className="flex items-center gap-2 text-sm text-gray-700">
 						<input
 							type="checkbox"
@@ -980,6 +1265,9 @@ export function OrgConsole() {
 							</option>
 						))}
 					</select>
+					{formErrors.assignmentMember ? (
+						<p className="text-xs text-red-600">{formErrors.assignmentMember}</p>
+					) : null}
 					<select
 						value={assignmentForm.roleTemplateId}
 						onChange={(event) =>
@@ -998,6 +1286,9 @@ export function OrgConsole() {
 							</option>
 						))}
 					</select>
+					{formErrors.assignmentRoleTemplate ? (
+						<p className="text-xs text-red-600">{formErrors.assignmentRoleTemplate}</p>
+					) : null}
 					<select
 						value={assignmentForm.orgUnitId}
 						onChange={(event) =>
@@ -1013,6 +1304,9 @@ export function OrgConsole() {
 							</option>
 						))}
 					</select>
+					{formErrors.assignmentOrgUnit ? (
+						<p className="text-xs text-red-600">{formErrors.assignmentOrgUnit}</p>
+					) : null}
 					<button
 						type="submit"
 						disabled={!bootstrap}
@@ -1025,9 +1319,19 @@ export function OrgConsole() {
 
 			<div className="grid gap-6 xl:grid-cols-2">
 				<div className="rounded-lg border border-gray-200 bg-white p-4">
-					<h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-						Role assignments
-					</h3>
+					<div className="flex items-center justify-between gap-2">
+						<h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+							Role assignments
+						</h3>
+						<button
+							type="button"
+							onClick={clearAssignmentFilters}
+							disabled={!assignmentFiltersActive}
+							className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 disabled:opacity-40"
+						>
+							Clear filters
+						</button>
+					</div>
 					<div className="mt-3 grid gap-2 md:grid-cols-5">
 						<input
 							value={assignmentSearch}
@@ -1108,8 +1412,22 @@ export function OrgConsole() {
 									</div>
 								</div>
 							))
+						) : assignmentFiltersActive ? (
+							<div className="rounded border border-dashed border-slate-200 bg-slate-50 p-3 text-gray-600">
+								<p className="text-sm font-medium text-slate-700">
+									No assignments match your current filters.
+								</p>
+								<p className="mt-1 text-xs text-slate-500">
+									Clear filters or broaden unit scope to load assignments.
+								</p>
+							</div>
 						) : (
-							<p className="text-gray-500">No assignments yet.</p>
+							<div className="rounded border border-dashed border-slate-200 bg-slate-50 p-3 text-gray-600">
+								<p className="text-sm font-medium text-slate-700">No assignments yet.</p>
+								<p className="mt-1 text-xs text-slate-500">
+									Create a role template and assign it to a member to start leadership timeline tracking.
+								</p>
+							</div>
 						)}
 					</div>
 					<div className="mt-3 flex items-center justify-between">
@@ -1169,6 +1487,9 @@ export function OrgConsole() {
 									className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
 								/>
 							</label>
+							{formErrors.assignmentEditStart ? (
+								<p className="text-xs text-red-600 md:col-span-2">{formErrors.assignmentEditStart}</p>
+							) : null}
 							<label className="text-xs font-medium text-slate-700">
 								End
 								<input
@@ -1183,6 +1504,9 @@ export function OrgConsole() {
 									className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
 								/>
 							</label>
+							{formErrors.assignmentEditEnd ? (
+								<p className="text-xs text-red-600 md:col-span-2">{formErrors.assignmentEditEnd}</p>
+							) : null}
 							<div className="flex items-end gap-2">
 								<button
 									type="submit"
@@ -1238,6 +1562,35 @@ export function OrgConsole() {
 							</button>
 							<button
 								type="button"
+								onClick={() => applyAuditDatePreset(1)}
+								className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700"
+							>
+								Last 24h
+							</button>
+							<button
+								type="button"
+								onClick={() => applyAuditDatePreset(7)}
+								className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700"
+							>
+								Last 7d
+							</button>
+							<button
+								type="button"
+								onClick={() => applyAuditDatePreset(30)}
+								className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700"
+							>
+								Last 30d
+							</button>
+							<button
+								type="button"
+								onClick={clearAuditFilters}
+								disabled={!auditFiltersActive}
+								className="rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 disabled:opacity-40"
+							>
+								Clear filters
+							</button>
+							<button
+								type="button"
 								onClick={handleExportAuditCsv}
 								className="rounded border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700"
 							>
@@ -1245,7 +1598,7 @@ export function OrgConsole() {
 							</button>
 						</div>
 					</div>
-					<div className="mt-3 grid gap-2 md:grid-cols-5">
+					<div className="mt-3 grid gap-2 md:grid-cols-7">
 						<input
 							value={auditSearch}
 							onChange={(event) => setAuditSearch(event.target.value)}
@@ -1295,7 +1648,22 @@ export function OrgConsole() {
 							<option value={50}>Show 50</option>
 							<option value={100}>Show 100</option>
 						</select>
+						<input
+							type="datetime-local"
+							value={auditCreatedFrom}
+							onChange={(event) => setAuditCreatedFrom(event.target.value)}
+							placeholder="Created from"
+							className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+						/>
+						<input
+							type="datetime-local"
+							value={auditCreatedTo}
+							onChange={(event) => setAuditCreatedTo(event.target.value)}
+							placeholder="Created to"
+							className="rounded-md border border-gray-300 px-3 py-2 text-sm"
+						/>
 					</div>
+					{formErrors.auditRange ? <p className="mt-2 text-xs text-red-600">{formErrors.auditRange}</p> : null}
 					<div className="mt-3 space-y-2 text-sm">
 						{auditEvents.length ? (
 							auditEvents.map((event) => (
@@ -1320,8 +1688,22 @@ export function OrgConsole() {
 									) : null}
 								</div>
 							))
+						) : auditFiltersActive ? (
+							<div className="rounded border border-dashed border-slate-200 bg-slate-50 p-3 text-gray-600">
+								<p className="text-sm font-medium text-slate-700">
+									No audit events match your current filters.
+								</p>
+								<p className="mt-1 text-xs text-slate-500">
+									Use a wider date range or clear filters to inspect more history.
+								</p>
+							</div>
 						) : (
-							<p className="text-gray-500">No audit events yet.</p>
+							<div className="rounded border border-dashed border-slate-200 bg-slate-50 p-3 text-gray-600">
+								<p className="text-sm font-medium text-slate-700">No audit events yet.</p>
+								<p className="mt-1 text-xs text-slate-500">
+									Audit rows appear after org, role, auth guardrail, or provider operations run.
+								</p>
+							</div>
 						)}
 					</div>
 					<div className="mt-3 flex items-center justify-between">
