@@ -9,10 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.30.0",
     "@faithflow/database": "workspace:*",
+    "@heroicons/react": "^2.2.0",
+    "@tanstack/react-table": "^8.11.2",
     "next": "^14.0.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "recharts": "^2.10.3"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
