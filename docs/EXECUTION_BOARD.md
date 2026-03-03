@@ -1,12 +1,13 @@
 # FaithFlow Unified Execution Board
 
-Last updated: 2026-02-23
+Last updated: 2026-03-03
 
 This board consolidates the active backlog into one ordered sequence so implementation can run without context switching.
 
 ## Priority Order
 
 ### 1) Enterprise auth guardrails (P0, in progress)
+**Status:** IN PROGRESS
 **Goal:** Enforce admin-grade security checks in runtime auth (MFA, verified email, session age, domain allowlist) before privileged actions execute.
 
 **Why first:** Everything else (payments, org ops, support tooling) depends on trusted actor context.
@@ -25,6 +26,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Enforced policy override from organization settings during actor resolution.
 - Added auth guardrail denial auditing (`AUTH_GUARDRAIL_BLOCKED`) with structured violation codes.
 - Added guardrail health endpoint for ops monitoring (`/api/health/auth-guardrails`).
+- Added dashboard guardrail block UX with explicit denial reason and step-by-step remediation guidance.
 
 **Done when**
 - Privileged users without required controls are blocked with actionable error messages.
@@ -33,6 +35,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 2) Org operating model completion (P0)
+**Status:** DONE
 **Goal:** Finish enterprise org flows for HQ/region/branch/campus/diaspora execution at scale.
 
 **Deliverables**
@@ -59,6 +62,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 3) Payment and comms production adapters (P0)
+**Status:** BLOCKED (awaiting production provider env + dashboard webhook setup)
 **Goal:** Move from framework-ready mutations to provider-backed production paths.
 
 **Deliverables**
@@ -85,6 +89,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 4) Executive rollups and drill-down dashboards (P1)
+**Status:** IN PROGRESS
 **Goal:** Make HQ/regional leaders operational in <=3 clicks.
 
 **Deliverables**
@@ -107,6 +112,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 5) Lock-state parity and entitlement UX (P1)
+**Status:** IN PROGRESS
 **Goal:** Standardize locked-feature behavior across all modules.
 
 **Deliverables**
@@ -123,6 +129,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 6) Operability hardening (P1)
+**Status:** IN PROGRESS
 **Goal:** Increase deployment confidence and incident response speed.
 
 **Deliverables**
@@ -151,6 +158,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 7) AI intelligence packs (P2)
+**Status:** IN PROGRESS
 **Goal:** Add high-value decision support after operational core is stable.
 
 **Deliverables**
@@ -167,6 +175,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 8) Add-on framework (P2)
+**Status:** IN PROGRESS
 **Goal:** Launch entitlement-driven expansion modules (streaming, bible school, facilities).
 
 **Deliverables**
