@@ -26,7 +26,8 @@
     "test:admin-health": "tsx scripts/admin-health-smoke.ts",
     "test:platform-smoke": "pnpm test:org-e2e && pnpm test:payment-comms-e2e && pnpm test:provider-webhooks-e2e && pnpm test:admin-health",
     "outbox:process": "tsx scripts/process-outbox.ts",
-    "lint:workspace-deps": "node scripts/check-workspace-dependencies.mjs"
+    "lint:workspace-deps": "node scripts/check-workspace-dependencies.mjs",
+    "ops:enforce-required-checks": "node scripts/enforce-required-checks.mjs"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

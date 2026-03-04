@@ -160,6 +160,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
   - `pnpm test:platform-smoke`
 - Added contextual runbook links on failed Provider Ops outcomes for faster replay remediation.
 - Added consolidated Ops Health dashboard (`/dashboard/ops-health`) that aggregates all `/api/health/*` checks with alert states and module drill-through links.
+- Deferred infra action: GitHub branch protection must still be updated to require the `workspace-dependency-guard` check on protected branches (`main`, `develop`) once a repo admin token is available (`pnpm ops:enforce-required-checks`).
 
 ---
 
