@@ -1,13 +1,13 @@
 # FaithFlow Unified Execution Board
 
-Last updated: 2026-03-03
+Last updated: 2026-03-04
 
 This board consolidates the active backlog into one ordered sequence so implementation can run without context switching.
 
 ## Priority Order
 
-### 1) Enterprise auth guardrails (P0, in progress)
-**Status:** IN PROGRESS
+### 1) Enterprise auth guardrails (P0)
+**Status:** DONE
 **Goal:** Enforce admin-grade security checks in runtime auth (MFA, verified email, session age, domain allowlist) before privileged actions execute.
 
 **Why first:** Everything else (payments, org ops, support tooling) depends on trusted actor context.
@@ -27,6 +27,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added auth guardrail denial auditing (`AUTH_GUARDRAIL_BLOCKED`) with structured violation codes.
 - Added guardrail health endpoint for ops monitoring (`/api/health/auth-guardrails`).
 - Added dashboard guardrail block UX with explicit denial reason and step-by-step remediation guidance.
+- Added policy smoke coverage (`pnpm test:auth-guardrails`) and wired it into `pnpm test:platform-smoke`.
 
 **Done when**
 - Privileged users without required controls are blocked with actionable error messages.
