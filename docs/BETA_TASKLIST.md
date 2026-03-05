@@ -43,7 +43,11 @@ Deliverables:
 
 - [~] Keep global navigation focused by active domain (single expanded group)
 - [x] Keep contextual section sidebar sticky on long pages
-- [ ] Split new large surfaces into contextual sub-pages/tabs instead of single long forms
+- [~] Split new large surfaces into contextual sub-pages/tabs instead of single long forms
+  - [x] Platform subscriptions page segmented into focused workspace tabs (plan editor, tenant assignment, dunning, metadata, catalog, snapshot)
+  - [x] Billing page segmented into overview, plan-change, and invoices workspaces
+  - [x] Communications page segmented into overview, compose, automation, and activity workspaces
+  - [x] Finance page segmented into operations, giving ops, accounting, and settlements workspaces
 - [ ] Require empty/loading/error states and consistent required/validation messaging on all new forms
 
 Acceptance criteria:

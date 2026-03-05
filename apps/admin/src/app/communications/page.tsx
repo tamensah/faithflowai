@@ -11,6 +11,13 @@ import { FeatureLocked } from '../../components/FeatureLocked';
 import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const channelOptions = ['EMAIL', 'SMS', 'WHATSAPP'] as const;
+const communicationsSectionOptions = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'compose', label: 'Compose' },
+  { key: 'automation', label: 'Automation' },
+  { key: 'activity', label: 'Activity' },
+] as const;
+type CommunicationsSectionKey = (typeof communicationsSectionOptions)[number]['key'];
 
 export default function CommunicationsPage() {
   const gate = useFeatureGate('communications_enabled');
@@ -59,6 +66,7 @@ export default function CommunicationsPage() {
   const [dripBody, setDripBody] = useState('');
   const [dripAudience, setDripAudience] = useState('');
   const [dripTo, setDripTo] = useState('');
+  const [activeSection, setActiveSection] = useState<CommunicationsSectionKey>('overview');
 
   const { data: churches } = trpc.church.list.useQuery({ organizationId: undefined });
   const { data: templates } = trpc.communications.templates.useQuery(
@@ -352,6 +360,24 @@ export default function CommunicationsPage() {
       <PageSectionLayout rootId="communications-page-sections" title="Communications sections" className="space-y-6">
         {gate.readOnly ? <ReadOnlyNotice /> : null}
 
+        <Card className="p-4">
+          <h2 className="text-base font-semibold">Communications workspace</h2>
+          <p className="mt-1 text-xs text-muted">Switch to the section you need instead of scrolling one long page.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {communicationsSectionOptions.map((section) => (
+              <Button
+                key={section.key}
+                size="sm"
+                variant={activeSection === section.key ? 'default' : 'outline'}
+                onClick={() => setActiveSection(section.key)}
+              >
+                {section.label}
+              </Button>
+            ))}
+          </div>
+        </Card>
+
+        {activeSection === 'overview' ? (
         <Card className="p-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
@@ -379,7 +405,9 @@ export default function CommunicationsPage() {
             </select>
           </div>
         </Card>
+        ) : null}
 
+        {activeSection === 'overview' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Quiet hours</h2>
           <p className="mt-1 text-sm text-muted">
@@ -432,7 +460,9 @@ export default function CommunicationsPage() {
             </Button>
           </div>
         </Card>
+        ) : null}
 
+        {activeSection === 'compose' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Templates</h2>
           <p className="mt-1 text-sm text-muted">
@@ -496,7 +526,9 @@ export default function CommunicationsPage() {
             </Button>
           </div>
         </Card>
+        ) : null}
 
+        {activeSection === 'compose' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Send message</h2>
           <p className="mt-1 text-sm text-muted">Choose a template or write a custom message. Audiences expand to real recipients.</p>
@@ -586,7 +618,9 @@ export default function CommunicationsPage() {
             </div>
           ) : null}
         </Card>
+        ) : null}
 
+        {activeSection === 'automation' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Schedule message</h2>
           <p className="mt-1 text-sm text-muted">Draft, review, and queue messages to be sent later (use dispatch in your cron).</p>
@@ -805,7 +839,9 @@ export default function CommunicationsPage() {
             {!schedules?.length && <p>No scheduled messages yet.</p>}
           </div>
         </Card>
+        ) : null}
 
+        {activeSection === 'automation' ? (
         <Card className="p-6">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
@@ -861,7 +897,9 @@ export default function CommunicationsPage() {
             ))}
           </div>
         </Card>
+        ) : null}
 
+        {activeSection === 'automation' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Delivery analytics (last 30 days)</h2>
           <p className="mt-1 text-sm text-muted">Counts based on communication messages sent/failed/queued.</p>
@@ -908,7 +946,9 @@ export default function CommunicationsPage() {
             </div>
           ) : null}
         </Card>
+        ) : null}
 
+        {activeSection === 'automation' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Drip campaigns</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -1066,7 +1106,9 @@ export default function CommunicationsPage() {
             </div>
           )}
         </Card>
+        ) : null}
 
+        {activeSection === 'activity' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Recent messages</h2>
           <div className="mt-3 flex flex-wrap gap-3 text-sm text-muted">
@@ -1089,6 +1131,7 @@ export default function CommunicationsPage() {
             {!messages?.length && <p>No messages yet.</p>}
           </div>
         </Card>
+        ) : null}
       </PageSectionLayout>
       )}
     </Shell>

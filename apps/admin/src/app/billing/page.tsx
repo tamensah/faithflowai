@@ -8,6 +8,12 @@ import { trpc } from '../../lib/trpc';
 
 const checkoutProviders = ['STRIPE', 'PAYSTACK'] as const;
 const changeEffectiveOptions = ['NEXT_CYCLE', 'IMMEDIATE'] as const;
+const billingSectionOptions = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'plan-change', label: 'Plan change' },
+  { key: 'invoices', label: 'Invoices' },
+] as const;
+type BillingSectionKey = (typeof billingSectionOptions)[number]['key'];
 
 function formatPlanPrice(amountMinor: number, currency: string, interval: string) {
   return `${currency} ${(amountMinor / 100).toFixed(2)} / ${interval.toLowerCase()}`;
@@ -39,6 +45,7 @@ export default function BillingPage() {
   const [effective, setEffective] = useState<(typeof changeEffectiveOptions)[number]>('NEXT_CYCLE');
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [checkoutReferenceHandled, setCheckoutReferenceHandled] = useState(false);
+  const [activeSection, setActiveSection] = useState<BillingSectionKey>('overview');
 
   const { data: plans } = trpc.billing.plans.useQuery();
   const { data: current } = trpc.billing.currentSubscription.useQuery();
@@ -181,7 +188,24 @@ export default function BillingPage() {
           </Card>
         ) : null}
 
-        {entitlementsStatus?.entitlements?.source === 'inactive_subscription' ? (
+        <Card className="p-4">
+          <h2 className="text-base font-semibold">Billing workspace</h2>
+          <p className="mt-1 text-xs text-muted">Use focused tabs to manage billing without one long page.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {billingSectionOptions.map((section) => (
+              <Button
+                key={section.key}
+                size="sm"
+                variant={activeSection === section.key ? 'default' : 'outline'}
+                onClick={() => setActiveSection(section.key)}
+              >
+                {section.label}
+              </Button>
+            ))}
+          </div>
+        </Card>
+
+        {activeSection === 'overview' && entitlementsStatus?.entitlements?.source === 'inactive_subscription' ? (
           <Card className="border-destructive/30 bg-white p-6">
             <h2 className="text-lg font-semibold">Subscription inactive</h2>
             <p className="mt-2 text-sm text-muted">
@@ -200,6 +224,7 @@ export default function BillingPage() {
           </Card>
         ) : null}
 
+        {activeSection === 'overview' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Current Subscription</h2>
           {current ? (
@@ -276,16 +301,19 @@ export default function BillingPage() {
             <p className="mt-4 text-sm text-muted">No active subscription found.</p>
           )}
         </Card>
+        ) : null}
 
+        {activeSection === 'plan-change' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Change Plan</h2>
+          <p className="mt-1 text-xs text-muted">Required fields are marked with *.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <select
               className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
               value={selectedPlanCode}
               onChange={(event) => setSelectedPlanCode(event.target.value)}
             >
-              <option value="">Select plan</option>
+              <option value="">Select plan *</option>
               {plans?.map((plan) => (
                 <option key={plan.id} value={plan.code}>
                   {plan.name} ({plan.code})
@@ -364,7 +392,9 @@ export default function BillingPage() {
             ) : null}
           </div>
         </Card>
+        ) : null}
 
+        {activeSection === 'invoices' ? (
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -419,6 +449,7 @@ export default function BillingPage() {
             {!invoices?.invoices.length ? <p className="text-sm text-muted">No invoices available.</p> : null}
           </div>
         </Card>
+        ) : null}
       </PageSectionLayout>
     </Shell>
   );

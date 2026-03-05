@@ -27,6 +27,13 @@ const evidenceTypeOptions = [
   'SERVICE_DOCUMENTATION',
   'SERVICE_DATE',
 ];
+const financeSectionOptions = [
+  { key: 'operations', label: 'Operations' },
+  { key: 'giving', label: 'Giving ops' },
+  { key: 'accounting', label: 'Accounting' },
+  { key: 'settlements', label: 'Settlements' },
+] as const;
+type FinanceSectionKey = (typeof financeSectionOptions)[number]['key'];
 
 export default function FinancePage() {
   const gate = useFeatureGate('finance_enabled');
@@ -87,6 +94,7 @@ export default function FinancePage() {
   const [donationImportFilename, setDonationImportFilename] = useState('');
   const [donationImportResult, setDonationImportResult] = useState<any>(null);
   const [donationImportBatchId, setDonationImportBatchId] = useState<string>('');
+  const [activeSection, setActiveSection] = useState<FinanceSectionKey>('operations');
   const statementEmailRef = useRef<HTMLInputElement | null>(null);
   const donationImportRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -460,15 +468,34 @@ export default function FinancePage() {
           </div>
         </Card>
 
+        <Card className="ff-surface p-4">
+          <h2 className="text-base font-semibold">Finance workspace</h2>
+          <p className="mt-1 text-xs text-muted">Use focused sections instead of one long scroll.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {financeSectionOptions.map((section) => (
+              <Button
+                key={section.key}
+                size="sm"
+                variant={activeSection === section.key ? 'default' : 'outline'}
+                onClick={() => setActiveSection(section.key)}
+              >
+                {section.label}
+              </Button>
+            ))}
+          </div>
+        </Card>
+
         {gate.readOnly ? <ReadOnlyNotice /> : null}
 
-        {isChurchesLoading ? (
+        {activeSection === 'operations' && isChurchesLoading ? (
           <div className="grid gap-3 sm:grid-cols-2">
             <LoadingSkeleton lines={4} />
             <LoadingSkeleton lines={5} />
           </div>
         ) : null}
 
+        {activeSection === 'operations' ? (
+        <>
         <Card className="ff-surface p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -687,7 +714,11 @@ export default function FinancePage() {
             ) : null}
           </div>
         </Card>
+        </>
+        ) : null}
 
+        {activeSection === 'giving' ? (
+        <>
         <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Tithing statement</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -895,7 +926,11 @@ export default function FinancePage() {
             </div>
           </Card>
         </div>
+        </>
+        ) : null}
 
+        {activeSection === 'accounting' ? (
+        <>
         <div className="grid gap-6 lg:grid-cols-2">
           <Card className="ff-surface p-6">
             <h2 className="text-lg font-semibold">Expense Categories</h2>
@@ -1352,7 +1387,11 @@ export default function FinancePage() {
             </div>
           )}
         </Card>
+        </>
+        ) : null}
 
+        {activeSection === 'settlements' ? (
+        <>
         <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Payout reconciliation</h2>
           <div className="mt-4 flex flex-wrap gap-3">
@@ -1450,6 +1489,8 @@ export default function FinancePage() {
             {!auditLogs?.length && <p>No audit activity yet.</p>}
           </div>
         </Card>
+        </>
+        ) : null}
         </div>
         <PageContextSidebar rootId="finance-page-sections" title="Finance sections" />
       </div>
