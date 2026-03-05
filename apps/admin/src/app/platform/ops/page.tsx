@@ -28,6 +28,10 @@ export default function PlatformOpsPage() {
   const [enforceSso, setEnforceSso] = useState(false);
   const [automationLimit, setAutomationLimit] = useState('250');
   const [sslWarningDays, setSslWarningDays] = useState('30');
+  const [streamingChurchId, setStreamingChurchId] = useState('');
+  const [streamingSyncLimit, setStreamingSyncLimit] = useState('200');
+  const [applyStreamingTransitions, setApplyStreamingTransitions] = useState(true);
+  const [streamingSyncStatus, setStreamingSyncStatus] = useState('');
 
   useEffect(() => {
     if (!tenantId && tenants?.length) {
@@ -96,6 +100,24 @@ export default function PlatformOpsPage() {
         utils.tenantOps.listDomains.invalidate({ tenantId }),
       ]);
     },
+  });
+  const streamingSyncInput = {
+    tenantId,
+    churchId: streamingChurchId.trim() || undefined,
+    limit: Number.isFinite(Number(streamingSyncLimit)) ? Number(streamingSyncLimit) : 200,
+  };
+  const streamingSyncPreview = trpc.tenantOps.streamingSyncPreview.useQuery(streamingSyncInput, {
+    enabled: Boolean(tenantId),
+  });
+  const { mutate: runStreamingSync, isPending: isRunningStreamingSync } = trpc.tenantOps.runStreamingSync.useMutation({
+    onSuccess: async (result) => {
+      setStreamingSyncStatus(`Synced ${result.scanned} session(s): ${result.updated} updated, ${result.failed} failed.`);
+      await Promise.all([
+        utils.tenantOps.streamingSyncPreview.invalidate(streamingSyncInput),
+        utils.tenantOps.listHealthChecks.invalidate({ tenantId, limit: 20 }),
+      ]);
+    },
+    onError: (error) => setStreamingSyncStatus(error.message),
   });
 
   if (!platformSelf?.platformUser) {
@@ -223,6 +245,75 @@ export default function PlatformOpsPage() {
             >
               {isRunningDomainAutomation ? 'Running automation...' : 'Run automation'}
             </Button>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Streaming provider sync</h2>
+          <p className="mt-1 text-xs text-muted">
+            Preview and run provider reconciliation for live-stream sessions under this tenant.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Input
+              placeholder="Optional church ID"
+              value={streamingChurchId}
+              onChange={(event) => setStreamingChurchId(event.target.value)}
+            />
+            <Input
+              placeholder="Session scan limit"
+              type="number"
+              value={streamingSyncLimit}
+              onChange={(event) => setStreamingSyncLimit(event.target.value)}
+            />
+          </div>
+          <label className="mt-3 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={applyStreamingTransitions}
+              onChange={(event) => setApplyStreamingTransitions(event.target.checked)}
+            />
+            Apply suggested SCHEDULED → LIVE transitions
+          </label>
+          <p className="mt-3 text-xs text-muted">
+            Preview: scanned {streamingSyncPreview.data?.scanned ?? 0} · updates {streamingSyncPreview.data?.updated ?? 0} · failed{' '}
+            {streamingSyncPreview.data?.failed ?? 0}
+          </p>
+          {streamingSyncStatus ? <p className="mt-1 text-xs text-muted">{streamingSyncStatus}</p> : null}
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={!tenantId || streamingSyncPreview.isFetching}
+              onClick={() => streamingSyncPreview.refetch()}
+            >
+              {streamingSyncPreview.isFetching ? 'Refreshing preview...' : 'Refresh preview'}
+            </Button>
+            <Button
+              disabled={!canWrite || !tenantId || isRunningStreamingSync}
+              onClick={() =>
+                runStreamingSync({
+                  ...streamingSyncInput,
+                  applySuggestedTransitions: applyStreamingTransitions,
+                })
+              }
+            >
+              {isRunningStreamingSync ? 'Running sync...' : 'Run provider sync'}
+            </Button>
+          </div>
+          <div className="mt-4 space-y-2">
+            {(streamingSyncPreview.data?.entries ?? []).slice(0, 6).map((entry) => (
+              <div key={entry.sessionId} className="rounded-md border border-border p-3 text-xs">
+                <p className="font-semibold">
+                  {entry.provider} · {entry.status}
+                </p>
+                <p className="text-muted">
+                  Playback {entry.playbackReachable ? 'reachable' : 'unreachable'} ({entry.playbackStatusCode ?? 'n/a'})
+                </p>
+                <p className="text-muted">{entry.recommendedAction}</p>
+              </div>
+            ))}
+            {!streamingSyncPreview.data?.entries?.length ? (
+              <p className="text-sm text-muted">No stream sessions found for the current scope.</p>
+            ) : null}
           </div>
         </Card>
 

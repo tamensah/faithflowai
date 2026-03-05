@@ -4,13 +4,15 @@ import {
   LiveModerationLevel,
   LiveStreamProvider,
   LiveStreamStatus,
-  UserRole,
   prisma,
 } from '@faithflow-ai/database';
 import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
 import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 import { recordAuditLog } from '../audit';
+import { runStreamingProviderSync } from '../streaming-sync';
+
+const moderationActionValues = ['WARN', 'MUTE_PARTICIPANT', 'REMOVE_PARTICIPANT', 'DELETE_MESSAGE', 'BAN_PARTICIPANT'] as const;
 
 async function requireStaff(tenantId: string, clerkUserId: string) {
   const membership = await prisma.staffMembership.findFirst({
@@ -334,5 +336,173 @@ export const streamingRouter = router({
           totalViews: sessions.reduce((sum, session) => sum + session.totalViews, 0),
         },
       };
+    }),
+
+  setModerationLevel: protectedProcedure
+    .input(
+      z.object({
+        sessionId: z.string(),
+        moderationLevel: z.nativeEnum(LiveModerationLevel),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      const membership = await requireStaff(ctx.tenantId!, ctx.userId!);
+
+      const session = await prisma.liveStreamSession.findFirst({
+        where: { id: input.sessionId, church: { organization: { tenantId: ctx.tenantId! } } },
+      });
+      if (!session) throw new TRPCError({ code: 'NOT_FOUND', message: 'Session not found' });
+
+      const updated = await prisma.liveStreamSession.update({
+        where: { id: session.id },
+        data: { moderationLevel: input.moderationLevel },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        churchId: updated.churchId,
+        actorType: AuditActorType.USER,
+        actorId: membership.userId,
+        action: 'streaming.session.moderation_level_updated',
+        targetType: 'LiveStreamSession',
+        targetId: updated.id,
+        metadata: { moderationLevel: updated.moderationLevel },
+      });
+
+      return updated;
+    }),
+
+  recordModerationAction: protectedProcedure
+    .input(
+      z.object({
+        sessionId: z.string(),
+        actionType: z.enum(moderationActionValues),
+        participantRef: z.string().trim().min(1).max(160).optional(),
+        messageRef: z.string().trim().min(1).max(160).optional(),
+        reason: z.string().trim().min(2).max(500),
+        durationMinutes: z.number().int().min(1).max(1440).optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      const membership = await requireStaff(ctx.tenantId!, ctx.userId!);
+
+      const session = await prisma.liveStreamSession.findFirst({
+        where: { id: input.sessionId, church: { organization: { tenantId: ctx.tenantId! } } },
+      });
+      if (!session) throw new TRPCError({ code: 'NOT_FOUND', message: 'Session not found' });
+
+      const action = `streaming.moderation.${input.actionType.toLowerCase()}`;
+      const entry = await recordAuditLog({
+        tenantId: ctx.tenantId,
+        churchId: session.churchId,
+        actorType: AuditActorType.USER,
+        actorId: membership.userId,
+        action,
+        targetType: 'LiveStreamSession',
+        targetId: session.id,
+        metadata: {
+          actionType: input.actionType,
+          participantRef: input.participantRef ?? null,
+          messageRef: input.messageRef ?? null,
+          reason: input.reason,
+          durationMinutes: input.durationMinutes ?? null,
+        },
+      });
+
+      return entry;
+    }),
+
+  moderationTimeline: protectedProcedure
+    .input(
+      z.object({
+        sessionId: z.string(),
+        limit: z.number().int().min(1).max(200).default(50),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      await requireStaff(ctx.tenantId!, ctx.userId!);
+
+      const session = await prisma.liveStreamSession.findFirst({
+        where: { id: input.sessionId, church: { organization: { tenantId: ctx.tenantId! } } },
+        select: { id: true },
+      });
+      if (!session) throw new TRPCError({ code: 'NOT_FOUND', message: 'Session not found' });
+
+      return prisma.auditLog.findMany({
+        where: {
+          tenantId: ctx.tenantId!,
+          targetType: 'LiveStreamSession',
+          targetId: input.sessionId,
+          action: { startsWith: 'streaming.moderation.' },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: input.limit,
+      });
+    }),
+
+  providerSyncPreview: protectedProcedure
+    .input(
+      z
+        .object({
+          churchId: z.string().optional(),
+          limit: z.number().int().min(1).max(500).default(200),
+        })
+        .optional()
+    )
+    .query(async ({ input, ctx }) => {
+      await ensureFeatureReadAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      await requireStaff(ctx.tenantId!, ctx.userId!);
+
+      return runStreamingProviderSync({
+        tenantId: ctx.tenantId!,
+        churchId: input?.churchId,
+        limit: input?.limit ?? 200,
+        dryRun: true,
+        applySuggestedTransitions: false,
+      });
+    }),
+
+  runProviderSync: protectedProcedure
+    .input(
+      z
+        .object({
+          churchId: z.string().optional(),
+          limit: z.number().int().min(1).max(500).default(200),
+          applySuggestedTransitions: z.boolean().default(true),
+        })
+        .optional()
+    )
+    .mutation(async ({ input, ctx }) => {
+      await ensureFeatureWriteAccess(ctx.tenantId!, 'streaming_enabled', 'Your subscription does not include live streaming.');
+      const membership = await requireStaff(ctx.tenantId!, ctx.userId!);
+
+      const result = await runStreamingProviderSync({
+        tenantId: ctx.tenantId!,
+        churchId: input?.churchId,
+        limit: input?.limit ?? 200,
+        dryRun: false,
+        applySuggestedTransitions: input?.applySuggestedTransitions ?? true,
+        actorId: membership.userId,
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: membership.userId,
+        action: 'streaming.provider_sync.ran',
+        targetType: 'Tenant',
+        targetId: ctx.tenantId,
+        metadata: {
+          churchId: input?.churchId ?? null,
+          scanned: result.scanned,
+          updated: result.updated,
+          failed: result.failed,
+        },
+      });
+
+      return result;
     }),
 });

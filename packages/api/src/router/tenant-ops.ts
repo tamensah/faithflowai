@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { router, userProcedure } from '../trpc';
 import { recordAuditLog } from '../audit';
 import { deriveDomainRunbookState, runTenantDomainAutomation } from '../tenant-ops-automation';
+import { runStreamingProviderSync } from '../streaming-sync';
 
 async function requirePlatformRole(clerkUserId: string, roles: PlatformRole[]) {
   const platformUser = await prisma.platformUser.findFirst({
@@ -251,6 +252,75 @@ export const tenantOpsRouter = router({
         sslExpiryWarningDays: input?.sslExpiryWarningDays ?? 30,
         dryRun: input?.dryRun ?? false,
       });
+    }),
+
+  streamingSyncPreview: userProcedure
+    .input(
+      z.object({
+        tenantId: z.string(),
+        churchId: z.string().optional(),
+        limit: z.number().int().min(1).max(500).default(200),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      await requirePlatformRole(ctx.userId!, [
+        PlatformRole.SUPER_ADMIN,
+        PlatformRole.PLATFORM_ADMIN,
+        PlatformRole.OPERATIONS_MANAGER,
+        PlatformRole.SECURITY_ADMIN,
+      ]);
+
+      return runStreamingProviderSync({
+        tenantId: input.tenantId,
+        churchId: input.churchId,
+        limit: input.limit,
+        dryRun: true,
+        applySuggestedTransitions: false,
+      });
+    }),
+
+  runStreamingSync: userProcedure
+    .input(
+      z.object({
+        tenantId: z.string(),
+        churchId: z.string().optional(),
+        limit: z.number().int().min(1).max(500).default(200),
+        applySuggestedTransitions: z.boolean().default(true),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const actor = await requirePlatformRole(ctx.userId!, [
+        PlatformRole.SUPER_ADMIN,
+        PlatformRole.PLATFORM_ADMIN,
+        PlatformRole.OPERATIONS_MANAGER,
+        PlatformRole.SECURITY_ADMIN,
+      ]);
+
+      const result = await runStreamingProviderSync({
+        tenantId: input.tenantId,
+        churchId: input.churchId,
+        limit: input.limit,
+        dryRun: false,
+        applySuggestedTransitions: input.applySuggestedTransitions,
+      });
+
+      await recordAuditLog({
+        tenantId: input.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: actor.id,
+        action: 'tenant.streaming.provider_sync.ran',
+        targetType: 'Tenant',
+        targetId: input.tenantId,
+        metadata: {
+          churchId: input.churchId ?? null,
+          scanned: result.scanned,
+          updated: result.updated,
+          failed: result.failed,
+          applySuggestedTransitions: input.applySuggestedTransitions,
+        },
+      });
+
+      return result;
     }),
 
   listHealthChecks: userProcedure

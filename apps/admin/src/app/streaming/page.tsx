@@ -11,6 +11,7 @@ import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const providerOptions = ['YOUTUBE', 'FACEBOOK', 'VIMEO', 'CUSTOM_RTMP'] as const;
 const moderationOptions = ['OPEN', 'FILTERED', 'STRICT'] as const;
+const moderationActionOptions = ['WARN', 'MUTE_PARTICIPANT', 'REMOVE_PARTICIPANT', 'DELETE_MESSAGE', 'BAN_PARTICIPANT'] as const;
 
 export default function StreamingPage() {
   const gate = useFeatureGate('streaming_enabled');
@@ -26,18 +27,44 @@ export default function StreamingPage() {
   const [sessionChannelId, setSessionChannelId] = useState('');
   const [sessionStartsAt, setSessionStartsAt] = useState('');
   const [moderationLevel, setModerationLevel] = useState<(typeof moderationOptions)[number]>('FILTERED');
+  const [syncLimit, setSyncLimit] = useState('200');
+  const [syncStatus, setSyncStatus] = useState('');
+  const [applySuggestedTransitions, setApplySuggestedTransitions] = useState(true);
+  const [moderationSessionId, setModerationSessionId] = useState('');
+  const [moderationActionType, setModerationActionType] = useState<(typeof moderationActionOptions)[number]>('WARN');
+  const [moderationParticipantRef, setModerationParticipantRef] = useState('');
+  const [moderationMessageRef, setModerationMessageRef] = useState('');
+  const [moderationReason, setModerationReason] = useState('');
+  const [moderationDurationMinutes, setModerationDurationMinutes] = useState('15');
+  const [moderationStatus, setModerationStatus] = useState('');
+  const [sessionModerationDraft, setSessionModerationDraft] = useState<Record<string, (typeof moderationOptions)[number]>>({});
 
   const { data: churches } = trpc.church.list.useQuery({});
   const { data: campuses } = trpc.campus.list.useQuery({ churchId: churchId || undefined });
   const { data: channels } = trpc.streaming.channels.useQuery({ churchId: churchId || undefined });
   const { data: sessions } = trpc.streaming.sessions.useQuery({ churchId: churchId || undefined, limit: 100 });
   const { data: analytics } = trpc.streaming.analytics.useQuery({ churchId: churchId || undefined });
+  const parsedSyncLimit = Number.isFinite(Number(syncLimit)) ? Math.max(1, Math.min(500, Number(syncLimit))) : 200;
+  const providerSyncPreview = trpc.streaming.providerSyncPreview.useQuery(
+    { churchId: churchId || undefined, limit: parsedSyncLimit },
+    { enabled: false, refetchOnWindowFocus: false }
+  );
+  const moderationTimeline = trpc.streaming.moderationTimeline.useQuery(
+    { sessionId: moderationSessionId, limit: 50 },
+    { enabled: Boolean(moderationSessionId) }
+  );
 
   useEffect(() => {
     if (!churchId && churches?.length) {
       setChurchId(churches[0].id);
     }
   }, [churchId, churches]);
+
+  useEffect(() => {
+    if (!moderationSessionId && sessions?.length) {
+      setModerationSessionId(sessions[0].id);
+    }
+  }, [moderationSessionId, sessions]);
 
   const { mutate: createChannel, isPending: isCreatingChannel } = trpc.streaming.createChannel.useMutation({
     onSuccess: async (channel) => {
@@ -66,6 +93,31 @@ export default function StreamingPage() {
       await Promise.all([utils.streaming.sessions.invalidate(), utils.streaming.analytics.invalidate()]);
     },
   });
+  const { mutate: runProviderSync, isPending: isRunningProviderSync } = trpc.streaming.runProviderSync.useMutation({
+    onSuccess: async (result) => {
+      setSyncStatus(`Synced ${result.scanned} session(s): ${result.updated} updated, ${result.failed} failed.`);
+      await Promise.all([utils.streaming.sessions.invalidate(), utils.streaming.analytics.invalidate()]);
+    },
+    onError: (error) => setSyncStatus(error.message),
+  });
+  const { mutate: setModerationForSession, isPending: isSettingModeration } = trpc.streaming.setModerationLevel.useMutation({
+    onSuccess: async (session) => {
+      setModerationStatus(`Moderation level updated for ${session.title}.`);
+      await utils.streaming.sessions.invalidate();
+    },
+    onError: (error) => setModerationStatus(error.message),
+  });
+  const { mutate: recordModerationAction, isPending: isRecordingModerationAction } =
+    trpc.streaming.recordModerationAction.useMutation({
+      onSuccess: async () => {
+        setModerationStatus('Moderation action recorded.');
+        setModerationReason('');
+        setModerationParticipantRef('');
+        setModerationMessageRef('');
+        await utils.streaming.moderationTimeline.invalidate();
+      },
+      onError: (error) => setModerationStatus(error.message),
+    });
 
   return (
     <Shell>
@@ -221,6 +273,41 @@ export default function StreamingPage() {
                   <p className="text-xs text-muted">{session.status}</p>
                 </div>
                 <p className="text-xs text-muted">{session.channel.name}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <select
+                    className="h-9 rounded-md border border-border bg-white px-2 text-xs"
+                    value={sessionModerationDraft[session.id] ?? session.moderationLevel}
+                    onChange={(event) =>
+                      setSessionModerationDraft((current) => ({
+                        ...current,
+                        [session.id]: event.target.value as (typeof moderationOptions)[number],
+                      }))
+                    }
+                  >
+                    {moderationOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      setModerationForSession({
+                        sessionId: session.id,
+                        moderationLevel: sessionModerationDraft[session.id] ?? session.moderationLevel,
+                      })
+                    }
+                    disabled={
+                      !canWrite ||
+                      isSettingModeration ||
+                      (sessionModerationDraft[session.id] ?? session.moderationLevel) === session.moderationLevel
+                    }
+                  >
+                    Save moderation
+                  </Button>
+                </div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <Button
                     size="sm"
@@ -242,6 +329,161 @@ export default function StreamingPage() {
               </div>
             ))}
             {!sessions?.length ? <p className="text-sm text-muted">No streaming sessions yet.</p> : null}
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Provider sync</h2>
+          <p className="mt-1 text-sm text-muted">
+            Preview provider reachability checks and reconcile session status from the provider signal.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <Input
+              type="number"
+              min={1}
+              max={500}
+              value={syncLimit}
+              onChange={(event) => setSyncLimit(event.target.value)}
+              placeholder="Sync limit"
+            />
+            <label className="flex items-center gap-2 text-sm text-muted">
+              <input
+                type="checkbox"
+                checked={applySuggestedTransitions}
+                onChange={(event) => setApplySuggestedTransitions(event.target.checked)}
+              />
+              Apply suggested SCHEDULED → LIVE transitions
+            </label>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              disabled={providerSyncPreview.isFetching}
+              onClick={async () => {
+                const result = await providerSyncPreview.refetch();
+                setSyncStatus(
+                  result.data
+                    ? `Preview scanned ${result.data.scanned} session(s), ${result.data.failed} check(s) failed.`
+                    : 'No preview data available.'
+                );
+              }}
+            >
+              {providerSyncPreview.isFetching ? 'Running preview...' : 'Preview sync'}
+            </Button>
+            <Button
+              disabled={!canWrite || isRunningProviderSync}
+              onClick={() =>
+                runProviderSync({
+                  churchId: churchId || undefined,
+                  limit: parsedSyncLimit,
+                  applySuggestedTransitions,
+                })
+              }
+            >
+              {isRunningProviderSync ? 'Running sync...' : 'Run provider sync'}
+            </Button>
+          </div>
+          {syncStatus ? <p className="mt-3 text-sm text-muted">{syncStatus}</p> : null}
+          <div className="mt-4 space-y-2">
+            {(providerSyncPreview.data?.entries ?? []).slice(0, 8).map((entry) => (
+              <div key={entry.sessionId} className="rounded-md border border-border p-3 text-xs text-muted">
+                <p className="font-medium text-foreground">{entry.sessionId}</p>
+                <p>
+                  Status {entry.status} · Playback {entry.playbackReachable ? 'reachable' : 'unreachable'} (
+                  {entry.playbackStatusCode ?? 'n/a'})
+                </p>
+                <p>{entry.recommendedAction}</p>
+              </div>
+            ))}
+            {!providerSyncPreview.data?.entries?.length ? (
+              <p className="text-sm text-muted">Run preview to inspect provider state.</p>
+            ) : null}
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Moderation controls</h2>
+          <p className="mt-1 text-sm text-muted">Record moderation interventions and review timeline entries.</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <select
+              className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+              value={moderationSessionId}
+              onChange={(event) => setModerationSessionId(event.target.value)}
+            >
+              <option value="">Select session</option>
+              {sessions?.map((session) => (
+                <option key={session.id} value={session.id}>
+                  {session.title}
+                </option>
+              ))}
+            </select>
+            <select
+              className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+              value={moderationActionType}
+              onChange={(event) => setModerationActionType(event.target.value as (typeof moderationActionOptions)[number])}
+            >
+              {moderationActionOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            <Input
+              placeholder="Participant ref (optional)"
+              value={moderationParticipantRef}
+              onChange={(event) => setModerationParticipantRef(event.target.value)}
+            />
+            <Input
+              placeholder="Message ref (optional)"
+              value={moderationMessageRef}
+              onChange={(event) => setModerationMessageRef(event.target.value)}
+            />
+            <Input
+              type="number"
+              min={1}
+              max={1440}
+              placeholder="Duration minutes"
+              value={moderationDurationMinutes}
+              onChange={(event) => setModerationDurationMinutes(event.target.value)}
+            />
+            <Input
+              placeholder="Reason"
+              value={moderationReason}
+              onChange={(event) => setModerationReason(event.target.value)}
+            />
+          </div>
+          <div className="mt-4">
+            <Button
+              disabled={!canWrite || !moderationSessionId || moderationReason.trim().length < 2 || isRecordingModerationAction}
+              onClick={() =>
+                recordModerationAction({
+                  sessionId: moderationSessionId,
+                  actionType: moderationActionType,
+                  participantRef: moderationParticipantRef.trim() || undefined,
+                  messageRef: moderationMessageRef.trim() || undefined,
+                  reason: moderationReason.trim(),
+                  durationMinutes: (() => {
+                    const parsed = Number.parseInt(moderationDurationMinutes, 10);
+                    return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+                  })(),
+                })
+              }
+            >
+              {isRecordingModerationAction ? 'Saving action...' : 'Record moderation action'}
+            </Button>
+          </div>
+          {moderationStatus ? <p className="mt-3 text-sm text-muted">{moderationStatus}</p> : null}
+          <div className="mt-4 space-y-2">
+            {(moderationTimeline.data ?? []).map((entry) => (
+              <div key={entry.id} className="rounded-md border border-border p-3 text-xs text-muted">
+                <p className="font-medium text-foreground">{entry.action}</p>
+                <p>{new Date(entry.createdAt).toLocaleString()}</p>
+                <pre className="mt-2 overflow-x-auto whitespace-pre-wrap">{JSON.stringify(entry.metadata ?? {}, null, 2)}</pre>
+              </div>
+            ))}
+            {moderationSessionId && !moderationTimeline.data?.length ? (
+              <p className="text-sm text-muted">No moderation actions recorded for this session yet.</p>
+            ) : null}
           </div>
         </Card>
 

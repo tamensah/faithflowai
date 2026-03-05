@@ -33,6 +33,7 @@ import {
   runSubscriptionMetadataBackfill,
   runTenantDomainAutomation,
   runSupportSlaAutomation,
+  runStreamingProviderSync,
   renderReceiptHtml,
   subscribeRealtime,
   recordAuditLog,
@@ -842,6 +843,35 @@ async function start() {
     } catch (error) {
       request.log.error({ error }, 'Support SLA automation failed');
       reply.code(500).send({ error: 'Support SLA automation failed' });
+    }
+  });
+
+  server.post('/tasks/streaming/provider-sync', async (request, reply) => {
+    try {
+      const apiKey = extractIntegrationKey(request);
+      if (!env.INTEGRATION_API_KEY || apiKey !== env.INTEGRATION_API_KEY) {
+        reply.code(401).send({ error: 'Unauthorized' });
+        return;
+      }
+
+      const body = (request.body ?? {}) as {
+        tenantId?: string;
+        churchId?: string;
+        limit?: number;
+        dryRun?: boolean;
+        applySuggestedTransitions?: boolean;
+      };
+      const result = await runStreamingProviderSync({
+        tenantId: body.tenantId,
+        churchId: body.churchId,
+        limit: typeof body.limit === 'number' ? body.limit : 200,
+        dryRun: body.dryRun,
+        applySuggestedTransitions: body.applySuggestedTransitions,
+      });
+      reply.send(result);
+    } catch (error) {
+      request.log.error({ error }, 'Streaming provider sync failed');
+      reply.code(500).send({ error: 'Streaming provider sync failed' });
     }
   });
 
