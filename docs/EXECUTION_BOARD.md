@@ -1,6 +1,6 @@
 # FaithFlow Unified Execution Board
 
-Last updated: 2026-03-04
+Last updated: 2026-03-05
 
 This board consolidates the active backlog into one ordered sequence so implementation can run without context switching.
 
@@ -90,7 +90,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 4) Executive rollups and drill-down dashboards (P1)
-**Status:** IN PROGRESS
+**Status:** DONE
 **Goal:** Make HQ/regional leaders operational in <=3 clicks.
 
 **Deliverables**
@@ -136,7 +136,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 6) Operability hardening (P1)
-**Status:** IN PROGRESS
+**Status:** BLOCKED (awaiting repo admin token to enforce required branch protection checks)
 **Goal:** Increase deployment confidence and incident response speed.
 
 **Deliverables**
@@ -161,12 +161,13 @@ This board consolidates the active backlog into one ordered sequence so implemen
   - `pnpm test:platform-smoke`
 - Added contextual runbook links on failed Provider Ops outcomes for faster replay remediation.
 - Added consolidated Ops Health dashboard (`/dashboard/ops-health`) that aggregates all `/api/health/*` checks with alert states and module drill-through links.
-- Deferred infra action: GitHub branch protection must still be updated to require the `workspace-dependency-guard` check on protected branches (`main`, `develop`) once a repo admin token is available (`pnpm ops:enforce-required-checks`).
+- Added workspace dependency drift protection in CI (`.github/workflows/workspace-deps.yml`) and repo lint command (`pnpm lint:workspace-deps`).
+- Added branch protection automation (`pnpm ops:enforce-required-checks`) to require `workspace-dependency-guard` on protected branches once `GITHUB_TOKEN` is available.
 
 ---
 
 ### 7) AI intelligence packs (P2)
-**Status:** IN PROGRESS
+**Status:** DONE
 **Goal:** Add high-value decision support after operational core is stable.
 
 **Deliverables**
@@ -184,7 +185,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 ---
 
 ### 8) Add-on framework (P2)
-**Status:** IN PROGRESS
+**Status:** DONE
 **Goal:** Launch entitlement-driven expansion modules (streaming, bible school, facilities).
 
 **Deliverables**
