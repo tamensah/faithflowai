@@ -122,13 +122,18 @@ Paystack metadata requirement for add-on auto-toggle:
 
 1. Add all required env vars in Vercel project settings (`admin` and `web` where applicable).
 2. Configure webhook URLs/events on each provider dashboard.
-3. Trigger provider test events and confirm visibility in `/dashboard/provider-ops`.
-4. Run:
+3. Run go-live readiness audit (non-strict first, strict after env setup):
+   - `pnpm ops:go-live-readiness`
+   - `pnpm ops:go-live-readiness -- --strict`
+4. Trigger provider test events and confirm visibility in `/dashboard/provider-ops`.
+5. Run:
    - `pnpm test:payment-comms-e2e`
    - `pnpm test:provider-webhooks-e2e`
    - `pnpm outbox:process -- --domain=PAYMENT --maxEvents=25`
    - `pnpm outbox:process -- --domain=COMMS --maxEvents=25`
-5. Confirm failed items can be replayed successfully from Provider Ops.
+6. Confirm failed items can be replayed successfully from Provider Ops.
+7. Enforce required branch checks when admin token is available:
+   - `GITHUB_TOKEN=YOUR_ADMIN_TOKEN pnpm ops:enforce-required-checks`
 
 ## 6) Current status snapshot
 

@@ -26,6 +26,7 @@
     "test:auth-guardrails": "tsx scripts/auth-guardrails-smoke.ts",
     "test:admin-health": "tsx scripts/admin-health-smoke.ts",
     "test:platform-smoke": "pnpm test:org-e2e && pnpm test:payment-comms-e2e && pnpm test:provider-webhooks-e2e && pnpm test:auth-guardrails && pnpm test:admin-health",
+    "ops:go-live-readiness": "tsx scripts/go-live-readiness.ts",
     "outbox:process": "tsx scripts/process-outbox.ts",
     "lint:workspace-deps": "node scripts/check-workspace-dependencies.mjs",
     "ops:enforce-required-checks": "node scripts/enforce-required-checks.mjs"

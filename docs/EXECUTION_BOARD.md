@@ -163,6 +163,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added consolidated Ops Health dashboard (`/dashboard/ops-health`) that aggregates all `/api/health/*` checks with alert states and module drill-through links.
 - Added workspace dependency drift protection in CI (`.github/workflows/workspace-deps.yml`) and repo lint command (`pnpm lint:workspace-deps`).
 - Added branch protection automation (`pnpm ops:enforce-required-checks`) to require `workspace-dependency-guard` on protected branches once `GITHUB_TOKEN` is available.
+- Added go-live readiness audit script (`pnpm ops:go-live-readiness`) to verify env coverage, live health endpoints, and branch-protection readiness from a single command.
 
 ---
 
