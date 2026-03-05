@@ -67,8 +67,13 @@ export default function CommunicationsPage() {
   const [dripAudience, setDripAudience] = useState('');
   const [dripTo, setDripTo] = useState('');
   const [activeSection, setActiveSection] = useState<CommunicationsSectionKey>('overview');
+  const [quietHoursStatus, setQuietHoursStatus] = useState('');
+  const [templateStatus, setTemplateStatus] = useState('');
+  const [sendStatus, setSendStatus] = useState('');
+  const [scheduleStatus, setScheduleStatus] = useState('');
+  const [dripStatus, setDripStatus] = useState('');
 
-  const { data: churches } = trpc.church.list.useQuery({ organizationId: undefined });
+  const { data: churches, isLoading: isLoadingChurches } = trpc.church.list.useQuery({ organizationId: undefined });
   const { data: templates } = trpc.communications.templates.useQuery(
     { churchId: churchId || undefined },
     { enabled: Boolean(churchId) }
@@ -260,15 +265,18 @@ export default function CommunicationsPage() {
 
   const { mutate: createTemplate, isPending: isCreatingTemplate } = trpc.communications.createTemplate.useMutation({
     onSuccess: async () => {
+      setTemplateStatus('Template created.');
       setTemplateName('');
       setTemplateBody('');
       setTemplateSubject('');
       await utils.communications.templates.invalidate();
     },
+    onError: (error) => setTemplateStatus(error.message),
   });
 
   const { mutate: sendMessage, isPending: isSendingMessage } = trpc.communications.send.useMutation({
     onSuccess: async () => {
+      setSendStatus('Message sent.');
       setSendTo('');
       setSendSubject('');
       setSendBody('');
@@ -276,10 +284,12 @@ export default function CommunicationsPage() {
       setAudience('');
       await utils.communications.messages.invalidate();
     },
+    onError: (error) => setSendStatus(error.message),
   });
 
   const { mutate: scheduleMessage, isPending: isScheduling } = trpc.communications.schedule.useMutation({
     onSuccess: async (data) => {
+      setScheduleStatus('Message scheduled.');
       setScheduleTo('');
       setScheduleSubject('');
       setScheduleBody('');
@@ -288,6 +298,7 @@ export default function CommunicationsPage() {
       setLastScheduleBatchKey((data as any)?.batchKey ?? '');
       await utils.communications.schedules.invalidate();
     },
+    onError: (error) => setScheduleStatus(error.message),
   });
 
   const { mutate: updateBatchStatus, isPending: isUpdatingBatch } =
@@ -317,14 +328,17 @@ export default function CommunicationsPage() {
 
   const { mutate: createDrip, isPending: isCreatingDrip } = trpc.communications.createDrip.useMutation({
     onSuccess: async () => {
+      setDripStatus('Drip campaign created.');
       setDripName('');
       setDripDescription('');
       await utils.communications.drips.invalidate();
     },
+    onError: (error) => setDripStatus(error.message),
   });
 
   const { mutate: addDripStep, isPending: isAddingDripStep } = trpc.communications.addDripStep.useMutation({
     onSuccess: async () => {
+      setDripStatus('Drip step added.');
       setDripStepOrder(String(Number(dripStepOrder) + 1));
       setDripDelayHours('24');
       setDripSubject('');
@@ -332,21 +346,163 @@ export default function CommunicationsPage() {
       setDripTemplateId('');
       await utils.communications.dripSteps.invalidate();
     },
+    onError: (error) => setDripStatus(error.message),
   });
 
   const { mutate: enrollDrip, isPending: isEnrollingDrip } = trpc.communications.enrollDrip.useMutation({
     onSuccess: async () => {
+      setDripStatus('Recipients enrolled.');
       setDripTo('');
       setDripAudience('');
       await utils.communications.schedules.invalidate();
     },
+    onError: (error) => setDripStatus(error.message),
   });
 
   const { mutate: updateChurch, isPending: isSavingQuietHours } = trpc.church.update.useMutation({
     onSuccess: async () => {
+      setQuietHoursStatus('Quiet hours saved.');
       await utils.church.list.invalidate();
     },
+    onError: (error) => setQuietHoursStatus(error.message),
   });
+
+  const handleSaveQuietHours = () => {
+    if (!churchId) {
+      setQuietHoursStatus('Select a church first.');
+      return;
+    }
+    setQuietHoursStatus('');
+    updateChurch({
+      id: churchId,
+      quietHoursEnabled: quietEnabled,
+      quietHoursStartHour: Number(quietStart || '21'),
+      quietHoursEndHour: Number(quietEnd || '7'),
+      quietHoursRescheduleMinutes: Number(quietIncrement || '30'),
+    });
+  };
+
+  const handleCreateTemplate = () => {
+    if (!churchId || !templateName.trim() || !templateBody.trim()) {
+      setTemplateStatus('Church, template name, and body are required.');
+      return;
+    }
+    if (templateChannel === 'EMAIL' && !templateSubject.trim()) {
+      setTemplateStatus('Email templates require a subject.');
+      return;
+    }
+    setTemplateStatus('');
+    createTemplate({
+      churchId,
+      name: templateName.trim(),
+      channel: templateChannel as any,
+      subject: templateChannel === 'EMAIL' ? templateSubject.trim() : undefined,
+      body: templateBody,
+    });
+  };
+
+  const handleSendMessage = () => {
+    if (!churchId || (!sendTo && !audience)) {
+      setSendStatus('Provide recipients or an audience.');
+      return;
+    }
+    if (!templateId && !sendBody.trim()) {
+      setSendStatus('Provide a message body or select a template.');
+      return;
+    }
+    if (sendChannel === 'EMAIL' && !templateId && !sendSubject.trim()) {
+      setSendStatus('Email messages require a subject when no template is selected.');
+      return;
+    }
+    setSendStatus('');
+    sendMessage({
+      churchId,
+      channel: sendChannel as any,
+      templateId: templateId || undefined,
+      audience: audience ? (audience as any) : undefined,
+      subject: sendChannel === 'EMAIL' ? sendSubject : undefined,
+      body: sendBody || undefined,
+      to: parsedSendRecipients,
+    });
+  };
+
+  const handleScheduleMessage = () => {
+    if (!churchId || (!scheduleTo && !scheduleAudience)) {
+      setScheduleStatus('Provide recipients or an audience.');
+      return;
+    }
+    if (!scheduleTemplateId && !scheduleBody.trim()) {
+      setScheduleStatus('Provide a message body or select a template.');
+      return;
+    }
+    if (scheduleChannel === 'EMAIL' && !scheduleTemplateId && !scheduleSubject.trim()) {
+      setScheduleStatus('Email schedules require a subject when no template is selected.');
+      return;
+    }
+    setScheduleStatus('');
+    scheduleMessage({
+      churchId,
+      channel: scheduleChannel as any,
+      templateId: scheduleTemplateId || undefined,
+      audience: scheduleAudience ? (scheduleAudience as any) : undefined,
+      subject: scheduleChannel === 'EMAIL' ? scheduleSubject : undefined,
+      body: scheduleBody || undefined,
+      sendAt: scheduleSendAt ? new Date(scheduleSendAt) : new Date(),
+      initialStatus: scheduleInitialStatus,
+      to: parsedScheduleRecipients,
+    });
+  };
+
+  const handleCreateDrip = () => {
+    if (!churchId || !dripName.trim()) {
+      setDripStatus('Church and campaign name are required.');
+      return;
+    }
+    setDripStatus('');
+    createDrip({
+      churchId,
+      name: dripName.trim(),
+      description: dripDescription || undefined,
+    });
+  };
+
+  const handleAddDripStep = () => {
+    if (!selectedDripId || !dripStepOrder || !dripDelayHours) {
+      setDripStatus('Select campaign, step order, and delay hours.');
+      return;
+    }
+    if (!dripTemplateId && !dripBody.trim()) {
+      setDripStatus('Provide step body or select a template.');
+      return;
+    }
+    setDripStatus('');
+    addDripStep({
+      campaignId: selectedDripId,
+      stepOrder: Number(dripStepOrder),
+      delayHours: Number(dripDelayHours),
+      channel: dripChannel as any,
+      templateId: dripTemplateId || undefined,
+      subject: dripChannel === 'EMAIL' ? dripSubject : undefined,
+      body: dripBody || undefined,
+    });
+  };
+
+  const handleEnrollDrip = () => {
+    if (!selectedDripId || (!dripAudience && !dripTo)) {
+      setDripStatus('Choose an audience or provide recipients.');
+      return;
+    }
+    setDripStatus('');
+    enrollDrip({
+      campaignId: selectedDripId,
+      churchId,
+      audience: dripAudience ? (dripAudience as any) : undefined,
+      to: dripTo
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean),
+    });
+  };
 
   return (
     <Shell>
@@ -397,6 +553,7 @@ export default function CommunicationsPage() {
               value={churchId}
               onChange={(event) => setChurchId(event.target.value)}
             >
+              <option value="">{isLoadingChurches ? 'Loading churches...' : 'Select church *'}</option>
               {churches?.map((church) => (
                 <option key={church.id} value={church.id}>
                   {church.name}
@@ -444,20 +601,10 @@ export default function CommunicationsPage() {
             />
           </div>
           <div className="mt-4">
-            <Button
-              onClick={() =>
-                updateChurch({
-                  id: churchId,
-                  quietHoursEnabled: quietEnabled,
-                  quietHoursStartHour: Number(quietStart || '21'),
-                  quietHoursEndHour: Number(quietEnd || '7'),
-                  quietHoursRescheduleMinutes: Number(quietIncrement || '30'),
-                })
-              }
-              disabled={!canWrite || !churchId || isSavingQuietHours}
-            >
+            <Button onClick={handleSaveQuietHours} disabled={!canWrite || isSavingQuietHours}>
               {isSavingQuietHours ? 'Saving…' : 'Save quiet hours'}
             </Button>
+            {quietHoursStatus ? <p className="mt-2 text-xs text-muted">{quietHoursStatus}</p> : null}
           </div>
         </Card>
         ) : null}
@@ -465,6 +612,7 @@ export default function CommunicationsPage() {
         {activeSection === 'compose' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Templates</h2>
+          <p className="mt-1 text-xs text-muted">Required fields are marked with *.</p>
           <p className="mt-1 text-sm text-muted">
             Supported variables: {'{{firstName}}'}, {'{{lastName}}'}, {'{{email}}'}, {'{{phone}}'}, {'{{donorName}}'},
             {'{{churchName}}'}
@@ -482,7 +630,7 @@ export default function CommunicationsPage() {
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <Input
-              placeholder="Template name"
+              placeholder="Template name *"
               value={templateName}
               onChange={(event) => setTemplateName(event.target.value)}
             />
@@ -499,38 +647,29 @@ export default function CommunicationsPage() {
             </select>
             {templateChannel === 'EMAIL' && (
               <Input
-                placeholder="Email subject"
+                placeholder="Email subject *"
                 value={templateSubject}
                 onChange={(event) => setTemplateSubject(event.target.value)}
               />
             )}
             <textarea
               className="min-h-[120px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-              placeholder="Template body (HTML for email)"
+              placeholder="Template body * (HTML for email)"
               value={templateBody}
               onChange={(event) => setTemplateBody(event.target.value)}
             />
-            <Button
-              onClick={() =>
-                createTemplate({
-                  churchId,
-                  name: templateName,
-                  channel: templateChannel as any,
-                  subject: templateChannel === 'EMAIL' ? templateSubject : undefined,
-                  body: templateBody,
-                })
-              }
-              disabled={!canWrite || !churchId || !templateName || !templateBody || isCreatingTemplate}
-            >
+            <Button onClick={handleCreateTemplate} disabled={!canWrite || isCreatingTemplate}>
               {isCreatingTemplate ? 'Creating…' : 'Create template'}
             </Button>
           </div>
+          {templateStatus ? <p className="mt-3 text-xs text-muted">{templateStatus}</p> : null}
         </Card>
         ) : null}
 
         {activeSection === 'compose' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Send message</h2>
+          <p className="mt-1 text-xs text-muted">Required fields are marked with *.</p>
           <p className="mt-1 text-sm text-muted">Choose a template or write a custom message. Audiences expand to real recipients.</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <select
@@ -573,33 +712,21 @@ export default function CommunicationsPage() {
             />
             {sendChannel === 'EMAIL' && (
               <Input
-                placeholder="Email subject"
+                placeholder="Email subject * (required without template)"
                 value={sendSubject}
                 onChange={(event) => setSendSubject(event.target.value)}
               />
             )}
             <textarea
               className="min-h-[120px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-              placeholder="Message body (HTML for email)"
+              placeholder="Message body * (required without template)"
               value={sendBody}
               onChange={(event) => setSendBody(event.target.value)}
             />
             <Button
-              onClick={() =>
-                sendMessage({
-                  churchId,
-                  channel: sendChannel as any,
-                  templateId: templateId || undefined,
-                  audience: audience ? (audience as any) : undefined,
-                  subject: sendChannel === 'EMAIL' ? sendSubject : undefined,
-                  body: sendBody || undefined,
-                  to: parsedSendRecipients,
-                })
-              }
+              onClick={handleSendMessage}
               disabled={
                 !canWrite ||
-                !churchId ||
-                (!sendTo && !audience) ||
                 isSendingMessage ||
                 (sendPreviewEnabled && (sendPreview?.deliverable ?? 0) === 0)
               }
@@ -607,6 +734,7 @@ export default function CommunicationsPage() {
               {isSendingMessage ? 'Sending…' : 'Send'}
             </Button>
           </div>
+          {sendStatus ? <p className="mt-3 text-xs text-muted">{sendStatus}</p> : null}
           {sendPreviewEnabled ? (
             <div className="mt-3 rounded-md border border-border bg-muted/40 p-3 text-xs text-muted">
               <p>
@@ -623,6 +751,7 @@ export default function CommunicationsPage() {
         {activeSection === 'automation' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Schedule message</h2>
+          <p className="mt-1 text-xs text-muted">Required fields are marked with *.</p>
           <p className="mt-1 text-sm text-muted">Draft, review, and queue messages to be sent later (use dispatch in your cron).</p>
           <div className="mt-4 rounded-md border border-border bg-muted/40 p-3">
             <p className="text-sm font-medium text-foreground">AI drafting assistant (human review required)</p>
@@ -730,14 +859,14 @@ export default function CommunicationsPage() {
             />
             {scheduleChannel === 'EMAIL' && (
               <Input
-                placeholder="Email subject"
+                placeholder="Email subject * (required without template)"
                 value={scheduleSubject}
                 onChange={(event) => setScheduleSubject(event.target.value)}
               />
             )}
             <textarea
               className="min-h-[120px] w-full rounded-md border border-border bg-white px-3 py-2 text-sm"
-              placeholder="Message body (HTML for email)"
+              placeholder="Message body * (required without template)"
               value={scheduleBody}
               onChange={(event) => setScheduleBody(event.target.value)}
             />
@@ -747,23 +876,9 @@ export default function CommunicationsPage() {
               onChange={(event) => setScheduleSendAt(event.target.value)}
             />
             <Button
-              onClick={() =>
-                scheduleMessage({
-                  churchId,
-                  channel: scheduleChannel as any,
-                  templateId: scheduleTemplateId || undefined,
-                  audience: scheduleAudience ? (scheduleAudience as any) : undefined,
-                  subject: scheduleChannel === 'EMAIL' ? scheduleSubject : undefined,
-                  body: scheduleBody || undefined,
-                  sendAt: scheduleSendAt ? new Date(scheduleSendAt) : new Date(),
-                  initialStatus: scheduleInitialStatus,
-                  to: parsedScheduleRecipients,
-                })
-              }
+              onClick={handleScheduleMessage}
               disabled={
                 !canWrite ||
-                !churchId ||
-                (!scheduleTo && !scheduleAudience) ||
                 isScheduling ||
                 (schedulePreviewEnabled && (schedulePreview?.deliverable ?? 0) === 0)
               }
@@ -774,6 +889,7 @@ export default function CommunicationsPage() {
               {isDispatching ? 'Dispatching…' : 'Dispatch due now'}
             </Button>
           </div>
+          {scheduleStatus ? <p className="mt-3 text-xs text-muted">{scheduleStatus}</p> : null}
           {schedulePreviewEnabled ? (
             <div className="mt-3 rounded-md border border-border bg-muted/40 p-3 text-xs text-muted">
               <p>
@@ -951,9 +1067,10 @@ export default function CommunicationsPage() {
         {activeSection === 'automation' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Drip campaigns</h2>
+          <p className="mt-1 text-xs text-muted">Required fields are marked with *.</p>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <Input
-              placeholder="Campaign name"
+              placeholder="Campaign name *"
               value={dripName}
               onChange={(event) => setDripName(event.target.value)}
             />
@@ -962,16 +1079,7 @@ export default function CommunicationsPage() {
               value={dripDescription}
               onChange={(event) => setDripDescription(event.target.value)}
             />
-            <Button
-              onClick={() =>
-                createDrip({
-                  churchId,
-                  name: dripName,
-                  description: dripDescription || undefined,
-                })
-              }
-              disabled={!canWrite || !churchId || !dripName || isCreatingDrip}
-            >
+            <Button onClick={handleCreateDrip} disabled={!canWrite || isCreatingDrip}>
               {isCreatingDrip ? 'Creating…' : 'Create drip'}
             </Button>
           </div>
@@ -1043,18 +1151,8 @@ export default function CommunicationsPage() {
                   onChange={(event) => setDripBody(event.target.value)}
                 />
                 <Button
-                  onClick={() =>
-                    addDripStep({
-                      campaignId: selectedDripId,
-                      stepOrder: Number(dripStepOrder),
-                      delayHours: Number(dripDelayHours),
-                      channel: dripChannel as any,
-                      templateId: dripTemplateId || undefined,
-                      subject: dripChannel === 'EMAIL' ? dripSubject : undefined,
-                      body: dripBody || undefined,
-                    })
-                  }
-                  disabled={!canWrite || !dripStepOrder || isAddingDripStep}
+                  onClick={handleAddDripStep}
+                  disabled={!canWrite || isAddingDripStep}
                 >
                   {isAddingDripStep ? 'Adding…' : 'Add drip step'}
                 </Button>
@@ -1087,24 +1185,15 @@ export default function CommunicationsPage() {
                   onChange={(event) => setDripTo(event.target.value)}
                 />
                 <Button
-                  onClick={() =>
-                    enrollDrip({
-                      campaignId: selectedDripId,
-                      churchId,
-                      audience: dripAudience ? (dripAudience as any) : undefined,
-                      to: dripTo
-                        .split(',')
-                        .map((value) => value.trim())
-                        .filter(Boolean),
-                    })
-                  }
-                  disabled={!canWrite || !selectedDripId || (!dripAudience && !dripTo) || isEnrollingDrip}
+                  onClick={handleEnrollDrip}
+                  disabled={!canWrite || isEnrollingDrip}
                 >
                   {isEnrollingDrip ? 'Enrolling…' : 'Enroll recipients'}
                 </Button>
               </div>
             </div>
           )}
+          {dripStatus ? <p className="mt-3 text-xs text-muted">{dripStatus}</p> : null}
         </Card>
         ) : null}
 

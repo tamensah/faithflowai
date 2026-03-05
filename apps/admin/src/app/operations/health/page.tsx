@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge, Button, Card } from '@faithflow-ai/ui';
+import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../../components/Shell';
 import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
@@ -19,6 +19,7 @@ export default function OperationsHealthPage() {
   const utils = trpc.useUtils();
   const canWrite = writeGate.canWrite;
   const [message, setMessage] = useState<string | null>(null);
+  const [templateRecipient, setTemplateRecipient] = useState('');
   const { data, isLoading, error } = trpc.operations.health.useQuery(undefined, { retry: false });
   const { data: checklist } = trpc.operations.goLiveChecklist.useQuery(undefined, { retry: false });
   const { mutate: sendTestEmail, isPending: isSendingTestEmail } = trpc.operations.sendTestEmail.useMutation({
@@ -39,6 +40,14 @@ export default function OperationsHealthPage() {
     },
     onError: (err) => setMessage(err.message),
   });
+  const { mutate: queueTransactionalTemplate, isPending: isQueueingTemplate } =
+    trpc.operations.queueTransactionalTemplate.useMutation({
+      onSuccess: async (result) => {
+        setMessage(`${result.template} template queued (${result.queued}).`);
+        await utils.operations.health.invalidate();
+      },
+      onError: (err) => setMessage(err.message),
+    });
 
   return (
     <Shell>
@@ -121,6 +130,42 @@ export default function OperationsHealthPage() {
                   {isRunningUploadTest ? 'Testing...' : 'Run storage upload test'}
                 </Button>
               </div>
+              <div className="mt-4 grid gap-2 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center">
+                <Input
+                  placeholder="Recipient override (optional admin email)"
+                  value={templateRecipient}
+                  onChange={(event) => setTemplateRecipient(event.target.value)}
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!canWrite || isQueueingTemplate || !data.providers.resend}
+                  onClick={() =>
+                    queueTransactionalTemplate({
+                      template: 'WELCOME_ONBOARDING',
+                      to: templateRecipient.trim() || undefined,
+                    })
+                  }
+                >
+                  {isQueueingTemplate ? 'Queueing...' : 'Queue welcome email'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!canWrite || isQueueingTemplate || !data.providers.resend}
+                  onClick={() =>
+                    queueTransactionalTemplate({
+                      template: 'TRIAL_ENDING',
+                      to: templateRecipient.trim() || undefined,
+                    })
+                  }
+                >
+                  {isQueueingTemplate ? 'Queueing...' : 'Queue trial reminder'}
+                </Button>
+              </div>
+              <p className="mt-2 text-xs text-muted">
+                Transactional templates are queued through the same provider/outbox pipeline as live notifications.
+              </p>
               {writeGate.readOnly ? (
                 <p className="mt-2 text-xs text-muted">Provider test actions are disabled in view-only mode.</p>
               ) : null}

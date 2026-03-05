@@ -29,6 +29,7 @@ This is the live checklist for product scope, implementation status, and next st
 - Payout reconciliation (Stripe + Paystack)
 - Finance CSV exports
 - Communications: outbound email/SMS/WhatsApp (templates + logs)
+- Transactional email templates wired for onboarding welcome + trial-ending reminders (queued through provider pipeline)
 - Communications: audience targeting + delivery analytics
 - Communications: suppression workspace + unsubscribe reporting by channel/reason
 - Communications: STOP keyword unsubscribe handling (Twilio inbound SMS/WhatsApp)
@@ -61,6 +62,7 @@ This is the live checklist for product scope, implementation status, and next st
 - Event check-in flow (admin)
 - Volunteer availability + scheduling inputs
 - Member CSV import utilities
+- Migration assistant expanded with household/donation mapping guidance and source normalization checklist
 - In-app messaging + notifications
 - Push notifications (FCM-ready)
 - Event RSVP + recurring series

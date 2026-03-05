@@ -1,2 +1,4 @@
 amount,currency,donorName,donorEmail,donorPhone,memberEmail,memberPhone,fundName,campaignName,createdAt
 25,USD,Jane Doe,jane@example.com,+15551231234,jane@example.com,,General,,2026-02-01
+120,GHS,Ama Mensah,ama@example.com,+233201234567,ama@example.com,,Tithe,Vision Sunday,2026-02-04
+50,NGN,Samuel Ade,samuel@example.com,+2348012345678,,+2348012345678,Offering,,2026-02-10

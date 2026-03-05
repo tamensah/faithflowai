@@ -49,6 +49,9 @@ Deliverables:
   - [x] Communications page segmented into overview, compose, automation, and activity workspaces
   - [x] Finance page segmented into operations, giving ops, accounting, and settlements workspaces
 - [ ] Require empty/loading/error states and consistent required/validation messaging on all new forms
+  - [x] Communications forms now use explicit required-field copy + inline success/error status messaging (quiet hours, templates, send, schedule, drip)
+  - [x] Billing surfaces now show loading states for subscription/plans/invoices and explicit required plan selection copy
+  - [x] Finance workspaces now show explicit required-field guidance, loading placeholders for list/report blocks, and inline success/error status feedback for imports, giving, accounting, settlements, and exports
 
 Acceptance criteria:
 - New feature pages must ship with contextual section navigation and focused, non-overloaded information architecture.
@@ -82,9 +85,9 @@ Deliverables:
 
 ## 3) Communications Foundations (Activation + Retention)
 
-- [ ] Resend transactional templates:
-  - [~] Welcome/onboarding
-  - [~] Trial ending reminders
+- [x] Resend transactional templates:
+  - [x] Welcome/onboarding
+  - [x] Trial ending reminders
   - [x] Receipt resend / tithing statement notice
   - [x] Failed payment / past-due notices
 - [ ] Messaging consent + compliance:
@@ -115,9 +118,9 @@ Deliverables:
   - [x] Dry-run mode with summary
 - [x] Rollback strategy (batch id + revert updates)
 - [x] Rollback strategy (batch id + delete created members)
-- [ ] Migration assistant docs + templates:
+- [x] Migration assistant docs + templates:
   - [x] Example CSV templates
-  - [~] Common ChMS export guidance
+  - [x] Common ChMS export guidance
 
 Deliverables:
 - A church can migrate a real dataset safely.

@@ -94,6 +94,11 @@ export default function FinancePage() {
   const [donationImportFilename, setDonationImportFilename] = useState('');
   const [donationImportResult, setDonationImportResult] = useState<any>(null);
   const [donationImportBatchId, setDonationImportBatchId] = useState<string>('');
+  const [operationsStatus, setOperationsStatus] = useState('');
+  const [givingStatus, setGivingStatus] = useState('');
+  const [accountingStatus, setAccountingStatus] = useState('');
+  const [settlementsStatus, setSettlementsStatus] = useState('');
+  const [exportStatus, setExportStatus] = useState('');
   const [activeSection, setActiveSection] = useState<FinanceSectionKey>('operations');
   const statementEmailRef = useRef<HTMLInputElement | null>(null);
   const donationImportRef = useRef<HTMLTextAreaElement | null>(null);
@@ -164,35 +169,47 @@ export default function FinancePage() {
     { enabled: Boolean(churchId && (statementMemberId || statementEmail)) }
   );
 
-  const { data: pledges } = trpc.pledge.list.useQuery({ churchId: churchId || undefined }, { enabled: Boolean(churchId) });
-  const { data: recurring } = trpc.recurring.list.useQuery(
+  const { data: pledges, isLoading: isLoadingPledges } = trpc.pledge.list.useQuery(
     { churchId: churchId || undefined },
     { enabled: Boolean(churchId) }
   );
-  const { data: categories } = trpc.expenseCategory.list.useQuery(
+  const { data: recurring, isLoading: isLoadingRecurring } = trpc.recurring.list.useQuery(
     { churchId: churchId || undefined },
     { enabled: Boolean(churchId) }
   );
-  const { data: expenses } = trpc.expense.list.useQuery({ churchId: churchId || undefined }, { enabled: Boolean(churchId) });
-  const { data: budgets } = trpc.budget.list.useQuery({ churchId: churchId || undefined }, { enabled: Boolean(churchId) });
-  const { data: receipts } = trpc.receipt.list.useQuery({ churchId: churchId || undefined, limit: 20 }, { enabled: Boolean(churchId) });
-  const { data: auditLogs } = trpc.audit.list.useQuery(
+  const { data: categories, isLoading: isLoadingCategories } = trpc.expenseCategory.list.useQuery(
+    { churchId: churchId || undefined },
+    { enabled: Boolean(churchId) }
+  );
+  const { data: expenses, isLoading: isLoadingExpenses } = trpc.expense.list.useQuery(
+    { churchId: churchId || undefined },
+    { enabled: Boolean(churchId) }
+  );
+  const { data: budgets, isLoading: isLoadingBudgets } = trpc.budget.list.useQuery(
+    { churchId: churchId || undefined },
+    { enabled: Boolean(churchId) }
+  );
+  const { data: receipts, isLoading: isLoadingReceipts } = trpc.receipt.list.useQuery(
     { churchId: churchId || undefined, limit: 20 },
     { enabled: Boolean(churchId) }
   );
-  const { data: payouts } = trpc.finance.listPayouts.useQuery(
+  const { data: auditLogs, isLoading: isLoadingAuditLogs } = trpc.audit.list.useQuery(
     { churchId: churchId || undefined, limit: 20 },
     { enabled: Boolean(churchId) }
   );
-  const { data: payoutTransactions } = trpc.finance.payoutTransactions.useQuery(
+  const { data: payouts, isLoading: isLoadingPayouts } = trpc.finance.listPayouts.useQuery(
+    { churchId: churchId || undefined, limit: 20 },
+    { enabled: Boolean(churchId) }
+  );
+  const { data: payoutTransactions, isLoading: isLoadingPayoutTransactions } = trpc.finance.payoutTransactions.useQuery(
     { payoutId: selectedPayoutId, limit: 20 },
     { enabled: Boolean(selectedPayoutId) }
   );
-  const { data: refunds } = trpc.finance.refunds.useQuery(
+  const { data: refunds, isLoading: isLoadingRefunds } = trpc.finance.refunds.useQuery(
     { churchId: churchId || undefined, limit: 20 },
     { enabled: Boolean(churchId) }
   );
-  const { data: disputes } = trpc.finance.disputes.useQuery(
+  const { data: disputes, isLoading: isLoadingDisputes } = trpc.finance.disputes.useQuery(
     { churchId: churchId || undefined, limit: 20 },
     { enabled: Boolean(churchId) }
   );
@@ -217,69 +234,99 @@ export default function FinancePage() {
 
   const { mutate: createPledge, isPending: isCreatingPledge } = trpc.pledge.create.useMutation({
     onSuccess: async () => {
+      setGivingStatus('Pledge created.');
       setPledgeNotes('');
       await utils.pledge.list.invalidate();
     },
+    onError: (error) => setGivingStatus(error.message),
   });
 
   const { mutate: createRecurring, isPending: isCreatingRecurring } = trpc.recurring.createCheckout.useMutation({
     onSuccess: async (result) => {
+      setGivingStatus('Recurring checkout created.');
       await utils.recurring.list.invalidate();
       if (result.checkoutUrl) {
         window.open(result.checkoutUrl, '_blank', 'noopener');
       }
     },
+    onError: (error) => setGivingStatus(error.message),
   });
   const { mutate: chargeRecurring } = trpc.recurring.chargeNow.useMutation({
-    onSuccess: () => utils.recurring.list.invalidate(),
+    onSuccess: () => {
+      setGivingStatus('Charge attempt queued.');
+      return utils.recurring.list.invalidate();
+    },
+    onError: (error) => setGivingStatus(error.message),
   });
 
   const { mutate: createCategory, isPending: isCreatingCategory } = trpc.expenseCategory.create.useMutation({
     onSuccess: async () => {
+      setAccountingStatus('Expense category created.');
       setCategoryName('');
       setCategoryDescription('');
       await utils.expenseCategory.list.invalidate();
     },
+    onError: (error) => setAccountingStatus(error.message),
   });
 
   const { mutate: createExpense, isPending: isCreatingExpense } = trpc.expense.create.useMutation({
     onSuccess: async () => {
+      setAccountingStatus('Expense created.');
       setExpenseDescription('');
       await utils.expense.list.invalidate();
     },
+    onError: (error) => setAccountingStatus(error.message),
   });
 
   const { mutate: approveExpense } = trpc.expense.approve.useMutation({
-    onSuccess: () => utils.expense.list.invalidate(),
+    onSuccess: () => {
+      setAccountingStatus('Expense approved.');
+      return utils.expense.list.invalidate();
+    },
+    onError: (error) => setAccountingStatus(error.message),
   });
   const { mutate: rejectExpense } = trpc.expense.reject.useMutation({
-    onSuccess: () => utils.expense.list.invalidate(),
+    onSuccess: () => {
+      setAccountingStatus('Expense rejected.');
+      return utils.expense.list.invalidate();
+    },
+    onError: (error) => setAccountingStatus(error.message),
   });
   const { mutate: markPaid } = trpc.expense.markPaid.useMutation({
-    onSuccess: () => utils.expense.list.invalidate(),
+    onSuccess: () => {
+      setAccountingStatus('Expense marked as paid.');
+      return utils.expense.list.invalidate();
+    },
+    onError: (error) => setAccountingStatus(error.message),
   });
 
   const { mutate: createBudget, isPending: isCreatingBudget } = trpc.budget.create.useMutation({
     onSuccess: async () => {
+      setAccountingStatus('Budget created.');
       setBudgetName('');
       setBudgetStart('');
       setBudgetEnd('');
       await utils.budget.list.invalidate();
     },
+    onError: (error) => setAccountingStatus(error.message),
   });
 
   const { mutate: addBudgetItem, isPending: isAddingBudgetItem } = trpc.budget.addItem.useMutation({
     onSuccess: async () => {
+      setAccountingStatus('Budget item added.');
       setBudgetItemName('');
       await utils.budget.list.invalidate();
     },
+    onError: (error) => setAccountingStatus(error.message),
   });
 
   const { mutate: sendReceiptEmail, isPending: isSendingReceipt } = trpc.receipt.sendEmail.useMutation({
     onSuccess: () => {
+      setAccountingStatus('Receipt email sent.');
       setReceiptEmail('');
       setReceiptNumber('');
     },
+    onError: (error) => setAccountingStatus(error.message),
   });
 
   const { mutate: sendTithingStatementEmail, isPending: isSendingStatement } =
@@ -289,31 +336,41 @@ export default function FinancePage() {
     });
   const { mutate: voidReceipt, isPending: isVoidingReceipt } = trpc.receipt.void.useMutation({
     onSuccess: () => {
+      setAccountingStatus('Receipt voided.');
       setReceiptNumber('');
       setVoidReason('');
       utils.receipt.list.invalidate();
     },
+    onError: (error) => setAccountingStatus(error.message),
   });
   const { mutate: refundDonation, isPending: isRefundingDonation } = trpc.finance.refundDonation.useMutation({
     onSuccess: () => {
+      setAccountingStatus('Refund issued.');
       setRefundDonationId('');
       setRefundAmount('');
       setRefundReason('');
       utils.finance.refunds.invalidate();
       utils.donation.list.invalidate();
     },
+    onError: (error) => setAccountingStatus(error.message),
   });
   const { mutate: submitDispute, isPending: isSubmittingDispute } = trpc.finance.submitDispute.useMutation({
-    onSuccess: () => utils.finance.disputes.invalidate(),
+    onSuccess: () => {
+      setAccountingStatus('Dispute submitted.');
+      return utils.finance.disputes.invalidate();
+    },
+    onError: (error) => setAccountingStatus(error.message),
   });
   const { mutate: submitEvidenceText, isPending: isSubmittingEvidence } =
     trpc.finance.submitDisputeEvidenceText.useMutation({
       onSuccess: () => {
+        setAccountingStatus('Evidence submitted.');
         setEvidenceText('');
         setEvidenceDescription('');
         utils.finance.disputeEvidence.invalidate();
         utils.finance.disputes.invalidate();
       },
+      onError: (error) => setAccountingStatus(error.message),
     });
 
   const uploadEvidenceFile = async () => {
@@ -343,36 +400,49 @@ export default function FinancePage() {
       setEvidenceText('');
       setEvidenceDescription('');
       setSubmitAfterUpload(false);
+      setAccountingStatus('Evidence file uploaded.');
       await utils.finance.disputeEvidence.invalidate();
       await utils.finance.disputes.invalidate();
     } catch (error) {
-      console.error(error);
+      setAccountingStatus(error instanceof Error ? error.message : 'Upload failed.');
     } finally {
       setIsUploadingEvidence(false);
     }
   };
   const { mutate: syncStripePayouts, isPending: isSyncingStripe } = trpc.finance.syncStripePayouts.useMutation({
-    onSuccess: () => utils.finance.listPayouts.invalidate(),
+    onSuccess: () => {
+      setSettlementsStatus('Stripe payouts synced.');
+      return utils.finance.listPayouts.invalidate();
+    },
+    onError: (error) => setSettlementsStatus(error.message),
   });
   const { mutate: syncPaystackSettlements, isPending: isSyncingPaystack } =
     trpc.finance.syncPaystackSettlements.useMutation({
-      onSuccess: () => utils.finance.listPayouts.invalidate(),
+      onSuccess: () => {
+        setSettlementsStatus('Paystack settlements synced.');
+        return utils.finance.listPayouts.invalidate();
+      },
+      onError: (error) => setSettlementsStatus(error.message),
     });
 
   const { mutate: importDonations, isPending: isImportingDonations } = trpc.donation.importCsv.useMutation({
     onSuccess: async (result) => {
+      setOperationsStatus('Donation import processed.');
       setDonationImportResult(result);
       if (result?.batchId) setDonationImportBatchId(result.batchId);
       await Promise.all([utils.donation.list.invalidate(), utils.receipt.list.invalidate()]);
     },
+    onError: (error) => setOperationsStatus(error.message),
   });
 
   const { mutate: rollbackDonationImport, isPending: isRollingBackDonationImport } = trpc.donation.rollbackImport.useMutation({
     onSuccess: async () => {
+      setOperationsStatus('Import batch rolled back.');
       setDonationImportResult(null);
       setDonationImportBatchId('');
       await Promise.all([utils.donation.list.invalidate(), utils.receipt.list.invalidate()]);
     },
+    onError: (error) => setOperationsStatus(error.message),
   });
 
   const downloadDonationTemplate = () => {
@@ -387,6 +457,153 @@ export default function FinancePage() {
     link.download = 'faithflow-donations-import-template.csv';
     link.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleCreatePledge = () => {
+    if (!churchId || !pledgeAmount) {
+      setGivingStatus('Church and pledge amount are required.');
+      return;
+    }
+    setGivingStatus('');
+    createPledge({
+      churchId,
+      amount: Number(pledgeAmount),
+      currency: pledgeCurrency,
+      notes: pledgeNotes || undefined,
+    });
+  };
+
+  const handleCreateRecurring = () => {
+    if (!churchId || !recurringAmount) {
+      setGivingStatus('Church and recurring amount are required.');
+      return;
+    }
+    if (recurringProvider === 'PAYSTACK' && !recurringDonorEmail.trim()) {
+      setGivingStatus('Donor email is required for Paystack recurring checkout.');
+      return;
+    }
+    setGivingStatus('');
+    createRecurring({
+      churchId,
+      amount: Number(recurringAmount),
+      currency: recurringCurrency,
+      interval: recurringInterval as 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY',
+      provider: recurringProvider as 'STRIPE' | 'PAYSTACK',
+      donorEmail: recurringDonorEmail || undefined,
+      successUrl: typeof window === 'undefined' ? undefined : window.location.href,
+      cancelUrl: typeof window === 'undefined' ? undefined : window.location.href,
+    });
+  };
+
+  const handleCreateCategory = () => {
+    if (!churchId || !categoryName.trim()) {
+      setAccountingStatus('Church and category name are required.');
+      return;
+    }
+    setAccountingStatus('');
+    createCategory({
+      churchId,
+      name: categoryName,
+      description: categoryDescription || undefined,
+    });
+  };
+
+  const handleCreateExpense = () => {
+    if (!churchId || !expenseAmount) {
+      setAccountingStatus('Church and expense amount are required.');
+      return;
+    }
+    setAccountingStatus('');
+    createExpense({
+      churchId,
+      amount: Number(expenseAmount),
+      currency: expenseCurrency,
+      categoryId: expenseCategoryId || undefined,
+      description: expenseDescription || undefined,
+    });
+  };
+
+  const handleCreateBudget = () => {
+    if (!churchId || !budgetName || !budgetStart || !budgetEnd) {
+      setAccountingStatus('Church, budget name, and date range are required.');
+      return;
+    }
+    setAccountingStatus('');
+    createBudget({
+      churchId,
+      name: budgetName,
+      startAt: budgetStart,
+      endAt: budgetEnd,
+    });
+  };
+
+  const handleAddBudgetItem = () => {
+    if (!selectedBudgetId || !budgetItemName || !budgetItemAmount) {
+      setAccountingStatus('Budget, item name, and allocated amount are required.');
+      return;
+    }
+    setAccountingStatus('');
+    addBudgetItem({
+      budgetId: selectedBudgetId,
+      name: budgetItemName,
+      allocatedAmount: Number(budgetItemAmount),
+      categoryId: budgetItemCategoryId || undefined,
+    });
+  };
+
+  const handleSendReceipt = () => {
+    if (!receiptNumber.trim() || !receiptEmail.trim()) {
+      setAccountingStatus('Receipt number and recipient email are required.');
+      return;
+    }
+    setAccountingStatus('');
+    sendReceiptEmail({ receiptNumber, to: receiptEmail });
+  };
+
+  const handleVoidReceipt = () => {
+    if (!receiptNumber.trim()) {
+      setAccountingStatus('Receipt number is required to void a receipt.');
+      return;
+    }
+    setAccountingStatus('');
+    voidReceipt({ receiptNumber, reason: voidReason || undefined });
+  };
+
+  const handleIssueRefund = () => {
+    if (!refundDonationId.trim()) {
+      setAccountingStatus('Donation ID is required to issue a refund.');
+      return;
+    }
+    setAccountingStatus('');
+    refundDonation({
+      donationId: refundDonationId,
+      amount: refundAmount ? Number(refundAmount) : undefined,
+      reason: refundReason || undefined,
+    });
+  };
+
+  const handleExportCsv = async (type: string) => {
+    if (!churchId) {
+      setExportStatus('Select a church before exporting reports.');
+      return;
+    }
+    try {
+      setExportStatus('');
+      const result = await utils.finance.exportCsv.fetch({
+        type: type as any,
+        churchId: churchId || undefined,
+      });
+      const blob = new Blob([result.csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = result.filename;
+      link.click();
+      window.URL.revokeObjectURL(url);
+      setExportStatus(`${result.filename} exported.`);
+    } catch (error) {
+      setExportStatus(error instanceof Error ? error.message : 'Export failed.');
+    }
   };
 
   return (
@@ -564,6 +781,8 @@ export default function FinancePage() {
               {isRollingBackDonationImport ? 'Rolling back...' : 'Rollback last batch'}
             </Button>
           </div>
+          <p className="mt-2 text-xs text-muted">Required: select a church and provide CSV content before running import.</p>
+          {operationsStatus ? <p className="mt-2 text-xs text-muted">{operationsStatus}</p> : null}
 
           {donationImportResult ? (
             <div className="mt-4 space-y-2 text-sm text-muted">
@@ -795,6 +1014,7 @@ export default function FinancePage() {
           <Card className="ff-surface p-6">
             <h2 className="text-lg font-semibold">Pledges</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
+              {isLoadingPledges ? <p>Loading pledges...</p> : null}
               {pledges?.map((pledge) => (
                 <div key={pledge.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                   <span>
@@ -827,25 +1047,17 @@ export default function FinancePage() {
                 value={pledgeNotes}
                 onChange={(event) => setPledgeNotes(event.target.value)}
               />
-              <Button
-                onClick={() =>
-                  createPledge({
-                    churchId,
-                    amount: Number(pledgeAmount),
-                    currency: pledgeCurrency,
-                    notes: pledgeNotes || undefined,
-                  })
-                }
-                disabled={!churchId || !pledgeAmount || isCreatingPledge}
-              >
+              <Button onClick={handleCreatePledge} disabled={!churchId || !pledgeAmount || isCreatingPledge}>
                 {isCreatingPledge ? 'Creating…' : 'Create pledge'}
               </Button>
+              <p className="text-xs text-muted">Required: church and amount.</p>
             </div>
           </Card>
 
           <Card className="ff-surface p-6">
             <h2 className="text-lg font-semibold">Recurring Donations</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
+              {isLoadingRecurring ? <p>Loading recurring donations...</p> : null}
               {recurring?.map((item) => (
                 <div key={item.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                   <span>
@@ -901,31 +1113,21 @@ export default function FinancePage() {
                   onChange={(event) => setRecurringDonorEmail(event.target.value)}
                 />
               )}
-              <Button
-                onClick={() =>
-                  createRecurring({
-                    churchId,
-                    amount: Number(recurringAmount),
-                    currency: recurringCurrency,
-                    interval: recurringInterval as 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY',
-                    provider: recurringProvider as 'STRIPE' | 'PAYSTACK',
-                    donorEmail: recurringDonorEmail || undefined,
-                    successUrl: typeof window === 'undefined' ? undefined : window.location.href,
-                    cancelUrl: typeof window === 'undefined' ? undefined : window.location.href,
-                  })
-                }
-                disabled={
-                  !churchId ||
-                  !recurringAmount ||
-                  isCreatingRecurring ||
-                  (recurringProvider === 'PAYSTACK' && !recurringDonorEmail)
-                }
-              >
+              <Button onClick={handleCreateRecurring} disabled={
+                !churchId ||
+                !recurringAmount ||
+                isCreatingRecurring ||
+                (recurringProvider === 'PAYSTACK' && !recurringDonorEmail)
+              }>
                 {isCreatingRecurring ? 'Creating…' : 'Create recurring'}
               </Button>
+              <p className="text-xs text-muted">
+                Required: church and amount. Paystack checkout also requires donor email.
+              </p>
             </div>
           </Card>
         </div>
+        {givingStatus ? <p className="text-xs text-muted">{givingStatus}</p> : null}
         </>
         ) : null}
 
@@ -935,6 +1137,7 @@ export default function FinancePage() {
           <Card className="ff-surface p-6">
             <h2 className="text-lg font-semibold">Expense Categories</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
+              {isLoadingCategories ? <p>Loading categories...</p> : null}
               {categories?.map((category) => (
                 <div key={category.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                   <span>{category.name}</span>
@@ -958,24 +1161,17 @@ export default function FinancePage() {
                 value={categoryDescription}
                 onChange={(event) => setCategoryDescription(event.target.value)}
               />
-              <Button
-                onClick={() =>
-                  createCategory({
-                    churchId,
-                    name: categoryName,
-                    description: categoryDescription || undefined,
-                  })
-                }
-                disabled={!churchId || !categoryName || isCreatingCategory}
-              >
+              <Button onClick={handleCreateCategory} disabled={!churchId || !categoryName || isCreatingCategory}>
                 {isCreatingCategory ? 'Creating…' : 'Create category'}
               </Button>
+              <p className="text-xs text-muted">Required: church and category name.</p>
             </div>
           </Card>
 
           <Card className="ff-surface p-6">
             <h2 className="text-lg font-semibold">Expenses</h2>
             <div className="mt-4 space-y-2 text-sm text-muted">
+              {isLoadingExpenses ? <p>Loading expenses...</p> : null}
               {expenses?.map((expense) => (
                 <div key={expense.id} className={`rounded-md border border-border ${density === 'compact' ? 'px-3 py-2' : 'p-3'}`}>
                   <div className="flex items-center justify-between">
@@ -1033,20 +1229,10 @@ export default function FinancePage() {
                 value={expenseDescription}
                 onChange={(event) => setExpenseDescription(event.target.value)}
               />
-              <Button
-                onClick={() =>
-                  createExpense({
-                    churchId,
-                    amount: Number(expenseAmount),
-                    currency: expenseCurrency,
-                    categoryId: expenseCategoryId || undefined,
-                    description: expenseDescription || undefined,
-                  })
-                }
-                disabled={!churchId || !expenseAmount || isCreatingExpense}
-              >
+              <Button onClick={handleCreateExpense} disabled={!churchId || !expenseAmount || isCreatingExpense}>
                 {isCreatingExpense ? 'Creating…' : 'Create expense'}
               </Button>
+              <p className="text-xs text-muted">Required: church and expense amount.</p>
             </div>
           </Card>
         </div>
@@ -1054,6 +1240,7 @@ export default function FinancePage() {
         <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Budgets</h2>
           <div className="mt-4 space-y-2 text-sm text-muted">
+            {isLoadingBudgets ? <p>Loading budgets...</p> : null}
             {budgets?.map((budget) => (
               <div key={budget.id} className={`rounded-md border border-border ${density === 'compact' ? 'px-3 py-2' : 'p-3'}`}>
                 <div className="flex items-center justify-between">
@@ -1090,17 +1277,7 @@ export default function FinancePage() {
               value={budgetEnd}
               onChange={(event) => setBudgetEnd(event.target.value)}
             />
-            <Button
-              onClick={() =>
-                createBudget({
-                  churchId,
-                  name: budgetName,
-                  startAt: budgetStart,
-                  endAt: budgetEnd,
-                })
-              }
-              disabled={!churchId || !budgetName || !budgetStart || !budgetEnd || isCreatingBudget}
-            >
+            <Button onClick={handleCreateBudget} disabled={!churchId || !budgetName || !budgetStart || !budgetEnd || isCreatingBudget}>
               {isCreatingBudget ? 'Creating…' : 'Create budget'}
             </Button>
           </div>
@@ -1140,25 +1317,19 @@ export default function FinancePage() {
                 </option>
               ))}
             </select>
-            <Button
-              onClick={() =>
-                addBudgetItem({
-                  budgetId: selectedBudgetId,
-                  name: budgetItemName,
-                  allocatedAmount: Number(budgetItemAmount),
-                  categoryId: budgetItemCategoryId || undefined,
-                })
-              }
-              disabled={!selectedBudgetId || !budgetItemName || !budgetItemAmount || isAddingBudgetItem}
-            >
+            <Button onClick={handleAddBudgetItem} disabled={!selectedBudgetId || !budgetItemName || !budgetItemAmount || isAddingBudgetItem}>
               {isAddingBudgetItem ? 'Adding…' : 'Add budget item'}
             </Button>
           </div>
+          <p className="mt-2 text-xs text-muted">
+            Required: budget setup needs name and date range; budget items need target budget, name, and amount.
+          </p>
         </Card>
 
         <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Receipts</h2>
           <div className="mt-4 space-y-2 text-sm text-muted">
+            {isLoadingReceipts ? <p>Loading receipts...</p> : null}
             {receipts?.map((receipt) => (
               <div key={receipt.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                 <span>
@@ -1185,10 +1356,7 @@ export default function FinancePage() {
               value={receiptEmail}
               onChange={(event) => setReceiptEmail(event.target.value)}
             />
-            <Button
-              onClick={() => sendReceiptEmail({ receiptNumber, to: receiptEmail })}
-              disabled={!receiptNumber || !receiptEmail || isSendingReceipt}
-            >
+            <Button onClick={handleSendReceipt} disabled={!receiptNumber || !receiptEmail || isSendingReceipt}>
               {isSendingReceipt ? 'Sending…' : 'Send receipt'}
             </Button>
           </div>
@@ -1203,14 +1371,11 @@ export default function FinancePage() {
               value={voidReason}
               onChange={(event) => setVoidReason(event.target.value)}
             />
-            <Button
-              variant="outline"
-              onClick={() => voidReceipt({ receiptNumber, reason: voidReason || undefined })}
-              disabled={!receiptNumber || isVoidingReceipt}
-            >
+            <Button variant="outline" onClick={handleVoidReceipt} disabled={!receiptNumber || isVoidingReceipt}>
               {isVoidingReceipt ? 'Voiding…' : 'Void receipt'}
             </Button>
           </div>
+          <p className="mt-2 text-xs text-muted">Required: receipt number for resend/void; recipient email required for resend.</p>
         </Card>
 
         <Card className="ff-surface p-6">
@@ -1245,21 +1410,13 @@ export default function FinancePage() {
               value={refundReason}
               onChange={(event) => setRefundReason(event.target.value)}
             />
-            <Button
-              onClick={() =>
-                refundDonation({
-                  donationId: refundDonationId,
-                  amount: refundAmount ? Number(refundAmount) : undefined,
-                  reason: refundReason || undefined,
-                })
-              }
-              disabled={!refundDonationId || isRefundingDonation}
-            >
+            <Button onClick={handleIssueRefund} disabled={!refundDonationId || isRefundingDonation}>
               {isRefundingDonation ? 'Refunding…' : 'Issue refund'}
             </Button>
           </div>
           <div className="mt-4 space-y-2 text-sm text-muted">
             <p className="font-medium text-foreground">Recent refunds</p>
+            {isLoadingRefunds ? <p>Loading refunds...</p> : null}
             {refunds?.map((refund) => (
               <div key={refund.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                 <span>
@@ -1277,6 +1434,7 @@ export default function FinancePage() {
           </div>
           <div className="mt-4 space-y-2 text-sm text-muted">
             <p className="font-medium text-foreground">Recent disputes</p>
+            {isLoadingDisputes ? <p>Loading disputes...</p> : null}
             {disputes?.map((dispute) => (
               <button
                 key={dispute.id}
@@ -1387,6 +1545,7 @@ export default function FinancePage() {
             </div>
           )}
         </Card>
+        {accountingStatus ? <p className="text-xs text-muted">{accountingStatus}</p> : null}
         </>
         ) : null}
 
@@ -1403,6 +1562,7 @@ export default function FinancePage() {
             </Button>
           </div>
           <div className="mt-4 space-y-2 text-sm text-muted">
+            {isLoadingPayouts ? <p>Loading payouts...</p> : null}
             {payouts?.map((payout) => (
               <button
                 key={payout.id}
@@ -1428,6 +1588,7 @@ export default function FinancePage() {
           {selectedPayoutId && (
             <div className="mt-4 space-y-2 text-sm text-muted">
               <p className="font-medium text-foreground">Payout transactions</p>
+              {isLoadingPayoutTransactions ? <p>Loading payout transactions...</p> : null}
               {payoutTransactions?.map((txn) => (
                 <div key={txn.id} className={`flex items-center justify-between border-b border-border/60 ${rowClass}`}>
                   <span>
@@ -1454,30 +1615,21 @@ export default function FinancePage() {
               <Button
                 key={type}
                 variant="outline"
-                onClick={async () => {
-                  const result = await utils.finance.exportCsv.fetch({
-                    type: type as any,
-                    churchId: churchId || undefined,
-                  });
-                  const blob = new Blob([result.csv], { type: 'text/csv' });
-                  const url = window.URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.download = result.filename;
-                  link.click();
-                  window.URL.revokeObjectURL(url);
-                }}
+                onClick={() => handleExportCsv(type)}
                 disabled={!churchId}
               >
                 Export {type}
               </Button>
             ))}
           </div>
+          <p className="mt-2 text-xs text-muted">Required: select a church before exporting report CSV files.</p>
+          {exportStatus ? <p className="mt-2 text-xs text-muted">{exportStatus}</p> : null}
         </Card>
 
         <Card className="ff-surface p-6">
           <h2 className="text-lg font-semibold">Recent audit logs</h2>
           <div className="mt-4 space-y-2 text-sm text-muted">
+            {isLoadingAuditLogs ? <p>Loading audit activity...</p> : null}
             {auditLogs?.map((log) => (
               <div key={log.id} className="flex items-center justify-between">
                 <span>
@@ -1489,6 +1641,7 @@ export default function FinancePage() {
             {!auditLogs?.length && <p>No audit activity yet.</p>}
           </div>
         </Card>
+        {settlementsStatus ? <p className="text-xs text-muted">{settlementsStatus}</p> : null}
         </>
         ) : null}
         </div>

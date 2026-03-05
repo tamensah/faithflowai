@@ -47,10 +47,10 @@ export default function BillingPage() {
   const [checkoutReferenceHandled, setCheckoutReferenceHandled] = useState(false);
   const [activeSection, setActiveSection] = useState<BillingSectionKey>('overview');
 
-  const { data: plans } = trpc.billing.plans.useQuery();
-  const { data: current } = trpc.billing.currentSubscription.useQuery();
+  const { data: plans, isLoading: isLoadingPlans } = trpc.billing.plans.useQuery();
+  const { data: current, isLoading: isLoadingCurrent } = trpc.billing.currentSubscription.useQuery();
   const { data: entitlementsStatus } = trpc.billing.entitlements.useQuery();
-  const { data: invoices } = trpc.billing.invoices.useQuery({ provider, limit: 20 });
+  const { data: invoices, isLoading: isLoadingInvoices } = trpc.billing.invoices.useQuery({ provider, limit: 20 });
 
   useEffect(() => {
     if (!current?.provider) return;
@@ -227,7 +227,9 @@ export default function BillingPage() {
         {activeSection === 'overview' ? (
         <Card className="p-6">
           <h2 className="text-lg font-semibold">Current Subscription</h2>
-          {current ? (
+          {isLoadingCurrent ? (
+            <p className="mt-4 text-sm text-muted">Loading subscription...</p>
+          ) : current ? (
             <div className="mt-4 space-y-2 text-sm">
               <p>
                 <span className="font-medium">{current.plan.name}</span> ({current.plan.code})
@@ -313,7 +315,7 @@ export default function BillingPage() {
               value={selectedPlanCode}
               onChange={(event) => setSelectedPlanCode(event.target.value)}
             >
-              <option value="">Select plan *</option>
+              <option value="">{isLoadingPlans ? 'Loading plans...' : 'Select plan *'}</option>
               {plans?.map((plan) => (
                 <option key={plan.id} value={plan.code}>
                   {plan.name} ({plan.code})
@@ -422,6 +424,7 @@ export default function BillingPage() {
             </Button>
           </div>
           <div className="mt-4 space-y-3">
+            {isLoadingInvoices ? <p className="text-sm text-muted">Loading invoices...</p> : null}
             {invoices?.invoices.map((invoice) => (
               <div key={invoice.id} className="rounded-md border border-border p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">

@@ -1,10 +1,24 @@
 import { z } from 'zod';
-import { Prisma, prisma, CareRequestStatus, SermonStatus, StorageProvider, TenantSubscriptionStatus } from '@faithflow-ai/database';
+import {
+  Prisma,
+  prisma,
+  CareRequestStatus,
+  SermonStatus,
+  StorageProvider,
+  TenantSubscriptionStatus,
+  CommunicationChannel,
+  CommunicationProvider,
+  CommunicationScheduleStatus,
+  AuditActorType,
+  UserRole,
+} from '@faithflow-ai/database';
 import { router, protectedProcedure } from '../trpc';
 import { ensureFeatureReadAccess } from '../entitlements';
 import { TRPCError } from '@trpc/server';
 import { sendEmail } from '../email';
 import { runStorageSmokeTest } from '../storage';
+import { recordAuditLog } from '../audit';
+import { renderTrialEndingEmail, renderWelcomeOrgEmail } from '../email-templates';
 
 const rangeInput = z
   .object({
@@ -21,6 +35,28 @@ const activeCareStatuses: CareRequestStatus[] = [
   CareRequestStatus.ASSIGNED,
   CareRequestStatus.IN_PROGRESS,
 ];
+const transactionalTemplateSchema = z.enum(['WELCOME_ONBOARDING', 'TRIAL_ENDING']);
+
+function getTemplateRecipientList(
+  inputRecipient: string | undefined,
+  admins: Array<{ churchId: string; email: string }>
+) {
+  if (inputRecipient) {
+    return [
+      {
+        churchId: admins[0]?.churchId ?? '',
+        email: inputRecipient.toLowerCase(),
+      },
+    ];
+  }
+  const seen = new Set<string>();
+  return admins.filter((entry) => {
+    const key = `${entry.churchId}:${entry.email.toLowerCase()}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
 
 export const operationsRouter = router({
   health: protectedProcedure.query(async ({ ctx }) => {
@@ -293,6 +329,149 @@ export const operationsRouter = router({
       });
 
       return { ok: true, to, sentAt: now.toISOString() };
+    }),
+
+  queueTransactionalTemplate: protectedProcedure
+    .input(
+      z.object({
+        template: transactionalTemplateSchema,
+        to: z.string().email().optional(),
+        churchId: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (!ctx.userId || !ctx.tenantId) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Tenant context required' });
+      }
+
+      const staff = await prisma.staffMembership.findFirst({
+        where: {
+          user: { clerkUserId: ctx.userId },
+          church: { organization: { tenantId: ctx.tenantId } },
+        },
+        include: { user: true, church: true },
+      });
+      if (!staff) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
+      }
+      if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
+        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Resend is not configured' });
+      }
+
+      const selectedChurch = input.churchId
+        ? await prisma.church.findFirst({
+            where: { id: input.churchId, organization: { tenantId: ctx.tenantId } },
+          })
+        : staff.church;
+      if (!selectedChurch) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Church not found' });
+      }
+
+      const adminRows = await prisma.staffMembership.findMany({
+        where: {
+          role: UserRole.ADMIN,
+          church: { organization: { tenantId: ctx.tenantId } },
+          user: { email: { not: '' } },
+        },
+        include: { user: true },
+        take: 50,
+      });
+
+      const adminRecipients = adminRows
+        .filter((row) => Boolean(row.user.email))
+        .map((row) => ({ churchId: row.churchId, email: row.user.email!.toLowerCase() }));
+      const recipients = getTemplateRecipientList(input.to, adminRecipients).map((entry) => ({
+        churchId: entry.churchId || selectedChurch.id,
+        email: entry.email.toLowerCase(),
+      }));
+      if (!recipients.length) {
+        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'No admin recipients found for this tenant' });
+      }
+
+      const now = new Date();
+      const today = now.toISOString().slice(0, 10);
+      const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3001';
+
+      let trialEndsAtIso: string | null = null;
+      if (input.template === 'TRIAL_ENDING') {
+        const current = await prisma.tenantSubscription.findFirst({
+          where: {
+            tenantId: ctx.tenantId,
+            status: TenantSubscriptionStatus.TRIALING,
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+        if (!current?.trialEndsAt) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'No active trial subscription found for this tenant',
+          });
+        }
+        trialEndsAtIso = current.trialEndsAt.toISOString();
+      }
+
+      let queued = 0;
+      for (const recipient of recipients) {
+        const dedupeKey =
+          input.template === 'WELCOME_ONBOARDING'
+            ? `welcome:${ctx.tenantId}:${recipient.email}`
+            : `trial-ending:${ctx.tenantId}:${recipient.email}:${today}`;
+        const existing = await prisma.communicationSchedule.findFirst({
+          where: {
+            churchId: recipient.churchId,
+            to: recipient.email,
+            status: { in: [CommunicationScheduleStatus.QUEUED, CommunicationScheduleStatus.SENT] },
+            metadata: { path: ['dedupeKey'], equals: dedupeKey },
+          },
+        });
+        if (existing) continue;
+
+        const subject =
+          input.template === 'WELCOME_ONBOARDING'
+            ? 'Welcome to FaithFlow AI'
+            : 'Your FaithFlow trial is ending soon';
+        const body =
+          input.template === 'WELCOME_ONBOARDING'
+            ? renderWelcomeOrgEmail({ churchName: selectedChurch.name, adminUrl })
+            : renderTrialEndingEmail({ trialEndsAtIso: trialEndsAtIso!, billingUrl: `${adminUrl}/billing` });
+
+        await prisma.communicationSchedule.create({
+          data: {
+            churchId: recipient.churchId,
+            channel: CommunicationChannel.EMAIL,
+            provider: CommunicationProvider.RESEND,
+            to: recipient.email,
+            subject,
+            body,
+            sendAt: now,
+            status: CommunicationScheduleStatus.QUEUED,
+            metadata: {
+              dedupeKey,
+              tenantId: ctx.tenantId,
+              reason: input.template === 'WELCOME_ONBOARDING' ? 'tenant_welcome' : 'trial_ending',
+              queuedBy: ctx.userId,
+            } as Prisma.InputJsonValue,
+          },
+        });
+        queued += 1;
+      }
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        churchId: selectedChurch.id,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'operations.transactional_template_queued',
+        targetType: 'CommunicationSchedule',
+        targetId: selectedChurch.id,
+        metadata: {
+          template: input.template,
+          queued,
+          recipientOverride: input.to ?? null,
+        },
+      });
+
+      return { ok: true, template: input.template, queued };
     }),
 
   uploadTest: protectedProcedure

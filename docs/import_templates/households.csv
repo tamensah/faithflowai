@@ -1,2 +1,3 @@
-name,primaryMemberEmail,primaryMemberPhone
-Doe Household,jane@example.com,
+householdName,primaryMemberEmail,primaryMemberPhone,notes
+Doe Household,jane@example.com,+15551231234,Use the same householdName on related member rows
+Mensah Family,ama@example.com,+233201234567,Households are linked during member import

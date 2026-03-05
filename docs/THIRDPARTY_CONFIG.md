@@ -84,7 +84,7 @@ Inbound STOP/unsubscribe keywords (`STOP`, `UNSUBSCRIBE`, `CANCEL`, etc.) are pr
 
 ## 5. Resend (Email Delivery)
 
-**Goal**: enable receipts, outbound email communications, and marketing contact form delivery.
+**Goal**: enable receipts, outbound email communications, transactional onboarding/billing reminders, and marketing contact form delivery.
 
 - Create a Resend account.
 - Verify sending domain (DNS records for DKIM/SPF).
@@ -92,6 +92,9 @@ Inbound STOP/unsubscribe keywords (`STOP`, `UNSUBSCRIBE`, `CANCEL`, etc.) are pr
   - `RESEND_API_KEY`
   - `RESEND_FROM_EMAIL` (e.g., `FaithFlow AI <no-reply@yourdomain>`)
   - `CONTACT_TO_EMAIL` (where marketing site contact messages should be delivered)
+- Validation path in admin:
+  - Open `Admin -> Ops -> Health`
+  - Use **Queue welcome email** and **Queue trial reminder** buttons to enqueue transactional templates through the normal provider/outbox path.
 
 ## 6. Push Notifications (Firebase Cloud Messaging)
 
