@@ -22,6 +22,43 @@ This file is the running operations log for implementation details, runtime cons
 - Operational rule going forward:
   - execute code changes, docs updates, and deploy scripts only from `faithflow_ai` to avoid branch/repo drift.
 
+### Paystack subscription reconciliation hardening
+
+- Paystack tenant subscription reconciliation is now tenant-scoped end-to-end to prevent cross-tenant updates when provider references overlap.
+- Canonical Paystack provider reference strategy:
+  - prefer `subscription_code` when present
+  - fall back to transaction `reference`
+  - do not use shared plan codes as primary subscription identifiers.
+- Platform webhook plan resolution now checks both `paystackPlanCode` and `paystackTrialPlanCode` metadata paths.
+- Added e2e coverage for this scenario:
+  - `apps/api/test/e2e/platform-paystack-webhook.test.ts`
+  - validates tenant-scoped upserts + providerRef upgrade from `reference` to `subscription_code`.
+
+### Domain runbook and incident escalation hooks
+
+- Domain automation now computes runbook state + severity per domain and records those signals in health check details.
+- High/critical states automatically open (or update) internal support incidents for platform follow-up.
+- Recovery states auto-resolve previously opened domain incidents (configurable via `DOMAIN_INCIDENT_AUTO_CLOSE`).
+- Escalation severity and pending-verification threshold are env-tunable:
+  - `DOMAIN_PENDING_ESCALATION_HOURS` (default `24`)
+  - `DOMAIN_INCIDENT_AUTO_CLOSE` (default enabled unless set to `false`)
+- Added e2e coverage:
+  - `apps/api/test/e2e/tenant-domain-escalation.test.ts`
+
+### Tenant security policy runtime enforcement hooks
+
+- Protected tenant routes now enforce tenant security policy checks for staff access:
+  - MFA required (`requireMfaForStaff`)
+  - Session freshness (`sessionTimeoutMinutes`)
+  - IP allowlist (`ipAllowlist`)
+- Guardrail outcomes are audited as:
+  - `AUTH_GUARDRAIL_BLOCKED`
+  - `AUTH_GUARDRAIL_WARNING`
+- Added API telemetry endpoint:
+  - `GET /health/auth-guardrails`
+- Added e2e coverage:
+  - `apps/api/test/e2e/auth-policy-guardrails.test.ts`
+
 ## Update (2026-02-19)
 
 ### Admin UX shell and page navigation
@@ -208,11 +245,11 @@ This file is the running operations log for implementation details, runtime cons
 
 - [x] Implement real DNS verification probes and scheduled re-checks.
 - [x] Implement SSL lifecycle automation (provision, renew, expiry warnings, failover handling).
-- [ ] Add domain runbook states and incident escalation hooks.
+- [x] Add domain runbook states and incident escalation hooks.
 
 ### 4) Security/compliance enforcement
 
-- [ ] Enforce tenant security policy values in auth/session middleware and staff access gates.
+- [x] Enforce tenant security policy values in auth/session middleware and staff access gates.
 - [ ] Add data retention jobs (soft-delete/archive/purge policies) tied to tenant policy.
 - [ ] Add compliance audit views for policy drift and control violations.
 

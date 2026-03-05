@@ -162,6 +162,15 @@ export default function PlatformOpsPage() {
                 <p className="text-xs text-muted">
                   {entry.status} · SSL {entry.sslStatus}
                 </p>
+                <p className="mt-1 text-xs text-muted">
+                  Runbook {entry.runbook.state} · Severity {entry.runbook.severity}
+                </p>
+                <p className="mt-1 text-xs text-muted">{entry.runbook.recommendedAction}</p>
+                {entry.incident ? (
+                  <p className="mt-1 text-xs text-amber-700">
+                    Incident ticket {entry.incident.id} · {entry.incident.priority} · {entry.incident.status}
+                  </p>
+                ) : null}
                 <div className="mt-2 flex gap-2">
                   <Button
                     size="sm"
@@ -197,6 +206,10 @@ export default function PlatformOpsPage() {
           <p className="mt-3 text-xs text-muted">
             Preview: scanned {domainAutomationPreview?.scanned ?? 0} · updated {domainAutomationPreview?.updated ?? 0} · failed{' '}
             {domainAutomationPreview?.failed ?? 0}
+          </p>
+          <p className="mt-1 text-xs text-muted">
+            High/critical incidents:{' '}
+            {domainAutomationPreview?.updates?.filter((entry) => entry.severity === 'HIGH' || entry.severity === 'CRITICAL').length ?? 0}
           </p>
           <div className="mt-4">
             <Button

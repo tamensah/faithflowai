@@ -6,6 +6,8 @@ import {
   HealthCheckType,
   PlatformRole,
   Prisma,
+  SupportTicketPriority,
+  SupportTicketStatus,
   TenantDomainStatus,
   TenantSslStatus,
   prisma,
@@ -13,7 +15,7 @@ import {
 import { z } from 'zod';
 import { router, userProcedure } from '../trpc';
 import { recordAuditLog } from '../audit';
-import { runTenantDomainAutomation } from '../tenant-ops-automation';
+import { deriveDomainRunbookState, runTenantDomainAutomation } from '../tenant-ops-automation';
 
 async function requirePlatformRole(clerkUserId: string, roles: PlatformRole[]) {
   const platformUser = await prisma.platformUser.findFirst({
@@ -50,13 +52,59 @@ export const tenantOpsRouter = router({
         PlatformRole.COMPLIANCE_OFFICER,
       ]);
 
-      return prisma.tenantDomain.findMany({
+      const domains = await prisma.tenantDomain.findMany({
         where: {
           ...(input?.tenantId ? { tenantId: input.tenantId } : {}),
           ...(input?.status ? { status: input.status } : {}),
         },
         include: { tenant: { select: { id: true, name: true, slug: true } } },
         orderBy: [{ createdAt: 'desc' }],
+      });
+
+      const tenantIds = Array.from(new Set(domains.map((entry) => entry.tenantId)));
+      const openTickets = tenantIds.length
+        ? await prisma.supportTicket.findMany({
+            where: {
+              tenantId: { in: tenantIds },
+              status: { in: [SupportTicketStatus.OPEN, SupportTicketStatus.IN_PROGRESS, SupportTicketStatus.WAITING_CUSTOMER] },
+              subject: { contains: '[domain:' },
+            },
+            select: { id: true, tenantId: true, subject: true, priority: true, status: true, createdAt: true },
+          })
+        : [];
+
+      const incidentByDomainId = new Map<
+        string,
+        { id: string; status: SupportTicketStatus; priority: SupportTicketPriority; createdAt: Date }
+      >();
+      for (const ticket of openTickets) {
+        const match = ticket.subject.match(/\[domain:([a-zA-Z0-9]+)\]/);
+        if (!match) continue;
+        const domainId = match[1];
+        if (incidentByDomainId.has(domainId)) continue;
+        incidentByDomainId.set(domainId, {
+          id: ticket.id,
+          status: ticket.status,
+          priority: ticket.priority,
+          createdAt: ticket.createdAt,
+        });
+      }
+
+      const now = new Date();
+      return domains.map((entry) => {
+        const runbook = deriveDomainRunbookState({
+          status: entry.status,
+          sslStatus: entry.sslStatus,
+          lastCheckedAt: entry.lastCheckedAt,
+          createdAt: entry.createdAt,
+          now,
+        });
+        const incident = incidentByDomainId.get(entry.id) ?? null;
+        return {
+          ...entry,
+          runbook,
+          incident,
+        };
       });
     }),
 

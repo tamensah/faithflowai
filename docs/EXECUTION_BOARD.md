@@ -83,6 +83,10 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added Provider Ops visibility for billing-driven add-on entitlement sync history and payment filtering by add-on code.
 - Added a dedicated Provider Ops admin surface with webhook health, last delivery outcomes, and replay actions.
 - Expanded payment/comms smoke script to validate dead-letter and retry behavior end-to-end.
+- Hardened Paystack subscription reconciliation to avoid cross-tenant collisions:
+  - tenant-scoped subscription upserts
+  - canonical Paystack provider refs now prefer `subscription_code` and fall back to transaction `reference` (not shared `plan_code`)
+  - webhook plan resolution now supports both `paystackPlanCode` and `paystackTrialPlanCode`.
 
 **Done when**
 - Real provider calls run through replay-safe mutation paths with observable delivery state.
@@ -164,6 +168,13 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added workspace dependency drift protection in CI (`.github/workflows/workspace-deps.yml`) and repo lint command (`pnpm lint:workspace-deps`).
 - Added branch protection automation (`pnpm ops:enforce-required-checks`) to require `workspace-dependency-guard` on protected branches once `GITHUB_TOKEN` is available.
 - Added go-live readiness audit script (`pnpm ops:go-live-readiness`) to verify env coverage, live health endpoints, and branch-protection readiness from a single command.
+- Added domain runbook state evaluation and escalation hooks in domain automation:
+  - derives runbook state + severity per domain (`HEALTHY`, `VERIFY_DNS`, `PROVISION_SSL`, `RENEW_SSL`, `INVESTIGATE_FAILURE`, `ESCALATED`)
+  - auto-opens/updates support incidents for high/critical domain failures and auto-resolves incidents on recovery.
+- Added tenant security policy enforcement middleware on protected tenant routes:
+  - checks staff MFA requirement, session timeout window, and IP allowlist
+  - records audit outcomes (`AUTH_GUARDRAIL_BLOCKED`, `AUTH_GUARDRAIL_WARNING`)
+  - exposes guardrail telemetry endpoint: `/health/auth-guardrails`.
 
 ---
 

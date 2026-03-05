@@ -24,6 +24,10 @@ This doc lists the required provider‑side configuration to run the alpha. Once
   - `CLERK_WEBHOOK_SECRET`
   - `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` (web/admin, if using custom JWT template)
 
+Optional guardrail env:
+
+- `AUTH_POLICY_ENFORCE_SSO_STRICT` (`true` to hard-block when tenant policy enforces SSO and token lacks SSO auth method signal)
+
 ## 2. Stripe (USD Giving + Payouts)
 
 **Goal**: enable card giving, recurring donations, and payout reconciliation.
@@ -172,11 +176,20 @@ Shared:
 - Tenant domain + SSL automation (cron): `POST /tasks/tenant-ops/automate` with `x-api-key`.
 - Support SLA sweep (cron): `POST /tasks/support/sla` with `x-api-key`.
 
+Tenant domain runbook/escalation tuning env:
+
+- `DOMAIN_PENDING_ESCALATION_HOURS` (default `24`)
+- `DOMAIN_INCIDENT_AUTO_CLOSE` (default enabled; set `false` to require manual incident closure)
+
 ### Default cadence (recommended)
 
 - `POST /tasks/support/sla`: every 5 minutes
 - `POST /tasks/tenant-ops/automate`: every 15 minutes
 - `POST /tasks/subscriptions/metadata-backfill`: daily at 02:10 UTC
+
+Operational guardrail telemetry:
+
+- `GET /health/auth-guardrails`
 
 ### Optional internal scheduler
 

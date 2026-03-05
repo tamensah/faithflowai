@@ -6,6 +6,10 @@ export type ClerkClaims = {
   org_id?: string;
   orgId?: string;
   sid?: string;
+  iat?: number;
+  amr?: unknown;
+  fva?: unknown;
+  email_verified?: boolean;
 };
 
 let cachedKeyPromise: ReturnType<typeof importSPKI> | ReturnType<typeof importJWK> | null = null;

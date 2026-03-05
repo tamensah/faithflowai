@@ -40,10 +40,20 @@ function mapStripeStatus(status?: string | null) {
 
 function mapPaystackStatus(status?: string | null) {
   if (!status) return TenantSubscriptionStatus.ACTIVE;
-  if (status === 'active') return TenantSubscriptionStatus.ACTIVE;
-  if (status === 'non-renewing') return TenantSubscriptionStatus.PAUSED;
-  if (status === 'attention') return TenantSubscriptionStatus.PAST_DUE;
-  if (status === 'complete' || status === 'cancelled' || status === 'canceled') return TenantSubscriptionStatus.CANCELED;
+  const normalized = status.trim().toLowerCase();
+  if (normalized === 'active') return TenantSubscriptionStatus.ACTIVE;
+  if (normalized === 'non-renewing') return TenantSubscriptionStatus.PAUSED;
+  if (normalized === 'attention') return TenantSubscriptionStatus.PAST_DUE;
+  if (
+    normalized === 'complete' ||
+    normalized === 'completed' ||
+    normalized === 'cancelled' ||
+    normalized === 'canceled' ||
+    normalized === 'disabled' ||
+    normalized === 'ended'
+  ) {
+    return TenantSubscriptionStatus.CANCELED;
+  }
   return TenantSubscriptionStatus.ACTIVE;
 }
 
@@ -140,12 +150,14 @@ function normalizePaystackMetadata(event: { event: string; data?: Record<string,
       : (data.subscription as { subscription_code?: string } | undefined)?.subscription_code;
   const planCode =
     typeof data.plan === 'string' ? data.plan : (data.plan as { plan_code?: string } | undefined)?.plan_code;
+  const reference = typeof data.reference === 'string' && data.reference.trim().length ? data.reference.trim() : null;
 
   const normalizedSubscriptionCode =
     typeof subscriptionCode === 'string' && /^SUB_[A-Za-z0-9]+$/.test(subscriptionCode) ? subscriptionCode : null;
 
   return {
     ...event,
+    ...(reference ? { paystackReference: reference } : {}),
     ...(normalizedSubscriptionCode ? { paystackSubscriptionCode: normalizedSubscriptionCode } : {}),
     ...(customerCode ? { paystackCustomerCode: customerCode } : {}),
     ...(planCode ? { paystackPlanCode: planCode } : {}),
@@ -192,7 +204,12 @@ async function resolveTenantAndPlan(options: {
   }
   if (!plan && options.paystackPlanCode) {
     plan = await prisma.subscriptionPlan.findFirst({
-      where: { metadata: { path: ['paystackPlanCode'], equals: options.paystackPlanCode } },
+      where: {
+        OR: [
+          { metadata: { path: ['paystackPlanCode'], equals: options.paystackPlanCode } },
+          { metadata: { path: ['paystackTrialPlanCode'], equals: options.paystackPlanCode } },
+        ],
+      },
     });
   }
   if (!plan) {
@@ -209,6 +226,7 @@ async function upsertSubscription(input: {
   planId: string;
   provider: SubscriptionProvider;
   providerRef: string;
+  matchProviderRefs?: string[];
   status: TenantSubscriptionStatus;
   currentPeriodStart?: Date | null;
   currentPeriodEnd?: Date | null;
@@ -217,14 +235,26 @@ async function upsertSubscription(input: {
   cancelAtPeriodEnd?: boolean | null;
   metadata?: Prisma.InputJsonValue;
 }) {
+  const refs = Array.from(
+    new Set(
+      [input.providerRef, ...(input.matchProviderRefs ?? [])]
+        .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+        .map((value) => value.trim())
+    )
+  );
   const existing = await prisma.tenantSubscription.findFirst({
-    where: { provider: input.provider, providerRef: input.providerRef },
+    where: {
+      tenantId: input.tenantId,
+      provider: input.provider,
+      ...(refs.length ? { OR: refs.map((providerRef) => ({ providerRef })) } : { providerRef: input.providerRef }),
+    },
   });
 
   if (existing) {
     return prisma.tenantSubscription.update({
       where: { id: existing.id },
       data: {
+        providerRef: input.providerRef,
         planId: input.planId,
         status: input.status,
         currentPeriodStart: input.currentPeriodStart ?? undefined,
@@ -402,6 +432,7 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
 
   const data = event.data ?? {};
   const metadata = (data.metadata as Record<string, any> | undefined) ?? {};
+  const reference = typeof data.reference === 'string' && data.reference.trim().length > 0 ? data.reference.trim() : null;
   const subscriptionCode =
     typeof data.subscription === 'string'
       ? data.subscription
@@ -431,7 +462,7 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
       | { ok: true; skipped: true; reason: string }
       | { ok: true; provider: 'paystack'; event: string; subscriptionId: string };
 
-    if (!subscriptionCode && !planCode) {
+  if (!subscriptionCode && !planCode && !reference) {
       result = { ok: true, skipped: true, reason: 'missing_subscription_refs' };
     } else {
       const { tenant, plan } = await resolveTenantAndPlan({
@@ -448,12 +479,16 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
             ? TenantSubscriptionStatus.CANCELED
             : mapPaystackStatus((data.status as string | undefined) ?? 'active');
 
-        const providerRef = subscriptionCode ?? planCode!;
+        const providerRef = subscriptionCode ?? reference ?? planCode!;
+        const matchProviderRefs = [reference, planCode, subscriptionCode].filter(
+          (value): value is string => Boolean(value && value !== providerRef)
+        );
         const record = await upsertSubscription({
           tenantId: tenant.id,
           planId: plan.id,
           provider: SubscriptionProvider.PAYSTACK,
           providerRef,
+          matchProviderRefs,
           status,
           currentPeriodEnd: data.next_payment_date ? new Date(data.next_payment_date as string) : null,
           canceledAt: event.event === 'subscription.disable' ? new Date() : null,

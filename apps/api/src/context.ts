@@ -77,16 +77,42 @@ export async function createContext({ req }: { req: { headers: Record<string, st
 
   let userId: string | null = null;
   let clerkOrgId: string | null = null;
+  let authSignals: Context['authSignals'] = null;
+
+  const forwardedFor = req.headers['x-forwarded-for'];
+  const realIp = req.headers['x-real-ip'];
+  const forwardedIp = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
+  const requestIp =
+    (forwardedIp?.split(',')[0]?.trim() || (Array.isArray(realIp) ? realIp[0] : realIp) || null) ?? null;
 
   const bearer = extractBearerToken(token);
   if (bearer) {
     const claims = await verifyClerkToken(bearer);
     userId = claims?.sub ?? null;
     clerkOrgId = (claims?.org_id ?? claims?.orgId) ?? fallbackOrg;
+    const authMethods = Array.isArray(claims?.amr)
+      ? claims.amr.filter((value): value is string => typeof value === 'string')
+      : [];
+    const fva = Array.isArray(claims?.fva) ? claims.fva : [];
+    const secondFactorAge =
+      fva.length > 1 && typeof fva[1] === 'number'
+        ? fva[1]
+        : fva.length > 1 && typeof fva[1] === 'string'
+          ? Number(fva[1])
+          : null;
+    authSignals = {
+      sessionId: claims?.sid ?? null,
+      sessionIssuedAtMs: typeof claims?.iat === 'number' ? claims.iat * 1000 : null,
+      authMethods,
+      secondFactorVerified:
+        secondFactorAge !== null && Number.isFinite(secondFactorAge) ? secondFactorAge >= 0 : null,
+      emailVerified: typeof claims?.email_verified === 'boolean' ? claims.email_verified : null,
+    };
   } else {
     const fallbackUser = req.headers['x-user-id'];
     userId = Array.isArray(fallbackUser) ? fallbackUser[0] : fallbackUser ?? null;
     clerkOrgId = fallbackOrg;
+    authSignals = null;
   }
 
   const tenant = clerkOrgId ? await provisionTenant(clerkOrgId) : null;
@@ -96,5 +122,7 @@ export async function createContext({ req }: { req: { headers: Record<string, st
     clerkOrgId,
     tenantId: tenant?.tenantId ?? null,
     tenantStatus: tenant?.tenantStatus ?? null,
+    requestIp,
+    authSignals,
   };
 }

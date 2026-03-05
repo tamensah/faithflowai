@@ -28,7 +28,7 @@ Status legend:
   - [x] In-app cancel now updates local state immediately after successful disable
   - [x] Add manual provider-state refresh action in billing UI
   - [x] Add checkout reference verification fallback to activate subscription when webhook delivery is delayed
-  - [~] Ensure webhook sync covers status transitions reliably
+  - [x] Ensure webhook sync covers status transitions reliably
 - [~] Entitlements polish:
   - [~] "What's locked" UI across admin modules
   - [x] Upgrade CTA with deep-link to `/billing`

@@ -157,10 +157,20 @@ function mapStripeStatus(status?: string | null) {
 
 function mapPaystackStatus(status?: string | null) {
   if (!status) return TenantSubscriptionStatus.ACTIVE;
-  if (status === 'active') return TenantSubscriptionStatus.ACTIVE;
-  if (status === 'non-renewing') return TenantSubscriptionStatus.PAUSED;
-  if (status === 'attention') return TenantSubscriptionStatus.PAST_DUE;
-  if (status === 'complete' || status === 'cancelled' || status === 'canceled') return TenantSubscriptionStatus.CANCELED;
+  const normalized = status.trim().toLowerCase();
+  if (normalized === 'active') return TenantSubscriptionStatus.ACTIVE;
+  if (normalized === 'non-renewing') return TenantSubscriptionStatus.PAUSED;
+  if (normalized === 'attention') return TenantSubscriptionStatus.PAST_DUE;
+  if (
+    normalized === 'complete' ||
+    normalized === 'completed' ||
+    normalized === 'cancelled' ||
+    normalized === 'canceled' ||
+    normalized === 'disabled' ||
+    normalized === 'ended'
+  ) {
+    return TenantSubscriptionStatus.CANCELED;
+  }
   return TenantSubscriptionStatus.ACTIVE;
 }
 
@@ -637,7 +647,7 @@ export const billingRouter = router({
         throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'No active subscription plan is configured.' });
       }
 
-      const providerRef = paystackSubscriptionCode ?? paystackPlanCode ?? input.reference;
+      const providerRef = paystackSubscriptionCode ?? input.reference;
       const currentPeriodEnd = parseDate(data.next_payment_date);
       const paidAt = parseDate(data.paid_at) ?? parseDate(data.created_at) ?? new Date();
 
@@ -650,8 +660,20 @@ export const billingRouter = router({
         ...(customerCode ? { paystackCustomerCode: customerCode } : {}),
       } as Prisma.InputJsonValue;
 
+      const candidateRefs = Array.from(
+        new Set(
+          [providerRef, input.reference, paystackPlanCode, paystackSubscriptionCode].filter(
+            (value): value is string => Boolean(value && value.trim().length)
+          )
+        )
+      );
       const existing = await prisma.tenantSubscription.findFirst({
-        where: { provider: SubscriptionProvider.PAYSTACK, providerRef },
+        where: {
+          tenantId: ctx.tenantId!,
+          provider: SubscriptionProvider.PAYSTACK,
+          OR: candidateRefs.map((ref) => ({ providerRef: ref })),
+        },
+        orderBy: { createdAt: 'desc' },
       });
       const record = existing
         ? await prisma.tenantSubscription.update({
@@ -659,6 +681,7 @@ export const billingRouter = router({
             data: {
               tenantId: ctx.tenantId!,
               planId: plan.id,
+              providerRef,
               status: TenantSubscriptionStatus.ACTIVE,
               currentPeriodStart: existing.currentPeriodStart ?? paidAt,
               currentPeriodEnd,

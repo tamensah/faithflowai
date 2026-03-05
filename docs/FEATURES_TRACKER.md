@@ -114,7 +114,9 @@ This is the live checklist for product scope, implementation status, and next st
   - Tenant domain management + verification/activation
   - Tenant health sweep + health history logging
   - Tenant security policy controls (MFA/SSO/session/retention)
+  - Runtime enforcement hooks for MFA/session freshness/IP allowlist + guardrail audit events
   - Domain/SSL automation sweeps (DNS verification + SSL lifecycle state updates)
+  - Domain runbook state evaluation + automatic incident ticket escalation/resolution hooks
   - Admin page: `/platform/ops`
 - Ministry + content systems:
   - Pastoral care requests, assignment, notes, status workflow, dashboard
@@ -135,10 +137,10 @@ This is the live checklist for product scope, implementation status, and next st
 - Billing provider sync reliability:
   - Manual provider-state refresh action in `/billing`
   - Paystack in-app cancellation now updates local subscription state immediately on success
+  - Paystack webhook reconciliation hardened for tenant-scoped matching and trial-plan code resolution
 
 ## In Progress
 - Revenue operations hardening:
-  - Paystack tier-change/cancellation edge cases and webhook-state reconciliation
   - Locked-state UX parity across all write actions and empty states
 
 ## Next Up (High Priority)
@@ -146,8 +148,7 @@ This is the live checklist for product scope, implementation status, and next st
    - Complete plan upgrade/downgrade/interval transitions with guardrails and proration rules
    - Automated retries + escalation policies (email/SMS/WhatsApp) with suppression windows
 2. Platform operations automation
-   - Domain runbook states + incident escalation hooks
-   - Security policy enforcement hooks (MFA/SSO/session controls in auth layer)
+   - Security policy rollout hardening (strict SSO mode + org-specific policy tuning)
 3. Streaming and support depth
    - Stream moderation controls + external provider sync jobs
    - Knowledge base integration and ticket deflection

@@ -1253,6 +1253,34 @@ async function start() {
 
   server.get('/health', async () => ({ ok: true, timestamp: new Date().toISOString() }));
 
+  server.get('/health/auth-guardrails', async () => {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const [policyCount, blockedCount, warningCount] = await Promise.all([
+      prisma.tenantSecurityPolicy.count(),
+      prisma.auditLog.count({
+        where: {
+          action: 'AUTH_GUARDRAIL_BLOCKED',
+          createdAt: { gte: since },
+        },
+      }),
+      prisma.auditLog.count({
+        where: {
+          action: 'AUTH_GUARDRAIL_WARNING',
+          createdAt: { gte: since },
+        },
+      }),
+    ]);
+
+    return {
+      ok: true,
+      timestamp: new Date().toISOString(),
+      strictSsoEnforcement: process.env.AUTH_POLICY_ENFORCE_SSO_STRICT === 'true',
+      policiesConfigured: policyCount,
+      blockedLast24h: blockedCount,
+      warningsLast24h: warningCount,
+    };
+  });
+
   server.get('/stream', async (request, reply) => {
     const tokenFromHeader = extractBearerToken(request.headers.authorization);
     const tokenFromQuery = typeof request.query === 'object' && request.query ? (request.query as any).token : null;
