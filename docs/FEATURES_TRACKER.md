@@ -172,3 +172,4 @@ This is the live checklist for product scope, implementation status, and next st
 - All features must enforce tenant isolation and RBAC by default.
 - AI outputs must be traceable with source attribution.
 - Operational notes log: `docs/OPERATIONAL_NOTES.md`.
+- Canonical workspace path for active edits and deploy prep: `/Users/tamensah/aihub/faithflow_ai`.

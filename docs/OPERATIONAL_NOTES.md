@@ -10,6 +10,18 @@ This file is the running operations log for implementation details, runtime cons
 
 ## Snapshot (2026-02-11)
 
+## Update (2026-03-05)
+
+### Repository canonical path and doc consolidation
+
+- Canonical active workspace for ongoing development is now `/Users/tamensah/aihub/faithflow_ai`.
+- Legacy parallel workspace `/Users/tamensah/aihub/faithlow` is treated as historical/reference only and should not receive active feature edits.
+- Markdown documentation from the legacy workspace has been consolidated into this repo under:
+  - `docs/` (top-level architecture/process docs)
+  - `docs/notes/` (reference specs and blueprint notes)
+- Operational rule going forward:
+  - execute code changes, docs updates, and deploy scripts only from `faithflow_ai` to avoid branch/repo drift.
+
 ## Update (2026-02-19)
 
 ### Admin UX shell and page navigation
