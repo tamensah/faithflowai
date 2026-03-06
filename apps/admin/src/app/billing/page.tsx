@@ -14,6 +14,7 @@ const billingSectionOptions = [
   { key: 'invoices', label: 'Invoices' },
 ] as const;
 type BillingSectionKey = (typeof billingSectionOptions)[number]['key'];
+type PlanChangeKind = 'UPGRADE' | 'DOWNGRADE' | 'LATERAL';
 
 function formatPlanPrice(amountMinor: number, currency: string, interval: string) {
   return `${currency} ${(amountMinor / 100).toFixed(2)} / ${interval.toLowerCase()}`;
@@ -36,6 +37,26 @@ function formatTrialDaysLeft(value?: string | Date | null) {
   const diffMs = end.getTime() - Date.now();
   const days = Math.max(0, Math.ceil(diffMs / (24 * 60 * 60 * 1000)));
   return `${days} day${days === 1 ? '' : 's'} left`;
+}
+
+function classifyPlanChange(
+  current?: { amountMinor?: number | null; interval?: string | null } | null,
+  target?: { amountMinor?: number | null; interval?: string | null } | null
+) {
+  if (
+    !current ||
+    !target ||
+    typeof current.amountMinor !== 'number' ||
+    typeof target.amountMinor !== 'number' ||
+    !current.interval ||
+    !target.interval
+  ) {
+    return null;
+  }
+  if (target.amountMinor > current.amountMinor) return 'UPGRADE' as const;
+  if (target.amountMinor < current.amountMinor) return 'DOWNGRADE' as const;
+  if (target.interval !== current.interval) return 'LATERAL' as const;
+  return 'LATERAL' as const;
 }
 
 export default function BillingPage() {
@@ -164,6 +185,45 @@ export default function BillingPage() {
     if (!selectedPlan || !current) return false;
     return selectedPlan.amountMinor > current.plan.amountMinor;
   }, [current, selectedPlan]);
+  const selectedPlanChangeKind = useMemo<PlanChangeKind | null>(
+    () => classifyPlanChange(current?.plan ?? null, selectedPlan),
+    [current?.plan, selectedPlan]
+  );
+  const paystackDisableReady = useMemo(() => {
+    const metadata = current?.metadata;
+    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+      return Boolean(current?.providerRef && /^SUB_[A-Za-z0-9]+$/.test(current.providerRef));
+    }
+    const record = metadata as Record<string, unknown>;
+    const subscriptionCode =
+      typeof record.paystackSubscriptionCode === 'string' ? record.paystackSubscriptionCode : null;
+    const emailToken = typeof record.paystackEmailToken === 'string' ? record.paystackEmailToken : null;
+    return Boolean(
+      (subscriptionCode && emailToken) || (current?.providerRef && /^SUB_[A-Za-z0-9]+$/.test(current.providerRef))
+    );
+  }, [current?.metadata, current?.providerRef]);
+  const selectedPlanGuidance = useMemo(() => {
+    if (!current || !selectedPlanChangeKind) return null;
+    if (current.provider === 'STRIPE') {
+      if (selectedPlanChangeKind === 'UPGRADE') {
+        return effective === 'IMMEDIATE'
+          ? 'Stripe will switch the tenant immediately and start a fresh billing cycle now.'
+          : 'Stripe will keep the current plan active until the next billing cycle, then move to the selected tier.';
+      }
+      return 'Downgrades and lateral Stripe changes are scheduled for the next billing cycle to avoid proration ambiguity.';
+    }
+    if (current.provider === 'PAYSTACK') {
+      if (selectedPlanChangeKind === 'UPGRADE') {
+        return paystackDisableReady
+          ? 'Paystack upgrades open a new checkout immediately. FaithFlow can disable the older Paystack subscription after the replacement activates.'
+          : 'Paystack upgrades open a new checkout immediately. If current subscription tokens are missing, finance ops may need to cancel the older Paystack subscription manually.';
+      }
+      return paystackDisableReady
+        ? 'For downgrades or lateral changes, complete checkout close to renewal time to minimize overlap. FaithFlow can disable the older subscription after the new one activates.'
+        : 'For downgrades or lateral changes, complete checkout close to renewal time to minimize overlap. Manual Paystack dashboard cancellation may still be required.';
+    }
+    return null;
+  }, [current, effective, paystackDisableReady, selectedPlanChangeKind]);
 
   return (
     <Shell>
@@ -360,6 +420,27 @@ export default function BillingPage() {
               {getTrialDays(selectedPlan.metadata) ? ` · ${getTrialDays(selectedPlan.metadata)}-day free trial` : ''}
             </p>
           ) : null}
+          {current && selectedPlan && selectedPlanChangeKind ? (
+            <div className="mt-4 rounded-lg border border-border bg-muted/10 p-4 text-sm">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium text-foreground">Transition:</span>
+                <Badge variant={selectedPlanChangeKind === 'UPGRADE' ? 'success' : 'default'}>
+                  {selectedPlanChangeKind.toLowerCase()}
+                </Badge>
+                <span className="text-muted">
+                  {current.plan.name} ({current.plan.interval.toLowerCase()}) to {selectedPlan.name} (
+                  {selectedPlan.interval.toLowerCase()})
+                </span>
+              </div>
+              {selectedPlanGuidance ? <p className="mt-2 text-muted">{selectedPlanGuidance}</p> : null}
+              {current.provider === 'PAYSTACK' ? (
+                <p className="mt-2 text-xs text-muted">
+                  Auto-disable path: {paystackDisableReady ? 'ready from current subscription metadata' : 'manual dashboard fallback may be required'}
+                  {current.currentPeriodEnd ? ` · current cycle ends ${new Date(current.currentPeriodEnd).toLocaleString()}` : ''}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <div className="mt-4">
             <Button
               disabled={!selectedPlanCode || isStartingCheckout || isChangingPlan}
@@ -389,7 +470,8 @@ export default function BillingPage() {
             {current?.provider === 'PAYSTACK' ? (
               <p className="mt-2 text-xs text-muted">
                 Paystack tier changes start a new checkout. After the new subscription activates, FaithFlow will attempt
-                to disable the previous Paystack subscription (best effort) to avoid double billing.
+                to disable the previous Paystack subscription when subscription tokens are available; otherwise finance
+                ops must cancel it in Paystack.
               </p>
             ) : null}
           </div>

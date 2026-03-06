@@ -11,12 +11,12 @@ Legend:
 
 ## 1) Subscriptions + Billing Hardening
 
-- [~] Stripe plan change (admin self-serve)
-- [~] Paystack tier change (checkout + best-effort old subscription disable)
+- [x] Stripe plan change (admin self-serve)
+- [x] Paystack tier change (checkout + best-effort old subscription disable)
 - [~] Provider-state refresh + cancellation reliability in `/billing`
 - [x] Trial -> grace -> read-only lockout policy (server-side)
 - [~] Cancel/resume flows (Stripe + Paystack cancel)
-- [~] “What’s locked” UX everywhere (pages + actions + empty states)
+- [x] “What’s locked” UX everywhere (pages + actions + empty states)
 
 Acceptance criteria:
 - Admin can upgrade/downgrade tiers with “effective next cycle” default and optional immediate Stripe upgrade.
@@ -59,8 +59,8 @@ Acceptance criteria:
 ## 4) Data Import (Adoption Unlock)
 
 - [~] Members CSV import with batch tracking + rollback
-- [~] Households CSV import (mapping + preview + rollback)
-- [~] Donations CSV import (mapping + preview + rollback)
+- [x] Households CSV import (mapping + preview + rollback)
+- [x] Donations CSV import (mapping + preview + rollback)
 - [x] Migration assistant docs + templates
 
 Acceptance criteria:
@@ -72,8 +72,9 @@ Acceptance criteria:
 
 - [x] “Ask FaithFlow” admin assistant (tenant-scoped)
 - [x] Citations + prompt/output logging (audit)
-- [~] RBAC + redaction for sensitive fields
+- [x] RBAC + redaction for sensitive fields
 - [x] Opinionated starter insights (giving/attendance/volunteers)
+- [x] Summary packs for executive, attendance, giving, and volunteer review
 
 Acceptance criteria:
 - AI outputs are tenant-scoped, attributable, and safe to use in staff workflows.

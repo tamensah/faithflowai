@@ -7,6 +7,7 @@ import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
 import { useWriteAccess } from '../../../lib/entitlements';
 import { ReadOnlyNotice } from '../../../components/ReadOnlyNotice';
+import { EmptyState } from '../../../components/EmptyState';
 
 type TenantStatusFilter = 'ALL' | 'ACTIVE' | 'SUSPENDED';
 type AuditActorTypeFilter = 'ALL' | 'USER' | 'SYSTEM' | 'WEBHOOK';
@@ -99,7 +100,12 @@ export default function PlatformTenantsPage() {
       <Shell>
         <Card className="p-6">
           <h1 className="text-xl font-semibold">Platform tenants</h1>
-          <p className="mt-2 text-sm text-muted">You do not have platform access.</p>
+          <div className="mt-4">
+            <EmptyState
+              title="Platform access required"
+              description="Use a platform-admin account to review tenant lifecycle, suspension state, and audit trails."
+            />
+          </div>
         </Card>
       </Shell>
     );
@@ -145,7 +151,10 @@ export default function PlatformTenantsPage() {
 
           {!isLoading && !tenants?.length ? (
             <Card className="p-6">
-              <p className="text-sm text-muted">No tenants match the current filters.</p>
+              <EmptyState
+                title="No tenants match these filters"
+                description="Broaden the search or clear the status filter to find the tenant you want to inspect."
+              />
             </Card>
           ) : null}
 
@@ -322,7 +331,10 @@ export default function PlatformTenantsPage() {
             <div className="mt-4 space-y-3">
               {isAuditLoading ? <p className="text-sm text-muted">Loading audit logs...</p> : null}
               {!isAuditLoading && !auditLogs?.length ? (
-                <p className="text-sm text-muted">No tenant audit entries found.</p>
+                <EmptyState
+                  title="No audit entries found"
+                  description="Change the filters or widen the date window to inspect tenant lifecycle activity."
+                />
               ) : null}
               {auditLogs?.map((entry) => (
                 <Card key={entry.id} className="p-3">

@@ -11,6 +11,20 @@ import { EmptyState } from '../../components/EmptyState';
 import { LoadingSkeleton } from '../../components/LoadingSkeleton';
 import { PageContextSidebar } from '../../components/PageContextSidebar';
 import { useKeyboardShortcuts } from '../../lib/useKeyboardShortcuts';
+import { analyzeCsvImport } from '../../lib/csvImportPreview';
+
+const householdImportAliases = {
+  name: 'name',
+  household: 'name',
+  primarymemberid: 'primaryMemberId',
+  primarymember: 'primaryMemberId',
+  primaryemail: 'primaryEmail',
+  email: 'primaryEmail',
+  primaryphone: 'primaryPhone',
+  phone: 'primaryPhone',
+  memberemails: 'memberEmails',
+  members: 'memberEmails',
+} as const;
 
 export default function MembersPage() {
   const gate = useFeatureGate('membership_enabled');
@@ -259,6 +273,26 @@ export default function MembersPage() {
       return name.includes(query) || email.includes(query) || phone.includes(query);
     });
   }, [directoryPreview, directorySearch]);
+  const householdImportPreview = useMemo(
+    () =>
+      analyzeCsvImport(householdImportCsv, householdImportAliases, [
+        {
+          label: 'Household identity',
+          check: (targets) => ({
+            ok: targets.has('name') || targets.has('primaryEmail') || targets.has('primaryPhone'),
+            detail: 'Provide a household name or a primary email/phone so each row can be matched safely.',
+          }),
+        },
+        {
+          label: 'Member linking',
+          check: (targets) => ({
+            ok: targets.has('memberEmails'),
+            detail: 'Member emails are optional but recommended so imported households can attach members immediately.',
+          }),
+        },
+      ]),
+    [householdImportCsv]
+  );
 
   const handleSurveyExport = async () => {
     if (!surveySummaryId) return;
@@ -1552,6 +1586,53 @@ export default function MembersPage() {
                 </Button>
               ) : null}
             </div>
+            {householdImportPreview ? (
+              <div className="mt-4 rounded-xl border border-border bg-muted/10 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Import mapping preview</p>
+                    <p className="text-xs text-muted">
+                      {householdImportPreview.rowCount} row{householdImportPreview.rowCount === 1 ? '' : 's'} detected ·{' '}
+                      {householdImportPreview.recognizedCount}/{householdImportPreview.rawHeaders.length} mapped columns
+                    </p>
+                  </div>
+                  <Badge variant={householdImportPreview.unrecognizedHeaders.length ? 'warning' : 'success'}>
+                    {householdImportPreview.unrecognizedHeaders.length ? 'Review headers' : 'Ready to import'}
+                  </Badge>
+                </div>
+                <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                  <div className="space-y-2 text-xs text-muted">
+                    {householdImportPreview.mappedHeaders.map((entry) => (
+                      <div
+                        key={`${entry.source}-${entry.target ?? 'unmapped'}`}
+                        className="flex items-center justify-between gap-3 rounded-md border border-border bg-white px-3 py-2"
+                      >
+                        <span className="truncate">{entry.source}</span>
+                        <span className="font-medium text-foreground">{entry.target ?? 'Unmapped'}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-2">
+                    {householdImportPreview.readiness.map((item) => (
+                      <div key={item.label} className="rounded-md border border-border bg-white px-3 py-2 text-xs text-muted">
+                        <p className="font-medium text-foreground">
+                          {item.label}: {item.ok ? 'OK' : 'Needs attention'}
+                        </p>
+                        <p className="mt-1">{item.detail}</p>
+                      </div>
+                    ))}
+                    {householdImportPreview.sampleRows.length ? (
+                      <div className="rounded-md border border-border bg-white p-3 text-xs text-muted">
+                        <p className="font-medium text-foreground">Sample row</p>
+                        <pre className="mt-2 whitespace-pre-wrap">
+                          {JSON.stringify(householdImportPreview.sampleRows[0], null, 2)}
+                        </pre>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            ) : null}
             <div className="mt-4 text-sm text-muted">
               <pre className="rounded-md bg-muted/10 p-3 text-xs whitespace-pre-wrap">
                 {householdImportSummary ? JSON.stringify(householdImportSummary, null, 2) : 'No household import summary yet.'}

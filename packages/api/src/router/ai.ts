@@ -46,13 +46,55 @@ type Source = {
   timestamp?: string;
 };
 
+type SummaryPack = {
+  key: 'executive' | 'attendance' | 'giving' | 'volunteer';
+  title: string;
+  summary: string;
+  highlights: string[];
+  actionLabel: string;
+  actionHref: string;
+};
+
 function redactEmail(value: string) {
   // Minimal email redaction for UI labels; does not attempt to parse all edge cases.
   return value.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, '[redacted]');
 }
 
+function redactPhone(value: string) {
+  return value.replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, '[redacted]');
+}
+
+function maskName(value: string) {
+  const parts = value
+    .split(/\s+/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  if (!parts.length) return 'Unknown';
+  if (parts.length === 1) return `${parts[0]![0] ?? ''}***`;
+  const [first, ...rest] = parts;
+  return `${first} ${rest.map((entry) => `${entry[0] ?? ''}.`).join(' ')}`.trim();
+}
+
 function redactLabel(label: string) {
-  return redactEmail(label);
+  return redactPhone(redactEmail(label));
+}
+
+function getQuestionGuardrailMessage(value: string) {
+  const normalized = value.toLowerCase();
+  if (/(api[\s_-]*key|secret|password|session cookie|jwt|bearer token|access token)/i.test(normalized)) {
+    return 'FaithFlow AI will not retrieve secrets, credentials, or session data.';
+  }
+  if (
+    /(list|export|dump|show|reveal|give me).*(emails?|phone numbers?|addresses?|contact list|member directory)/i.test(
+      normalized
+    )
+  ) {
+    return 'FaithFlow AI will not expose bulk contact data. Use approved member directory and export workflows instead.';
+  }
+  if (/(list|dump|show|reveal|all|every|full).*(care notes?|pastoral notes?|counseling|counselling|medical|prayer requests?)/i.test(normalized)) {
+    return 'FaithFlow AI will not expose private care or counseling records in bulk.';
+  }
+  return null;
 }
 
 function parseJsonDraft(raw: string) {
@@ -190,7 +232,7 @@ async function collectSources(input: {
     sources.push({
       id: member.id,
       type: 'member',
-      label: `Member ${member.firstName} ${member.lastName} (${member.status})`,
+      label: `Member ${maskName(`${member.firstName} ${member.lastName}`)} (${member.status})`,
       timestamp: member.updatedAt.toISOString(),
     });
   }
@@ -199,7 +241,7 @@ async function collectSources(input: {
       id: donation.id,
       type: 'donation',
       label: redactLabel(
-        `Donation ${donation.amount.toString()} ${donation.currency} by ${donation.donorName ?? 'Unknown'} (${donation.createdAt.toISOString().slice(0, 10)})`
+        `Donation ${donation.amount.toString()} ${donation.currency} by ${maskName(donation.donorName ?? 'Unknown')} (${donation.createdAt.toISOString().slice(0, 10)})`
       ),
       timestamp: donation.createdAt.toISOString(),
     });
@@ -216,6 +258,263 @@ async function collectSources(input: {
   return sources.slice(0, 30);
 }
 
+async function loadInsightSnapshot(input: { tenantId: string; churchId?: string | null }) {
+  const churchId = input.churchId ?? null;
+  const churchFilter = churchId ? { churchId } : {};
+  const now = Date.now();
+  const last30 = new Date(now - 30 * 24 * 60 * 60 * 1000);
+  const prev30 = new Date(now - 60 * 24 * 60 * 60 * 1000);
+  const last90 = new Date(now - 90 * 24 * 60 * 60 * 1000);
+  const yearAgo = new Date(now - 365 * 24 * 60 * 60 * 1000);
+
+  const [membersTotal, attendanceLast30, attendancePrev30, givingLast30, givingPrev30, upcomingEvents, volunteerShifts, donorsLastYear, donorsRecent] =
+    await Promise.all([
+      prisma.member.count({ where: { church: { organization: { tenantId: input.tenantId } }, ...churchFilter } }),
+      prisma.attendance.count({
+        where: {
+          event: { church: { organization: { tenantId: input.tenantId } }, ...churchFilter },
+          createdAt: { gte: last30 },
+        },
+      }),
+      prisma.attendance.count({
+        where: {
+          event: { church: { organization: { tenantId: input.tenantId } }, ...churchFilter },
+          createdAt: { gte: prev30, lt: last30 },
+        },
+      }),
+      prisma.donation.aggregate({
+        where: {
+          church: { organization: { tenantId: input.tenantId } },
+          ...churchFilter,
+          status: 'COMPLETED',
+          createdAt: { gte: last30 },
+        },
+        _sum: { amount: true },
+        _count: { _all: true },
+      }),
+      prisma.donation.aggregate({
+        where: {
+          church: { organization: { tenantId: input.tenantId } },
+          ...churchFilter,
+          status: 'COMPLETED',
+          createdAt: { gte: prev30, lt: last30 },
+        },
+        _sum: { amount: true },
+        _count: { _all: true },
+      }),
+      prisma.event.count({
+        where: {
+          church: { organization: { tenantId: input.tenantId } },
+          ...churchFilter,
+          startAt: { gte: new Date() },
+        },
+      }),
+      prisma.volunteerShift.findMany({
+        where: {
+          church: { organization: { tenantId: input.tenantId } },
+          ...churchFilter,
+          startAt: { gte: new Date(), lte: new Date(now + 30 * 24 * 60 * 60 * 1000) },
+        },
+        select: { id: true, capacity: true, _count: { select: { assignments: true } }, startAt: true, title: true },
+        take: 120,
+        orderBy: { startAt: 'asc' },
+      }),
+      prisma.donation.findMany({
+        where: {
+          church: { organization: { tenantId: input.tenantId } },
+          ...churchFilter,
+          status: 'COMPLETED',
+          createdAt: { gte: yearAgo },
+        },
+        select: { donorEmail: true, memberId: true },
+      }),
+      prisma.donation.findMany({
+        where: {
+          church: { organization: { tenantId: input.tenantId } },
+          ...churchFilter,
+          status: 'COMPLETED',
+          createdAt: { gte: last90 },
+        },
+        select: { donorEmail: true, memberId: true },
+      }),
+    ]);
+
+  const givingLast30Sum = Number(givingLast30._sum.amount?.toString() ?? '0');
+  const givingPrev30Sum = Number(givingPrev30._sum.amount?.toString() ?? '0');
+  const givingDelta = givingLast30Sum - givingPrev30Sum;
+  const givingDeltaPct = givingPrev30Sum > 0 ? (givingDelta / givingPrev30Sum) * 100 : null;
+
+  const attendanceDelta = attendanceLast30 - attendancePrev30;
+  const attendanceDeltaPct = attendancePrev30 > 0 ? (attendanceDelta / attendancePrev30) * 100 : null;
+
+  const shiftGaps = volunteerShifts
+    .filter((shift) => typeof shift.capacity === 'number' && shift.capacity !== null)
+    .map((shift) => ({
+      id: shift.id,
+      title: shift.title,
+      startAt: shift.startAt,
+      capacity: shift.capacity ?? 0,
+      assigned: shift._count.assignments,
+      gap: Math.max(0, (shift.capacity ?? 0) - shift._count.assignments),
+    }))
+    .filter((shift) => shift.gap > 0)
+    .slice(0, 10);
+
+  const lastYearSet = new Set(
+    donorsLastYear
+      .map((item) => item.memberId ?? item.donorEmail ?? null)
+      .filter((id): id is string => Boolean(id))
+  );
+  const recentSet = new Set(
+    donorsRecent
+      .map((item) => item.memberId ?? item.donorEmail ?? null)
+      .filter((id): id is string => Boolean(id))
+  );
+  const lapsedCount = Array.from(lastYearSet).filter((id) => !recentSet.has(id)).length;
+
+  return {
+    membersTotal,
+    upcomingEvents,
+    attendance: {
+      last30: attendanceLast30,
+      prev30: attendancePrev30,
+      delta: attendanceDelta,
+      deltaPct: attendanceDeltaPct,
+    },
+    giving: {
+      last30Sum: givingLast30Sum,
+      last30Count: givingLast30._count._all,
+      prev30Sum: givingPrev30Sum,
+      prev30Count: givingPrev30._count._all,
+      delta: givingDelta,
+      deltaPct: givingDeltaPct,
+      lapsedCount,
+    },
+    volunteer: {
+      shiftsNext30: volunteerShifts.length,
+      gaps: shiftGaps,
+    },
+    asOf: new Date().toISOString(),
+  };
+}
+
+function toStarterInsightResponse(snapshot: Awaited<ReturnType<typeof loadInsightSnapshot>>, allowFinanceSources: boolean) {
+  return {
+    membersTotal: snapshot.membersTotal,
+    upcomingEvents: snapshot.upcomingEvents,
+    attendance: snapshot.attendance,
+    giving: {
+      last30Sum: allowFinanceSources ? snapshot.giving.last30Sum : null,
+      last30Count: snapshot.giving.last30Count,
+      prev30Sum: allowFinanceSources ? snapshot.giving.prev30Sum : null,
+      prev30Count: snapshot.giving.prev30Count,
+      delta: allowFinanceSources ? snapshot.giving.delta : null,
+      deltaPct: allowFinanceSources ? snapshot.giving.deltaPct : null,
+      lapsedCount: allowFinanceSources ? snapshot.giving.lapsedCount : null,
+    },
+    volunteer: snapshot.volunteer,
+    asOf: snapshot.asOf,
+  };
+}
+
+function buildFallbackSummaryPacks(
+  snapshot: Awaited<ReturnType<typeof loadInsightSnapshot>>,
+  allowFinanceSources: boolean
+): SummaryPack[] {
+  return [
+    {
+      key: 'executive',
+      title: 'Executive snapshot',
+      summary: `${snapshot.membersTotal} members tracked, ${snapshot.upcomingEvents} upcoming events, and ${snapshot.volunteer.gaps.length} volunteer gap areas need attention.`,
+      highlights: [
+        `${snapshot.attendance.last30} attendance records in the last 30 days`,
+        `${snapshot.volunteer.shiftsNext30} volunteer shifts scheduled in the next 30 days`,
+        allowFinanceSources
+          ? `${snapshot.giving.last30Count} gifts recorded in the last 30 days`
+          : 'Giving visibility is limited to non-financial counts for this role',
+      ],
+      actionLabel: 'Open overview',
+      actionHref: '/dashboard',
+    },
+    {
+      key: 'attendance',
+      title: 'Attendance momentum',
+      summary:
+        snapshot.attendance.delta >= 0
+          ? `Attendance is up ${snapshot.attendance.delta} compared with the previous 30-day window.`
+          : `Attendance is down ${Math.abs(snapshot.attendance.delta)} compared with the previous 30-day window.`,
+      highlights: [
+        `Current 30-day attendance: ${snapshot.attendance.last30}`,
+        `Previous 30-day attendance: ${snapshot.attendance.prev30}`,
+        snapshot.attendance.deltaPct === null
+          ? 'Percentage change is unavailable because the prior period had no attendance'
+          : `Delta: ${snapshot.attendance.deltaPct.toFixed(1)}%`,
+      ],
+      actionLabel: 'Open events',
+      actionHref: '/dashboard/events',
+    },
+    {
+      key: 'giving',
+      title: 'Giving and donor risk',
+      summary: allowFinanceSources
+        ? `Giving moved by ${snapshot.giving.delta >= 0 ? '+' : ''}${snapshot.giving.delta.toFixed(0)} over the prior 30-day window, with ${snapshot.giving.lapsedCount} lapsed donors in the last 90 days.`
+        : `Giving activity shows ${snapshot.giving.last30Count} gifts in the last 30 days. Full financial detail is restricted to tenant admins.`,
+      highlights: allowFinanceSources
+        ? [
+            `Current 30-day total: ${snapshot.giving.last30Sum.toFixed(0)}`,
+            `Previous 30-day total: ${snapshot.giving.prev30Sum.toFixed(0)}`,
+            `Lapsed donor count: ${snapshot.giving.lapsedCount}`,
+          ]
+        : [
+            `Current 30-day gift count: ${snapshot.giving.last30Count}`,
+            `Previous 30-day gift count: ${snapshot.giving.prev30Count}`,
+            'Revenue amounts are hidden for this role',
+          ],
+      actionLabel: 'Open finance',
+      actionHref: '/dashboard/finance',
+    },
+    {
+      key: 'volunteer',
+      title: 'Volunteer coverage',
+      summary: snapshot.volunteer.gaps.length
+        ? `${snapshot.volunteer.gaps.length} upcoming shifts are understaffed and should be assigned now.`
+        : 'Upcoming volunteer coverage is healthy across the next 30 days.',
+      highlights: snapshot.volunteer.gaps.length
+        ? snapshot.volunteer.gaps.slice(0, 3).map((gap) => `${gap.title}: gap ${gap.gap} on ${gap.startAt.toISOString().slice(0, 10)}`)
+        : [`${snapshot.volunteer.shiftsNext30} shifts scheduled with no detected coverage gaps`],
+      actionLabel: 'Open members',
+      actionHref: '/dashboard/members',
+    },
+  ];
+}
+
+function parseSummaryPacks(raw: string, fallback: SummaryPack[]) {
+  const trimmed = raw.trim();
+  const unwrapped = trimmed.startsWith('```')
+    ? trimmed
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/\s*```$/i, '')
+        .trim()
+    : trimmed;
+  try {
+    const parsed = JSON.parse(unwrapped) as { packs?: Array<Partial<SummaryPack>> };
+    const incoming = Array.isArray(parsed?.packs) ? parsed.packs : [];
+    return fallback.map((pack) => {
+      const override = incoming.find((entry) => entry.key === pack.key);
+      return {
+        ...pack,
+        summary: typeof override?.summary === 'string' && override.summary.trim() ? override.summary.trim() : pack.summary,
+        highlights: Array.isArray(override?.highlights)
+          ? override.highlights.map((item) => String(item).trim()).filter(Boolean).slice(0, 3)
+          : pack.highlights,
+      };
+    });
+  } catch {
+    return fallback;
+  }
+}
+
 export const aiRouter = router({
   ask: protectedProcedure
     .input(
@@ -229,6 +528,10 @@ export const aiRouter = router({
     .mutation(async ({ input, ctx }) => {
       const staff = await requireStaff(ctx.tenantId!, ctx.userId!);
       await ensureFeatureWriteAccess(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
+      const guardrailMessage = getQuestionGuardrailMessage(input.question);
+      if (guardrailMessage) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: guardrailMessage });
+      }
 
       const provider = (input.provider ?? 'openai') as AIProvider;
       const model = input.model?.trim() || defaultModel(provider);
@@ -319,6 +622,10 @@ export const aiRouter = router({
         'communications_enabled',
         'Communications are not enabled on your current plan.'
       );
+      const guardrailMessage = getQuestionGuardrailMessage(`${input.objective}\n${input.audienceHint ?? ''}`);
+      if (guardrailMessage) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: guardrailMessage });
+      }
 
       const provider = (input.provider ?? 'openai') as AIProvider;
       const model = input.model?.trim() || defaultModel(provider);
@@ -401,113 +708,69 @@ export const aiRouter = router({
   starterInsights: protectedProcedure
     .input(z.object({ churchId: z.string().optional() }).optional())
     .query(async ({ input, ctx }) => {
-      await requireStaff(ctx.tenantId!, ctx.userId!);
+      const staff = await requireStaff(ctx.tenantId!, ctx.userId!);
+      await ensureFeatureReadAccess(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
+      const snapshot = await loadInsightSnapshot({ tenantId: ctx.tenantId!, churchId: input?.churchId ?? null });
+      return toStarterInsightResponse(snapshot, staff.role === UserRole.ADMIN);
+    }),
+
+  summaryPacks: protectedProcedure
+    .input(
+      z
+        .object({
+          churchId: z.string().optional(),
+          provider: providerSchema.optional(),
+          model: z.string().trim().max(120).optional(),
+        })
+        .optional()
+    )
+    .query(async ({ input, ctx }) => {
+      const staff = await requireStaff(ctx.tenantId!, ctx.userId!);
       await ensureFeatureReadAccess(ctx.tenantId!, 'ai_insights', 'AI insights are not enabled on your current plan.');
 
-      const churchId = input?.churchId ?? null;
-      const churchFilter = churchId ? { churchId } : {};
-      const now = Date.now();
-      const last30 = new Date(now - 30 * 24 * 60 * 60 * 1000);
-      const prev30 = new Date(now - 60 * 24 * 60 * 60 * 1000);
+      const allowFinanceSources = staff.role === UserRole.ADMIN;
+      const snapshot = await loadInsightSnapshot({ tenantId: ctx.tenantId!, churchId: input?.churchId ?? null });
+      const fallback = buildFallbackSummaryPacks(snapshot, allowFinanceSources);
+      const provider = (input?.provider ?? 'openai') as AIProvider;
+      const model = input?.model?.trim() || defaultModel(provider);
 
-      const [membersTotal, attendanceLast30, attendancePrev30, givingLast30, givingPrev30, upcomingEvents, volunteerShifts] =
-        await Promise.all([
-          prisma.member.count({ where: { church: { organization: { tenantId: ctx.tenantId! } }, ...churchFilter } }),
-          prisma.attendance.count({
-            where: {
-              event: { church: { organization: { tenantId: ctx.tenantId! } }, ...churchFilter },
-              createdAt: { gte: last30 },
-            },
-          }),
-          prisma.attendance.count({
-            where: {
-              event: { church: { organization: { tenantId: ctx.tenantId! } }, ...churchFilter },
-              createdAt: { gte: prev30, lt: last30 },
-            },
-          }),
-          prisma.donation.aggregate({
-            where: {
-              church: { organization: { tenantId: ctx.tenantId! } },
-              ...churchFilter,
-              status: 'COMPLETED',
-              createdAt: { gte: last30 },
-            },
-            _sum: { amount: true },
-            _count: { _all: true },
-          }),
-          prisma.donation.aggregate({
-            where: {
-              church: { organization: { tenantId: ctx.tenantId! } },
-              ...churchFilter,
-              status: 'COMPLETED',
-              createdAt: { gte: prev30, lt: last30 },
-            },
-            _sum: { amount: true },
-            _count: { _all: true },
-          }),
-          prisma.event.count({
-            where: {
-              church: { organization: { tenantId: ctx.tenantId! } },
-              ...churchFilter,
-              startAt: { gte: new Date() },
-            },
-          }),
-          prisma.volunteerShift.findMany({
-            where: {
-              church: { organization: { tenantId: ctx.tenantId! } },
-              ...churchFilter,
-              startAt: { gte: new Date(), lte: new Date(now + 30 * 24 * 60 * 60 * 1000) },
-            },
-            select: { id: true, capacity: true, _count: { select: { assignments: true } }, startAt: true, title: true },
-            take: 120,
-            orderBy: { startAt: 'asc' },
-          }),
-        ]);
+      try {
+        const prompt = [
+          'You are FaithFlow AI preparing executive summary packs for church operators.',
+          'Return ONLY valid JSON with shape {"packs":[{"key","summary","highlights"}]}.',
+          'Use the provided keys exactly: executive, attendance, giving, volunteer.',
+          'Each summary must be one concise paragraph.',
+          'Each highlights array must contain exactly 3 short bullets.',
+          allowFinanceSources
+            ? 'Financial amounts are allowed.'
+            : 'Do not expose financial amounts or donor-identifiable financial detail. Use counts and directional language only.',
+          '',
+          'DATA:',
+          JSON.stringify(snapshot, null, 2),
+        ].join('\n');
 
-      const givingLast30Sum = Number(givingLast30._sum.amount?.toString() ?? '0');
-      const givingPrev30Sum = Number(givingPrev30._sum.amount?.toString() ?? '0');
-      const givingDelta = givingLast30Sum - givingPrev30Sum;
-      const givingDeltaPct = givingPrev30Sum > 0 ? (givingDelta / givingPrev30Sum) * 100 : null;
+        const raw = await generateTextSimple({
+          provider,
+          model,
+          prompt,
+          temperature: 0.2,
+          maxTokens: 900,
+        });
 
-      const attendanceDelta = attendanceLast30 - attendancePrev30;
-      const attendanceDeltaPct = attendancePrev30 > 0 ? (attendanceDelta / attendancePrev30) * 100 : null;
-
-      const shiftGaps = volunteerShifts
-        .filter((shift) => typeof shift.capacity === 'number' && shift.capacity !== null)
-        .map((shift) => ({
-          id: shift.id,
-          title: shift.title,
-          startAt: shift.startAt,
-          capacity: shift.capacity ?? 0,
-          assigned: shift._count.assignments,
-          gap: Math.max(0, (shift.capacity ?? 0) - shift._count.assignments),
-        }))
-        .filter((shift) => shift.gap > 0)
-        .slice(0, 10);
-
-      return {
-        membersTotal,
-        upcomingEvents,
-        attendance: {
-          last30: attendanceLast30,
-          prev30: attendancePrev30,
-          delta: attendanceDelta,
-          deltaPct: attendanceDeltaPct,
-        },
-        giving: {
-          last30Sum: givingLast30Sum,
-          last30Count: givingLast30._count._all,
-          prev30Sum: givingPrev30Sum,
-          prev30Count: givingPrev30._count._all,
-          delta: givingDelta,
-          deltaPct: givingDeltaPct,
-        },
-        volunteer: {
-          shiftsNext30: volunteerShifts.length,
-          gaps: shiftGaps,
-        },
-        asOf: new Date().toISOString(),
-      };
+        return {
+          packs: parseSummaryPacks(raw, fallback),
+          generatedWithAi: true,
+          warnings: [] as string[],
+          asOf: snapshot.asOf,
+        };
+      } catch {
+        return {
+          packs: fallback,
+          generatedWithAi: false,
+          warnings: ['AI generation failed; returned fallback summary packs.'],
+          asOf: snapshot.asOf,
+        };
+      }
     }),
 
   recent: protectedProcedure

@@ -7,6 +7,7 @@ import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
 import { useWriteAccess } from '../../../lib/entitlements';
 import { ReadOnlyNotice } from '../../../components/ReadOnlyNotice';
+import { EmptyState } from '../../../components/EmptyState';
 
 function formatDate(value?: string | Date | null) {
   if (!value) return 'N/A';
@@ -190,7 +191,10 @@ export default function OperationsHealthPage() {
                   </Card>
                 ))}
                 {!checklist?.items?.length ? (
-                  <p className="text-sm text-muted">Checklist unavailable.</p>
+                  <EmptyState
+                    title="Checklist unavailable"
+                    description="Health checks are online, but no go-live checklist data is available yet for this tenant."
+                  />
                 ) : null}
               </div>
             </Card>
@@ -209,7 +213,12 @@ export default function OperationsHealthPage() {
                   <p>Period end: {formatDate(data.subscription.currentPeriodEnd)}</p>
                 </div>
               ) : (
-                <p className="mt-2 text-sm text-muted">No active subscription found.</p>
+                <div className="mt-3">
+                  <EmptyState
+                    title="No active subscription"
+                    description="Assign a tenant plan or complete billing onboarding before running subscription-dependent checks."
+                  />
+                </div>
               )}
             </Card>
 
@@ -242,7 +251,12 @@ export default function OperationsHealthPage() {
                 ))}
               </div>
               {!Object.keys(data.webhooks.latestByProvider).length ? (
-                <p className="mt-3 text-sm text-muted">No webhook events recorded yet.</p>
+                <div className="mt-3">
+                  <EmptyState
+                    title="No webhook events yet"
+                    description="Provider events will appear here after the first live webhook delivery or replay."
+                  />
+                </div>
               ) : null}
             </Card>
           </div>

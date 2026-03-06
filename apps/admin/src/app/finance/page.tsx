@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { trpc } from '../../lib/trpc';
@@ -12,6 +12,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { LoadingSkeleton } from '../../components/LoadingSkeleton';
 import { PageContextSidebar } from '../../components/PageContextSidebar';
 import { useKeyboardShortcuts } from '../../lib/useKeyboardShortcuts';
+import { analyzeCsvImport } from '../../lib/csvImportPreview';
 
 const evidenceTypeOptions = [
   'UNCATEGORIZED',
@@ -34,6 +35,22 @@ const financeSectionOptions = [
   { key: 'settlements', label: 'Settlements' },
 ] as const;
 type FinanceSectionKey = (typeof financeSectionOptions)[number]['key'];
+
+const donationImportAliases = {
+  amount: 'amount',
+  currency: 'currency',
+  donorname: 'donorName',
+  donoremail: 'donorEmail',
+  donorphone: 'donorPhone',
+  memberemail: 'memberEmail',
+  memberphone: 'memberPhone',
+  fund: 'fundName',
+  fundname: 'fundName',
+  campaign: 'campaignName',
+  campaignname: 'campaignName',
+  createdat: 'createdAt',
+  date: 'createdAt',
+} as const;
 
 export default function FinancePage() {
   const gate = useFeatureGate('finance_enabled');
@@ -112,6 +129,37 @@ export default function FinancePage() {
     }
   }, [churchId, churches]);
   const rowClass = density === 'compact' ? 'py-1.5 text-xs' : 'py-2.5 text-sm';
+  const donationImportPreview = useMemo(
+    () =>
+      analyzeCsvImport(donationImportCsv, donationImportAliases, [
+        {
+          label: 'Required amount column',
+          check: (targets) => ({
+            ok: targets.has('amount'),
+            detail: 'Each row must map an amount column before the import can create donations.',
+          }),
+        },
+        {
+          label: 'Donor matching context',
+          check: (targets) => ({
+            ok:
+              targets.has('donorEmail') ||
+              targets.has('donorPhone') ||
+              targets.has('memberEmail') ||
+              targets.has('memberPhone'),
+            detail: 'Email or phone columns are recommended so imported gifts can be matched to donors or members.',
+          }),
+        },
+        {
+          label: 'Posting date',
+          check: (targets) => ({
+            ok: targets.has('createdAt'),
+            detail: 'Created date is optional, but adding it keeps historical reports and statements accurate.',
+          }),
+        },
+      ]),
+    [donationImportCsv]
+  );
 
   useKeyboardShortcuts([
     {
@@ -747,6 +795,59 @@ export default function FinancePage() {
             value={donationImportCsv}
             onChange={(event) => setDonationImportCsv(event.target.value)}
           />
+          {donationImportPreview ? (
+            <div className="mt-4 rounded-xl border border-border bg-muted/10 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Import mapping preview</p>
+                  <p className="text-xs text-muted">
+                    {donationImportPreview.rowCount} row{donationImportPreview.rowCount === 1 ? '' : 's'} detected ·{' '}
+                    {donationImportPreview.recognizedCount}/{donationImportPreview.rawHeaders.length} mapped columns
+                  </p>
+                </div>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    donationImportPreview.unrecognizedHeaders.length
+                      ? 'bg-amber-100 text-amber-900'
+                      : 'bg-emerald-100 text-emerald-900'
+                  }`}
+                >
+                  {donationImportPreview.unrecognizedHeaders.length ? 'Review headers' : 'Ready to import'}
+                </span>
+              </div>
+              <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                <div className="space-y-2 text-xs text-muted">
+                  {donationImportPreview.mappedHeaders.map((entry) => (
+                    <div
+                      key={`${entry.source}-${entry.target ?? 'unmapped'}`}
+                      className="flex items-center justify-between gap-3 rounded-md border border-border bg-white px-3 py-2"
+                    >
+                      <span className="truncate">{entry.source}</span>
+                      <span className="font-medium text-foreground">{entry.target ?? 'Unmapped'}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  {donationImportPreview.readiness.map((item) => (
+                    <div key={item.label} className="rounded-md border border-border bg-white px-3 py-2 text-xs text-muted">
+                      <p className="font-medium text-foreground">
+                        {item.label}: {item.ok ? 'OK' : 'Needs attention'}
+                      </p>
+                      <p className="mt-1">{item.detail}</p>
+                    </div>
+                  ))}
+                  {donationImportPreview.sampleRows.length ? (
+                    <div className="rounded-md border border-border bg-white p-3 text-xs text-muted">
+                      <p className="font-medium text-foreground">Sample row</p>
+                      <pre className="mt-2 whitespace-pre-wrap">
+                        {JSON.stringify(donationImportPreview.sampleRows[0], null, 2)}
+                      </pre>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <div className="mt-4 flex flex-wrap gap-2">
             <Button

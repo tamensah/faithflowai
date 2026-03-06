@@ -1,6 +1,6 @@
 # FaithFlow Unified Execution Board
 
-Last updated: 2026-03-05
+Last updated: 2026-03-06
 
 This board consolidates the active backlog into one ordered sequence so implementation can run without context switching.
 
@@ -133,6 +133,7 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Added shared org-context lock panel UX across remaining admin modules (Members, Events, Staff, Payments, Comms, Add-ons, Provider Ops, Facilities, Settings, Bible School, Streaming, Analytics, Groups, and Organization Builder).
 - Replaced ad-hoc no-org placeholders with consistent lock copy + CTA links to overview and organization builder.
 - Aligned module lock and empty-state guidance so each blocked path includes an explicit remediation path before retry.
+- Added guardrail-style empty-state parity on AI, Platform Tenants, Platform Subscriptions, and Ops Health so blocked or empty workflows always explain the next operator action.
 
 **Done when**
 - Every admin module displays a consistent lock-state panel (with actionable next steps) when org context, entitlement, or provider readiness is missing.
@@ -193,6 +194,11 @@ This board consolidates the active backlog into one ordered sequence so implemen
 - Signals are derived from platform event/payment/member data with transparent metric attribution.
 - Added per-insight action links and "mark reviewed" workflow on `/dashboard/analytics`.
 - Added audit-safe attribution for insight review actions via `AI_INSIGHT_REVIEWED` audit events.
+- Added stricter AI governance controls:
+  - sensitive prompt guardrails for secrets, bulk contact export, and private care-note extraction
+  - role-aware financial visibility in starter insights
+  - masked member/donor labels in cited AI sources
+- Added AI summary packs on `/dashboard/ai` for executive, attendance, giving, and volunteer reviews with fallback generation when model calls are unavailable.
 
 ---
 

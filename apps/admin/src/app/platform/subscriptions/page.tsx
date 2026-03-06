@@ -7,6 +7,7 @@ import { PageSectionLayout } from '../../../components/PageSectionLayout';
 import { trpc } from '../../../lib/trpc';
 import { useWriteAccess } from '../../../lib/entitlements';
 import { ReadOnlyNotice } from '../../../components/ReadOnlyNotice';
+import { EmptyState } from '../../../components/EmptyState';
 
 const intervalOptions = ['MONTHLY', 'YEARLY', 'CUSTOM'] as const;
 const subscriptionStatusOptions = ['TRIALING', 'ACTIVE', 'PAST_DUE', 'PAUSED', 'CANCELED', 'EXPIRED'] as const;
@@ -241,7 +242,12 @@ export default function PlatformSubscriptionsPage() {
       <Shell>
         <Card className="p-6">
           <h1 className="text-xl font-semibold">Platform subscriptions</h1>
-          <p className="mt-2 text-sm text-muted">You do not have platform access.</p>
+          <div className="mt-4">
+            <EmptyState
+              title="Platform access required"
+              description="Use a platform-admin account to manage plan catalog, tenant assignments, and subscription operations."
+            />
+          </div>
         </Card>
       </Shell>
     );
@@ -509,7 +515,12 @@ export default function PlatformSubscriptionsPage() {
                   </div>
                 </Card>
               ))}
-              {!isLoadingPlans && !plans?.length ? <p className="text-sm text-muted">No plans found.</p> : null}
+              {!isLoadingPlans && !plans?.length ? (
+                <EmptyState
+                  title="No plans found"
+                  description="Create the first starter, growth, or enterprise plan to start assigning subscriptions."
+                />
+              ) : null}
             </div>
           </Card>
         ) : null}
@@ -529,7 +540,12 @@ export default function PlatformSubscriptionsPage() {
                   </p>
                 </div>
               ))}
-              {!isLoadingTenants && !tenantOptions.length ? <p className="text-sm text-muted">No tenants found.</p> : null}
+              {!isLoadingTenants && !tenantOptions.length ? (
+                <EmptyState
+                  title="No tenants found"
+                  description="Tenant snapshots appear here after onboarding creates the first church organization."
+                />
+              ) : null}
             </div>
           </Card>
         ) : null}

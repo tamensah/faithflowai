@@ -180,6 +180,22 @@ function parseDate(value: unknown) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+type PlanChangeKind = 'UPGRADE' | 'DOWNGRADE' | 'LATERAL';
+
+function classifyPlanChange(current: { amountMinor: number; interval: string }, target: { amountMinor: number; interval: string }) {
+  if (target.amountMinor > current.amountMinor) return 'UPGRADE' as const;
+  if (target.amountMinor < current.amountMinor) return 'DOWNGRADE' as const;
+  if (target.interval !== current.interval) return 'LATERAL' as const;
+  return 'LATERAL' as const;
+}
+
+function hasPaystackDisablePath(metadata: Prisma.JsonValue | null | undefined, providerRef?: string | null) {
+  const subscriptionCode = extractPaystackSubscriptionCode(metadata);
+  const emailToken = extractPaystackEmailToken(metadata);
+  if (subscriptionCode && emailToken) return true;
+  return Boolean(providerRef && /^SUB_[A-Za-z0-9]+$/.test(providerRef));
+}
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   return value as Record<string, unknown>;
@@ -746,6 +762,8 @@ export const billingRouter = router({
       return { ok: true, noop: true, message: 'Already on this plan.' };
     }
 
+    const changeKind = classifyPlanChange(active.plan, targetPlan);
+
     if (active.provider === SubscriptionProvider.STRIPE) {
       const stripe = new Stripe(requireStripeSecret());
       if (!active.providerRef) {
@@ -802,11 +820,12 @@ export const billingRouter = router({
             provider: active.provider,
             fromPlan: active.plan.code,
             toPlan: targetPlan.code,
+            changeKind,
             effective: input.effective,
           },
         });
 
-        return { ok: true, provider: PaymentProvider.STRIPE, mode: 'updated' as const };
+        return { ok: true, provider: PaymentProvider.STRIPE, mode: 'updated' as const, changeKind };
       }
 
       const currentPeriodEnd = primaryItem.current_period_end;
@@ -863,6 +882,7 @@ export const billingRouter = router({
           provider: active.provider,
           fromPlan: active.plan.code,
           toPlan: targetPlan.code,
+          changeKind,
           effective: input.effective,
           scheduleId: schedule.id,
           effectiveAt: new Date(currentPeriodEnd * 1000).toISOString(),
@@ -873,6 +893,7 @@ export const billingRouter = router({
         ok: true,
         provider: PaymentProvider.STRIPE,
         mode: 'scheduled' as const,
+        changeKind,
         scheduleId: schedule.id,
         effectiveAt: new Date(currentPeriodEnd * 1000).toISOString(),
       };
@@ -887,6 +908,8 @@ export const billingRouter = router({
 
       const planMeta = (targetPlan.metadata ?? {}) as Record<string, unknown>;
       const trialDays = readPlanMetaInt(planMeta, 'trialDays');
+      const disablePreviousReady = hasPaystackDisablePath(active.metadata, active.providerRef);
+      const currentPeriodEnd = active.currentPeriodEnd ? new Date(active.currentPeriodEnd).toISOString() : null;
       const paystackPlanCode =
         (trialDays ? readPlanMetaString(planMeta, 'paystackTrialPlanCode') : null) ??
         readPlanMetaString(planMeta, 'paystackPlanCode');
@@ -917,6 +940,13 @@ export const billingRouter = router({
             clerkOrgId: ctx.clerkOrgId,
             planCode: targetPlan.code,
             planChangeFrom: active.plan.code,
+            planChangeKind: changeKind,
+            planChangeFromInterval: active.plan.interval,
+            planChangeToInterval: targetPlan.interval,
+            previousSubscriptionId: active.id,
+            previousSubscriptionProviderRef: active.providerRef,
+            disablePreviousSubscriptionReady: disablePreviousReady,
+            currentPeriodEnd,
             ...(trialDays ? { trialDays, paystackTrial: true } : {}),
           },
         }),
@@ -942,13 +972,32 @@ export const billingRouter = router({
         action: 'billing.self_serve.plan_change_checkout_started',
         targetType: 'SubscriptionPlan',
         targetId: targetPlan.id,
-        metadata: { provider: active.provider, fromPlan: active.plan.code, toPlan: targetPlan.code, reference },
+        metadata: {
+          provider: active.provider,
+          fromPlan: active.plan.code,
+          toPlan: targetPlan.code,
+          changeKind,
+          disablePreviousReady,
+          currentPeriodEnd,
+          reference,
+        },
       });
+
+      const guidance =
+        changeKind === 'UPGRADE'
+          ? 'Complete checkout to activate the higher tier. FaithFlow will try to retire the older Paystack subscription after the new one is confirmed.'
+          : disablePreviousReady
+            ? 'Complete checkout near the end of the current cycle to reduce overlap. FaithFlow can disable the older Paystack subscription after activation.'
+            : 'Complete checkout near the end of the current cycle to reduce overlap. Manual Paystack dashboard cancellation may still be required because the current subscription tokens are incomplete.';
 
       return {
         ok: true,
         provider: PaymentProvider.PAYSTACK,
         mode: 'checkout' as const,
+        changeKind,
+        disablePreviousReady,
+        currentPeriodEnd,
+        message: guidance,
         checkoutUrl: payload.data.authorization_url,
         reference: payload.data.reference ?? reference,
       };
