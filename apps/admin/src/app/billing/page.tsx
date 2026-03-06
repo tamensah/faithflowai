@@ -70,6 +70,7 @@ export default function BillingPage() {
 
   const { data: plans, isLoading: isLoadingPlans } = trpc.billing.plans.useQuery();
   const { data: current, isLoading: isLoadingCurrent } = trpc.billing.currentSubscription.useQuery();
+  const { data: actionReadiness } = trpc.billing.actionReadiness.useQuery();
   const { data: entitlementsStatus } = trpc.billing.entitlements.useQuery();
   const { data: invoices, isLoading: isLoadingInvoices } = trpc.billing.invoices.useQuery({ provider, limit: 20 });
 
@@ -306,11 +307,30 @@ export default function BillingPage() {
                 Current period end:{' '}
                 {current.currentPeriodEnd ? new Date(current.currentPeriodEnd).toLocaleDateString() : 'N/A'}
               </p>
+              {actionReadiness ? (
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  {[
+                    { key: 'refresh', label: 'Provider sync', value: actionReadiness.refresh },
+                    { key: 'cancel', label: 'Cancellation', value: actionReadiness.cancel },
+                    { key: 'resume', label: 'Resume', value: actionReadiness.resume },
+                  ].map((item) => (
+                    <div key={item.key} className="rounded-lg border border-border bg-muted/10 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">{item.label}</p>
+                        <Badge variant={item.value.severity === 'success' ? 'success' : item.value.severity === 'warning' ? 'warning' : 'default'}>
+                          {item.value.enabled ? 'Ready' : 'Blocked'}
+                        </Badge>
+                      </div>
+                      <p className="mt-2 text-xs text-muted">{item.value.message}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
               <div className="mt-3 flex items-center gap-2">
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={isRefreshingSubscription || isVerifyingPaystackCheckout}
+                  disabled={isRefreshingSubscription || isVerifyingPaystackCheckout || !actionReadiness?.refresh.enabled}
                   onClick={() => refreshCurrentSubscription()}
                 >
                   {isRefreshingSubscription ? 'Refreshing...' : 'Refresh provider status'}
@@ -328,14 +348,19 @@ export default function BillingPage() {
                 </Button>
                 {current.provider === 'STRIPE' ? (
                   current.cancelAtPeriodEnd ? (
-                    <Button size="sm" variant="outline" disabled={isResuming} onClick={() => resumeSubscription()}>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={isResuming || !actionReadiness?.resume.enabled}
+                      onClick={() => resumeSubscription()}
+                    >
                       {isResuming ? 'Resuming...' : 'Resume'}
                     </Button>
                   ) : (
                     <Button
                       size="sm"
                       variant="outline"
-                      disabled={isCanceling}
+                      disabled={isCanceling || !actionReadiness?.cancel.enabled}
                       onClick={() => cancelSubscription({ atPeriodEnd: true })}
                     >
                       {isCanceling ? 'Canceling...' : 'Cancel at period end'}
@@ -345,13 +370,20 @@ export default function BillingPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={isCanceling}
+                    disabled={isCanceling || !actionReadiness?.cancel.enabled}
                     onClick={() => cancelSubscription({ atPeriodEnd: false })}
                   >
                     {isCanceling ? 'Canceling...' : 'Cancel Paystack subscription'}
                   </Button>
                 ) : null}
               </div>
+              {!actionReadiness?.refresh.enabled || !actionReadiness?.cancel.enabled || actionReadiness?.resume.enabled === false ? (
+                <div className="mt-3 space-y-1 text-xs text-muted">
+                  {!actionReadiness?.refresh.enabled ? <p>Provider sync blocked: {actionReadiness?.refresh.message}</p> : null}
+                  {!actionReadiness?.cancel.enabled ? <p>Cancellation blocked: {actionReadiness?.cancel.message}</p> : null}
+                  {!actionReadiness?.resume.enabled ? <p>Resume status: {actionReadiness?.resume.message}</p> : null}
+                </div>
+              ) : null}
               {current.provider === 'PAYSTACK' ? (
                 <p className="mt-2 text-xs text-muted">
                   Paystack cancellation requires Paystack to have issued a subscription. If this button fails, cancel the

@@ -196,6 +196,105 @@ function hasPaystackDisablePath(metadata: Prisma.JsonValue | null | undefined, p
   return Boolean(providerRef && /^SUB_[A-Za-z0-9]+$/.test(providerRef));
 }
 
+function getSubscriptionActionReadiness(active: Awaited<ReturnType<typeof getActiveSubscription>>) {
+  if (!active) {
+    return {
+      hasSubscription: false,
+      refresh: {
+        enabled: false,
+        severity: 'warning' as const,
+        message: 'No active subscription is linked to this tenant yet.',
+      },
+      cancel: {
+        enabled: false,
+        severity: 'warning' as const,
+        message: 'Start or sync a subscription before cancellation actions are available.',
+      },
+      resume: {
+        enabled: false,
+        severity: 'default' as const,
+        message: 'Resume is only available after a subscription is scheduled for cancellation.',
+      },
+    };
+  }
+
+  if (active.provider === SubscriptionProvider.STRIPE) {
+    const providerRefReady = Boolean(active.providerRef);
+    return {
+      hasSubscription: true,
+      refresh: {
+        enabled: providerRefReady,
+        severity: providerRefReady ? ('success' as const) : ('warning' as const),
+        message: providerRefReady
+          ? 'Stripe subscription reference is present. Provider refresh can reconcile live status.'
+          : 'Stripe provider reference is missing. Refresh, cancel, and resume should wait for webhook sync or metadata backfill.',
+      },
+      cancel: {
+        enabled: providerRefReady,
+        severity: providerRefReady ? ('default' as const) : ('warning' as const),
+        message: active.cancelAtPeriodEnd
+          ? 'Subscription is already scheduled to end at the current period boundary.'
+          : providerRefReady
+            ? 'Cancel-at-period-end is available and recommended for Stripe subscriptions.'
+            : 'Stripe subscription reference is missing, so cancellation cannot be requested safely yet.',
+      },
+      resume: {
+        enabled: providerRefReady && Boolean(active.cancelAtPeriodEnd),
+        severity: providerRefReady && active.cancelAtPeriodEnd ? ('success' as const) : ('default' as const),
+        message:
+          providerRefReady && active.cancelAtPeriodEnd
+            ? 'Resume is available because this Stripe subscription is set to cancel at period end.'
+            : 'Resume becomes available only after a Stripe subscription is marked cancel-at-period-end.',
+      },
+    };
+  }
+
+  if (active.provider === SubscriptionProvider.PAYSTACK) {
+    const disableReady = hasPaystackDisablePath(active.metadata, active.providerRef);
+    return {
+      hasSubscription: true,
+      refresh: {
+        enabled: true,
+        severity: disableReady ? ('success' as const) : ('warning' as const),
+        message: disableReady
+          ? 'Paystack subscription metadata is complete enough for sync and disable flows.'
+          : 'Refresh provider status after each checkout so FaithFlow can capture subscription tokens needed for safe cancellation.',
+      },
+      cancel: {
+        enabled: disableReady,
+        severity: disableReady ? ('default' as const) : ('warning' as const),
+        message: disableReady
+          ? 'Disable can be attempted from FaithFlow because Paystack subscription tokens are present.'
+          : 'Paystack cancellation may still require manual dashboard action until subscription_code and email_token have been synced.',
+      },
+      resume: {
+        enabled: false,
+        severity: 'default' as const,
+        message: 'Paystack resume is not supported in-app. Start a fresh checkout if the subscription has been disabled.',
+      },
+    };
+  }
+
+  return {
+    hasSubscription: true,
+    refresh: {
+      enabled: false,
+      severity: 'warning' as const,
+      message: 'Unsupported billing provider.',
+    },
+    cancel: {
+      enabled: false,
+      severity: 'warning' as const,
+      message: 'Unsupported billing provider.',
+    },
+    resume: {
+      enabled: false,
+      severity: 'warning' as const,
+      message: 'Unsupported billing provider.',
+    },
+  };
+}
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   return value as Record<string, unknown>;
@@ -456,6 +555,12 @@ export const billingRouter = router({
   currentSubscription: protectedProcedure.query(async ({ ctx }) => {
     await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
     return getActiveSubscription(ctx.tenantId!);
+  }),
+
+  actionReadiness: protectedProcedure.query(async ({ ctx }) => {
+    await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
+    const active = await getActiveSubscription(ctx.tenantId!);
+    return getSubscriptionActionReadiness(active);
   }),
 
   refreshCurrentSubscription: protectedProcedure.mutation(async ({ ctx }) => {
