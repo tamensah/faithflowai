@@ -117,7 +117,9 @@ const enforceTenantSecurityPolicy = t.middleware(async ({ ctx, next, path }) => 
   const allowlist = parseIpAllowlist(policy.ipAllowlist);
   if (allowlist.length > 0) {
     if (!ctx.requestIp) {
-      warnings.push('REQUEST_IP_MISSING');
+      // Security: when an IP allowlist is configured and the request IP cannot be determined,
+      // treat it as a violation rather than a warning — silent bypass is worse than a false block.
+      violations.push('IP_NOT_ALLOWED');
     } else if (!allowlist.includes(ctx.requestIp)) {
       violations.push('IP_NOT_ALLOWED');
     }

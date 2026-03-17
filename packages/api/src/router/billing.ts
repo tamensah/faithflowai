@@ -120,11 +120,36 @@ const baselinePlans = [
   },
 ];
 
+// Security: only allow successUrl/cancelUrl that share an origin with our known frontend domains
+// to prevent open-redirect phishing after Stripe/Paystack checkout.
+function isAllowedCheckoutRedirectUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const adminOrigin = new URL(process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001').origin;
+    const webOrigin = new URL(process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000').origin;
+    return parsed.origin === adminOrigin || parsed.origin === webOrigin;
+  } catch {
+    return false;
+  }
+}
+
 const checkoutInput = z.object({
   planCode: z.string().trim().min(2).max(64),
   provider: z.nativeEnum(PaymentProvider),
-  successUrl: z.string().url().optional(),
-  cancelUrl: z.string().url().optional(),
+  successUrl: z
+    .string()
+    .url()
+    .optional()
+    .refine((url) => !url || isAllowedCheckoutRedirectUrl(url), {
+      message: 'successUrl must be on an allowed FaithFlow domain',
+    }),
+  cancelUrl: z
+    .string()
+    .url()
+    .optional()
+    .refine((url) => !url || isAllowedCheckoutRedirectUrl(url), {
+      message: 'cancelUrl must be on an allowed FaithFlow domain',
+    }),
 });
 const verifyPaystackCheckoutInput = z.object({
   reference: z.string().trim().min(3).max(200),
@@ -387,6 +412,17 @@ async function requireTenantAdmin(tenantId: string, clerkUserId: string) {
   });
   if (staffCount > 0) {
     throw new TRPCError({ code: 'FORBIDDEN', message: 'Tenant admin access required' });
+  }
+
+  // Security: before bootstrapping an admin, verify the caller is actually a member of this Clerk org.
+  // This prevents any authenticated user from claiming admin of an abandoned/empty tenant.
+  if (clerk) {
+    const orgMemberships = await clerk.users.getOrganizationMembershipList({ userId: clerkUserId });
+    const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { clerkOrgId: true } });
+    const isMember = orgMemberships.data.some((m) => m.organization.id === tenant?.clerkOrgId);
+    if (!isMember) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'Tenant admin access required' });
+    }
   }
 
   const defaultChurch = await prisma.church.findFirst({

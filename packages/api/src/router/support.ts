@@ -422,7 +422,7 @@ export const supportRouter = router({
   kbSearch: protectedProcedure
     .input(z.object({ query: z.string().min(2).max(200), limit: z.number().int().min(1).max(10).default(5) }))
     .query(async ({ input }) => {
-      return prisma.kBArticle.findMany({
+      const articles = await prisma.kBArticle.findMany({
         where: {
           published: true,
           OR: [
@@ -435,11 +435,17 @@ export const supportRouter = router({
         orderBy: { updatedAt: 'desc' },
         select: { id: true, title: true, slug: true, category: true, body: true },
       });
+      // Security: truncate body to avoid bandwidth amplification via search
+      return articles.map((a) => ({ ...a, body: a.body.slice(0, 250) }));
     }),
 
   kbArticles: protectedProcedure
     .input(z.object({ publishedOnly: z.boolean().default(true), limit: z.number().int().min(1).max(200).default(50) }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
+      // Security: only platform users may request unpublished (draft) articles
+      if (!input.publishedOnly) {
+        await requirePlatformRole(ctx.userId!, [...supportPlatformRoles]);
+      }
       return prisma.kBArticle.findMany({
         where: input.publishedOnly ? { published: true } : undefined,
         take: input.limit,

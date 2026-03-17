@@ -46,16 +46,54 @@ function timeoutMs() {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 3000;
 }
 
+// Security: private/loopback/link-local IP ranges that must not be fetched (SSRF defense)
+const PRIVATE_IP_PATTERNS = [
+  /^127\./,                        // loopback
+  /^10\./,                         // RFC 1918
+  /^172\.(1[6-9]|2\d|3[01])\./,   // RFC 1918
+  /^192\.168\./,                   // RFC 1918
+  /^169\.254\./,                   // link-local (AWS IMDS, etc.)
+  /^::1$/,                         // IPv6 loopback
+  /^fc00:/i,                       // IPv6 unique local
+  /^fe80:/i,                       // IPv6 link-local
+  /^0\./,                          // 0.0.0.0/8
+  /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./,  // RFC 6598 CGN
+  /^localhost$/i,
+];
+
+function isSafeExternalUrl(raw: string): { safe: boolean; reason?: string } {
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return { safe: false, reason: 'invalid_url' };
+  }
+  if (parsed.protocol !== 'https:') {
+    return { safe: false, reason: 'non_https_scheme' };
+  }
+  const hostname = parsed.hostname;
+  if (PRIVATE_IP_PATTERNS.some((re) => re.test(hostname))) {
+    return { safe: false, reason: 'private_ip_blocked' };
+  }
+  return { safe: true };
+}
+
 async function probeUrl(url?: string | null): Promise<ProbeResult> {
   if (!url) {
     return { reachable: false, statusCode: null, latencyMs: null, error: 'missing_url' };
+  }
+
+  // Security: block SSRF — only allow HTTPS to public IPs
+  const safety = isSafeExternalUrl(url);
+  if (!safety.safe) {
+    return { reachable: false, statusCode: null, latencyMs: null, error: safety.reason ?? 'url_blocked' };
   }
 
   const started = Date.now();
   try {
     const response = await fetch(url, {
       method: 'HEAD',
-      redirect: 'follow',
+      redirect: 'error',  // do not follow redirects — validate the redirect target instead
       signal: AbortSignal.timeout(timeoutMs()),
     });
     return {

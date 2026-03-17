@@ -84,22 +84,15 @@ export const operationsRouter = router({
     }
     const dbLatencyMs = Date.now() - dbStart;
 
-    let migrationInfo: { ok: boolean; lastMigration?: { name: string; finishedAt: Date | null }; total?: number } = {
-      ok: false,
-    };
+    // Security: migration names and counts are an internal detail — only expose ok/total to tenant staff,
+    // not migration names (which reveal schema history useful for targeted attacks).
+    let migrationInfo: { ok: boolean; total?: number } = { ok: false };
     try {
-      const rows = (await prisma.$queryRaw<
-        Array<{ migration_name: string; finished_at: Date | null }>
-      >`SELECT migration_name, finished_at FROM "_prisma_migrations" ORDER BY finished_at DESC NULLS LAST LIMIT 1`) as Array<{
-        migration_name: string;
-        finished_at: Date | null;
-      }>;
       const countRows = (await prisma.$queryRaw<Array<{ count: bigint }>>`SELECT COUNT(*)::bigint as count FROM "_prisma_migrations"`) as Array<{
         count: bigint;
       }>;
       migrationInfo = {
         ok: true,
-        lastMigration: rows[0] ? { name: rows[0].migration_name, finishedAt: rows[0].finished_at } : undefined,
         total: countRows[0] ? Number(countRows[0].count) : undefined,
       };
     } catch {
@@ -126,7 +119,7 @@ export const operationsRouter = router({
         status: true,
         receivedAt: true,
         processedAt: true,
-        error: true,
+        // Security: raw error strings from webhook processing can leak internal details — omit from tenant-visible response
       },
     });
 
@@ -299,8 +292,9 @@ export const operationsRouter = router({
   }),
 
   sendTestEmail: protectedProcedure
-    .input(z.object({ to: z.string().email().optional() }).optional())
-    .mutation(async ({ ctx, input }) => {
+    // Security: removed the `to` input override — test emails are always sent to the requesting
+    // staff user's own email only, preventing use of the platform as an email relay to arbitrary addresses.
+    .mutation(async ({ ctx }) => {
       if (!ctx.userId || !ctx.tenantId) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'Tenant context required' });
       }
@@ -316,16 +310,17 @@ export const operationsRouter = router({
         throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
       }
 
-      const to = input?.to ?? staff.user.email;
+      const to = staff.user.email;
       if (!to) {
-        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'No email found for staff user. Provide "to".' });
+        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'No email address found for your user account.' });
       }
 
       const now = new Date();
       await sendEmail({
         to,
         subject: 'FaithFlow AI test email',
-        html: `<p>This is a test email from FaithFlow AI.</p><p>Tenant: ${ctx.tenantId}</p><p>Time: ${now.toISOString()}</p>`,
+        // Security: do not include tenantId or internal details in outbound email body
+        html: `<p>This is a test email from FaithFlow AI.</p><p>Sent at: ${now.toISOString()}</p>`,
       });
 
       return { ok: true, to, sentAt: now.toISOString() };

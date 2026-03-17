@@ -425,7 +425,10 @@ export const communicationsRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Suppression not found' });
       }
 
-      await prisma.communicationSuppression.delete({ where: { id: input.id } });
+      // Security: include tenantId in delete where clause to prevent cross-tenant IDOR race condition
+      await prisma.communicationSuppression.delete({
+        where: { tenantId_channel_address: { tenantId: ctx.tenantId!, channel: suppression.channel, address: suppression.address } },
+      });
 
       await recordAuditLog({
         tenantId: ctx.tenantId,

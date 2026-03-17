@@ -323,6 +323,17 @@ async function start() {
     reply.header('Content-Type', 'text/html; charset=utf-8').send(html);
   });
 
+  // HTML escaping helper — prevents XSS when interpolating user-controlled values into HTML
+  function escapeHtml(s: string): string {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  const unsubscribeStyle =
+    'body{font-family:ui-sans-serif,system-ui,-apple-system;max-width:720px;margin:48px auto;padding:0 16px;line-height:1.5;color:#0f172a}' +
+    '.card{border:1px solid #e2e8f0;border-radius:14px;padding:20px;background:#fff}.muted{color:#64748b;font-size:14px}' +
+    'button{margin-top:12px;padding:8px 20px;background:#0f172a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px}';
+
+  // GET: verify token and show a confirmation page — does NOT mutate state (fixes MED-1 state-mutating GET)
   server.get('/unsubscribe', async (request, reply) => {
     const token = (request.query as { token?: string })?.token;
     if (!token) {
@@ -335,7 +346,42 @@ async function start() {
       reply
         .code(400)
         .header('Content-Type', 'text/html; charset=utf-8')
-        .send(`<h1>Unsubscribe link invalid</h1><p>${result.error}</p>`);
+        .send(`<h1>Unsubscribe link invalid</h1><p>${escapeHtml(result.error ?? 'Invalid token')}</p>`);
+      return;
+    }
+
+    const { channel, address } = result.payload;
+    // Show confirmation page only — mutation happens on POST
+    reply.header('Content-Type', 'text/html; charset=utf-8').send(
+      [
+        '<!doctype html><html lang="en">',
+        `<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Unsubscribe - FaithFlow</title><style>${unsubscribeStyle}</style></head>`,
+        '<body><div class="card">',
+        '<h1>Confirm unsubscribe</h1>',
+        `<p class="muted">Channel: ${escapeHtml(channel)}</p>`,
+        `<p class="muted">Address: ${escapeHtml(address)}</p>`,
+        '<p class="muted">Click below to stop receiving these messages.</p>',
+        `<form method="POST" action="/unsubscribe"><input type="hidden" name="token" value="${escapeHtml(token)}"/><button type="submit">Unsubscribe</button></form>`,
+        '</div></body></html>',
+      ].join('')
+    );
+  });
+
+  // POST: perform the actual unsubscribe mutation
+  server.post('/unsubscribe', async (request, reply) => {
+    const body = request.body as Record<string, unknown> | undefined;
+    const token = typeof body?.token === 'string' ? body.token : (request.query as { token?: string })?.token;
+    if (!token) {
+      reply.code(400).header('Content-Type', 'text/html; charset=utf-8').send('<h1>Missing token</h1>');
+      return;
+    }
+
+    const result = verifyUnsubscribeToken(token);
+    if (!result.ok) {
+      reply
+        .code(400)
+        .header('Content-Type', 'text/html; charset=utf-8')
+        .send(`<h1>Unsubscribe link invalid</h1><p>${escapeHtml(result.error ?? 'Invalid token')}</p>`);
       return;
     }
 
@@ -372,21 +418,14 @@ async function start() {
 
     reply.header('Content-Type', 'text/html; charset=utf-8').send(
       [
-        '<!doctype html>',
-        '<html lang="en">',
-        '<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>',
-        '<title>Unsubscribed - FaithFlow</title>',
-        '<style>body{font-family:ui-sans-serif,system-ui,-apple-system;max-width:720px;margin:48px auto;padding:0 16px;line-height:1.5;color:#0f172a} .card{border:1px solid #e2e8f0;border-radius:14px;padding:20px;background:#fff} .muted{color:#64748b;font-size:14px}</style>',
-        '</head>',
-        '<body>',
-        '<div class="card">',
+        '<!doctype html><html lang="en">',
+        `<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Unsubscribed - FaithFlow</title><style>${unsubscribeStyle}</style></head>`,
+        '<body><div class="card">',
         '<h1>You are unsubscribed.</h1>',
-        `<p class="muted">Channel: ${channel}</p>`,
-        `<p class="muted">Address: ${address}</p>`,
+        `<p class="muted">Channel: ${escapeHtml(channel)}</p>`,
+        `<p class="muted">Address: ${escapeHtml(address)}</p>`,
         '<p class="muted">You can still receive critical transactional messages (e.g., receipts) depending on your tenant policies.</p>',
-        '</div>',
-        '</body>',
-        '</html>',
+        '</div></body></html>',
       ].join('')
     );
   });
@@ -624,7 +663,28 @@ async function start() {
           return;
         }
 
-        const uploadDir = path.join(process.cwd(), 'apps', 'api', 'uploads', 'disputes', disputeId);
+        // Security: validate disputeId is a safe alphanumeric/hyphen string before using in filesystem path
+        if (!/^[a-zA-Z0-9_-]{1,128}$/.test(disputeId)) {
+          reply.code(400).send({ error: 'Invalid dispute id format' });
+          return;
+        }
+
+        // Security: restrict allowed MIME types to prevent arbitrary file uploads
+        const ALLOWED_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'application/pdf', 'text/plain']);
+        if (!ALLOWED_MIME_TYPES.has(data.mimetype)) {
+          reply.code(400).send({ error: 'File type not allowed. Upload PNG, JPEG, GIF, WEBP, PDF, or TXT.' });
+          return;
+        }
+
+        const uploadRoot = path.resolve(process.cwd(), 'apps', 'api', 'uploads', 'disputes');
+        const uploadDir = path.resolve(uploadRoot, disputeId);
+
+        // Security: verify the resolved path stays within the uploads root (path traversal defense)
+        if (!uploadDir.startsWith(uploadRoot + path.sep) && uploadDir !== uploadRoot) {
+          reply.code(400).send({ error: 'Invalid dispute id' });
+          return;
+        }
+
         await fs.mkdir(uploadDir, { recursive: true });
         const safeName = `${Date.now()}-${path.basename(data.filename)}`;
         const filePath = path.join(uploadDir, safeName);
