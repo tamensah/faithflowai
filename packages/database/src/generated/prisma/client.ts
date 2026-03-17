@@ -500,6 +500,11 @@ export type SupportTicket = Prisma.SupportTicketModel
  */
 export type SupportTicketMessage = Prisma.SupportTicketMessageModel
 /**
+ * Model KBArticle
+ * 
+ */
+export type KBArticle = Prisma.KBArticleModel
+/**
  * Model WebhookEvent
  * 
  */

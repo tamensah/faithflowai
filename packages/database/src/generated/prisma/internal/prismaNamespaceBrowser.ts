@@ -143,6 +143,7 @@ export const ModelName = {
   TenantSecurityPolicy: 'TenantSecurityPolicy',
   SupportTicket: 'SupportTicket',
   SupportTicketMessage: 'SupportTicketMessage',
+  KBArticle: 'KBArticle',
   WebhookEvent: 'WebhookEvent',
   LiveStreamChannel: 'LiveStreamChannel',
   LiveStreamSession: 'LiveStreamSession'
@@ -1670,6 +1671,23 @@ export const SupportTicketMessageScalarFieldEnum = {
 } as const
 
 export type SupportTicketMessageScalarFieldEnum = (typeof SupportTicketMessageScalarFieldEnum)[keyof typeof SupportTicketMessageScalarFieldEnum]
+
+
+export const KBArticleScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  body: 'body',
+  category: 'category',
+  tags: 'tags',
+  published: 'published',
+  createdBy: 'createdBy',
+  updatedBy: 'updatedBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KBArticleScalarFieldEnum = (typeof KBArticleScalarFieldEnum)[keyof typeof KBArticleScalarFieldEnum]
 
 
 export const WebhookEventScalarFieldEnum = {

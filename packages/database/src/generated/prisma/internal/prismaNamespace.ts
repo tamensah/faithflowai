@@ -476,6 +476,7 @@ export const ModelName = {
   TenantSecurityPolicy: 'TenantSecurityPolicy',
   SupportTicket: 'SupportTicket',
   SupportTicketMessage: 'SupportTicketMessage',
+  KBArticle: 'KBArticle',
   WebhookEvent: 'WebhookEvent',
   LiveStreamChannel: 'LiveStreamChannel',
   LiveStreamSession: 'LiveStreamSession'
@@ -494,7 +495,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "organization" | "church" | "campus" | "household" | "member" | "memberAccessRequest" | "staffInvite" | "platformUser" | "platformUserRole" | "subscriptionPlan" | "subscriptionPlanFeature" | "tenantSubscription" | "importBatch" | "importBatchItem" | "memberRegistration" | "memberTag" | "memberTagAssignment" | "memberMilestone" | "group" | "onboardingWorkflow" | "onboardingStep" | "memberOnboarding" | "memberOnboardingTask" | "groupMember" | "volunteerRole" | "volunteerShift" | "volunteerShiftAssignment" | "volunteerAvailability" | "survey" | "surveyQuestion" | "surveyResponse" | "volunteerAssignment" | "event" | "eventSeries" | "eventRsvp" | "eventBadge" | "eventRegistration" | "eventAssignment" | "eventMedia" | "eventTicketType" | "eventTicketOrder" | "conversation" | "conversationMember" | "message" | "mediaAsset" | "notificationPreference" | "inAppNotification" | "deviceToken" | "attendance" | "memberRelationship" | "donation" | "fund" | "campaign" | "paymentIntent" | "donationReceipt" | "textToGiveNumber" | "textToGiveMessage" | "payout" | "payoutTransaction" | "refund" | "dispute" | "disputeEvidence" | "communicationSchedule" | "communicationDripCampaign" | "communicationDripStep" | "communicationDripEnrollment" | "communicationTemplate" | "communicationMessage" | "communicationSuppression" | "aiInteraction" | "fundraiserPage" | "pledge" | "recurringDonation" | "expenseCategory" | "expense" | "budget" | "budgetItem" | "auditLog" | "user" | "staffMembership" | "facility" | "facilityBooking" | "careRequest" | "careNote" | "sermon" | "contentResource" | "tenantDomain" | "tenantHealthCheck" | "tenantSecurityPolicy" | "supportTicket" | "supportTicketMessage" | "webhookEvent" | "liveStreamChannel" | "liveStreamSession"
+    modelProps: "tenant" | "organization" | "church" | "campus" | "household" | "member" | "memberAccessRequest" | "staffInvite" | "platformUser" | "platformUserRole" | "subscriptionPlan" | "subscriptionPlanFeature" | "tenantSubscription" | "importBatch" | "importBatchItem" | "memberRegistration" | "memberTag" | "memberTagAssignment" | "memberMilestone" | "group" | "onboardingWorkflow" | "onboardingStep" | "memberOnboarding" | "memberOnboardingTask" | "groupMember" | "volunteerRole" | "volunteerShift" | "volunteerShiftAssignment" | "volunteerAvailability" | "survey" | "surveyQuestion" | "surveyResponse" | "volunteerAssignment" | "event" | "eventSeries" | "eventRsvp" | "eventBadge" | "eventRegistration" | "eventAssignment" | "eventMedia" | "eventTicketType" | "eventTicketOrder" | "conversation" | "conversationMember" | "message" | "mediaAsset" | "notificationPreference" | "inAppNotification" | "deviceToken" | "attendance" | "memberRelationship" | "donation" | "fund" | "campaign" | "paymentIntent" | "donationReceipt" | "textToGiveNumber" | "textToGiveMessage" | "payout" | "payoutTransaction" | "refund" | "dispute" | "disputeEvidence" | "communicationSchedule" | "communicationDripCampaign" | "communicationDripStep" | "communicationDripEnrollment" | "communicationTemplate" | "communicationMessage" | "communicationSuppression" | "aiInteraction" | "fundraiserPage" | "pledge" | "recurringDonation" | "expenseCategory" | "expense" | "budget" | "budgetItem" | "auditLog" | "user" | "staffMembership" | "facility" | "facilityBooking" | "careRequest" | "careNote" | "sermon" | "contentResource" | "tenantDomain" | "tenantHealthCheck" | "tenantSecurityPolicy" | "supportTicket" | "supportTicketMessage" | "kBArticle" | "webhookEvent" | "liveStreamChannel" | "liveStreamSession"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -7306,6 +7307,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    KBArticle: {
+      payload: Prisma.$KBArticlePayload<ExtArgs>
+      fields: Prisma.KBArticleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.KBArticleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.KBArticleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload>
+        }
+        findFirst: {
+          args: Prisma.KBArticleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.KBArticleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload>
+        }
+        findMany: {
+          args: Prisma.KBArticleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload>[]
+        }
+        create: {
+          args: Prisma.KBArticleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload>
+        }
+        createMany: {
+          args: Prisma.KBArticleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.KBArticleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload>[]
+        }
+        delete: {
+          args: Prisma.KBArticleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload>
+        }
+        update: {
+          args: Prisma.KBArticleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload>
+        }
+        deleteMany: {
+          args: Prisma.KBArticleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.KBArticleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.KBArticleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload>[]
+        }
+        upsert: {
+          args: Prisma.KBArticleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KBArticlePayload>
+        }
+        aggregate: {
+          args: Prisma.KBArticleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKBArticle>
+        }
+        groupBy: {
+          args: Prisma.KBArticleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KBArticleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.KBArticleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KBArticleCountAggregateOutputType> | number
+        }
+      }
+    }
     WebhookEvent: {
       payload: Prisma.$WebhookEventPayload<ExtArgs>
       fields: Prisma.WebhookEventFieldRefs
@@ -9075,6 +9150,23 @@ export const SupportTicketMessageScalarFieldEnum = {
 export type SupportTicketMessageScalarFieldEnum = (typeof SupportTicketMessageScalarFieldEnum)[keyof typeof SupportTicketMessageScalarFieldEnum]
 
 
+export const KBArticleScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  body: 'body',
+  category: 'category',
+  tags: 'tags',
+  published: 'published',
+  createdBy: 'createdBy',
+  updatedBy: 'updatedBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KBArticleScalarFieldEnum = (typeof KBArticleScalarFieldEnum)[keyof typeof KBArticleScalarFieldEnum]
+
+
 export const WebhookEventScalarFieldEnum = {
   id: 'id',
   provider: 'provider',
@@ -10727,6 +10819,7 @@ export type GlobalOmitConfig = {
   tenantSecurityPolicy?: Prisma.TenantSecurityPolicyOmit
   supportTicket?: Prisma.SupportTicketOmit
   supportTicketMessage?: Prisma.SupportTicketMessageOmit
+  kBArticle?: Prisma.KBArticleOmit
   webhookEvent?: Prisma.WebhookEventOmit
   liveStreamChannel?: Prisma.LiveStreamChannelOmit
   liveStreamSession?: Prisma.LiveStreamSessionOmit
