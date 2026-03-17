@@ -14,6 +14,8 @@ import { renderFailedPaymentNoticeEmail } from './email-templates';
 type RunSubscriptionDunningInput = {
   tenantIds?: string[];
   graceDays?: number;
+  maxGraceDays?: number;
+  escalationTier?: 1 | 2 | 3;
   limit?: number;
   dryRun?: boolean;
 };
@@ -49,14 +51,26 @@ export async function runSubscriptionDunning(input: RunSubscriptionDunningInput 
   const graceDays = input.graceDays ?? 3;
   const limit = input.limit ?? 200;
   const dryRun = input.dryRun ?? false;
+  const tier = input.escalationTier ?? 1;
   const cutoff = new Date(Date.now() - graceDays * 24 * 60 * 60 * 1000);
+  const maxCutoff = input.maxGraceDays != null
+    ? new Date(Date.now() - input.maxGraceDays * 24 * 60 * 60 * 1000)
+    : null;
   const billingBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3001';
 
   const subscriptions = await prisma.tenantSubscription.findMany({
     where: {
       status: TenantSubscriptionStatus.PAST_DUE,
       ...(input.tenantIds?.length ? { tenantId: { in: input.tenantIds } } : {}),
-      OR: [{ currentPeriodEnd: null }, { currentPeriodEnd: { lte: cutoff } }],
+      OR: [
+        { currentPeriodEnd: null },
+        {
+          currentPeriodEnd: {
+            lte: cutoff,
+            ...(maxCutoff ? { gte: maxCutoff } : {}),
+          },
+        },
+      ],
     },
     include: {
       plan: true,
@@ -114,7 +128,12 @@ export async function runSubscriptionDunning(input: RunSubscriptionDunningInput 
 
   let queued = 0;
   for (const target of targets) {
-    const subject = `Action required: FaithFlow subscription payment issue (${target.planCode})`;
+    const subject =
+      tier === 1
+        ? `Action required: FaithFlow subscription payment issue (${target.planCode})`
+        : tier === 2
+          ? `Reminder: FaithFlow subscription past due (${target.planCode})`
+          : `Final notice: FaithFlow subscription will be suspended (${target.planCode})`;
     const body = buildDunningBody({
       planName: target.planName,
       periodEnd: target.currentPeriodEnd,
@@ -122,7 +141,7 @@ export async function runSubscriptionDunning(input: RunSubscriptionDunningInput 
     });
 
     for (const recipient of target.recipients) {
-      const dedupeKey = `dunning:${target.subscriptionId}:${recipient.email.toLowerCase()}`;
+      const dedupeKey = `dunning:${target.subscriptionId}:${recipient.email.toLowerCase()}:tier${tier}`;
       const existing = await prisma.communicationSchedule.findFirst({
         where: {
           churchId: recipient.churchId,
@@ -164,6 +183,7 @@ export async function runSubscriptionDunning(input: RunSubscriptionDunningInput 
       metadata: {
         recipientCount: target.recipients.length,
         graceDays,
+        escalationTier: tier,
       },
     });
   }

@@ -38,6 +38,7 @@ import {
   subscribeRealtime,
   recordAuditLog,
   verifyUnsubscribeToken,
+  queueTenantWelcomeEmail,
 } from '@faithflow-ai/api';
 import { createContext } from './context';
 import { env } from './env';
@@ -749,12 +750,28 @@ async function start() {
 
       const body = (request.body ?? {}) as {
         graceDays?: number;
+        maxGraceDays?: number;
+        escalationTier?: 1 | 2 | 3;
         limit?: number;
         tenantIds?: string[];
         dryRun?: boolean;
       };
+
+      // If no specific tier is requested, run all three tiers sequentially (cron mode).
+      if (body.escalationTier == null && body.graceDays == null) {
+        const [tier1, tier2, tier3] = await Promise.all([
+          runSubscriptionDunning({ graceDays: 0, maxGraceDays: 3, escalationTier: 1, limit: body.limit, tenantIds: body.tenantIds, dryRun: body.dryRun }),
+          runSubscriptionDunning({ graceDays: 3, maxGraceDays: 7, escalationTier: 2, limit: body.limit, tenantIds: body.tenantIds, dryRun: body.dryRun }),
+          runSubscriptionDunning({ graceDays: 7, escalationTier: 3, limit: body.limit, tenantIds: body.tenantIds, dryRun: body.dryRun }),
+        ]);
+        reply.send({ tiers: [tier1, tier2, tier3], totalQueued: tier1.queued + tier2.queued + tier3.queued });
+        return;
+      }
+
       const result = await runSubscriptionDunning({
         graceDays: body.graceDays,
+        maxGraceDays: body.maxGraceDays,
+        escalationTier: body.escalationTier,
         limit: body.limit,
         tenantIds: body.tenantIds,
         dryRun: body.dryRun,
@@ -964,7 +981,11 @@ async function start() {
     }
 
     if (event.type === 'organization.created' && event.data?.id) {
-      await provisionTenant(event.data.id);
+      const provisioned = await provisionTenant(event.data.id);
+      // Fire-and-forget: dedup key prevents double-sending if a subscription webhook also fires.
+      queueTenantWelcomeEmail(provisioned.tenantId).catch((err: unknown) => {
+        request.log.warn({ err }, 'Failed to queue welcome email after org creation');
+      });
     }
 
     reply.code(200).send({ ok: true });

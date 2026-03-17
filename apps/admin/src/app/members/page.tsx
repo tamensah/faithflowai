@@ -26,6 +26,25 @@ const householdImportAliases = {
   members: 'memberEmails',
 } as const;
 
+const memberImportAliases = {
+  firstname: 'firstName',
+  first: 'firstName',
+  lastname: 'lastName',
+  last: 'lastName',
+  email: 'email',
+  emailaddress: 'email',
+  phone: 'phone',
+  phonenumber: 'phone',
+  mobile: 'phone',
+  householdname: 'householdName',
+  household: 'householdName',
+  preferredname: 'preferredName',
+  nickname: 'preferredName',
+  status: 'status',
+  tags: 'tags',
+  notes: 'notes',
+} as const;
+
 export default function MembersPage() {
   const gate = useFeatureGate('membership_enabled');
   const utils = trpc.useUtils();
@@ -292,6 +311,27 @@ export default function MembersPage() {
         },
       ]),
     [householdImportCsv]
+  );
+
+  const memberImportPreview = useMemo(
+    () =>
+      analyzeCsvImport(importCsv, memberImportAliases, [
+        {
+          label: 'Member identity',
+          check: (targets) => ({
+            ok: targets.has('firstName') || targets.has('lastName') || targets.has('email'),
+            detail: 'Provide at least a first name, last name, or email so each row can be matched safely.',
+          }),
+        },
+        {
+          label: 'Contact info',
+          check: (targets) => ({
+            ok: targets.has('email') || targets.has('phone'),
+            detail: 'Email or phone is recommended for communication opt-in and deduplication.',
+          }),
+        },
+      ]),
+    [importCsv]
   );
 
   const handleSurveyExport = async () => {
@@ -1109,6 +1149,53 @@ export default function MembersPage() {
               </Button>
             ) : null}
           </div>
+          {memberImportPreview ? (
+            <div className="mt-4 rounded-xl border border-border bg-muted/10 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Import mapping preview</p>
+                  <p className="text-xs text-muted">
+                    {memberImportPreview.rowCount} row{memberImportPreview.rowCount === 1 ? '' : 's'} detected ·{' '}
+                    {memberImportPreview.recognizedCount}/{memberImportPreview.rawHeaders.length} mapped columns
+                  </p>
+                </div>
+                <Badge variant={memberImportPreview.unrecognizedHeaders.length ? 'warning' : 'success'}>
+                  {memberImportPreview.unrecognizedHeaders.length ? 'Review headers' : 'Ready to import'}
+                </Badge>
+              </div>
+              <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                <div className="space-y-2 text-xs text-muted">
+                  {memberImportPreview.mappedHeaders.map((entry) => (
+                    <div
+                      key={`${entry.source}-${entry.target ?? 'unmapped'}`}
+                      className="flex items-center justify-between gap-3 rounded-md border border-border bg-white px-3 py-2"
+                    >
+                      <span className="truncate">{entry.source}</span>
+                      <span className="font-medium text-foreground">{entry.target ?? 'Unmapped'}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  {memberImportPreview.readiness.map((item) => (
+                    <div key={item.label} className="rounded-md border border-border bg-white px-3 py-2 text-xs text-muted">
+                      <p className="font-medium text-foreground">
+                        {item.label}: {item.ok ? 'OK' : 'Needs attention'}
+                      </p>
+                      <p className="mt-1">{item.detail}</p>
+                    </div>
+                  ))}
+                  {memberImportPreview.sampleRows.length ? (
+                    <div className="rounded-md border border-border bg-white p-3 text-xs text-muted">
+                      <p className="font-medium text-foreground">Sample row</p>
+                      <pre className="mt-2 whitespace-pre-wrap">
+                        {JSON.stringify(memberImportPreview.sampleRows[0], null, 2)}
+                      </pre>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          ) : null}
           <div className="mt-4 text-sm text-muted">
             <pre className="rounded-md bg-muted/10 p-3 text-xs whitespace-pre-wrap">
               {importSummary ? JSON.stringify(importSummary, null, 2) : 'No import summary yet.'}

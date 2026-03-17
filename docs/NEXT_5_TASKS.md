@@ -44,9 +44,9 @@ Acceptance criteria:
 
 ## 3) Communications Foundations (Activation + Retention)
 
-- [~] Consent + quiet hours enforcement (server-side)
+- [x] Consent + quiet hours enforcement (server-side)
 - [x] Suppression list + unsubscribe flows (per channel, with admin reporting baseline + STOP keyword handling)
-- [~] Transactional templates (welcome, trial ending, failed payment, receipts)
+- [x] Transactional templates (welcome, trial ending, failed payment, receipts)
 - [x] Scheduling UX upgrades (draft/review/approve + analytics + calendar view)
 
 Acceptance criteria:
@@ -58,7 +58,7 @@ Acceptance criteria:
 
 ## 4) Data Import (Adoption Unlock)
 
-- [~] Members CSV import with batch tracking + rollback
+- [x] Members CSV import with batch tracking + rollback
 - [x] Households CSV import (mapping + preview + rollback)
 - [x] Donations CSV import (mapping + preview + rollback)
 - [x] Migration assistant docs + templates

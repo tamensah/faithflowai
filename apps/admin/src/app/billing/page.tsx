@@ -5,6 +5,8 @@ import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { Shell } from '../../components/Shell';
 import { PageSectionLayout } from '../../components/PageSectionLayout';
 import { trpc } from '../../lib/trpc';
+import { useWriteAccess } from '../../lib/entitlements';
+import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
 const checkoutProviders = ['STRIPE', 'PAYSTACK'] as const;
 const changeEffectiveOptions = ['NEXT_CYCLE', 'IMMEDIATE'] as const;
@@ -61,6 +63,7 @@ function classifyPlanChange(
 
 export default function BillingPage() {
   const utils = trpc.useUtils();
+  const { canWrite } = useWriteAccess();
   const [provider, setProvider] = useState<(typeof checkoutProviders)[number]>('STRIPE');
   const [selectedPlanCode, setSelectedPlanCode] = useState('');
   const [effective, setEffective] = useState<(typeof changeEffectiveOptions)[number]>('NEXT_CYCLE');
@@ -249,6 +252,8 @@ export default function BillingPage() {
           </Card>
         ) : null}
 
+        {!canWrite ? <ReadOnlyNotice /> : null}
+
         <Card className="p-4">
           <h2 className="text-base font-semibold">Billing workspace</h2>
           <p className="mt-1 text-xs text-muted">Use focused tabs to manage billing without one long page.</p>
@@ -330,7 +335,7 @@ export default function BillingPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  disabled={isRefreshingSubscription || isVerifyingPaystackCheckout || !actionReadiness?.refresh.enabled}
+                  disabled={!canWrite || isRefreshingSubscription || isVerifyingPaystackCheckout || !actionReadiness?.refresh.enabled}
                   onClick={() => refreshCurrentSubscription()}
                 >
                   {isRefreshingSubscription ? 'Refreshing...' : 'Refresh provider status'}
@@ -338,7 +343,7 @@ export default function BillingPage() {
                 <Button
                   size="sm"
                   onClick={() => createPortalSession({})}
-                  disabled={isOpeningPortal || current.provider !== 'STRIPE'}
+                  disabled={!canWrite || isOpeningPortal || current.provider !== 'STRIPE'}
                 >
                   {current.provider !== 'STRIPE'
                     ? 'Stripe portal unavailable'
@@ -422,8 +427,8 @@ export default function BillingPage() {
                   onChange={(event) => setEffective(event.target.value as (typeof changeEffectiveOptions)[number])}
                 >
                   <option value="NEXT_CYCLE">Effective next cycle</option>
-                  <option value="IMMEDIATE" disabled={!selectedPlanIsUpgrade}>
-                    Immediate (upgrade only)
+                  <option value="IMMEDIATE" disabled={!selectedPlanIsUpgrade || selectedPlanChangeKind === 'LATERAL'}>
+                    Immediate (same-interval upgrade only)
                   </option>
                 </select>
               ) : (

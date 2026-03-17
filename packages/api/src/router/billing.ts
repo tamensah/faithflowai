@@ -895,7 +895,14 @@ export const billingRouter = router({
         throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Stripe subscription item could not be resolved.' });
       }
 
-      // Immediate changes are only allowed for upgrades in beta. Downgrades are next-cycle only.
+      // Immediate changes are only allowed for same-interval upgrades. Interval changes (monthly↔annual)
+      // must go through next-cycle to avoid confusing mid-cycle charge timing.
+      if (input.effective === 'IMMEDIATE' && active.plan.interval !== targetPlan.interval) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Interval changes must be effective at next cycle. Select "Effective next cycle" and try again.',
+        });
+      }
       if (input.effective === 'IMMEDIATE' && targetPlan.amountMinor <= active.plan.amountMinor) {
         throw new TRPCError({ code: 'BAD_REQUEST', message: 'Immediate plan changes are only supported for upgrades.' });
       }

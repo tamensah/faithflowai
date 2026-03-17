@@ -141,17 +141,18 @@ This is the live checklist for product scope, implementation status, and next st
   - Paystack in-app cancellation now updates local subscription state immediately on success
   - Paystack webhook reconciliation hardened for tenant-scoped matching and trial-plan code resolution
 
-## In Progress
 - Revenue operations hardening:
-  - Locked-state UX parity across all write actions and empty states
+  - Locked-state UX parity across all write actions and empty states (billing page write-access gating)
+  - Interval-change guardrail on plan transitions (monthly↔annual blocked from IMMEDIATE effective)
+  - Dunning escalation tiers (tier 1 day 0–3 / tier 2 day 3–7 / tier 3 day 7+, per-tier dedup keys)
+  - Auto-trigger dunning email immediately on invoice.payment_failed webhook (no cron delay)
+  - Welcome email auto-queued on Clerk organization.created webhook
+- Members CSV import preview UI (header mapping + readiness checks + sample row, matching household pattern)
 
 ## Next Up (High Priority)
-1. Revenue operations hardening
-   - Complete plan upgrade/downgrade/interval transitions with guardrails and proration rules
-   - Automated retries + escalation policies (email/SMS/WhatsApp) with suppression windows
-2. Platform operations automation
+1. Platform operations automation
    - Security policy rollout hardening (strict SSO mode + org-specific policy tuning)
-3. Streaming and support depth
+2. Streaming and support depth
    - Stream moderation controls + external provider sync jobs
    - Knowledge base integration and ticket deflection
 

@@ -14,6 +14,7 @@ import {
 } from '@faithflow-ai/database';
 import { recordAuditLog } from './audit';
 import { renderWelcomeOrgEmail } from './email-templates';
+import { runSubscriptionDunning } from './billing-dunning';
 import {
   beginWebhookProcessing,
   buildWebhookExternalEventId,
@@ -83,7 +84,7 @@ function normalizeStripeInvoiceMetadata(invoice: Stripe.Invoice) {
   } as Prisma.InputJsonValue;
 }
 
-async function queueTenantWelcomeEmail(tenantId: string) {
+export async function queueTenantWelcomeEmail(tenantId: string) {
   // Avoid queueing messages that will inevitably fail when email isn't configured.
   if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) return;
 
@@ -391,6 +392,12 @@ export async function handlePlatformStripeWebhook(
             targetId: updated.id,
             metadata: { eventType: event.type, status: updated.status, stripeSubscriptionId: subscriptionRef },
           });
+
+          if (event.type === 'invoice.payment_failed') {
+            // Trigger an immediate dunning email without waiting for the scheduled cron.
+            // The 24h dedup window in runSubscriptionDunning prevents spam on repeated webhook retries.
+            runSubscriptionDunning({ tenantIds: [updated.tenantId], graceDays: 0 }).catch(() => {});
+          }
 
           result = { ok: true, provider: 'stripe', event: event.type, subscriptionId: updated.id };
         }
