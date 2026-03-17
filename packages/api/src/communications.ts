@@ -15,6 +15,17 @@ type SendParams = {
   body: string;
 };
 
+type QuietHoursResolutionInput = {
+  channel: CommunicationChannel;
+  churchTimeZone: string;
+  quietEnabled: boolean;
+  quietStart: number;
+  quietEnd: number;
+  incrementMinutes: number;
+  allowQuietHoursOverride: boolean;
+  fromDate?: Date;
+};
+
 function getTwilioConfig() {
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
   const authToken = process.env.TWILIO_AUTH_TOKEN;
@@ -79,6 +90,38 @@ function isQuietHour(hour: number, startHour: number, endHour: number) {
   return hour >= startHour || hour < endHour;
 }
 
+export function resolveQuietHoursDeferredSendAt({
+  channel,
+  churchTimeZone,
+  quietEnabled,
+  quietStart,
+  quietEnd,
+  incrementMinutes,
+  allowQuietHoursOverride,
+  fromDate,
+}: QuietHoursResolutionInput) {
+  if (channel === CommunicationChannel.EMAIL) return null;
+  if (!quietHoursGloballyEnabled()) return null;
+  if (!quietEnabled) return null;
+  if (allowQuietHoursOverride) return null;
+
+  const now = fromDate ?? new Date();
+  const localHour = getLocalHour(now, churchTimeZone);
+  if (localHour === null) return null;
+  if (!isQuietHour(localHour, quietStart, quietEnd)) return null;
+
+  let candidate = now;
+  for (let steps = 0; steps < 48; steps += 1) {
+    const hour = getLocalHour(candidate, churchTimeZone);
+    if (hour !== null && !isQuietHour(hour, quietStart, quietEnd)) {
+      return candidate;
+    }
+    candidate = new Date(candidate.getTime() + incrementMinutes * 60 * 1000);
+  }
+
+  return null;
+}
+
 async function rescheduleIfQuietHours({
   scheduleId,
   channel,
@@ -98,31 +141,22 @@ async function rescheduleIfQuietHours({
   incrementMinutes: number;
   allowQuietHoursOverride: boolean;
 }) {
-  if (channel === CommunicationChannel.EMAIL) return false;
-  if (!quietHoursGloballyEnabled()) return false;
-  if (!quietEnabled) return false;
-  if (allowQuietHoursOverride) return false;
+  const deferredUntil = resolveQuietHoursDeferredSendAt({
+    channel,
+    churchTimeZone,
+    quietEnabled,
+    quietStart,
+    quietEnd,
+    incrementMinutes,
+    allowQuietHoursOverride,
+  });
+  if (!deferredUntil) return false;
 
-  const now = new Date();
-  const localHour = getLocalHour(now, churchTimeZone);
-  if (localHour === null) return false;
-  if (!isQuietHour(localHour, quietStart, quietEnd)) return false;
-
-  // Find the next non-quiet window by stepping forward in small increments.
-  let candidate = now;
-  for (let steps = 0; steps < 48; steps += 1) {
-    const hour = getLocalHour(candidate, churchTimeZone);
-    if (hour !== null && !isQuietHour(hour, quietStart, quietEnd)) {
-      await prisma.communicationSchedule.update({
-        where: { id: scheduleId },
-        data: { sendAt: candidate },
-      });
-      return true;
-    }
-    candidate = new Date(candidate.getTime() + incrementMinutes * 60 * 1000);
-  }
-
-  return false;
+  await prisma.communicationSchedule.update({
+    where: { id: scheduleId },
+    data: { sendAt: deferredUntil },
+  });
+  return true;
 }
 
 async function sendTwilioMessage({

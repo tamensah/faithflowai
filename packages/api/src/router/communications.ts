@@ -15,7 +15,13 @@ import {
 } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { recordAuditLog } from '../audit';
-import { channelToPreference, dispatchScheduledCommunications, normalizeRecipientAddress, sendCommunication } from '../communications';
+import {
+  channelToPreference,
+  dispatchScheduledCommunications,
+  normalizeRecipientAddress,
+  resolveQuietHoursDeferredSendAt,
+  sendCommunication,
+} from '../communications';
 import { buildUnsubscribeUrl, createUnsubscribeToken } from '../unsubscribe';
 import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 import crypto from 'crypto';
@@ -582,10 +588,30 @@ export const communicationsRouter = router({
       recipients: recipientList,
     });
 
+    const uniqueMemberIds = Array.from(
+      new Set(Array.from(recipients.values()).map((context) => context.memberId).filter(Boolean))
+    ) as string[];
+    const memberOverrides =
+      uniqueMemberIds.length > 0
+        ? await prisma.member.findMany({
+            where: { id: { in: uniqueMemberIds } },
+            select: { id: true, allowQuietHours: true },
+          })
+        : [];
+    const allowQuietHoursByMemberId = new Map(memberOverrides.map((row) => [row.id, Boolean(row.allowQuietHours)]));
+    const quietConfig = {
+      quietEnabled: Boolean(church.quietHoursEnabled),
+      quietStart: church.quietHoursStartHour ?? 21,
+      quietEnd: church.quietHoursEndHour ?? 7,
+      incrementMinutes: church.quietHoursRescheduleMinutes ?? 30,
+    };
+
     let deliverable = 0;
     let suppressed = 0;
     let optedOut = 0;
     let invalid = 0;
+    let quietHoursDeferred = 0;
+    let nextAvailableAt: Date | null = null;
     const blocked: Array<{ to: string; reason: string; memberId?: string | null }> = [];
 
     for (const [to, context] of recipients.entries()) {
@@ -610,6 +636,21 @@ export const communicationsRouter = router({
         }
         continue;
       }
+      const deferredUntil = resolveQuietHoursDeferredSendAt({
+        channel: input.channel,
+        churchTimeZone: church.timezone || 'UTC',
+        quietEnabled: quietConfig.quietEnabled,
+        quietStart: quietConfig.quietStart,
+        quietEnd: quietConfig.quietEnd,
+        incrementMinutes: quietConfig.incrementMinutes,
+        allowQuietHoursOverride: context.memberId ? allowQuietHoursByMemberId.get(context.memberId) === true : false,
+      });
+      if (deferredUntil) {
+        quietHoursDeferred += 1;
+        if (!nextAvailableAt || deferredUntil < nextAvailableAt) {
+          nextAvailableAt = deferredUntil;
+        }
+      }
       deliverable += 1;
     }
 
@@ -621,6 +662,8 @@ export const communicationsRouter = router({
       suppressed,
       optedOut,
       invalid,
+      quietHoursDeferred,
+      nextAvailableAt,
       blocked,
       unsubscribeMechanism:
         input.channel === CommunicationChannel.EMAIL
@@ -1314,6 +1357,7 @@ export const communicationsRouter = router({
     let sent = 0;
     let failed = 0;
     let skipped = 0;
+    let deferred = 0;
 
     const recipients = new Map<string, RecipientContext>();
     let churchName = church.name;
@@ -1355,6 +1399,21 @@ export const communicationsRouter = router({
       channel: input.channel,
       recipients: recipientList,
     });
+    const uniqueMemberIds = Array.from(new Set(recipientList.map((entry) => entry.memberId).filter(Boolean))) as string[];
+    const memberOverrides =
+      uniqueMemberIds.length > 0
+        ? await prisma.member.findMany({
+            where: { id: { in: uniqueMemberIds } },
+            select: { id: true, allowQuietHours: true },
+          })
+        : [];
+    const allowQuietHoursByMemberId = new Map(memberOverrides.map((row) => [row.id, Boolean(row.allowQuietHours)]));
+    const quietConfig = {
+      quietEnabled: Boolean(church.quietHoursEnabled),
+      quietStart: church.quietHoursStartHour ?? 21,
+      quietEnd: church.quietHoursEndHour ?? 7,
+      incrementMinutes: church.quietHoursRescheduleMinutes ?? 30,
+    };
 
     for (const [recipient, context] of recipients.entries()) {
       const resolvedSubject = subject ? renderTemplate(subject, context) : undefined;
@@ -1370,6 +1429,16 @@ export const communicationsRouter = router({
         continue;
       }
 
+      const deferredUntil = resolveQuietHoursDeferredSendAt({
+        channel: input.channel,
+        churchTimeZone: church.timezone || 'UTC',
+        quietEnabled: quietConfig.quietEnabled,
+        quietStart: quietConfig.quietStart,
+        quietEnd: quietConfig.quietEnd,
+        incrementMinutes: quietConfig.incrementMinutes,
+        allowQuietHoursOverride: context.memberId ? allowQuietHoursByMemberId.get(context.memberId) === true : false,
+      });
+
       const unsubscribeToken = normalizedAddress
         ? createUnsubscribeToken({
             tenantId: ctx.tenantId!,
@@ -1384,6 +1453,30 @@ export const communicationsRouter = router({
         body: resolvedBodyRaw,
         unsubscribeUrl,
       });
+
+      if (deferredUntil) {
+        await prisma.communicationSchedule.create({
+          data: {
+            churchId: input.churchId,
+            templateId: template?.id ?? null,
+            channel: input.channel,
+            provider: input.channel === CommunicationChannel.EMAIL ? CommunicationProvider.RESEND : CommunicationProvider.TWILIO,
+            to: recipient,
+            subject: resolvedSubject,
+            body: resolvedBody,
+            sendAt: deferredUntil,
+            status: CommunicationScheduleStatus.QUEUED,
+            metadata: {
+              audience: input.audience ?? null,
+              memberId: context.memberId ?? null,
+              queuedFromImmediateSend: true,
+              deferredByQuietHours: true,
+            },
+          },
+        });
+        deferred += 1;
+        continue;
+      }
 
       const message = await prisma.communicationMessage.create({
         data: {
@@ -1442,11 +1535,12 @@ export const communicationsRouter = router({
         sent,
         failed,
         skipped,
+        deferred,
         templateId: template?.id ?? null,
         audience: input.audience ?? null,
       },
     });
 
-    return { sent, failed, skipped };
+    return { sent, failed, skipped, deferred };
   }),
 });

@@ -163,6 +163,19 @@ export default function OperationsHealthPage() {
                 >
                   {isQueueingTemplate ? 'Queueing...' : 'Queue trial reminder'}
                 </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!canWrite || isQueueingTemplate || !data.providers.resend}
+                  onClick={() =>
+                    queueTransactionalTemplate({
+                      template: 'FAILED_PAYMENT',
+                      to: templateRecipient.trim() || undefined,
+                    })
+                  }
+                >
+                  {isQueueingTemplate ? 'Queueing...' : 'Queue failed-payment notice'}
+                </Button>
               </div>
               <p className="mt-2 text-xs text-muted">
                 Transactional templates are queued through the same provider/outbox pipeline as live notifications.

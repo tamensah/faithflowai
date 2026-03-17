@@ -18,7 +18,7 @@ import { TRPCError } from '@trpc/server';
 import { sendEmail } from '../email';
 import { runStorageSmokeTest } from '../storage';
 import { recordAuditLog } from '../audit';
-import { renderTrialEndingEmail, renderWelcomeOrgEmail } from '../email-templates';
+import { renderFailedPaymentNoticeEmail, renderTrialEndingEmail, renderWelcomeOrgEmail } from '../email-templates';
 
 const rangeInput = z
   .object({
@@ -35,7 +35,7 @@ const activeCareStatuses: CareRequestStatus[] = [
   CareRequestStatus.ASSIGNED,
   CareRequestStatus.IN_PROGRESS,
 ];
-const transactionalTemplateSchema = z.enum(['WELCOME_ONBOARDING', 'TRIAL_ENDING']);
+const transactionalTemplateSchema = z.enum(['WELCOME_ONBOARDING', 'TRIAL_ENDING', 'FAILED_PAYMENT']);
 
 function getTemplateRecipientList(
   inputRecipient: string | undefined,
@@ -393,6 +393,11 @@ export const operationsRouter = router({
       const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL ?? process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3001';
 
       let trialEndsAtIso: string | null = null;
+      let failedPaymentSubscription: {
+        id: string;
+        planName: string;
+        currentPeriodEnd: Date | null;
+      } | null = null;
       if (input.template === 'TRIAL_ENDING') {
         const current = await prisma.tenantSubscription.findFirst({
           where: {
@@ -408,6 +413,26 @@ export const operationsRouter = router({
           });
         }
         trialEndsAtIso = current.trialEndsAt.toISOString();
+      } else if (input.template === 'FAILED_PAYMENT') {
+        const current = await prisma.tenantSubscription.findFirst({
+          where: {
+            tenantId: ctx.tenantId,
+            status: TenantSubscriptionStatus.PAST_DUE,
+          },
+          include: { plan: true },
+          orderBy: { updatedAt: 'desc' },
+        });
+        if (!current?.plan) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'No past-due subscription found for this tenant',
+          });
+        }
+        failedPaymentSubscription = {
+          id: current.id,
+          planName: current.plan.name,
+          currentPeriodEnd: current.currentPeriodEnd,
+        };
       }
 
       let queued = 0;
@@ -415,7 +440,9 @@ export const operationsRouter = router({
         const dedupeKey =
           input.template === 'WELCOME_ONBOARDING'
             ? `welcome:${ctx.tenantId}:${recipient.email}`
-            : `trial-ending:${ctx.tenantId}:${recipient.email}:${today}`;
+            : input.template === 'TRIAL_ENDING'
+              ? `trial-ending:${ctx.tenantId}:${recipient.email}:${today}`
+              : `failed-payment:${ctx.tenantId}:${recipient.email}:${today}`;
         const existing = await prisma.communicationSchedule.findFirst({
           where: {
             churchId: recipient.churchId,
@@ -429,11 +456,19 @@ export const operationsRouter = router({
         const subject =
           input.template === 'WELCOME_ONBOARDING'
             ? 'Welcome to FaithFlow AI'
-            : 'Your FaithFlow trial is ending soon';
+            : input.template === 'TRIAL_ENDING'
+              ? 'Your FaithFlow trial is ending soon'
+              : 'Payment failed - action required';
         const body =
           input.template === 'WELCOME_ONBOARDING'
             ? renderWelcomeOrgEmail({ churchName: selectedChurch.name, adminUrl })
-            : renderTrialEndingEmail({ trialEndsAtIso: trialEndsAtIso!, billingUrl: `${adminUrl}/billing` });
+            : input.template === 'TRIAL_ENDING'
+              ? renderTrialEndingEmail({ trialEndsAtIso: trialEndsAtIso!, billingUrl: `${adminUrl}/billing` })
+              : renderFailedPaymentNoticeEmail({
+                  planName: failedPaymentSubscription!.planName,
+                  periodEndIso: failedPaymentSubscription!.currentPeriodEnd?.toISOString() ?? null,
+                  billingUrl: `${adminUrl}/billing`,
+                });
 
         await prisma.communicationSchedule.create({
           data: {
@@ -448,8 +483,14 @@ export const operationsRouter = router({
             metadata: {
               dedupeKey,
               tenantId: ctx.tenantId,
-              reason: input.template === 'WELCOME_ONBOARDING' ? 'tenant_welcome' : 'trial_ending',
+              reason:
+                input.template === 'WELCOME_ONBOARDING'
+                  ? 'tenant_welcome'
+                  : input.template === 'TRIAL_ENDING'
+                    ? 'trial_ending'
+                    : 'failed_payment',
               queuedBy: ctx.userId,
+              ...(failedPaymentSubscription ? { subscriptionId: failedPaymentSubscription.id } : {}),
             } as Prisma.InputJsonValue,
           },
         });
