@@ -102,9 +102,10 @@ export const streamingRouter = router({
         id: z.string(),
         name: z.string().min(2).max(120).optional(),
         isActive: z.boolean().optional(),
-        ingestUrl: z.string().url().optional(),
-        playbackUrl: z.string().url().optional(),
-        streamKey: z.string().optional(),
+        externalChannelId: z.string().max(200).optional().nullable(),
+        ingestUrl: z.string().url().optional().nullable(),
+        playbackUrl: z.string().url().optional().nullable(),
+        streamKey: z.string().optional().nullable(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -119,11 +120,12 @@ export const streamingRouter = router({
       const updated = await prisma.liveStreamChannel.update({
         where: { id: channel.id },
         data: {
-          name: input.name,
-          isActive: input.isActive,
-          ingestUrl: input.ingestUrl,
-          playbackUrl: input.playbackUrl,
-          streamKey: input.streamKey,
+          ...(input.name !== undefined ? { name: input.name } : {}),
+          ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
+          ...(input.externalChannelId !== undefined ? { externalChannelId: input.externalChannelId } : {}),
+          ...(input.ingestUrl !== undefined ? { ingestUrl: input.ingestUrl } : {}),
+          ...(input.playbackUrl !== undefined ? { playbackUrl: input.playbackUrl } : {}),
+          ...(input.streamKey !== undefined ? { streamKey: input.streamKey } : {}),
         },
       });
 

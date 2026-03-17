@@ -21,12 +21,19 @@ export default function StreamingPage() {
   const [campusId, setCampusId] = useState('');
   const [channelName, setChannelName] = useState('');
   const [channelProvider, setChannelProvider] = useState<(typeof providerOptions)[number]>('YOUTUBE');
+  const [externalChannelId, setExternalChannelId] = useState('');
   const [playbackUrl, setPlaybackUrl] = useState('');
   const [ingestUrl, setIngestUrl] = useState('');
+  const [editChannelId, setEditChannelId] = useState('');
+  const [editExternalChannelId, setEditExternalChannelId] = useState('');
+  const [editPlaybackUrl, setEditPlaybackUrl] = useState('');
+  const [editIngestUrl, setEditIngestUrl] = useState('');
+  const [editChannelStatus, setEditChannelStatus] = useState('');
   const [sessionTitle, setSessionTitle] = useState('');
   const [sessionChannelId, setSessionChannelId] = useState('');
   const [sessionStartsAt, setSessionStartsAt] = useState('');
   const [moderationLevel, setModerationLevel] = useState<(typeof moderationOptions)[number]>('FILTERED');
+  const [isRecording, setIsRecording] = useState(true);
   const [syncLimit, setSyncLimit] = useState('200');
   const [syncStatus, setSyncStatus] = useState('');
   const [applySuggestedTransitions, setApplySuggestedTransitions] = useState(true);
@@ -69,11 +76,19 @@ export default function StreamingPage() {
   const { mutate: createChannel, isPending: isCreatingChannel } = trpc.streaming.createChannel.useMutation({
     onSuccess: async (channel) => {
       setChannelName('');
+      setExternalChannelId('');
       setPlaybackUrl('');
       setIngestUrl('');
       setSessionChannelId(channel.id);
       await utils.streaming.channels.invalidate();
     },
+  });
+  const { mutate: updateChannel, isPending: isUpdatingChannel } = trpc.streaming.updateChannel.useMutation({
+    onSuccess: async () => {
+      setEditChannelStatus('Channel updated.');
+      await utils.streaming.channels.invalidate();
+    },
+    onError: (error) => setEditChannelStatus(error.message),
   });
   const { mutate: createSession, isPending: isCreatingSession } = trpc.streaming.createSession.useMutation({
     onSuccess: async () => {
@@ -192,6 +207,11 @@ export default function StreamingPage() {
             </select>
             <Input placeholder="Playback URL" value={playbackUrl} onChange={(event) => setPlaybackUrl(event.target.value)} />
             <Input placeholder="Ingest URL" value={ingestUrl} onChange={(event) => setIngestUrl(event.target.value)} />
+            <Input
+              placeholder="External ID (broadcast/video ID for provider API)"
+              value={externalChannelId}
+              onChange={(event) => setExternalChannelId(event.target.value)}
+            />
           </div>
           <div className="mt-4">
             <Button
@@ -202,6 +222,7 @@ export default function StreamingPage() {
                   campusId: campusId || undefined,
                   name: channelName.trim(),
                   provider: channelProvider,
+                  externalChannelId: externalChannelId.trim() || undefined,
                   playbackUrl: playbackUrl.trim() || undefined,
                   ingestUrl: ingestUrl.trim() || undefined,
                 })
@@ -209,6 +230,80 @@ export default function StreamingPage() {
             >
               {isCreatingChannel ? 'Creating...' : 'Create channel'}
             </Button>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h2 className="text-lg font-semibold">Channels</h2>
+          <div className="mt-4 space-y-3">
+            {channels?.map((channel) => (
+              <div key={channel.id} className="rounded-md border border-border p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-semibold">{channel.name}</p>
+                    <p className="text-xs text-muted">{channel.provider} · {channel.isActive ? 'Active' : 'Inactive'}</p>
+                    {channel.externalChannelId ? (
+                      <p className="text-xs text-muted">External ID: {channel.externalChannelId}</p>
+                    ) : (
+                      <p className="text-xs text-amber-600">No external ID — provider API unavailable</p>
+                    )}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditChannelId(channel.id);
+                      setEditExternalChannelId(channel.externalChannelId ?? '');
+                      setEditPlaybackUrl(channel.playbackUrl ?? '');
+                      setEditIngestUrl(channel.ingestUrl ?? '');
+                      setEditChannelStatus('');
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </div>
+                {editChannelId === channel.id ? (
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <Input
+                      placeholder="External ID (broadcast/video ID)"
+                      value={editExternalChannelId}
+                      onChange={(event) => setEditExternalChannelId(event.target.value)}
+                    />
+                    <Input
+                      placeholder="Playback URL"
+                      value={editPlaybackUrl}
+                      onChange={(event) => setEditPlaybackUrl(event.target.value)}
+                    />
+                    <Input
+                      placeholder="Ingest URL"
+                      value={editIngestUrl}
+                      onChange={(event) => setEditIngestUrl(event.target.value)}
+                    />
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        disabled={!canWrite || isUpdatingChannel}
+                        onClick={() =>
+                          updateChannel({
+                            id: channel.id,
+                            externalChannelId: editExternalChannelId.trim() || null,
+                            playbackUrl: editPlaybackUrl.trim() || null,
+                            ingestUrl: editIngestUrl.trim() || null,
+                          })
+                        }
+                      >
+                        {isUpdatingChannel ? 'Saving...' : 'Save'}
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setEditChannelId('')}>
+                        Cancel
+                      </Button>
+                    </div>
+                    {editChannelStatus ? <p className="col-span-2 text-xs text-muted">{editChannelStatus}</p> : null}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+            {!channels?.length ? <p className="text-sm text-muted">No channels yet. Create one above.</p> : null}
           </div>
         </Card>
 
@@ -244,6 +339,14 @@ export default function StreamingPage() {
                 </option>
               ))}
             </select>
+            <label className="flex items-center gap-2 text-sm text-muted">
+              <input
+                type="checkbox"
+                checked={isRecording}
+                onChange={(event) => setIsRecording(event.target.checked)}
+              />
+              Record this session
+            </label>
           </div>
           <div className="mt-4">
             <Button
@@ -255,6 +358,7 @@ export default function StreamingPage() {
                   title: sessionTitle.trim(),
                   scheduledStartAt: sessionStartsAt ? new Date(sessionStartsAt) : undefined,
                   moderationLevel,
+                  isRecording,
                 })
               }
             >
@@ -268,11 +372,36 @@ export default function StreamingPage() {
           <div className="mt-4 space-y-3">
             {sessions?.map((session) => (
               <div key={session.id} className="rounded-md border border-border p-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold">{session.title}</p>
-                  <p className="text-xs text-muted">{session.status}</p>
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-semibold">{session.title}</p>
+                    <p className="text-xs text-muted">
+                      {session.channel.name}
+                      {session.event ? ` · ${session.event.title}` : ''}
+                      {session.scheduledStartAt
+                        ? ` · ${new Date(session.scheduledStartAt).toLocaleString()}`
+                        : ''}
+                    </p>
+                    {(session.peakViewers > 0 || session.totalViews > 0) ? (
+                      <p className="text-xs text-muted">
+                        Peak viewers: {session.peakViewers} · Total views: {session.totalViews}
+                      </p>
+                    ) : null}
+                    {session.recordingUrl ? (
+                      <a
+                        href={session.recordingUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs underline text-muted hover:text-foreground"
+                      >
+                        Recording
+                      </a>
+                    ) : session.isRecording && session.status === 'ENDED' ? (
+                      <p className="text-xs text-amber-600">Recording expected — URL not yet ingested</p>
+                    ) : null}
+                  </div>
+                  <p className="shrink-0 text-xs font-medium text-muted">{session.status}</p>
                 </div>
-                <p className="text-xs text-muted">{session.channel.name}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <select
                     className="h-9 rounded-md border border-border bg-white px-2 text-xs"
@@ -313,7 +442,7 @@ export default function StreamingPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => startSession({ id: session.id })}
-                    disabled={!canWrite || session.status === 'LIVE'}
+                    disabled={!canWrite || session.status !== 'SCHEDULED'}
                   >
                     Go live
                   </Button>
@@ -352,7 +481,7 @@ export default function StreamingPage() {
                 checked={applySuggestedTransitions}
                 onChange={(event) => setApplySuggestedTransitions(event.target.checked)}
               />
-              Apply suggested SCHEDULED → LIVE transitions
+              Apply suggested transitions (SCHEDULED → LIVE, LIVE → ENDED)
             </label>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -389,10 +518,17 @@ export default function StreamingPage() {
               <div key={entry.sessionId} className="rounded-md border border-border p-3 text-xs text-muted">
                 <p className="font-medium text-foreground">{entry.sessionId}</p>
                 <p>
-                  Status {entry.status} · Playback {entry.playbackReachable ? 'reachable' : 'unreachable'} (
-                  {entry.playbackStatusCode ?? 'n/a'})
+                  Status <span className="font-medium text-foreground">{entry.status}</span>
+                  {' · '}Playback {entry.playbackReachable ? 'reachable' : 'unreachable'} ({entry.playbackStatusCode ?? 'n/a'})
+                  {entry.providerStatus ? ` · Provider: ${entry.providerStatus}` : ''}
+                  {entry.liveViewers != null ? ` · ${entry.liveViewers} live viewers` : ''}
                 </p>
-                <p>{entry.recommendedAction}</p>
+                {entry.suggestedTransition !== 'NONE' ? (
+                  <p className="mt-1 font-medium text-amber-700">
+                    Suggested: {entry.suggestedTransition.replace('_', ' → ')}
+                  </p>
+                ) : null}
+                <p className="mt-1">{entry.recommendedAction}</p>
               </div>
             ))}
             {!providerSyncPreview.data?.entries?.length ? (
