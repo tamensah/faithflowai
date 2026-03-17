@@ -46,3 +46,19 @@ services:
       -H "x-api-key: $INTEGRATION_API_KEY"
       -H "content-type: application/json"
       -d '{"limit":500,"dryRun":false}'
+
+  - type: cron
+    name: faithflow-streaming-provider-sync
+    runtime: native
+    schedule: "*/10 * * * *"
+    envVars:
+      - key: API_BASE_URL
+        sync: false
+      - key: INTEGRATION_API_KEY
+        sync: false
+    startCommand: >
+      curl --fail --show-error --silent
+      -X POST "$API_BASE_URL/tasks/streaming/provider-sync"
+      -H "x-api-key: $INTEGRATION_API_KEY"
+      -H "content-type: application/json"
+      -d '{"limit":200,"applySuggestedTransitions":true,"dryRun":false}'

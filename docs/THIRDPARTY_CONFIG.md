@@ -178,6 +178,7 @@ Shared:
 - Subscription metadata backfill (cron): `POST /tasks/subscriptions/metadata-backfill` with `x-api-key`.
 - Tenant domain + SSL automation (cron): `POST /tasks/tenant-ops/automate` with `x-api-key`.
 - Support SLA sweep (cron): `POST /tasks/support/sla` with `x-api-key`.
+- Streaming provider sync (cron): `POST /tasks/streaming/provider-sync` with `x-api-key`.
 
 Tenant domain runbook/escalation tuning env:
 
@@ -188,6 +189,7 @@ Tenant domain runbook/escalation tuning env:
 
 - `POST /tasks/support/sla`: every 5 minutes
 - `POST /tasks/tenant-ops/automate`: every 15 minutes
+- `POST /tasks/streaming/provider-sync`: every 10 minutes
 - `POST /tasks/subscriptions/metadata-backfill`: daily at 02:10 UTC
 
 Operational guardrail telemetry:
@@ -203,10 +205,81 @@ If you prefer in-process scheduling (single-instance only), set:
 - `CRON_SUPPORT_SLA_SWEEP=*/5 * * * *`
 - `CRON_TENANT_OPS_AUTOMATE=*/15 * * * *`
 - `CRON_SUBSCRIPTION_METADATA_BACKFILL=10 2 * * *`
+- `CRON_STREAMING_PROVIDER_SYNC=*/10 * * * *`
 
 See scheduler profiles: `/Users/tamensah/aihub/faithflow_ai/docs/SCHEDULER_PROFILES.md`.
 
-## 12. Deployment (Render)
+## 12. Live Streaming Providers (Add-on)
+
+Live streaming requires the `STREAMING_SUITE` add-on to be enabled for a tenant. Each channel stores a `provider` (YOUTUBE, FACEBOOK, VIMEO, CUSTOM_RTMP) and an optional `externalChannelId` used to call real provider APIs.
+
+When provider credentials are absent, the sync runtime falls back to HTTP HEAD probing of the channel's `playbackUrl` to infer session state. Setting API credentials enables richer signals: live viewer counts, authoritative stream status, and automatic recording URL ingestion.
+
+### YouTube Live
+
+- Create a project in [Google Cloud Console](https://console.cloud.google.com/).
+- Enable the **YouTube Data API v3**.
+- Create an API key (restrict to `youtube.googleapis.com` for production).
+- Store the broadcast ID (from YouTube Studio → Go Live → Broadcast ID) in the channel's **External channel ID** field.
+- Required env:
+  - `YOUTUBE_API_KEY`
+
+Signal mapping:
+| YouTube `lifeCycleStatus` | FaithFlow action |
+|--------------------------|-----------------|
+| `liveStarting`, `live` | → LIVE transition suggested |
+| `complete`, `revoked` | → ENDED transition suggested |
+
+### Facebook Live Video
+
+- Create a [Facebook Developer App](https://developers.facebook.com/) with `pages_read_engagement` and `pages_manage_videos` permissions.
+- Generate a long-lived Page Access Token.
+- Store the Facebook Live Video ID in the channel's **External channel ID** field.
+- Required env:
+  - `FACEBOOK_PAGE_ACCESS_TOKEN`
+
+Signal mapping:
+| Facebook `status` | FaithFlow action |
+|-------------------|-----------------|
+| `LIVE`, `SCHEDULED_LIVE` | → LIVE transition suggested |
+| `VOD`, `PROCESSING` | → ENDED transition suggested |
+
+### Vimeo Live
+
+- Create a [Vimeo Developer App](https://developer.vimeo.com/) with `video_files`, `live_events` scopes.
+- Generate a Personal Access Token with those scopes.
+- Store the Vimeo Live Event ID in the channel's **External channel ID** field.
+- Required env:
+  - `VIMEO_ACCESS_TOKEN`
+
+Signal mapping:
+| Vimeo `status` | FaithFlow action |
+|----------------|-----------------|
+| `streaming` | → LIVE transition suggested |
+| `archive_in_progress`, `archived` | → ENDED + recording URL auto-ingested |
+
+### Custom RTMP
+
+No provider API integration. Relies entirely on HTTP HEAD probe of the `playbackUrl`. Set a public HLS or DASH URL in the channel's **Playback URL** field.
+
+### Shared streaming env
+
+- `STREAMING_SYNC_HTTP_TIMEOUT_MS` — HTTP probe timeout in milliseconds (default: `3000`)
+
+### Sync cron
+
+The provider sync runs every 10 minutes via the `faithflow-streaming-provider-sync` cron (defined in `render.yaml` / `render.cron.yaml`). It applies suggested SCHEDULED→LIVE and LIVE→ENDED transitions automatically and ingests recording URLs when available.
+
+Task endpoint (API key protected):
+- `POST /tasks/streaming/provider-sync`
+  - Body: `{ limit, applySuggestedTransitions, tenantId?, churchId?, dryRun? }`
+
+Optional in-process scheduler env:
+- `CRON_STREAMING_PROVIDER_SYNC` (default: `*/10 * * * *`)
+
+---
+
+## 13. Deployment (Render)
 
 Recommended alpha backend deployment uses Render Blueprint:
 

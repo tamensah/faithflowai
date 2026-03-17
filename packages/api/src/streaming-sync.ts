@@ -15,6 +15,14 @@ type ProbeResult = {
   error: string | null;
 };
 
+type ProviderApiResult = {
+  liveViewers: number | null;
+  providerStatus: string | null;
+  isLiveOnProvider: boolean;
+  hasEndedOnProvider: boolean;
+  providerRecordingUrl: string | null;
+};
+
 type StreamingSyncEntry = {
   sessionId: string;
   churchId: string;
@@ -26,8 +34,10 @@ type StreamingSyncEntry = {
   recordingReachable: boolean | null;
   recordingStatusCode: number | null;
   ingestionConfigured: boolean;
+  liveViewers: number | null;
+  providerStatus: string | null;
   recommendedAction: string;
-  suggestedTransition: 'NONE' | 'SCHEDULED_TO_LIVE';
+  suggestedTransition: 'NONE' | 'SCHEDULED_TO_LIVE' | 'LIVE_TO_ENDED';
   updated: boolean;
 };
 
@@ -64,6 +74,102 @@ async function probeUrl(url?: string | null): Promise<ProbeResult> {
   }
 }
 
+function nullProviderResult(): ProviderApiResult {
+  return { liveViewers: null, providerStatus: null, isLiveOnProvider: false, hasEndedOnProvider: false, providerRecordingUrl: null };
+}
+
+async function fetchYoutubeStatus(broadcastId: string): Promise<ProviderApiResult> {
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (!apiKey) return nullProviderResult();
+
+  const url = `https://www.googleapis.com/youtube/v3/liveBroadcasts?part=status,statistics&id=${encodeURIComponent(broadcastId)}&key=${encodeURIComponent(apiKey)}`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs()) });
+  if (!res.ok) return nullProviderResult();
+
+  const data = await res.json() as {
+    items?: Array<{
+      status?: { lifeCycleStatus?: string };
+      statistics?: { concurrentViewers?: string };
+    }>;
+  };
+  const item = data.items?.[0];
+  if (!item) return nullProviderResult();
+
+  const lifeCycle = item.status?.lifeCycleStatus ?? null;
+  const viewers = item.statistics?.concurrentViewers != null ? Number(item.statistics.concurrentViewers) : null;
+
+  return {
+    liveViewers: viewers,
+    providerStatus: lifeCycle,
+    // liveStarting = imminent; live = broadcasting
+    isLiveOnProvider: lifeCycle === 'live' || lifeCycle === 'liveStarting',
+    hasEndedOnProvider: lifeCycle === 'complete' || lifeCycle === 'revoked',
+    // YouTube archive URLs are not available via this API endpoint
+    providerRecordingUrl: null,
+  };
+}
+
+async function fetchFacebookStatus(videoId: string): Promise<ProviderApiResult> {
+  const token = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+  if (!token) return nullProviderResult();
+
+  const url = `https://graph.facebook.com/v18.0/${encodeURIComponent(videoId)}?fields=status,live_views&access_token=${encodeURIComponent(token)}`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs()) });
+  if (!res.ok) return nullProviderResult();
+
+  const data = await res.json() as { status?: string; live_views?: number };
+  const status = data.status ?? null;
+
+  return {
+    liveViewers: data.live_views ?? null,
+    providerStatus: status,
+    isLiveOnProvider: status === 'LIVE' || status === 'SCHEDULED_LIVE',
+    hasEndedOnProvider: status === 'VOD' || status === 'PROCESSING',
+    providerRecordingUrl: null,
+  };
+}
+
+async function fetchVimeoStatus(videoId: string): Promise<ProviderApiResult> {
+  const token = process.env.VIMEO_ACCESS_TOKEN;
+  if (!token) return nullProviderResult();
+
+  const url = `https://api.vimeo.com/live_events/${encodeURIComponent(videoId)}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `bearer ${token}` },
+    signal: AbortSignal.timeout(timeoutMs()),
+  });
+  if (!res.ok) return nullProviderResult();
+
+  const data = await res.json() as {
+    status?: string;
+    record?: { url?: string };
+  };
+  const status = data.status ?? null;
+
+  return {
+    liveViewers: null,
+    providerStatus: status,
+    isLiveOnProvider: status === 'streaming',
+    hasEndedOnProvider: status === 'archived' || status === 'archive_in_progress',
+    // Auto-ingest recording URL once the Vimeo event is archived
+    providerRecordingUrl: status === 'archived' ? (data.record?.url ?? null) : null,
+  };
+}
+
+async function fetchProviderStatus(provider: string, externalChannelId: string | null): Promise<ProviderApiResult> {
+  if (!externalChannelId) return nullProviderResult();
+
+  try {
+    if (provider === 'YOUTUBE') return await fetchYoutubeStatus(externalChannelId);
+    if (provider === 'FACEBOOK') return await fetchFacebookStatus(externalChannelId);
+    if (provider === 'VIMEO') return await fetchVimeoStatus(externalChannelId);
+  } catch {
+    // Provider API errors are non-fatal — fall back to URL probe signals
+  }
+
+  return nullProviderResult();
+}
+
 export async function runStreamingProviderSync(options?: {
   tenantId?: string;
   churchId?: string;
@@ -94,54 +200,147 @@ export async function runStreamingProviderSync(options?: {
 
   for (const session of sessions) {
     try {
-      const playbackProbe = await probeUrl(session.channel.playbackUrl);
+      const [playbackProbe, providerData] = await Promise.all([
+        probeUrl(session.channel.playbackUrl),
+        fetchProviderStatus(session.channel.provider, session.channel.externalChannelId),
+      ]);
       const recordingProbe = session.recordingUrl ? await probeUrl(session.recordingUrl) : null;
+
+      // Provider API takes precedence when available; URL probe is the fallback.
+      const isLiveSignal =
+        providerData.isLiveOnProvider ||
+        (providerData.providerStatus === null && playbackProbe.reachable);
+      const hasEndedSignal = providerData.hasEndedOnProvider;
+
       const shouldSuggestStart =
         session.status === LiveStreamStatus.SCHEDULED &&
         Boolean(session.scheduledStartAt && session.scheduledStartAt <= now) &&
-        playbackProbe.reachable;
+        isLiveSignal;
+
+      const shouldSuggestEnd =
+        session.status === LiveStreamStatus.LIVE &&
+        hasEndedSignal;
+
+      let suggestedTransition: StreamingSyncEntry['suggestedTransition'] = 'NONE';
+      if (shouldSuggestStart) suggestedTransition = 'SCHEDULED_TO_LIVE';
+      else if (shouldSuggestEnd) suggestedTransition = 'LIVE_TO_ENDED';
 
       let recommendedAction = 'No action required.';
       if (!session.channel.playbackUrl) {
         recommendedAction = 'Set playback URL to enable provider health checks.';
-      } else if (!playbackProbe.reachable) {
+      } else if (!playbackProbe.reachable && providerData.providerStatus === null) {
         recommendedAction = 'Playback endpoint is unreachable. Check provider output and stream configuration.';
-      } else if (session.status === LiveStreamStatus.SCHEDULED && shouldSuggestStart) {
-        recommendedAction = 'Session appears live on provider. Promote status to LIVE.';
+      } else if (shouldSuggestStart) {
+        recommendedAction = providerData.isLiveOnProvider
+          ? `Provider confirms session is live (${providerData.providerStatus}). Promote status to LIVE.`
+          : 'Session appears live on provider. Promote status to LIVE.';
+      } else if (shouldSuggestEnd) {
+        recommendedAction = `Provider reports session ended (${providerData.providerStatus}). Transition to ENDED.`;
       } else if (session.status === LiveStreamStatus.ENDED && session.isRecording && !session.recordingUrl) {
-        recommendedAction = 'Recording expected but missing URL. Ingest recording link from provider.';
+        recommendedAction = providerData.providerRecordingUrl
+          ? 'Recording URL retrieved from provider and will be saved automatically.'
+          : 'Recording expected but missing URL. Ingest recording link from provider.';
       }
 
       let didUpdate = false;
-      if (!options?.dryRun && options?.applySuggestedTransitions && shouldSuggestStart && !session.startedAt) {
-        await prisma.liveStreamSession.update({
-          where: { id: session.id },
-          data: {
-            status: LiveStreamStatus.LIVE,
-            startedAt: now,
-          },
-        });
-        updated += 1;
-        didUpdate = true;
+      if (!options?.dryRun && options?.applySuggestedTransitions) {
+        if (shouldSuggestStart && !session.startedAt) {
+          await prisma.liveStreamSession.update({
+            where: { id: session.id },
+            data: {
+              status: LiveStreamStatus.LIVE,
+              startedAt: now,
+              ...(providerData.liveViewers != null ? { peakViewers: providerData.liveViewers } : {}),
+            },
+          });
+          updated += 1;
+          didUpdate = true;
 
-        await recordAuditLog({
-          tenantId: session.church.organization.tenantId,
-          churchId: session.churchId,
-          actorType: AuditActorType.SYSTEM,
-          actorId: options?.actorId ?? null,
-          action: 'streaming.session.synced_live',
-          targetType: 'LiveStreamSession',
-          targetId: session.id,
-          metadata: {
-            reason: 'playback_reachable_after_schedule',
-            playbackStatusCode: playbackProbe.statusCode,
-          },
-        });
+          await recordAuditLog({
+            tenantId: session.church.organization.tenantId,
+            churchId: session.churchId,
+            actorType: AuditActorType.SYSTEM,
+            actorId: options?.actorId ?? null,
+            action: 'streaming.session.synced_live',
+            targetType: 'LiveStreamSession',
+            targetId: session.id,
+            metadata: {
+              reason: isLiveSignal ? 'provider_api_live_signal' : 'playback_reachable_after_schedule',
+              providerStatus: providerData.providerStatus,
+              playbackStatusCode: playbackProbe.statusCode,
+              liveViewers: providerData.liveViewers,
+            },
+          });
+        } else if (shouldSuggestEnd && !session.endedAt) {
+          await prisma.liveStreamSession.update({
+            where: { id: session.id },
+            data: {
+              status: LiveStreamStatus.ENDED,
+              endedAt: now,
+            },
+          });
+          updated += 1;
+          didUpdate = true;
+
+          await recordAuditLog({
+            tenantId: session.church.organization.tenantId,
+            churchId: session.churchId,
+            actorType: AuditActorType.SYSTEM,
+            actorId: options?.actorId ?? null,
+            action: 'streaming.session.synced_ended',
+            targetType: 'LiveStreamSession',
+            targetId: session.id,
+            metadata: {
+              reason: 'provider_api_ended_signal',
+              providerStatus: providerData.providerStatus,
+            },
+          });
+        }
+
+        // Auto-ingest recording URL from provider when session is ENDED and recording was expected.
+        if (
+          providerData.providerRecordingUrl &&
+          !session.recordingUrl &&
+          (session.status === LiveStreamStatus.ENDED || shouldSuggestEnd)
+        ) {
+          await prisma.liveStreamSession.update({
+            where: { id: session.id },
+            data: { recordingUrl: providerData.providerRecordingUrl },
+          });
+          if (!didUpdate) {
+            updated += 1;
+            didUpdate = true;
+          }
+
+          await recordAuditLog({
+            tenantId: session.church.organization.tenantId,
+            churchId: session.churchId,
+            actorType: AuditActorType.SYSTEM,
+            actorId: options?.actorId ?? null,
+            action: 'streaming.session.recording_ingested',
+            targetType: 'LiveStreamSession',
+            targetId: session.id,
+            metadata: { providerStatus: providerData.providerStatus },
+          });
+        }
+
+        // Update peak viewer count from live provider data.
+        if (
+          providerData.liveViewers != null &&
+          session.status === LiveStreamStatus.LIVE &&
+          !shouldSuggestEnd &&
+          providerData.liveViewers > (session.peakViewers ?? 0)
+        ) {
+          await prisma.liveStreamSession.update({
+            where: { id: session.id },
+            data: { peakViewers: providerData.liveViewers },
+          });
+        }
       }
 
       const healthStatus = !session.channel.playbackUrl
         ? HealthCheckStatus.DEGRADED
-        : playbackProbe.reachable
+        : playbackProbe.reachable || providerData.isLiveOnProvider
           ? HealthCheckStatus.HEALTHY
           : session.status === LiveStreamStatus.LIVE
             ? HealthCheckStatus.OUTAGE
@@ -166,7 +365,9 @@ export async function runStreamingProviderSync(options?: {
               playbackError: playbackProbe.error,
               recordingReachable: recordingProbe?.reachable ?? null,
               recordingStatusCode: recordingProbe?.statusCode ?? null,
-              suggestedTransition: shouldSuggestStart ? 'SCHEDULED_TO_LIVE' : 'NONE',
+              providerStatus: providerData.providerStatus,
+              liveViewers: providerData.liveViewers,
+              suggestedTransition,
             } as Prisma.InputJsonValue,
           },
         });
@@ -183,8 +384,10 @@ export async function runStreamingProviderSync(options?: {
         recordingReachable: recordingProbe?.reachable ?? null,
         recordingStatusCode: recordingProbe?.statusCode ?? null,
         ingestionConfigured: Boolean(session.channel.ingestUrl),
+        liveViewers: providerData.liveViewers,
+        providerStatus: providerData.providerStatus,
         recommendedAction,
-        suggestedTransition: shouldSuggestStart ? 'SCHEDULED_TO_LIVE' : 'NONE',
+        suggestedTransition,
         updated: didUpdate,
       });
     } catch (error) {

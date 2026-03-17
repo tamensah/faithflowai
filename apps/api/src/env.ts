@@ -56,6 +56,12 @@ const envSchema = z.object({
   GCS_PRIVATE_KEY: z.string().optional(),
   GCS_KEYFILE_PATH: z.string().optional(),
   GCS_PUBLIC_URL: z.string().optional(),
+  // Streaming provider API credentials (all optional — URL probe fallback used when absent)
+  YOUTUBE_API_KEY: z.string().optional(),
+  FACEBOOK_PAGE_ACCESS_TOKEN: z.string().optional(),
+  VIMEO_ACCESS_TOKEN: z.string().optional(),
+  STREAMING_SYNC_HTTP_TIMEOUT_MS: z.coerce.number().optional(),
+  CRON_STREAMING_PROVIDER_SYNC: z.string().default('*/10 * * * *'),
 });
 
 export const env = envSchema.parse(process.env);
