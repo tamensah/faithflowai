@@ -32,6 +32,58 @@ packages/
   utils/      Shared utilities
 ```
 
+## Branch & Deployment Workflow
+
+FaithFlow follows a **dev → staging → production** model. Production (`main`) is protected — no direct commits.
+
+### Branch model
+
+```
+feature/<name>  ──PR──►  develop  ──PR──►  main
+hotfix/<name>   ──PR──►  main  (+ backport PR to develop)
+```
+
+| Branch | Purpose | Deploys to |
+|--------|---------|-----------|
+| `feature/*` | New features / fixes | Ephemeral Vercel preview per PR |
+| `develop` | Integration & QA | **Staging** (stable URL, reviewed before prod) |
+| `main` | Production-ready code only | **Production** (auto-deploys on merge) |
+
+### Environments
+
+| Environment | Admin URL | API |
+|-------------|-----------|-----|
+| Staging | `https://admin-staging-tamensahs-projects.vercel.app` | Render staging service |
+| Production | `https://admin-tamensahs-projects.vercel.app` | Render production service |
+
+### Day-to-day flow
+
+```bash
+# 1. Branch off develop for your work
+git checkout develop && git pull
+git checkout -b feature/my-feature
+
+# 2. Commit and push — opens a PR against develop
+git push origin feature/my-feature
+
+# 3. PR merged → develop deploys to staging for review
+
+# 4. When staging is okayed, open a PR: develop → main
+# 5. Merge → production auto-deploys
+```
+
+### Rules
+- **Never commit directly to `main`** — always via PR from `develop`
+- **Never commit directly to `develop`** — always via PR from a feature branch
+- All PRs require a passing Vercel preview build before merge
+- Database migrations (`pnpm db:migrate`) must be run against staging before the `develop → main` PR is merged
+- Hotfixes to production must be backported to `develop` immediately
+
+### Render API deployments
+The Fastify API runs on Render (not Vercel). Render has separate staging and production services. Deploy the API staging service first, validate, then promote to production before merging `develop → main`.
+
+---
+
 ## Quick Start
 1. Install dependencies:
 ```
