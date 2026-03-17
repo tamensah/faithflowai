@@ -161,11 +161,19 @@ This is the live checklist for product scope, implementation status, and next st
   - STREAMING_SUITE entitlement gate; env vars tracked in THIRDPARTY_CONFIG.md §12
   - User manual: `docs/STREAMING_MANUAL.md`
 
+- Security policy rollout hardening:
+  - IP allowlist UI (add/remove individual IPs/CIDRs, wired into updateSecurityPolicy)
+  - SSO label references AUTH_POLICY_ENFORCE_SSO_STRICT env var; backend enforcement already in trpc middleware
+- Support center depth:
+  - Knowledge base article model (KBArticle: title, body, category, tags, published, slug)
+  - KB CRUD + search router procedures (platform-role-gated writes, protectedProcedure for reads)
+  - KB Management section in /support (create/edit/delete articles, publish toggle)
+  - Ticket deflection: matching published articles surfaced while tenant types ticket subject
+
 ## Next Up (High Priority)
-1. Platform operations automation
-   - Security policy rollout hardening (strict SSO mode + org-specific policy tuning)
-2. Support center depth
-   - Knowledge base integration and ticket deflection
+- Beta launch preparation: end-to-end smoke test (auth → giving → receipt → comms → streaming)
+- Native mobile apps (member + staff) or PWA wrapper
+- Prayer request lifecycle + privacy controls
 
 ## Backlog
 - Prayer request lifecycle + privacy controls
