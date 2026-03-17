@@ -97,7 +97,7 @@ export default function OperationsHealthPage() {
               <p className="mt-2 text-sm text-muted">
                 Migrations:{' '}
                 {data.migrations.ok
-                  ? `${data.migrations.total ?? 0} applied · last: ${data.migrations.lastMigration?.name ?? 'N/A'}`
+                  ? `${data.migrations.total ?? 0} applied`
                   : 'unknown'}
               </p>
             </Card>
@@ -118,7 +118,7 @@ export default function OperationsHealthPage() {
                   size="sm"
                   variant="outline"
                   disabled={!canWrite || isSendingTestEmail || !data.providers.resend}
-                  onClick={() => sendTestEmail({})}
+                  onClick={() => sendTestEmail()}
                 >
                   {isSendingTestEmail ? 'Sending...' : 'Send test email'}
                 </Button>
@@ -259,7 +259,7 @@ export default function OperationsHealthPage() {
                       <Badge variant="default">{event.status}</Badge>
                       <span className="text-xs text-muted">{formatDate(event.receivedAt)}</span>
                     </div>
-                    {event.error ? <p className="mt-2 text-xs text-destructive">{event.error}</p> : null}
+                    {event.status === 'FAILED' ? <p className="mt-2 text-xs text-destructive">Processing failed — check server logs.</p> : null}
                   </Card>
                 ))}
               </div>
