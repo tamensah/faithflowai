@@ -149,11 +149,22 @@ This is the live checklist for product scope, implementation status, and next st
   - Welcome email auto-queued on Clerk organization.created webhook
 - Members CSV import preview UI (header mapping + readiness checks + sample row, matching household pattern)
 
+- Streaming module complete:
+  - Real provider API integrations (YouTube Data API v3, Facebook Graph API, Vimeo Live Events)
+  - HTTP HEAD probe fallback when credentials absent
+  - SCHEDULED→LIVE and LIVE→ENDED auto-transitions via provider sync cron (every 10 min)
+  - Vimeo recording URL auto-ingestion on archive
+  - Moderation levels + action logging (WARN, MUTE, REMOVE, DELETE_MESSAGE, BAN)
+  - Channels card with inline edit (externalChannelId, playbackUrl, ingestUrl)
+  - Session cards with viewer counts, recording URL, and missing-ID warnings
+  - Provider sync preview showing providerStatus + liveViewers + suggestedTransition
+  - STREAMING_SUITE entitlement gate; env vars tracked in THIRDPARTY_CONFIG.md §12
+  - User manual: `docs/STREAMING_MANUAL.md`
+
 ## Next Up (High Priority)
 1. Platform operations automation
    - Security policy rollout hardening (strict SSO mode + org-specific policy tuning)
-2. Streaming and support depth
-   - Stream moderation controls + external provider sync jobs
+2. Support center depth
    - Knowledge base integration and ticket deflection
 
 ## Backlog
@@ -171,6 +182,7 @@ This is the live checklist for product scope, implementation status, and next st
 - Events: `docs/EVENTS_MANUAL.md`
 - Subscription system: `docs/SUBSCRIPTION_SYSTEM.md`
 - Disputes: `docs/DISPUTE_PLAYBOOK.md`
+- Streaming: `docs/STREAMING_MANUAL.md`
 
 ## Notes
 - All features must enforce tenant isolation and RBAC by default.
