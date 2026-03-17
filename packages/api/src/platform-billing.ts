@@ -472,8 +472,31 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
   if (!subscriptionCode && !planCode && !reference) {
       result = { ok: true, skipped: true, reason: 'missing_subscription_refs' };
     } else {
+      // Security (HIGH-6): the `reference` is set by our server at checkout creation time using the
+      // format `sub_{tenantId}_{timestamp}` or `planchange_{tenantId}_{timestamp}`. Extract the
+      // tenantId from the reference as the authoritative source rather than trusting the free-form
+      // `metadata.tenantId` field, which could be spoofed if the Paystack key is compromised.
+      let authorativeTenantId: string | null = metadata.tenantId ?? null;
+      if (reference) {
+        const refMatch = /^(?:sub|planchange)_([^_]+)_\d+$/.exec(reference);
+        const refTenantId = refMatch?.[1] ?? null;
+        if (refTenantId) {
+          if (authorativeTenantId && authorativeTenantId !== refTenantId) {
+            // Mismatch: metadata claims a different tenant than the reference. Use the reference-derived
+            // value — it was set by our server and is harder to forge via external access.
+            console.warn('[paystack-webhook] metadata.tenantId mismatch with reference-derived tenantId — possible spoofing attempt', {
+              metaTenantId: authorativeTenantId,
+              refTenantId,
+              reference,
+              event: event.event,
+            });
+          }
+          authorativeTenantId = refTenantId;
+        }
+      }
+
       const { tenant, plan } = await resolveTenantAndPlan({
-        tenantId: metadata.tenantId ?? null,
+        tenantId: authorativeTenantId,
         clerkOrgId: metadata.clerkOrgId ?? null,
         planCode: metadata.planCode ?? null,
         paystackPlanCode: planCode ?? null,

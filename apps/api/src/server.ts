@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
 import rawBody from 'fastify-raw-body';
 import formbody from '@fastify/formbody';
 import multipart from '@fastify/multipart';
@@ -151,6 +152,15 @@ function buildCalendarIcs(
 }
 
 async function start() {
+  // Rate limiting — applied globally; sensitive routes override with tighter limits below
+  await server.register(rateLimit, {
+    global: true,
+    max: 300,           // 300 req / 1 min per IP for general API traffic
+    timeWindow: 60_000,
+    keyGenerator: (request) => request.ip,
+    errorResponseBuilder: () => ({ error: 'Too many requests. Please slow down.' }),
+  });
+
   await server.register(cors, {
     origin: env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()),
     credentials: true,
@@ -334,7 +344,8 @@ async function start() {
     'button{margin-top:12px;padding:8px 20px;background:#0f172a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px}';
 
   // GET: verify token and show a confirmation page — does NOT mutate state (fixes MED-1 state-mutating GET)
-  server.get('/unsubscribe', async (request, reply) => {
+  // Tighter rate limit: 10 requests/min per IP — prevents victim mass-unsubscription via link enumeration
+  server.get('/unsubscribe', { config: { rateLimit: { max: 10, timeWindow: 60_000 } } }, async (request, reply) => {
     const token = (request.query as { token?: string })?.token;
     if (!token) {
       reply.code(400).header('Content-Type', 'text/html; charset=utf-8').send('<h1>Missing token</h1>');
@@ -368,7 +379,7 @@ async function start() {
   });
 
   // POST: perform the actual unsubscribe mutation
-  server.post('/unsubscribe', async (request, reply) => {
+  server.post('/unsubscribe', { config: { rateLimit: { max: 10, timeWindow: 60_000 } } }, async (request, reply) => {
     const body = request.body as Record<string, unknown> | undefined;
     const token = typeof body?.token === 'string' ? body.token : (request.query as { token?: string })?.token;
     if (!token) {
@@ -509,7 +520,8 @@ async function start() {
     }
   });
 
-  server.post('/api/v1/donations/manual', async (request, reply) => {
+  // Tighter rate limit: 60/min per IP — integration-key protected but still bounded
+  server.post('/api/v1/donations/manual', { config: { rateLimit: { max: 60, timeWindow: 60_000 } } }, async (request, reply) => {
     try {
       const tenantId = await resolveIntegrationTenant(request);
       const input = manualDonationSchema.parse(request.body);
@@ -988,7 +1000,8 @@ async function start() {
     }
   });
 
-  server.post('/public/giving/checkout', async (request, reply) => {
+  // Tighter rate limit: 20 checkout requests/min per IP — public unauthenticated endpoint
+  server.post('/public/giving/checkout', { config: { rateLimit: { max: 20, timeWindow: 60_000 } } }, async (request, reply) => {
     try {
       const input = checkoutInputSchema.parse(request.body);
       const result = await createDonationCheckout({ ...input, tenantId: null });

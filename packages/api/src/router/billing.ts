@@ -752,6 +752,15 @@ export const billingRouter = router({
 
       const metadata = asRecord(data.metadata);
       const metadataTenantId = typeof metadata?.tenantId === 'string' ? metadata.tenantId : null;
+
+      // Security (HIGH-6): additionally cross-validate using the reference itself.
+      // Our references follow `sub_{tenantId}_{timestamp}` — the tenantId embedded here
+      // was set server-side and cannot be manipulated via Paystack dashboard metadata.
+      const refMatch = /^(?:sub|planchange)_([^_]+)_\d+$/.exec(input.reference);
+      const referenceTenantId = refMatch?.[1] ?? null;
+      if (referenceTenantId && referenceTenantId !== ctx.tenantId) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Checkout reference does not belong to this tenant.' });
+      }
       if (metadataTenantId && metadataTenantId !== ctx.tenantId) {
         throw new TRPCError({ code: 'FORBIDDEN', message: 'Checkout reference does not belong to this tenant.' });
       }
