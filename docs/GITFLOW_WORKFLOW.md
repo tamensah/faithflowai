@@ -198,14 +198,51 @@ Set these in **GitHub → Settings → Branches → Add rule**:
 
 The Fastify API runs on Render, not Vercel. Render has **two separate services** — staging and production.
 
-| Service | Render branch | Purpose |
-|---------|--------------|---------|
-| `faithflow-api-staging` | `develop` | Staging API for the staging frontend |
-| `faithflow-api` | `main` | Production API |
+| Service | Render branch | Blueprint | Purpose |
+|---------|--------------|-----------|---------|
+| `faithflow-api-staging` | `develop` | `render.staging.yaml` | Staging API for the staging frontend |
+| `faithflow-api` | `main` | `render.yaml` | Production API |
 
 **Always deploy the staging API first** when a PR introduces backend changes. The `develop → main` PR should only be opened after both the staging frontend and staging API are verified together.
 
-Cron jobs (`render.cron.yaml`) run against the production API only. Staging uses a separate cron config (or manual task triggers via the health page).
+Cron jobs (`render.cron.yaml`) run against the production API only. Staging uses manual task triggers via the health page — no staging cron services.
+
+### One-time staging service setup
+
+The staging blueprint (`render.staging.yaml`) provisions a web service + Postgres database tracking the `develop` branch.
+
+1. Go to **Render Dashboard → New → Blueprint**
+2. Connect the `faithflowai` GitHub repo and select `render.staging.yaml`
+3. Fill in all `sync: false` env vars — use **test/staging API keys only**, never production secrets
+4. Deploy — Render creates `faithflow-api-staging` + `faithflow-postgres-staging`
+
+All future `develop` pushes auto-deploy to the staging service after this.
+
+### Day-to-day Render CLI commands
+
+```bash
+# List all services and their IDs
+render services --output json
+
+# Trigger a manual deploy (staging)
+render deploys create <staging-service-id> --output json
+
+# Tail logs
+render logs <service-id>
+
+# Restart a service
+render restart <service-id>
+
+# Connect to staging Postgres
+render psql <staging-db-id>
+
+# Connect to production Postgres
+render psql dpg-d66gic14tr6s73alhg10-a
+```
+
+> **Production service IDs (never modify without staging sign-off):**
+> - API: `srv-d66giolum26s738rsus0`
+> - Postgres: `dpg-d66gic14tr6s73alhg10-a`
 
 ---
 

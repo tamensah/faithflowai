@@ -1,0 +1,122 @@
+services:
+  - type: web
+    name: faithflow-api-staging
+    runtime: node
+    plan: starter
+    branch: develop
+    autoDeploy: true
+    healthCheckPath: /docs
+    buildCommand: corepack enable && pnpm install --frozen-lockfile
+    preDeployCommand: pnpm --filter @faithflow-ai/database exec prisma migrate deploy
+    startCommand: pnpm --filter @faithflow-ai/api-server start
+    envVars:
+      - key: NODE_ENV
+        value: staging
+      - key: PORT
+        value: "10000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: faithflow-postgres-staging
+          property: connectionString
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: NEXT_PUBLIC_WEB_URL
+        sync: false
+      - key: NEXT_PUBLIC_ADMIN_URL
+        sync: false
+      - key: INTEGRATION_API_KEY
+        sync: false
+      - key: ENABLE_INTERNAL_SCHEDULER
+        value: "false"
+      - key: SCHEDULER_TIMEZONE
+        value: UTC
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_JWT_KEY
+        sync: false
+      - key: CLERK_JWT_ISSUER
+        sync: false
+      - key: CLERK_JWT_AUDIENCE
+        sync: false
+      - key: CLERK_WEBHOOK_SECRET
+        sync: false
+      - key: PLATFORM_ADMIN_EMAILS
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PLATFORM_STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_WEBHOOK_SECRET
+        sync: false
+      - key: PLATFORM_PAYSTACK_WEBHOOK_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_SMS_NUMBER
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        sync: false
+      - key: TWILIO_WEBHOOK_URL
+        sync: false
+      - key: FCM_SERVER_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GOOGLE_GENERATIVE_AI_API_KEY
+        sync: false
+      - key: AI_OPENAI_MODEL
+        sync: false
+      - key: AI_ANTHROPIC_MODEL
+        sync: false
+      - key: AI_GOOGLE_MODEL
+        sync: false
+      - key: STORAGE_PROVIDER
+        sync: false
+      - key: UPLOAD_MAX_BYTES
+        value: "26214400"
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_REGION
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_PUBLIC_URL
+        sync: false
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_PUBLIC_READ
+        sync: false
+      - key: S3_FORCE_PATH_STYLE
+        sync: false
+      - key: GCS_BUCKET
+        sync: false
+      - key: GCS_PROJECT_ID
+        sync: false
+      - key: GCS_CLIENT_EMAIL
+        sync: false
+      - key: GCS_PRIVATE_KEY
+        sync: false
+      - key: GCS_KEYFILE_PATH
+        sync: false
+      - key: GCS_PUBLIC_URL
+        sync: false
+
+databases:
+  - name: faithflow-postgres-staging
+    plan: starter
+    databaseName: faithflowdb_staging
+    user: faithflow_staging
