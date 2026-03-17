@@ -2,6 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { createClerkClient } from '@clerk/backend';
 import {
   AuditActorType,
+  Prisma,
   PlatformRole,
   SupportMessageAuthorType,
   SupportTicketPriority,
@@ -414,5 +415,101 @@ export const supportRouter = router({
         limit: input?.limit ?? 500,
         dryRun: input?.dryRun ?? false,
       });
+    }),
+
+  // ── Knowledge base ─────────────────────────────────────────────────────────
+
+  kbSearch: protectedProcedure
+    .input(z.object({ query: z.string().min(2).max(200), limit: z.number().int().min(1).max(10).default(5) }))
+    .query(async ({ input }) => {
+      return prisma.kBArticle.findMany({
+        where: {
+          published: true,
+          OR: [
+            { title: { contains: input.query, mode: 'insensitive' } },
+            { body: { contains: input.query, mode: 'insensitive' } },
+            { category: { contains: input.query, mode: 'insensitive' } },
+          ],
+        },
+        take: input.limit,
+        orderBy: { updatedAt: 'desc' },
+        select: { id: true, title: true, slug: true, category: true, body: true },
+      });
+    }),
+
+  kbArticles: protectedProcedure
+    .input(z.object({ publishedOnly: z.boolean().default(true), limit: z.number().int().min(1).max(200).default(50) }))
+    .query(async ({ input }) => {
+      return prisma.kBArticle.findMany({
+        where: input.publishedOnly ? { published: true } : undefined,
+        take: input.limit,
+        orderBy: { updatedAt: 'desc' },
+        select: { id: true, title: true, slug: true, category: true, published: true, createdAt: true, updatedAt: true },
+      });
+    }),
+
+  createKBArticle: userProcedure
+    .input(
+      z.object({
+        title: z.string().min(4).max(200),
+        body: z.string().min(10).max(20000),
+        category: z.string().max(100).optional(),
+        tags: z.array(z.string()).optional(),
+        published: z.boolean().default(false),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      await requirePlatformRole(ctx.userId!, [...supportPlatformRoles]);
+      const slug =
+        input.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '') +
+        '-' +
+        Date.now();
+      return prisma.kBArticle.create({
+        data: {
+          title: input.title,
+          slug,
+          body: input.body,
+          category: input.category ?? null,
+          tags: (input.tags ?? []) as Prisma.InputJsonValue,
+          published: input.published,
+          createdBy: ctx.userId!,
+        },
+      });
+    }),
+
+  updateKBArticle: userProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        title: z.string().min(4).max(200).optional(),
+        body: z.string().min(10).max(20000).optional(),
+        category: z.string().max(100).optional().nullable(),
+        tags: z.array(z.string()).optional(),
+        published: z.boolean().optional(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      await requirePlatformRole(ctx.userId!, [...supportPlatformRoles]);
+      return prisma.kBArticle.update({
+        where: { id: input.id },
+        data: {
+          ...(input.title !== undefined ? { title: input.title } : {}),
+          ...(input.body !== undefined ? { body: input.body } : {}),
+          ...(input.category !== undefined ? { category: input.category } : {}),
+          ...(input.tags !== undefined ? { tags: input.tags as Prisma.InputJsonValue } : {}),
+          ...(input.published !== undefined ? { published: input.published } : {}),
+          updatedBy: ctx.userId!,
+        },
+      });
+    }),
+
+  deleteKBArticle: userProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      await requirePlatformRole(ctx.userId!, [...supportPlatformRoles]);
+      await prisma.kBArticle.delete({ where: { id: input.id } });
     }),
 });

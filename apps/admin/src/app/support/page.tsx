@@ -43,6 +43,17 @@ export default function SupportPage() {
   const [assigneeId, setAssigneeId] = useState('');
   const [status, setStatus] = useState<(typeof platformStatusOptions)[number]>('IN_PROGRESS');
 
+  // KB management state (platform admins)
+  const [kbTitle, setKbTitle] = useState('');
+  const [kbBody, setKbBody] = useState('');
+  const [kbCategory, setKbCategory] = useState('');
+  const [kbPublished, setKbPublished] = useState(false);
+  const [editingArticleId, setEditingArticleId] = useState('');
+  const [editKbTitle, setEditKbTitle] = useState('');
+  const [editKbBody, setEditKbBody] = useState('');
+  const [editKbCategory, setEditKbCategory] = useState('');
+  const [editKbPublished, setEditKbPublished] = useState(false);
+
   const selectedTicket = useMemo(
     () =>
       tenantTickets?.find((ticket) => ticket.id === selectedTicketId) ??
@@ -105,6 +116,38 @@ export default function SupportPage() {
     },
   });
 
+  // Ticket deflection: search KB when subject has 3+ chars
+  const { data: deflectionResults } = trpc.support.kbSearch.useQuery(
+    { query: subject, limit: 4 },
+    { enabled: subject.trim().length >= 3 }
+  );
+
+  // KB management (platform admins only)
+  const { data: kbArticles } = trpc.support.kbArticles.useQuery(
+    { publishedOnly: false, limit: 100 },
+    { enabled: Boolean(platformSelf?.platformUser) }
+  );
+  const { mutate: createKBArticle, isPending: isCreatingArticle } = trpc.support.createKBArticle.useMutation({
+    onSuccess: async () => {
+      setKbTitle('');
+      setKbBody('');
+      setKbCategory('');
+      setKbPublished(false);
+      await utils.support.kbArticles.invalidate();
+    },
+  });
+  const { mutate: updateKBArticle } = trpc.support.updateKBArticle.useMutation({
+    onSuccess: async () => {
+      setEditingArticleId('');
+      await utils.support.kbArticles.invalidate();
+    },
+  });
+  const { mutate: deleteKBArticle } = trpc.support.deleteKBArticle.useMutation({
+    onSuccess: async () => {
+      await utils.support.kbArticles.invalidate();
+    },
+  });
+
   const thread = platformSelf?.platformUser ? (platformThread ?? tenantThread ?? []) : (tenantThread ?? []);
 
   return (
@@ -146,6 +189,20 @@ export default function SupportPage() {
               onChange={(event) => setDescription(event.target.value)}
             />
           </div>
+          {deflectionResults && deflectionResults.length > 0 ? (
+            <div className="mt-4 rounded-md border border-border bg-muted/20 p-3">
+              <p className="text-xs font-semibold text-muted">These articles may answer your question — check before submitting:</p>
+              <ul className="mt-2 space-y-1.5">
+                {deflectionResults.map((article) => (
+                  <li key={article.id} className="text-xs">
+                    <p className="font-medium">{article.title}</p>
+                    {article.category ? <p className="text-muted">{article.category}</p> : null}
+                    <p className="mt-0.5 line-clamp-2 text-muted">{article.body}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <div className="mt-4">
             <Button
               disabled={!canWrite || !subject.trim() || description.trim().length < 10 || isCreating}
@@ -350,6 +407,146 @@ export default function SupportPage() {
               >
                 {(isTenantReplying || isPlatformReplying) ? 'Sending...' : 'Send reply'}
               </Button>
+            </div>
+          </Card>
+        ) : null}
+        {platformSelf?.platformUser ? (
+          <Card className="p-6">
+            <h2 className="text-lg font-semibold">Knowledge Base</h2>
+            <p className="mt-1 text-xs text-muted">Published articles are suggested to tenants during ticket creation to deflect common issues.</p>
+
+            <div className="mt-4 grid gap-3">
+              <Input
+                placeholder="Article title"
+                value={kbTitle}
+                disabled={!canWrite}
+                onChange={(event) => setKbTitle(event.target.value)}
+              />
+              <Input
+                placeholder="Category (e.g. Billing, Streaming)"
+                value={kbCategory}
+                disabled={!canWrite}
+                onChange={(event) => setKbCategory(event.target.value)}
+              />
+              <textarea
+                placeholder="Article body (markdown supported)"
+                rows={4}
+                value={kbBody}
+                disabled={!canWrite}
+                className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm disabled:opacity-50"
+                onChange={(event) => setKbBody(event.target.value)}
+              />
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={kbPublished}
+                    disabled={!canWrite}
+                    onChange={(event) => setKbPublished(event.target.checked)}
+                  />
+                  Publish immediately
+                </label>
+                <Button
+                  disabled={!canWrite || kbTitle.trim().length < 4 || kbBody.trim().length < 10 || isCreatingArticle}
+                  onClick={() =>
+                    createKBArticle({ title: kbTitle.trim(), body: kbBody.trim(), category: kbCategory.trim() || undefined, published: kbPublished })
+                  }
+                >
+                  {isCreatingArticle ? 'Saving...' : 'Add article'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              {kbArticles?.map((article) => (
+                <div key={article.id} className="rounded-md border border-border p-3 text-sm">
+                  {editingArticleId === article.id ? (
+                    <div className="grid gap-2">
+                      <Input
+                        value={editKbTitle}
+                        disabled={!canWrite}
+                        onChange={(event) => setEditKbTitle(event.target.value)}
+                        placeholder="Title"
+                      />
+                      <Input
+                        value={editKbCategory}
+                        disabled={!canWrite}
+                        onChange={(event) => setEditKbCategory(event.target.value)}
+                        placeholder="Category"
+                      />
+                      <textarea
+                        rows={3}
+                        value={editKbBody}
+                        disabled={!canWrite}
+                        className="w-full rounded-md border border-border bg-white px-3 py-2 text-sm disabled:opacity-50"
+                        onChange={(event) => setEditKbBody(event.target.value)}
+                      />
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center gap-2 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={editKbPublished}
+                            disabled={!canWrite}
+                            onChange={(event) => setEditKbPublished(event.target.checked)}
+                          />
+                          Published
+                        </label>
+                        <Button
+                          variant="outline"
+                          disabled={!canWrite}
+                          onClick={() =>
+                            updateKBArticle({
+                              id: article.id,
+                              title: editKbTitle.trim(),
+                              body: editKbBody.trim(),
+                              category: editKbCategory.trim() || null,
+                              published: editKbPublished,
+                            })
+                          }
+                        >
+                          Save
+                        </Button>
+                        <Button variant="outline" onClick={() => setEditingArticleId('')}>Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-semibold">{article.title}</p>
+                        {article.category ? <p className="text-xs text-muted">{article.category}</p> : null}
+                        <Badge variant={article.published ? 'default' : 'warning'} className="mt-1 text-xs">
+                          {article.published ? 'Published' : 'Draft'}
+                        </Badge>
+                      </div>
+                      <div className="flex shrink-0 gap-2">
+                        <Button
+                          variant="outline"
+                          disabled={!canWrite}
+                          onClick={() => {
+                            setEditingArticleId(article.id);
+                            setEditKbTitle(article.title);
+                            setEditKbCategory(article.category ?? '');
+                            setEditKbPublished(article.published);
+                            setEditKbBody('');
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          disabled={!canWrite}
+                          onClick={() => {
+                            if (window.confirm(`Delete "${article.title}"?`)) deleteKBArticle({ id: article.id });
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {!kbArticles?.length ? <p className="text-sm text-muted">No articles yet. Add one above to start building the knowledge base.</p> : null}
             </div>
           </Card>
         ) : null}

@@ -26,6 +26,8 @@ export default function PlatformOpsPage() {
   const [breachContactEmail, setBreachContactEmail] = useState('');
   const [requireMfaForStaff, setRequireMfaForStaff] = useState(true);
   const [enforceSso, setEnforceSso] = useState(false);
+  const [ipAllowlist, setIpAllowlist] = useState<string[]>([]);
+  const [ipInput, setIpInput] = useState('');
   const [automationLimit, setAutomationLimit] = useState('250');
   const [sslWarningDays, setSslWarningDays] = useState('30');
   const [streamingChurchId, setStreamingChurchId] = useState('');
@@ -69,6 +71,7 @@ export default function PlatformOpsPage() {
     setBreachContactEmail(securityPolicy.breachContactEmail ?? '');
     setRequireMfaForStaff(securityPolicy.requireMfaForStaff);
     setEnforceSso(securityPolicy.enforceSso);
+    setIpAllowlist(Array.isArray(securityPolicy.ipAllowlist) ? (securityPolicy.ipAllowlist as string[]) : []);
   }, [securityPolicy]);
 
   const { mutate: upsertDomain, isPending: isSavingDomain } = trpc.tenantOps.upsertDomain.useMutation({
@@ -372,8 +375,55 @@ export default function PlatformOpsPage() {
             </label>
             <label className="flex items-center gap-2">
               <input type="checkbox" checked={enforceSso} onChange={(event) => setEnforceSso(event.target.checked)} />
-              Enforce SSO
+              Enforce SSO (strict mode requires <code className="text-xs">AUTH_POLICY_ENFORCE_SSO_STRICT=true</code>)
             </label>
+          </div>
+          <div className="mt-4">
+            <p className="text-sm font-medium">IP Allowlist</p>
+            <p className="mt-0.5 text-xs text-muted">When populated, only requests from these IPs are permitted. Leave empty to allow all IPs.</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {ipAllowlist.map((ip) => (
+                <span key={ip} className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/30 px-2 py-0.5 text-xs">
+                  {ip}
+                  <button
+                    type="button"
+                    disabled={!canWrite}
+                    className="ml-0.5 text-muted hover:text-foreground disabled:opacity-40"
+                    onClick={() => setIpAllowlist((prev) => prev.filter((entry) => entry !== ip))}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              {!ipAllowlist.length ? <p className="text-xs text-muted">No IPs — all addresses allowed.</p> : null}
+            </div>
+            <div className="mt-2 flex gap-2">
+              <Input
+                placeholder="e.g. 203.0.113.5 or 10.0.0.0/24"
+                value={ipInput}
+                disabled={!canWrite}
+                className="max-w-xs"
+                onChange={(event) => setIpInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && ipInput.trim() && !ipAllowlist.includes(ipInput.trim())) {
+                    setIpAllowlist((prev) => [...prev, ipInput.trim()]);
+                    setIpInput('');
+                  }
+                }}
+              />
+              <Button
+                variant="outline"
+                disabled={!canWrite || !ipInput.trim() || ipAllowlist.includes(ipInput.trim())}
+                onClick={() => {
+                  if (ipInput.trim() && !ipAllowlist.includes(ipInput.trim())) {
+                    setIpAllowlist((prev) => [...prev, ipInput.trim()]);
+                    setIpInput('');
+                  }
+                }}
+              >
+                Add IP
+              </Button>
+            </div>
           </div>
           <div className="mt-4">
             <Button
@@ -386,6 +436,7 @@ export default function PlatformOpsPage() {
                   sessionTimeoutMinutes: Number(sessionTimeoutMinutes || 480),
                   dataRetentionDays: Number(dataRetentionDays || 3650),
                   breachContactEmail: breachContactEmail.trim() || null,
+                  ipAllowlist,
                 })
               }
             >
