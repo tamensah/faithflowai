@@ -1,5 +1,7 @@
 # FaithFlow AI Deployment Manual
 
+> **Branch & git workflow** → See [`docs/GITFLOW_WORKFLOW.md`](./GITFLOW_WORKFLOW.md) for the authoritative `feature/* → develop → main` branch model, staging verification checklist, and branch protection rules. **Never deploy to production without staging sign-off.**
+
 This manual is the end-to-end go-live runbook for alpha.
 
 It covers:
