@@ -6,8 +6,6 @@ import {
   OrganizationSwitcher,
   SignInButton,
   SignUpButton,
-  SignedIn,
-  SignedOut,
   useAuth,
   useUser,
 } from '@clerk/nextjs';
@@ -31,9 +29,68 @@ function getTrialDays(metadata: unknown) {
   return null;
 }
 
+// ─── Step indicator ────────────────────────────────────────────────────────────
+
+type StepState = 'done' | 'active' | 'locked';
+
+function StepDot({ state, n }: { state: StepState; n: number }) {
+  if (state === 'done') {
+    return (
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+        <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.2}>
+          <path d="M3 8l3.5 3.5L13 4.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+    );
+  }
+  if (state === 'active') {
+    return (
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+        {n}
+      </span>
+    );
+  }
+  return (
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-border text-sm font-semibold text-muted">
+      {n}
+    </span>
+  );
+}
+
+function StepRow({
+  n,
+  state,
+  title,
+  children,
+  isLast = false,
+}: {
+  n: number;
+  state: StepState;
+  title: string;
+  children: React.ReactNode;
+  isLast?: boolean;
+}) {
+  return (
+    <div className="flex gap-5">
+      <div className="flex flex-col items-center">
+        <StepDot state={state} n={n} />
+        {!isLast && <div className="mt-1 w-px flex-1 bg-border" />}
+      </div>
+      <div className={`w-full pb-8 pt-1 ${state === 'locked' ? 'opacity-40 select-none pointer-events-none' : ''}`}>
+        <p className={`text-base font-semibold ${state === 'active' ? 'text-foreground' : 'text-muted'}`}>
+          {title}
+        </p>
+        <div className="mt-3">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
+
 export default function GetStartedPage() {
   const utils = trpc.useUtils();
-  const { orgId } = useAuth();
+  const { isSignedIn, orgId } = useAuth();
   const { user } = useUser();
   const [provider, setProvider] = useState<(typeof providers)[number]>('STRIPE');
   const [selectedPlanCode, setSelectedPlanCode] = useState('');
@@ -56,6 +113,8 @@ export default function GetStartedPage() {
     },
   });
 
+  // Auto-bootstrap: silently claims admin for the first user in a new org.
+  // No user action required — the button in the old design was misleading.
   useEffect(() => {
     if (!orgId || !authSelf?.bootstrapAllowed || authSelf?.isStaff || isBootstrapping) return;
     bootstrap();
@@ -79,123 +138,153 @@ export default function GetStartedPage() {
     [plans, selectedPlanCode]
   );
 
+  // Derive step states
+  const step1: StepState = isSignedIn ? 'done' : 'active';
+  const step2: StepState = !isSignedIn ? 'locked' : orgId && authSelf?.isStaff ? 'done' : 'active';
+  const step3: StepState = !isSignedIn || !orgId || !authSelf?.isStaff ? 'locked' : 'active';
+
+  const trialDays = getTrialDays(selectedPlan?.metadata);
+
   return (
-    <main className="mx-auto min-h-screen w-full max-w-5xl p-8">
-      <div className="space-y-6">
-        <div>
-          <Badge variant="default">Church onboarding</Badge>
-          <h1 className="mt-3 text-3xl font-semibold">Set up your church and launch admin</h1>
-          <p className="mt-2 text-sm text-muted">
-            Flow: account → organization → admin claim → plan checkout → admin workspace.
-          </p>
-        </div>
+    <main className="mx-auto min-h-screen w-full max-w-2xl px-6 py-16">
+      {/* Header */}
+      <div className="mb-12">
+        <Badge variant="default">Church onboarding</Badge>
+        <h1 className="mt-4 text-4xl font-semibold leading-tight text-foreground">
+          Set up your church in minutes.
+        </h1>
+        <p className="mt-3 text-base text-muted">
+          Three steps and you'll have a fully configured admin workspace for your congregation.
+        </p>
+      </div>
 
-        <SignedOut>
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold">Create your account</h2>
-            <p className="mt-2 text-sm text-muted">Use an admin account for your church onboarding.</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <SignInButton mode="modal">
-                <Button>Sign in</Button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <Button variant="outline">Create account</Button>
-              </SignUpButton>
-            </div>
-          </Card>
-        </SignedOut>
-
-        <SignedIn>
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold">Step 1: Select or create organization</h2>
-            <p className="mt-2 text-sm text-muted">
-              Choose the church organization this subscription will belong to.
+      {/* Wizard */}
+      <div>
+        {/* ── Step 1: Create account ── */}
+        <StepRow n={1} state={step1} title="Create your account">
+          {step1 === 'done' ? (
+            <p className="text-sm text-emerald-700">
+              Signed in as <span className="font-medium">{user?.primaryEmailAddress?.emailAddress}</span>
             </p>
-            <div className="mt-4">
-              <OrganizationSwitcher hidePersonal afterSelectOrganizationUrl="/get-started" afterCreateOrganizationUrl="/get-started" />
-            </div>
-            {!orgId ? (
-              <p className="mt-3 text-xs text-muted">Select or create an organization to continue.</p>
-            ) : (
-              <p className="mt-3 text-xs text-emerald-700">Organization selected.</p>
-            )}
-          </Card>
-
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold">Step 2: Claim church admin access</h2>
-            <p className="mt-2 text-sm text-muted">First user in a new church organization is auto-assigned as admin.</p>
-            {authSelf?.isStaff ? (
-              <p className="mt-3 text-xs text-emerald-700">Admin access active for {user?.primaryEmailAddress?.emailAddress}.</p>
-            ) : (
-              <div className="mt-4">
-                <Button
-                  onClick={() => bootstrap()}
-                  disabled={!orgId || isBootstrapping || !authSelf?.bootstrapAllowed}
-                >
-                  {isBootstrapping ? 'Claiming access…' : 'Claim admin access'}
-                </Button>
-                {!authSelf?.bootstrapAllowed && orgId ? (
-                  <p className="mt-2 text-xs text-muted">
-                    This org already has staff configured. Ask an existing admin to grant access.
-                  </p>
-                ) : null}
+          ) : (
+            <Card className="p-5">
+              <p className="text-sm text-muted">
+                Your account is the admin login for your church. Use a work email — not a personal one you might lose access to.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {/* forceRedirectUrl ensures Clerk always comes back here after OAuth or email auth */}
+                <SignUpButton mode="modal" forceRedirectUrl="/get-started">
+                  <Button>Create free account</Button>
+                </SignUpButton>
+                <SignInButton mode="modal" forceRedirectUrl="/get-started">
+                  <Button variant="outline">Sign in</Button>
+                </SignInButton>
               </div>
-            )}
-          </Card>
+              <p className="mt-3 text-xs text-muted">14-day free trial · No credit card required</p>
+            </Card>
+          )}
+        </StepRow>
 
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold">Step 3: Choose plan and checkout</h2>
-            <p className="mt-2 text-sm text-muted">Subscription activates billing and feature entitlements for your organization.</p>
+        {/* ── Step 2: Set up your church ── */}
+        <StepRow n={2} state={step2} title="Set up your church">
+          {step2 === 'done' ? (
+            <p className="text-sm text-emerald-700">
+              Church organisation ready. Admin access active.
+            </p>
+          ) : (
+            <Card className="p-5">
+              <p className="text-sm text-muted">
+                Create your church organisation. This groups your members, events, and billing together under one workspace.
+              </p>
+              <div className="mt-4">
+                <OrganizationSwitcher
+                  hidePersonal
+                  afterSelectOrganizationUrl="/get-started"
+                  afterCreateOrganizationUrl="/get-started"
+                />
+              </div>
+              {!orgId ? (
+                <p className="mt-3 text-xs text-muted">
+                  Click the switcher above and choose <strong>Create organisation</strong> — name it after your church.
+                </p>
+              ) : (
+                <p className="mt-3 text-xs text-muted">
+                  {isBootstrapping ? 'Setting up your admin access…' : 'Organisation selected. Finalising access…'}
+                </p>
+              )}
+              {authSelf?.bootstrapAllowed === false && orgId ? (
+                <p className="mt-2 text-xs text-amber-700">
+                  This organisation already has an admin configured. Ask them to invite you from the Staff page.
+                </p>
+              ) : null}
+            </Card>
+          )}
+        </StepRow>
+
+        {/* ── Step 3: Choose plan ── */}
+        <StepRow n={3} state={step3} title="Choose your plan" isLast>
+          <Card className="p-5">
+            <p className="text-sm text-muted">
+              Your subscription activates all features for your church. Start with a 14-day free trial — upgrade or cancel any time.
+            </p>
+
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <select
-                className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
-                value={selectedPlanCode}
-                onChange={(event) => {
-                  setLocalError(null);
-                  setSelectedPlanCode(event.target.value);
-                }}
-                disabled={!orgId || isPlansLoading || !plans?.length}
-              >
-                <option value="">{isPlansLoading ? 'Loading plans...' : 'Select plan'}</option>
-                {plans?.map((plan) => (
-                  <option key={plan.id} value={plan.code}>
-                    {plan.name} ({plan.code})
-                  </option>
-                ))}
-              </select>
-              <select
-                className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
-                value={provider}
-                onChange={(event) => setProvider(event.target.value as (typeof providers)[number])}
-                disabled={!orgId}
-              >
-                {providers.map((entry) => (
-                  <option key={entry} value={entry}>
-                    {entry}
-                  </option>
-                ))}
-              </select>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted">Plan</label>
+                <select
+                  className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+                  value={selectedPlanCode}
+                  onChange={(e) => { setLocalError(null); setSelectedPlanCode(e.target.value); }}
+                  disabled={isPlansLoading || !plans?.length}
+                >
+                  <option value="">{isPlansLoading ? 'Loading plans…' : 'Select a plan'}</option>
+                  {plans?.map((plan) => (
+                    <option key={plan.id} value={plan.code}>
+                      {plan.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-muted">Payment provider</label>
+                <select
+                  className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+                  value={provider}
+                  onChange={(e) => setProvider(e.target.value as (typeof providers)[number])}
+                >
+                  <option value="STRIPE">Stripe — card / international</option>
+                  <option value="PAYSTACK">Paystack — Africa / local currency</option>
+                </select>
+              </div>
             </div>
-            {!isPlansLoading && !plans?.length ? (
-              <p className="mt-2 text-xs text-muted">
-                No plans available yet. Ask platform support to configure plan catalog pricing.
-              </p>
-            ) : null}
+
             {selectedPlan ? (
-              <p className="mt-3 text-sm text-muted">
-                {selectedPlan.description || 'No description'} ·{' '}
-                {formatPlan(selectedPlan.amountMinor, selectedPlan.currency, selectedPlan.interval)}
-                {getTrialDays(selectedPlan.metadata) ? ` · ${getTrialDays(selectedPlan.metadata)}-day free trial` : ''}
+              <div className="mt-3 rounded-lg bg-muted/5 p-3 text-sm">
+                <p className="font-medium text-foreground">{selectedPlan.name}</p>
+                <p className="mt-0.5 text-muted">
+                  {selectedPlan.description || 'Full feature access'} ·{' '}
+                  {formatPlan(selectedPlan.amountMinor, selectedPlan.currency, selectedPlan.interval)}
+                  {trialDays ? (
+                    <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
+                      {trialDays}-day free trial
+                    </span>
+                  ) : null}
+                </p>
+              </div>
+            ) : null}
+
+            {!isPlansLoading && !plans?.length ? (
+              <p className="mt-3 text-xs text-muted">
+                No plans configured yet. Contact platform support to set up the plan catalogue.
               </p>
             ) : null}
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+
+            <div className="mt-5 flex flex-wrap items-center gap-3">
               <Button
-                disabled={!orgId || !authSelf?.isStaff || !selectedPlanCode || isStartingCheckout || !plans?.length}
+                disabled={!selectedPlanCode || isStartingCheckout || !plans?.length}
                 onClick={() => {
-                  if (!selectedPlanCode) {
-                    setLocalError('Select a plan first.');
-                    return;
-                  }
+                  if (!selectedPlanCode) { setLocalError('Select a plan first.'); return; }
                   setLocalError(null);
                   startCheckout({
                     planCode: selectedPlanCode,
@@ -205,23 +294,34 @@ export default function GetStartedPage() {
                   });
                 }}
               >
-                {isStartingCheckout ? 'Redirecting…' : 'Continue to checkout'}
-              </Button>
-              <Button variant="outline" onClick={() => (window.location.href = adminBaseUrl)}>
-                Go to admin
+                {isStartingCheckout ? 'Redirecting to checkout…' : 'Start free trial'}
               </Button>
             </div>
-            {localError ? <p className="mt-2 text-xs text-destructive">{localError}</p> : null}
-            {!authSelf?.isStaff ? (
-              <p className="mt-2 text-xs text-muted">Claim admin access to unlock plan checkout.</p>
-            ) : null}
-          </Card>
-        </SignedIn>
 
-        <div className="flex flex-wrap gap-4 text-sm text-muted">
-          <span>Need member access instead? <Link className="underline" href="/portal">Go to member portal</Link>.</span>
-          <span>Need help? <Link className="underline" href="/guide">Read the admin guide</Link>.</span>
-        </div>
+            {localError ? <p className="mt-2 text-xs text-destructive">{localError}</p> : null}
+          </Card>
+        </StepRow>
+      </div>
+
+      {/* Footer links */}
+      <div className="mt-2 flex flex-wrap gap-4 text-sm text-muted">
+        <span>
+          Already set up?{' '}
+          <a href={adminBaseUrl} className="underline hover:text-foreground">
+            Go to admin console
+          </a>
+        </span>
+        <span>
+          Member of a church?{' '}
+          <Link href="/portal" className="underline hover:text-foreground">
+            Go to member portal
+          </Link>
+        </span>
+        <span>
+          <Link href="/guide" className="underline hover:text-foreground">
+            Read the setup guide
+          </Link>
+        </span>
       </div>
     </main>
   );
