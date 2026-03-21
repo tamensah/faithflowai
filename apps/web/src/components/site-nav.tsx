@@ -11,6 +11,7 @@ const mainLinks: LinkItem[] = [
   { href: '/features', label: 'Features' },
   { href: '/plans', label: 'Plans' },
   { href: '/about', label: 'About' },
+  { href: '/guide', label: 'Guide' },
   { href: '/contact', label: 'Contact' },
 ];
 

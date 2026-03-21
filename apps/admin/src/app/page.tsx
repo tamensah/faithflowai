@@ -164,11 +164,89 @@ export default function AdminHome() {
                   Open go-live checks
                 </Button>
               </Link>
+              <a
+                href={`${(process.env.NEXT_PUBLIC_WEB_URL ?? 'https://web-nu-eight-62.vercel.app').replace(/\/+$/, '')}/guide`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Button variant="outline" className="border-white/30 bg-white/10 text-white hover:bg-white/20">
+                  Admin guide ↗
+                </Button>
+              </a>
             </div>
           </div>
         </Card>
 
         {writeGate.readOnly ? <ReadOnlyNotice /> : null}
+
+        {/* First-time setup wizard — shown until a church exists */}
+        {churches !== undefined && churches.length === 0 ? (
+          <Card className="border-amber-200 bg-amber-50 p-6">
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-400 text-xs font-bold text-white">!</span>
+              <div className="flex-1">
+                <h2 className="font-display text-base font-semibold text-amber-900">Complete your workspace setup</h2>
+                <p className="mt-1 text-sm text-amber-800">
+                  Your admin account is active. Follow these steps to configure your church and start using all modules.
+                </p>
+                <ol className="mt-4 space-y-3">
+                  {[
+                    {
+                      n: 1,
+                      title: organizations && organizations.length > 0 ? '✓ Create your organization' : 'Create your organization',
+                      desc: 'Add your church organization in the panel below. This is the top-level entity that owns your churches.',
+                      done: Boolean(organizations && organizations.length > 0),
+                      action: null,
+                    },
+                    {
+                      n: 2,
+                      title: 'Create your first church',
+                      desc: 'Once an organization exists, use the Churches panel below to add your first church with a name, slug, and country.',
+                      done: false,
+                      action: null,
+                    },
+                    {
+                      n: 3,
+                      title: 'Invite your staff team',
+                      desc: 'Add staff accounts and assign roles. Staff members sign in to this console.',
+                      done: false,
+                      action: '/staff',
+                    },
+                    {
+                      n: 4,
+                      title: 'Import or add members',
+                      desc: 'Upload a CSV or add members individually. Members use the member portal.',
+                      done: false,
+                      action: '/members',
+                    },
+                    {
+                      n: 5,
+                      title: 'Check go-live readiness',
+                      desc: 'Run the go-live checklist to verify your configuration before inviting your congregation.',
+                      done: false,
+                      action: '/operations/health',
+                    },
+                  ].map((step) => (
+                    <li key={step.n} className="flex items-start gap-3">
+                      <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${step.done ? 'bg-emerald-500 text-white' : 'bg-amber-200 text-amber-800'}`}>
+                        {step.done ? '✓' : step.n}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold ${step.done ? 'text-emerald-700' : 'text-amber-900'}`}>{step.title}</p>
+                        <p className="mt-0.5 text-xs text-amber-700">{step.desc}</p>
+                        {step.action ? (
+                          <Link href={step.action} className="mt-1 inline-block text-xs font-medium text-primary hover:underline">
+                            Go to {step.title.toLowerCase()} →
+                          </Link>
+                        ) : null}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </Card>
+        ) : null}
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <Card className="ff-surface p-5">

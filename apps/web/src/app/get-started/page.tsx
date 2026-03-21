@@ -218,8 +218,9 @@ export default function GetStartedPage() {
           </Card>
         </SignedIn>
 
-        <div className="text-sm text-muted">
-          Need member access instead? <Link className="underline" href="/portal">Go to member portal</Link>.
+        <div className="flex flex-wrap gap-4 text-sm text-muted">
+          <span>Need member access instead? <Link className="underline" href="/portal">Go to member portal</Link>.</span>
+          <span>Need help? <Link className="underline" href="/guide">Read the admin guide</Link>.</span>
         </div>
       </div>
     </main>
