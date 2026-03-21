@@ -16,9 +16,11 @@ const sectionOptions = [
   { key: 'plan-form', label: 'Plan editor' },
   { key: 'assign-plan', label: 'Tenant assignment' },
   { key: 'dunning', label: 'Dunning' },
+  { key: 'billing-automation', label: 'Billing automation' },
   { key: 'metadata', label: 'Provider metadata' },
   { key: 'catalog', label: 'Plan catalog' },
   { key: 'snapshot', label: 'Tenant snapshot' },
+  { key: 'tenant-inspector', label: 'Tenant inspector' },
 ] as const;
 type SectionKey = (typeof sectionOptions)[number]['key'];
 
@@ -101,10 +103,14 @@ export default function PlatformSubscriptionsPage() {
   const [dunningGraceDays, setDunningGraceDays] = useState('3');
   const [dunningLimit, setDunningLimit] = useState('200');
   const [metadataBackfillLimit, setMetadataBackfillLimit] = useState('250');
+  const [billingAutomationExpireDays, setBillingAutomationExpireDays] = useState('7');
+  const [billingAutomationLimit, setBillingAutomationLimit] = useState('500');
+  const [inspectorTenantId, setInspectorTenantId] = useState('');
   const [planFormStatus, setPlanFormStatus] = useState('');
   const [assignmentStatus, setAssignmentStatus] = useState('');
   const [dunningStatus, setDunningStatus] = useState('');
   const [backfillStatus, setBackfillStatus] = useState('');
+  const [billingAutomationStatus, setBillingAutomationStatus] = useState('');
 
   const tenantOptions = useMemo(() => tenants ?? [], [tenants]);
   const dunningInput = useMemo(
@@ -160,6 +166,27 @@ export default function PlatformSubscriptionsPage() {
       },
       onError: (error) => setBackfillStatus(error.message),
     });
+
+  const { mutate: runBillingAutomation, data: billingAutomationResult, isPending: isRunningBillingAutomation } =
+    trpc.platform.runBillingAutomation.useMutation({
+      onSuccess: async () => {
+        setBillingAutomationStatus('Billing automation completed.');
+        await utils.platform.listTenants.invalidate();
+      },
+      onError: (error) => setBillingAutomationStatus(error.message),
+    });
+
+  const { data: inspectorSubscription, isLoading: isLoadingInspectorSub, refetch: refetchInspectorSub } =
+    trpc.platform.tenantSubscription.useQuery(
+      { tenantId: inspectorTenantId },
+      { enabled: Boolean(platformSelf?.platformUser) && Boolean(inspectorTenantId) }
+    );
+
+  const { data: inspectorUsage, isLoading: isLoadingInspectorUsage, refetch: refetchInspectorUsage } =
+    trpc.platform.tenantUsage.useQuery(
+      { tenantId: inspectorTenantId },
+      { enabled: Boolean(platformSelf?.platformUser) && Boolean(inspectorTenantId) }
+    );
 
   const handleSavePlan = () => {
     const amount = Number(amountMinor);
@@ -235,6 +262,21 @@ export default function PlatformSubscriptionsPage() {
 
     setBackfillStatus('');
     runMetadataBackfill({ limit, dryRun });
+  };
+
+  const handleRunBillingAutomation = () => {
+    const expireDays = Number(billingAutomationExpireDays);
+    const limit = Number(billingAutomationLimit);
+    if (!Number.isFinite(expireDays) || expireDays < 1) {
+      setBillingAutomationStatus('Expire-after days must be at least 1.');
+      return;
+    }
+    if (!Number.isFinite(limit) || limit < 1) {
+      setBillingAutomationStatus('Tenant limit must be at least 1.');
+      return;
+    }
+    setBillingAutomationStatus('');
+    runBillingAutomation({ expirePastDueAfterDays: expireDays, limitTenants: limit });
   };
 
   if (!platformSelf?.platformUser) {
@@ -442,6 +484,54 @@ export default function PlatformSubscriptionsPage() {
           </Card>
         ) : null}
 
+        {activeSection === 'billing-automation' ? (
+          <Card className="p-6">
+            <h2 className="text-lg font-semibold">Billing automation</h2>
+            <p className="mt-1 text-xs text-muted">
+              Expire past-due subscriptions that have not resolved payment after the configured grace period. This runs
+              the full subscription lifecycle automation sweep and locks out tenants who remain past-due beyond the
+              threshold.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-medium">Expire past-due after (days) *</label>
+                <Input
+                  placeholder="7"
+                  type="number"
+                  value={billingAutomationExpireDays}
+                  onChange={(event) => setBillingAutomationExpireDays(event.target.value)}
+                />
+                <p className="mt-1 text-xs text-muted">Subscriptions past-due for longer than this will be expired.</p>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium">Max tenants to process *</label>
+                <Input
+                  placeholder="500"
+                  type="number"
+                  value={billingAutomationLimit}
+                  onChange={(event) => setBillingAutomationLimit(event.target.value)}
+                />
+                <p className="mt-1 text-xs text-muted">Caps the sweep to avoid runaway processing.</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <Button
+                onClick={handleRunBillingAutomation}
+                disabled={!canWrite || isRunningBillingAutomation}
+                variant="outline"
+              >
+                {isRunningBillingAutomation ? 'Running automation…' : 'Run billing automation'}
+              </Button>
+            </div>
+            {billingAutomationResult ? (
+              <div className="mt-3 rounded-md border border-border bg-muted/30 p-3 text-xs">
+                <pre className="whitespace-pre-wrap break-all">{JSON.stringify(billingAutomationResult, null, 2)}</pre>
+              </div>
+            ) : null}
+            {billingAutomationStatus ? <p className="mt-3 text-xs text-muted">{billingAutomationStatus}</p> : null}
+          </Card>
+        ) : null}
+
         {activeSection === 'metadata' ? (
           <Card className="p-6">
             <h2 className="text-lg font-semibold">Provider metadata normalization</h2>
@@ -522,6 +612,99 @@ export default function PlatformSubscriptionsPage() {
                 />
               ) : null}
             </div>
+          </Card>
+        ) : null}
+
+        {activeSection === 'tenant-inspector' ? (
+          <Card className="p-6">
+            <h2 className="text-lg font-semibold">Tenant inspector</h2>
+            <p className="mt-1 text-xs text-muted">
+              Select a tenant to view their active subscription details and live usage snapshot.
+            </p>
+            <div className="mt-4">
+              <select
+                className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm sm:max-w-sm"
+                value={inspectorTenantId}
+                onChange={(event) => setInspectorTenantId(event.target.value)}
+              >
+                <option value="">{isLoadingTenants ? 'Loading tenants...' : 'Select tenant to inspect'}</option>
+                {tenantOptions.map((tenant) => (
+                  <option key={tenant.id} value={tenant.id}>
+                    {tenant.name} ({tenant.slug})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {inspectorTenantId ? (
+              <div className="mt-6 space-y-4">
+                {/* Subscription */}
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold">Active subscription</h3>
+                  {isLoadingInspectorSub ? (
+                    <p className="text-xs text-muted">Loading subscription…</p>
+                  ) : inspectorSubscription ? (
+                    <div className="rounded-md border border-border p-3 text-xs space-y-1">
+                      <p>
+                        <span className="font-medium">Plan:</span> {inspectorSubscription.plan?.name ?? 'N/A'} (
+                        {inspectorSubscription.plan?.code ?? 'N/A'})
+                      </p>
+                      <p>
+                        <span className="font-medium">Status:</span>{' '}
+                        <Badge variant={inspectorSubscription.status === 'ACTIVE' ? 'success' : 'warning'}>
+                          {inspectorSubscription.status}
+                        </Badge>
+                      </p>
+                      <p>
+                        <span className="font-medium">Provider:</span> {inspectorSubscription.provider}
+                      </p>
+                      {inspectorSubscription.currentPeriodEnd ? (
+                        <p>
+                          <span className="font-medium">Period end:</span>{' '}
+                          {new Date(inspectorSubscription.currentPeriodEnd).toLocaleDateString()}
+                        </p>
+                      ) : null}
+                      {inspectorSubscription.seatCount ? (
+                        <p>
+                          <span className="font-medium">Seats:</span> {inspectorSubscription.seatCount}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted">No active subscription found for this tenant.</p>
+                  )}
+                </div>
+
+                {/* Usage */}
+                <div>
+                  <h3 className="mb-2 text-sm font-semibold">Usage snapshot</h3>
+                  {isLoadingInspectorUsage ? (
+                    <p className="text-xs text-muted">Loading usage…</p>
+                  ) : inspectorUsage ? (
+                    <div className="rounded-md border border-border bg-muted/30 p-3 text-xs">
+                      <pre className="whitespace-pre-wrap break-all">
+                        {JSON.stringify(inspectorUsage, null, 2)}
+                      </pre>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted">No usage data available.</p>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      void refetchInspectorSub();
+                      void refetchInspectorUsage();
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                </div>
+              </div>
+            ) : null}
           </Card>
         ) : null}
 

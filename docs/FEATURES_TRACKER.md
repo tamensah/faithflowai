@@ -170,6 +170,12 @@ This is the live checklist for product scope, implementation status, and next st
   - KB Management section in /support (create/edit/delete articles, publish toggle)
   - Ticket deflection: matching published articles surfaced while tenant types ticket subject
 
+- Platform admin command center hardening:
+  - Platform overview page (`/platform`) upgraded to full command center: tenant stats (total/active/trialing/past-due/suspended), active plan catalog summary, at-risk dunning count, quick-action nav cards
+  - `runBillingAutomation` UI added to subscriptions page (Billing automation tab): expire past-due after configurable days, capped sweep limit, result display
+  - Tenant inspector tab added to subscriptions page: per-tenant subscription detail + live usage snapshot with refresh action
+  - Tenant inspector surfaces `tenantSubscription` + `tenantUsage` procedures previously unexposed in any UI
+
 - Marketing site and onboarding hardening:
   - Decoupled marketing layout from portal/admin via Next.js App Router route group `(marketing)/`
   - Root layout now minimal (ClerkProvider + Providers only) — portal and admin fully isolated
