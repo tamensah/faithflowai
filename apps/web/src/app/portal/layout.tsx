@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { OrganizationSwitcher, SignIn, useUser } from '@clerk/nextjs';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { trpc } from '../../lib/trpc';
+import { HelpTriggerButton, PortalHelpSheet } from './PortalHelpSheet';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -75,6 +76,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   const { user } = useUser();
   const pathname = usePathname();
 
+  const [helpOpen, setHelpOpen] = useState(false);
   const [requestChurchId, setRequestChurchId] = useState('');
   const [requestName, setRequestName] = useState('');
   const [requestEmail, setRequestEmail] = useState('');
@@ -303,10 +305,13 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
             ))}
           </nav>
 
-          {/* Mobile: show current page name */}
-          <p className="text-sm font-medium text-foreground sm:hidden">
-            {navLinks.find((l) => l.href === pathname)?.label ?? ''}
-          </p>
+          {/* Right side: current page label (mobile) + help trigger */}
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-foreground sm:hidden">
+              {navLinks.find((l) => l.href === pathname)?.label ?? ''}
+            </p>
+            <HelpTriggerButton onClick={() => setHelpOpen(true)} />
+          </div>
         </div>
       </header>
 
@@ -314,6 +319,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       <main className="mx-auto max-w-5xl px-4 py-5 pb-24 sm:px-6 sm:pb-8">
         {children}
       </main>
+
+      <PortalHelpSheet open={helpOpen} onOpenChange={setHelpOpen} />
 
       {/* Mobile bottom tab bar */}
       <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-white/95 backdrop-blur sm:hidden">

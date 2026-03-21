@@ -16,14 +16,14 @@ const onboardingSteps = [
     n: 1,
     title: 'Create your account',
     detail:
-      'Sign up at faithflow.ai. Use the email address you want as the primary admin for your church.',
+      'Sign up at the dedicated sign-up page. Use the email address you want as the primary admin contact for your church.',
     link: { label: 'Create account', href: webLink('/sign-up') },
   },
   {
     n: 2,
-    title: 'Create your Clerk organization',
+    title: 'Create your church organization',
     detail:
-      'After signing in, the onboarding wizard asks you to create (or select) an organization. This is your Clerk-level tenant — name it after your church or network.',
+      'On the onboarding page, use the organization switcher to create (or select) your church organization. This is your tenant boundary — name it after your church or network.',
     link: { label: 'Start onboarding', href: webLink('/get-started') },
   },
   {
@@ -256,13 +256,13 @@ const roles = [
 ];
 
 const portalSections = [
-  { label: 'Profile', path: '/portal/profile', desc: 'Edit contact info, photo, and directory privacy settings.' },
-  { label: 'Directory', path: '/portal/directory', desc: 'Browse church members (subject to each member\'s privacy settings).' },
-  { label: 'Events', path: '/portal/events', desc: 'Browse, RSVP, and register for upcoming events.' },
-  { label: 'Messages', path: '/portal/messages', desc: 'Direct messages with staff and other members.' },
-  { label: 'Volunteer', path: '/portal/volunteer', desc: 'Browse open shifts and sign up for service roles.' },
-  { label: 'Notifications', path: '/portal/notifications', desc: 'Notification inbox and preference management.' },
-  { label: 'Surveys', path: '/portal/surveys', desc: 'Complete active surveys from church leadership.' },
+  { label: 'Profile', path: '/portal/profile', desc: 'Edit preferred name, phone, address. Control directory visibility per field.' },
+  { label: 'Directory', path: '/portal/directory', desc: 'Browse fellow members. Visibility respects each member\'s privacy settings.' },
+  { label: 'Events', path: '/portal/events', desc: 'Browse, RSVP, register with custom forms, and purchase tickets (Stripe/Paystack).' },
+  { label: 'Messages', path: '/portal/messages', desc: 'Direct messages with staff and members. File attachments up to 10 MB, typing indicators, read receipts.' },
+  { label: 'Volunteer', path: '/portal/volunteer', desc: 'Browse open shifts, sign up, cancel, and set weekly availability windows.' },
+  { label: 'Notifications', path: '/portal/notifications', desc: 'Inbox (mark read) plus per-channel preferences: In-App, Email, SMS, WhatsApp, Push.' },
+  { label: 'Surveys', path: '/portal/surveys', desc: 'Complete active church surveys. Supports text, rating (1–5), single-choice, and multi-choice questions.' },
 ];
 
 export default function GuidePage() {
@@ -426,12 +426,13 @@ export default function GuidePage() {
             <p className="text-sm font-semibold text-foreground">Member access flow</p>
             <ol className="mt-3 space-y-2 text-sm text-muted">
               <li>1. Member visits <a href={webLink('/portal')} className="font-medium text-primary hover:underline">{WEB_URL}/portal</a></li>
-              <li>2. If not signed in: a sign-in form appears inline — they sign in or create an account</li>
-              <li>3. If their email matches an existing member record: they're linked automatically and see the portal</li>
-              <li>4. If no member record matches: they submit an access request (name, email, church, optional message)</li>
+              <li>2. Not signed in: an inline Clerk sign-in form appears — they sign in or create an account without leaving the page</li>
+              <li>3. Email matches an existing member record: portal opens immediately, no extra step required</li>
+              <li>4. No member record matches: they see an access request form (name, email, church, optional message)</li>
               <li>5. Admin reviews and approves the request from <a href={adminLink('/access-requests')} className="font-medium text-primary hover:underline">Admin → Access requests</a></li>
-              <li>6. Once approved, the member can sign in and use the full portal</li>
+              <li>6. Once approved, the member signs in and the full portal is available</li>
             </ol>
+            <p className="mt-4 text-xs text-muted">Staff and admin accounts that visit /portal are automatically redirected to the admin console.</p>
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
