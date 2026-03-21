@@ -113,21 +113,6 @@ export function SiteFooter() {
         </div>
       </div>
 
-      {/* Trial CTA strip */}
-      <div className="border-t border-border bg-muted/5">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5">
-          <p className="text-sm text-muted">
-            14-day free trial · No credit card required · Cancel anytime
-          </p>
-          <Link
-            href="/get-started"
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            Start free trial
-          </Link>
-        </div>
-      </div>
-
       {/* Legal bar */}
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
