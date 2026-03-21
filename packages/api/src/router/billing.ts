@@ -38,7 +38,7 @@ const baselinePlans = [
       trialDays: 14,
     },
     features: [
-      { key: 'max_members', enabled: true, limit: 500 },
+      { key: 'max_members', enabled: true, limit: 1000 },
       { key: 'max_campuses', enabled: true, limit: 1 },
       { key: 'ai_insights', enabled: false, limit: null },
       { key: 'membership_enabled', enabled: true, limit: null },
@@ -47,7 +47,7 @@ const baselinePlans = [
       { key: 'communications_enabled', enabled: true, limit: null },
       { key: 'multi_campus_enabled', enabled: true, limit: null },
       { key: 'facility_management_enabled', enabled: false, limit: null },
-      { key: 'pastoral_care_enabled', enabled: false, limit: null },
+      { key: 'pastoral_care_enabled', enabled: true, limit: null },
       { key: 'content_library_enabled', enabled: true, limit: null },
       { key: 'streaming_enabled', enabled: false, limit: null },
       { key: 'support_center_enabled', enabled: true, limit: null },

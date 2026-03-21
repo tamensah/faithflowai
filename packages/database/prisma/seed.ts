@@ -67,8 +67,8 @@ async function main() {
 
   await prisma.subscriptionPlanFeature.upsert({
     where: { planId_key: { planId: starterPlan.id, key: 'max_members' } },
-    update: { enabled: true, limit: 500 },
-    create: { planId: starterPlan.id, key: 'max_members', enabled: true, limit: 500 },
+    update: { enabled: true, limit: 1000 },
+    create: { planId: starterPlan.id, key: 'max_members', enabled: true, limit: 1000 },
   });
   await prisma.subscriptionPlanFeature.upsert({
     where: { planId_key: { planId: starterPlan.id, key: 'max_campuses' } },
@@ -85,7 +85,7 @@ async function main() {
   await upsertPlanFeature(starterPlan.id, 'finance_enabled', true);
   await upsertPlanFeature(starterPlan.id, 'multi_campus_enabled', true);
   await upsertPlanFeature(starterPlan.id, 'facility_management_enabled', false);
-  await upsertPlanFeature(starterPlan.id, 'pastoral_care_enabled', false);
+  await upsertPlanFeature(starterPlan.id, 'pastoral_care_enabled', true);
   await upsertPlanFeature(starterPlan.id, 'content_library_enabled', true);
   await upsertPlanFeature(starterPlan.id, 'streaming_enabled', false);
   await upsertPlanFeature(starterPlan.id, 'support_center_enabled', true);
