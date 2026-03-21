@@ -170,8 +170,33 @@ This is the live checklist for product scope, implementation status, and next st
   - KB Management section in /support (create/edit/delete articles, publish toggle)
   - Ticket deflection: matching published articles surfaced while tenant types ticket subject
 
+- Marketing site and onboarding hardening:
+  - Decoupled marketing layout from portal/admin via Next.js App Router route group `(marketing)/`
+  - Root layout now minimal (ClerkProvider + Providers only) — portal and admin fully isolated
+  - Comprehensive SaaS footer (5-column layout, payment badges, trust signals, legal bar)
+  - Dedicated sign-in and sign-up pages (`/sign-in`, `/sign-up`) — no modal-only flow
+  - Clerk branding override via `localization` prop ("Sign in to FaithFlow AI")
+  - Admin guide page (`/guide`) — 10-step onboarding flow, module reference, roles, portal access, quick links
+  - Church onboarding wizard redesigned (`/get-started`):
+    - Progressive 3-step wizard with locked/active/done visual states
+    - `forceRedirectUrl="/get-started"` on auth buttons — OAuth returns to wizard, not homepage
+    - "Claim admin access" removed as visible action; bootstrap fires silently via useEffect
+    - Steps unlock sequentially based on app state
+
+- Member portal improvements:
+  - Portal layout fully decoupled from marketing chrome
+  - Contextual help centre: `?` button in header opens right-side Sheet on every portal page
+  - `portal-help-content.ts`: typed Q&A for all 7 sections, `getHelpForRoute()` + `searchHelp()`
+  - `PortalHelpSheet.tsx`: accordion Q&As, live search, contextual defaults by current pathname
+
+- Documentation:
+  - `docs/MEMBER_PORTAL_MANUAL.md` — admin/developer reference for the portal
+  - `docs/PORTAL_MEMBER_HELP.md` — member-facing plain-language help guide (all 7 sections + FAQ)
+  - `docs/CHURCH_ONBOARDING_SALES_GUIDE.md` — sales playbook (profiles, discovery, session script, objections, plan sizing, escalation, CRM template)
+  - `docs/ENV_CHECKLIST.md` — consolidated beta go-live env var checklist per service
+  - `docs/BETA_SMOKE_TEST.md` — end-to-end testing checklist for beta
+
 ## Next Up (High Priority)
-- Beta launch preparation: end-to-end smoke test (auth → giving → receipt → comms → streaming)
 - Native mobile apps (member + staff) or PWA wrapper
 - Prayer request lifecycle + privacy controls
 
@@ -191,6 +216,11 @@ This is the live checklist for product scope, implementation status, and next st
 - Subscription system: `docs/SUBSCRIPTION_SYSTEM.md`
 - Disputes: `docs/DISPUTE_PLAYBOOK.md`
 - Streaming: `docs/STREAMING_MANUAL.md`
+- Member portal (admin/dev): `docs/MEMBER_PORTAL_MANUAL.md`
+- Member portal (member-facing help): `docs/PORTAL_MEMBER_HELP.md`
+- Church onboarding (sales): `docs/CHURCH_ONBOARDING_SALES_GUIDE.md`
+- Beta go-live env checklist: `docs/ENV_CHECKLIST.md`
+- Beta smoke test: `docs/BETA_SMOKE_TEST.md`
 
 ## Notes
 - All features must enforce tenant isolation and RBAC by default.

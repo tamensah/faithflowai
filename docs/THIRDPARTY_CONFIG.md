@@ -1,4 +1,4 @@
-# FaithFlow AI Third‑Party Configuration (Alpha Go‑Live)
+# FaithFlow AI Third‑Party Configuration (Beta Go‑Live)
 
 This doc lists the required provider‑side configuration to run the alpha. Once the API keys and webhooks below are set in environment variables, the app should be live without additional code changes.
 
@@ -165,6 +165,40 @@ Shared:
 - Set allowed origins in `ALLOWED_ORIGINS`.
 - Set `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_WEB_URL` for QR links and public redirects.
 
+## 10a. Frontend App Env Vars
+
+These are required in Vercel (or your hosting provider) for each frontend app. They are **not** in the API.
+
+### Web app (`apps/web`)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_API_URL` | ✅ | API base URL (e.g. `https://api.faithflow.ai`) |
+| `NEXT_PUBLIC_WEB_URL` | ✅ | Web app base URL (e.g. `https://faithflow.ai`) |
+| `NEXT_PUBLIC_ADMIN_URL` | ✅ | Admin console URL (e.g. `https://admin.faithflow.ai`) |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | ✅ | Clerk publishable key (starts `pk_`) |
+| `CLERK_SECRET_KEY` | ✅ | Clerk secret key (server-side only, starts `sk_`) |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | ✅ | Set to `/sign-in` |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | ✅ | Set to `/sign-up` |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` | ✅ | Set to `/portal` |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` | ✅ | Set to `/get-started` |
+| `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` | Optional | Custom JWT template name (e.g. `faithflow-api`) |
+| `RESEND_API_KEY` | ✅ | For contact form email delivery |
+| `RESEND_FROM_EMAIL` | ✅ | Sending address for contact form |
+| `CONTACT_TO_EMAIL` | ✅ | Recipient address for marketing contact form submissions |
+
+### Admin app (`apps/admin`)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_API_URL` | ✅ | API base URL |
+| `NEXT_PUBLIC_WEB_URL` | ✅ | Web app base URL (for portal links) |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | ✅ | Clerk publishable key |
+| `CLERK_SECRET_KEY` | ✅ | Clerk secret key |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | ✅ | Set to `/sign-in` |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` | ✅ | Set to `/` |
+| `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` | Optional | Custom JWT template name |
+
 ## 11. External Integrations (OpenAPI)
 
 - Set `INTEGRATION_API_KEY` for API key–based integrations.
@@ -279,7 +313,7 @@ Optional in-process scheduler env:
 
 ---
 
-## 13. Deployment (Render)
+## 15. Deployment (Render)
 
 Recommended alpha backend deployment uses Render Blueprint:
 
@@ -291,7 +325,7 @@ For Render cron services, set:
 - `API_BASE_URL`
 - `INTEGRATION_API_KEY`
 
-## 13. Scheduler Alerts (GitHub Actions)
+## 16. Scheduler Alerts (GitHub Actions)
 
 Optional but recommended repository secrets for scheduler failure notifications:
 
@@ -300,11 +334,11 @@ Optional but recommended repository secrets for scheduler failure notifications:
 - `FAITHFLOW_ALERT_EMAIL_FROM`
 - `FAITHFLOW_ALERT_EMAIL_TO`
 
-## 14. Optional: Realtime + Webhooks
+## 17. Optional: Realtime + Webhooks
 
 - `GET /stream` requires a Clerk JWT in the Authorization header or query string.
 - Ensure your reverse proxy supports SSE.
 
 ---
 
-Once the env variables are populated, the system is ready for alpha: auth, giving, receipts, reconciliation, text‑to‑give, and communications will work end‑to‑end.
+Once the env variables are populated, the system is ready for beta: auth, giving, receipts, reconciliation, text‑to‑give, and communications will work end‑to‑end. See `docs/ENV_CHECKLIST.md` for the consolidated per-environment checklist.

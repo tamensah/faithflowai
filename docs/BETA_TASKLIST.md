@@ -145,3 +145,29 @@ Deliverables:
 
 Deliverables:
 - AI reduces work and is auditable; no “black box” decisions.
+
+---
+
+## 6) Onboarding + Marketing Hardening
+
+- [x] Marketing site decoupled from portal/admin via route groups
+- [x] Comprehensive SaaS footer (no modal sign-in, no CTA strip)
+- [x] Dedicated sign-in + sign-up pages (`/sign-in`, `/sign-up`)
+- [x] Admin guide page (`/guide`) with 10-step onboarding, module reference, roles
+- [x] Onboarding wizard redesigned (`/get-started`):
+  - [x] Progressive 3-step wizard (locked → active → done)
+  - [x] `forceRedirectUrl=”/get-started”` — OAuth returns to wizard not homepage
+  - [x] Silent auto-bootstrap — “Claim admin access” button removed
+- [x] Portal help centre — `?` button → Sheet with contextual Q&As + live search
+
+---
+
+## 7) Pre-Launch Documentation
+
+- [x] `docs/PORTAL_MEMBER_HELP.md` — member-facing help guide
+- [x] `docs/MEMBER_PORTAL_MANUAL.md` — admin/dev portal reference
+- [x] `docs/CHURCH_ONBOARDING_SALES_GUIDE.md` — sales team playbook
+- [x] `docs/ENV_CHECKLIST.md` — consolidated beta go-live env var tracker
+- [x] `docs/BETA_SMOKE_TEST.md` — end-to-end smoke test checklist
+- [ ] Run full smoke test on staging (see `docs/BETA_SMOKE_TEST.md`)
+- [ ] All ENV_CHECKLIST “minimum viable” items checked off for prod
