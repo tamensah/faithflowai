@@ -12,7 +12,7 @@ import {
   useUser,
 } from '@clerk/nextjs';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
-import { trpc } from '../../lib/trpc';
+import { trpc } from '../../../lib/trpc';
 
 const providers = ['STRIPE', 'PAYSTACK'] as const;
 

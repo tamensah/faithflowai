@@ -7,7 +7,6 @@ import { useState } from 'react';
 type LinkItem = { href: string; label: string };
 
 const mainLinks: LinkItem[] = [
-  { href: '/', label: 'Home' },
   { href: '/features', label: 'Features' },
   { href: '/plans', label: 'Plans' },
   { href: '/about', label: 'About' },
@@ -15,9 +14,9 @@ const mainLinks: LinkItem[] = [
   { href: '/contact', label: 'Contact' },
 ];
 
-const portalLinks: LinkItem[] = [
+// Shown in the mobile drawer under "Access"
+const accessLinks: LinkItem[] = [
   { href: '/sign-in', label: 'Sign in' },
-  { href: '/sign-up', label: 'Create account' },
   { href: '/get-started', label: 'Church onboarding' },
   { href: '/portal', label: 'Member portal' },
 ];
@@ -37,47 +36,15 @@ export function SiteNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  const portalActive = portalLinks.some((l) => isRouteActive(pathname, l.href));
-
   return (
     <nav className="flex items-center">
-      {/* Desktop */}
-      <div className="hidden items-center gap-5 md:flex">
+      {/* Desktop — clean link list only */}
+      <div className="hidden items-center gap-6 md:flex">
         {mainLinks.map(({ href, label }) => (
           <Link key={href} className={linkClasses(isRouteActive(pathname, href))} href={href}>
             {label}
           </Link>
         ))}
-
-        {/* Sign in / portal dropdown */}
-        <div className="group relative">
-          <button
-            type="button"
-            className={`${linkClasses(portalActive)} flex items-center gap-1`}
-          >
-            Sign in
-            <svg viewBox="0 0 20 20" className="h-3.5 w-3.5 opacity-60" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M5 8l5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <div className="pointer-events-none absolute right-0 top-full z-50 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
-            <div className="w-52 rounded-lg border border-border bg-white p-2 shadow-lg">
-              {portalLinks.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`block rounded-md px-3 py-2 text-sm ${
-                    isRouteActive(pathname, href)
-                      ? 'bg-muted/20 font-semibold text-foreground'
-                      : 'text-muted hover:bg-muted/15 hover:text-foreground'
-                  }`}
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Mobile hamburger */}
@@ -99,6 +66,13 @@ export function SiteNav() {
           id="mobile-nav"
         >
           <div className="mx-auto flex max-w-6xl flex-col gap-3">
+            <Link
+              className={linkClasses(isRouteActive(pathname, '/'))}
+              href="/"
+              onClick={() => setOpen(false)}
+            >
+              Home
+            </Link>
             {mainLinks.map(({ href, label }) => (
               <Link
                 key={href}
@@ -110,8 +84,8 @@ export function SiteNav() {
               </Link>
             ))}
             <div className="border-t border-border pt-3">
-              <p className="mb-2 text-xs uppercase tracking-widest text-muted">Your account</p>
-              {portalLinks.map(({ href, label }) => (
+              <p className="mb-2 text-xs uppercase tracking-widest text-muted">Access</p>
+              {accessLinks.map(({ href, label }) => (
                 <Link
                   key={href}
                   className={`block py-1 ${linkClasses(isRouteActive(pathname, href))}`}
