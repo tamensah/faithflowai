@@ -119,12 +119,16 @@ const featureGroups = [
   {
     tag: 'Streaming & Content',
     heading: 'Live and on-demand in one system',
-    summary: 'Stream management and a content library for sermons, media, and resources.',
+    summary: 'Native integrations with YouTube, Facebook, and Vimeo — plus a full content library for sermons and resources.',
     items: [
-      'Live stream session management',
-      'Content library for sermons, media, and downloadable resources',
-      'Category tagging and search',
-      'Member access to content via portal',
+      'YouTube, Facebook, and Vimeo live integrations — no manual status updates',
+      'Auto-transitions: SCHEDULED → LIVE → ENDED synced from provider every 10 minutes',
+      'Live viewer counts pulled directly from provider APIs',
+      'Vimeo recording URLs auto-ingested when a session archives',
+      'Moderation tools: warn, mute, remove, ban — all action-logged',
+      'Custom RTMP channel support for any encoder',
+      'Content library: sermons, media, and downloadable resources with category tagging',
+      'Provider sync preview with suggested transitions before committing',
     ],
   },
   {

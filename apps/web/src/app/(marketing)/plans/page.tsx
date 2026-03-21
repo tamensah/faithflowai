@@ -23,7 +23,7 @@ const tiers = [
     cadence: '/month',
     trial: '14-day free trial',
     summary: 'For growing churches running multiple teams and workflows.',
-    features: ['Up to 5,000 members', 'Up to 5 campuses', 'AI insights enabled', 'Advanced automation + reporting'],
+    features: ['Up to 5,000 members', 'Up to 5 campuses', 'Live streaming (YouTube, Facebook, Vimeo)', 'AI insights + advanced automation'],
   },
   {
     name: 'Enterprise',
@@ -44,7 +44,7 @@ const comparisonRows: Row[] = [
   { label: 'AI insights', starter: 'Limited', growth: 'Included', enterprise: 'Included' },
   { label: 'Facilities', starter: 'Not included', growth: 'Included', enterprise: 'Included' },
   { label: 'Pastoral care', starter: 'Not included', growth: 'Included', enterprise: 'Included' },
-  { label: 'Streaming', starter: 'Not included', growth: 'Included', enterprise: 'Included' },
+  { label: 'Live streaming (YouTube / Facebook / Vimeo)', starter: 'Not included', growth: 'Included', enterprise: 'Included' },
   { label: 'Support center', starter: 'Included', growth: 'Included', enterprise: 'Included' },
   { label: 'Custom domain', starter: 'Not included', growth: 'Included', enterprise: 'Included' },
   { label: 'Member limit', starter: '500', growth: '5,000', enterprise: 'Unlimited' },
