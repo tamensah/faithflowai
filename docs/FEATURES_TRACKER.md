@@ -215,8 +215,14 @@ This is the live checklist for product scope, implementation status, and next st
 - Native mobile apps (member + staff)
 - Competitor data migration tooling
 
+## Next Up (Backlog Promotions)
+- Localised pricing tiers for African continental churches (GHS/NGN/KES)
+- Annual billing checkout flow in Stripe + Paystack
+- Denomination/network licensing model
+
 ## Manuals (Reference)
 - Platform admin: `docs/PLATFORM_ADMIN_MANUAL.md`
+- Pricing strategy + competitive analysis: `docs/PRICING_STRATEGY.md`
 - Finance: `docs/FINANCE_MANUAL.md`
 - Membership: `docs/MEMBERSHIP_MANUAL.md`
 - Events: `docs/EVENTS_MANUAL.md`
