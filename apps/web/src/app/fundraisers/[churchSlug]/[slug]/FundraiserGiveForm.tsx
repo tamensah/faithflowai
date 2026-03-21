@@ -81,7 +81,17 @@ export default function FundraiserGiveForm({ churchSlug, fundraiser }: Props) {
 
       const payload = (await response.json()) as { checkoutUrl?: string };
       if (payload.checkoutUrl) {
-        window.location.href = payload.checkoutUrl;
+        // Only redirect to known payment provider domains
+        try {
+          const url = new URL(payload.checkoutUrl);
+          const allowed = ['checkout.stripe.com', 'paystack.com', 'pay.paystack.com'];
+          if (!allowed.some((d) => url.hostname === d || url.hostname.endsWith(`.${d}`))) {
+            throw new Error('Unexpected checkout domain');
+          }
+          window.location.href = payload.checkoutUrl;
+        } catch {
+          setError('Checkout redirect was invalid. Please contact support.');
+        }
       }
     } catch (err) {
       setError('Checkout failed. Please try again.');

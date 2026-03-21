@@ -566,15 +566,17 @@ export default function MembersPage() {
 
       {/* ── Main Tabs ──────────────────────────────────────────────────────── */}
       <Tabs defaultValue="members">
-        <div className="overflow-x-auto pb-1">
-          <TabsList className="w-max min-w-full sm:w-auto">
-            <TabsTrigger value="members"><UsersIcon className="h-4 w-4 mr-1.5 inline" />Members</TabsTrigger>
-            <TabsTrigger value="households"><HomeModernIcon className="h-4 w-4 mr-1.5 inline" />Households</TabsTrigger>
-            <TabsTrigger value="groups"><UserGroupIcon className="h-4 w-4 mr-1.5 inline" />Groups</TabsTrigger>
-            <TabsTrigger value="volunteers"><BriefcaseIcon className="h-4 w-4 mr-1.5 inline" />Volunteers</TabsTrigger>
-            <TabsTrigger value="surveys"><ChartBarIcon className="h-4 w-4 mr-1.5 inline" />Surveys</TabsTrigger>
-            <TabsTrigger value="settings"><Cog6ToothIcon className="h-4 w-4 mr-1.5 inline" />Directory & Settings</TabsTrigger>
-          </TabsList>
+        <div className="sticky top-16 z-10 -mx-4 border-b border-border/50 bg-white/90 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
+          <div className="overflow-x-auto pb-1">
+            <TabsList className="w-max min-w-full sm:w-auto">
+              <TabsTrigger value="members"><UsersIcon className="h-4 w-4 mr-1.5 inline" />Members</TabsTrigger>
+              <TabsTrigger value="households"><HomeModernIcon className="h-4 w-4 mr-1.5 inline" />Households</TabsTrigger>
+              <TabsTrigger value="groups"><UserGroupIcon className="h-4 w-4 mr-1.5 inline" />Groups</TabsTrigger>
+              <TabsTrigger value="volunteers"><BriefcaseIcon className="h-4 w-4 mr-1.5 inline" />Volunteers</TabsTrigger>
+              <TabsTrigger value="surveys"><ChartBarIcon className="h-4 w-4 mr-1.5 inline" />Surveys</TabsTrigger>
+              <TabsTrigger value="settings"><Cog6ToothIcon className="h-4 w-4 mr-1.5 inline" />Directory & Settings</TabsTrigger>
+            </TabsList>
+          </div>
         </div>
 
         {/* ── Members Tab ──────────────────────────────────────────────────── */}

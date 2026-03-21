@@ -15,7 +15,9 @@ function isValidEmail(value: string) {
 }
 
 function safeString(value: unknown) {
-  return typeof value === 'string' ? value.trim() : '';
+  if (typeof value !== 'string') return '';
+  // Strip newlines and control characters to prevent email header injection
+  return value.replace(/[\r\n\x00-\x1F\x7F]/g, ' ').trim();
 }
 
 export const runtime = 'nodejs';

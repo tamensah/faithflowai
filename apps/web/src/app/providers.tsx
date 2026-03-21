@@ -16,7 +16,18 @@ function resolveTrpcUrl() {
 function TrpcProvider({ children }: { children: React.ReactNode }) {
   const { getToken, orgId } = useAuth();
   const tokenTemplate = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30 * 1000,
+            gcTime: 5 * 60 * 1000,
+            retry: 1,
+          },
+        },
+      })
+  );
   const trpcClient = useMemo(
     () =>
     trpc.createClient({

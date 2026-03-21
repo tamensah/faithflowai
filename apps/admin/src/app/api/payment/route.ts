@@ -3,6 +3,7 @@ import { resolveTenantContext } from '@/lib/tenant-context';
 
 const paymentStatusValues = ['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED'] as const;
 const paymentMethodValues = ['CARD', 'BANK_TRANSFER', 'MOBILE_MONEY'] as const;
+const CURSOR_RE = /^[a-zA-Z0-9_-]{10,36}$/;
 
 function resolveProvider(method: (typeof paymentMethodValues)[number]): 'MANUAL' | 'STRIPE' | 'PAYSTACK' {
   if (method === 'CARD') return 'STRIPE';
@@ -10,34 +11,24 @@ function resolveProvider(method: (typeof paymentMethodValues)[number]): 'MANUAL'
   return 'MANUAL';
 }
 
-function requireSignedInRequest(request: NextRequest) {
-  const authStatus = request.headers.get('x-clerk-auth-status');
-  if (authStatus && authStatus !== 'signed-in') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  return null;
-}
-
 function toErrorResponse(error: unknown) {
-  const message = error instanceof Error ? error.message : 'Unknown error';
   if (error instanceof SyntaxError) {
     return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
   }
+  const message = error instanceof Error ? error.message : '';
   if (message.startsWith('Unauthorized') || message.startsWith('Forbidden')) {
-    return NextResponse.json({ error: message }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 }
 
 export async function GET(request: NextRequest) {
-  const authFailure = requireSignedInRequest(request);
-  if (authFailure) return authFailure;
-
   try {
     const { prisma } = await import('@faithflow-ai/database');
     const statusParam = request.nextUrl.searchParams.get('status');
     const churchIdParam = request.nextUrl.searchParams.get('churchId');
-    const cursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
+    const rawCursor = request.nextUrl.searchParams.get('cursor') ?? undefined;
+    const cursor = rawCursor && CURSOR_RE.test(rawCursor) ? rawCursor : undefined;
     const limit = Number(request.nextUrl.searchParams.get('limit') ?? '50');
     const context = await resolveTenantContext();
     const status =
@@ -125,9 +116,6 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authFailure = requireSignedInRequest(request);
-  if (authFailure) return authFailure;
-
   try {
     const { prisma } = await import('@faithflow-ai/database');
     const payload = (await request.json()) as {
@@ -204,9 +192,6 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const authFailure = requireSignedInRequest(request);
-  if (authFailure) return authFailure;
-
   try {
     const { prisma } = await import('@faithflow-ai/database');
     const payload = (await request.json()) as {
