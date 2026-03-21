@@ -17,7 +17,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${sora.variable} ${sourceSans.variable}`}>
       <body className="font-sans">
-        <ClerkProvider>
+        <ClerkProvider
+          localization={{
+            signIn: { start: { title: 'Sign in to FaithFlow AI' } },
+            signUp: { start: { title: 'Create your FaithFlow AI account' } },
+          }}
+        >
           <Providers>
             <AdminGate>{children}</AdminGate>
           </Providers>

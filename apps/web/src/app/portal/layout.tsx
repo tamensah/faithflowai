@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { SignedOut, SignInButton, useUser } from '@clerk/nextjs';
+import { OrganizationSwitcher, SignIn, useUser } from '@clerk/nextjs';
 import { Button, Card, Input } from '@faithflow-ai/ui';
 import { trpc } from '../../lib/trpc';
 
@@ -137,18 +137,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
   if (selfError?.data?.code === 'UNAUTHORIZED') {
     return (
-      <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center p-8">
-        <Card className="p-6 text-center">
-          <h1 className="text-xl font-semibold">Sign in to continue</h1>
-          <p className="mt-2 text-sm text-muted">Your member portal is protected.</p>
-          <div className="mt-4">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <Button>Sign in</Button>
-              </SignInButton>
-            </SignedOut>
-          </div>
-        </Card>
+      <div className="flex min-h-screen items-center justify-center bg-background p-6">
+        <SignIn routing="path" path="/sign-in" fallbackRedirectUrl="/portal" />
       </div>
     );
   }
@@ -173,11 +163,17 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     return (
       <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center p-8">
         <Card className="w-full max-w-xl p-6">
-          <h1 className="text-xl font-semibold">Select your church organization</h1>
+          <h1 className="text-xl font-semibold">Select your church</h1>
           <p className="mt-2 text-sm text-muted">
-            Your session is signed in, but no active organization is selected. Use the organization switcher in the top
-            bar, then reopen the portal.
+            You're signed in, but no church organization is active. Select your church below to continue.
           </p>
+          <div className="mt-4">
+            <OrganizationSwitcher
+              hidePersonal
+              afterSelectOrganizationUrl="/portal"
+              afterCreateOrganizationUrl="/get-started"
+            />
+          </div>
         </Card>
       </div>
     );

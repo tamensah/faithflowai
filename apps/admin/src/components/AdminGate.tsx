@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { OrganizationSwitcher, SignInButton, SignUpButton, SignedOut, useAuth, useUser } from '@clerk/nextjs';
+import { OrganizationSwitcher, useAuth, useUser } from '@clerk/nextjs';
 import { Card, Button } from '@faithflow-ai/ui';
 import { trpc } from '../lib/trpc';
 
@@ -86,23 +86,15 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Middleware redirects unauthenticated users to /sign-in before this renders.
+  // This fallback handles edge cases (e.g., session expiry between renders).
   if (!isSignedIn) {
+    if (typeof window !== 'undefined') {
+      window.location.replace('/sign-in');
+    }
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-6">
-        <Card className="max-w-lg p-6">
-          <h1 className="text-xl font-semibold">Sign in to admin</h1>
-          <p className="mt-2 text-sm text-muted">Use your church admin account to access the console.</p>
-          <SignedOut>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <SignInButton mode="modal">
-                <Button>Sign in</Button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <Button variant="outline">Create account</Button>
-              </SignUpButton>
-            </div>
-          </SignedOut>
-        </Card>
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-muted">Redirecting to sign in…</p>
       </div>
     );
   }

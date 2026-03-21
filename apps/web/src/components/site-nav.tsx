@@ -15,6 +15,8 @@ const mainLinks: LinkItem[] = [
 ];
 
 const portalLinks: LinkItem[] = [
+  { href: '/sign-in', label: 'Sign in' },
+  { href: '/sign-up', label: 'Create account' },
   { href: '/get-started', label: 'Church onboarding' },
   { href: '/portal', label: 'Member portal' },
 ];
