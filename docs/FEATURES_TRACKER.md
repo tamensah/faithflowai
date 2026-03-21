@@ -216,6 +216,7 @@ This is the live checklist for product scope, implementation status, and next st
 - Competitor data migration tooling
 
 ## Manuals (Reference)
+- Platform admin: `docs/PLATFORM_ADMIN_MANUAL.md`
 - Finance: `docs/FINANCE_MANUAL.md`
 - Membership: `docs/MEMBERSHIP_MANUAL.md`
 - Events: `docs/EVENTS_MANUAL.md`
