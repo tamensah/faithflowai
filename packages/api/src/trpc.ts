@@ -179,7 +179,8 @@ const enforceTenantSecurityPolicy = t.middleware(async ({ ctx, next, path }) => 
 const enforceBillingLockout = t.middleware(async ({ ctx, next, path, type }) => {
   if (type !== 'mutation') return next({ ctx });
   if (!ctx.tenantId) return next({ ctx });
-  if (path.startsWith('billing.')) return next({ ctx });
+  // billing.* and auth.* are always exempt: tenants need these to recover from lockout
+  if (path.startsWith('billing.') || path.startsWith('auth.')) return next({ ctx });
 
   const resolved = await resolveTenantPlan(ctx.tenantId);
   if (resolved.source === 'inactive_subscription') {

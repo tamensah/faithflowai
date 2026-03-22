@@ -95,15 +95,25 @@ export default function GetStartedPage() {
   const [provider, setProvider] = useState<(typeof providers)[number]>('STRIPE');
   const [selectedPlanCode, setSelectedPlanCode] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
+  const [bootstrapError, setBootstrapError] = useState<string | null>(null);
   const adminBaseUrl = (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://admin-gamma-beryl.vercel.app').replace(/\/+$/, '');
 
-  const { data: authSelf } = trpc.auth.self.useQuery(undefined, { enabled: Boolean(orgId) });
+  const { data: authSelf } = trpc.auth.self.useQuery(undefined, {
+    enabled: Boolean(orgId),
+    // Poll every 3s while org is selected but we're not yet confirmed as staff,
+    // so the step transitions even if the bootstrap invalidation races with a stale cache.
+    refetchInterval: orgId && !authSelf?.isStaff ? 3000 : false,
+  });
   const { data: plans, isLoading: isPlansLoading } = trpc.billing.catalog.useQuery(undefined, { enabled: Boolean(orgId) });
 
   const { mutate: bootstrap, isPending: isBootstrapping } = trpc.auth.bootstrap.useMutation({
     onSuccess: async () => {
+      setBootstrapError(null);
       await utils.auth.self.invalidate();
       await utils.billing.plans.invalidate();
+    },
+    onError: (err) => {
+      setBootstrapError(err.message ?? 'Setup failed. Please try again.');
     },
   });
 
@@ -116,9 +126,10 @@ export default function GetStartedPage() {
   // Auto-bootstrap: silently claims admin for the first user in a new org.
   // No user action required — the button in the old design was misleading.
   useEffect(() => {
-    if (!orgId || !authSelf?.bootstrapAllowed || authSelf?.isStaff || isBootstrapping) return;
+    if (!orgId || !authSelf?.bootstrapAllowed || authSelf?.isStaff || isBootstrapping || bootstrapError) return;
+    setBootstrapError(null);
     bootstrap();
-  }, [authSelf?.bootstrapAllowed, authSelf?.isStaff, bootstrap, isBootstrapping, orgId]);
+  }, [authSelf?.bootstrapAllowed, authSelf?.isStaff, bootstrap, bootstrapError, isBootstrapping, orgId]);
 
   useEffect(() => {
     if (!plans?.length) return;
@@ -207,6 +218,17 @@ export default function GetStartedPage() {
                 <p className="mt-3 text-xs text-muted">
                   Click the switcher above and choose <strong>Create organisation</strong> — name it after your church.
                 </p>
+              ) : bootstrapError ? (
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs text-destructive">{bootstrapError}</p>
+                  <button
+                    type="button"
+                    className="text-xs font-medium underline underline-offset-2 hover:text-foreground"
+                    onClick={() => { setBootstrapError(null); bootstrap(); }}
+                  >
+                    Retry setup
+                  </button>
+                </div>
               ) : (
                 <p className="mt-3 text-xs text-muted">
                   {isBootstrapping ? 'Setting up your admin access…' : 'Organisation selected. Finalising access…'}
