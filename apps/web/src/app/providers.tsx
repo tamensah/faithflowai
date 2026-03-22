@@ -36,7 +36,12 @@ function TrpcProvider({ children }: { children: React.ReactNode }) {
           url: resolveTrpcUrl(),
           transformer: superjson,
           headers: async () => {
-            const token = await getToken(tokenTemplate ? { template: tokenTemplate } : undefined);
+            let token: string | null = null;
+            try {
+              token = await getToken(tokenTemplate ? { template: tokenTemplate } : undefined);
+            } catch {
+              // getToken throws in Core 3 when offline or session is invalid
+            }
             const headers: Record<string, string> = {};
             if (token) headers.Authorization = `Bearer ${token}`;
             if (orgId) {
