@@ -100,9 +100,9 @@ export default function GetStartedPage() {
 
   const { data: authSelf } = trpc.auth.self.useQuery(undefined, {
     enabled: Boolean(orgId),
-    // Poll every 3s while org is selected but we're not yet confirmed as staff,
-    // so the step transitions even if the bootstrap invalidation races with a stale cache.
-    refetchInterval: orgId && !authSelf?.isStaff ? 3000 : false,
+    // Poll every 3s until staff is confirmed — guards against stale-cache race after bootstrap.
+    // Once isStaff is true the step transitions and polling becomes a no-op.
+    refetchInterval: (query) => (query.state.data?.isStaff ? false : orgId ? 3000 : false),
   });
   const { data: plans, isLoading: isPlansLoading } = trpc.billing.catalog.useQuery(undefined, { enabled: Boolean(orgId) });
 
