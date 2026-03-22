@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ClerkProvider, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { ClerkProvider, Show, UserButton } from '@clerk/nextjs';
 import { SiteNav } from '../../components/site-nav';
 import { SiteFooter } from '../../components/site-footer';
 
@@ -16,7 +16,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
 
           {/* Header auth CTAs — standard SaaS pattern */}
           <div className="hidden items-center gap-2 md:flex">
-            <SignedOut>
+            <Show when="signed-out">
               <Link
                 href="/sign-in"
                 className="text-sm text-muted transition-colors hover:text-foreground"
@@ -29,16 +29,14 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
               >
                 Get started
               </Link>
-            </SignedOut>
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
+            </Show>
+            <Show when="signed-in">
+              <UserButton />
+            </Show>
           </div>
         </div>
       </header>
-
       {children}
-
       <SiteFooter />
     </>
   );

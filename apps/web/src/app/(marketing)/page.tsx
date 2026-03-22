@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
-import { SignedIn, SignedOut, SignInButton, SignUpButton } from '@clerk/nextjs';
+import { Show, SignInButton, SignUpButton } from '@clerk/nextjs';
 
 const modules = [
   {
@@ -102,7 +102,6 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
       {/* ── Platform pillars strip ─────────────────────────────────────── */}
       <section className="border-y border-border bg-white/70">
         <div className="mx-auto max-w-6xl px-6 py-8">
@@ -119,7 +118,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
       {/* ── Module grid ────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-6 py-20">
         <div className="mb-10 max-w-2xl">
@@ -146,7 +144,6 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
-
       {/* ── Two portals section ─────────────────────────────────────────── */}
       <section className="border-y border-border bg-white/60">
         <div className="mx-auto max-w-6xl px-6 py-20">
@@ -210,7 +207,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
       {/* ── AI section ──────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-6 py-20">
         <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
@@ -257,7 +253,6 @@ export default function HomePage() {
           </Card>
         </div>
       </section>
-
       {/* ── Who it's for ────────────────────────────────────────────────── */}
       <section className="border-t border-border bg-white/60">
         <div className="mx-auto max-w-6xl px-6 py-20">
@@ -303,7 +298,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
       {/* ── CTA footer ──────────────────────────────────────────────────── */}
       <section className="bg-primary">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-16 text-center">
@@ -314,7 +308,7 @@ export default function HomePage() {
             Start your 14-day free trial. Set up your church, explore every module, and bring your team along — no credit card needed.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <SignedOut>
+            <Show when="signed-out">
               <Link href="/get-started">
                 <Button variant="secondary" size="lg">Start free trial</Button>
               </Link>
@@ -323,12 +317,12 @@ export default function HomePage() {
                   Talk to us
                 </Button>
               </Link>
-            </SignedOut>
-            <SignedIn>
+            </Show>
+            <Show when="signed-in">
               <Link href="/get-started">
                 <Button variant="secondary" size="lg">Continue onboarding</Button>
               </Link>
-            </SignedIn>
+            </Show>
           </div>
         </div>
       </section>

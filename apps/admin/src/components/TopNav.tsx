@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { BellIcon } from '@heroicons/react/24/outline';
-import { OrganizationSwitcher, SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
+import { OrganizationSwitcher, Show, SignInButton, UserButton } from '@clerk/nextjs';
 
 function toTitle(pathname: string): string {
 	if (pathname === '/dashboard') return 'Overview';
@@ -21,13 +21,12 @@ export function TopNav() {
 	const title = toTitle(pathname);
 
 	return (
-		<div className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
-			<div>
+        <div className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
+            <div>
 				<p className="text-xs uppercase tracking-[0.18em] text-slate-500">Current view</p>
 				<h1 className="text-base font-semibold text-slate-900">{title}</h1>
 			</div>
-
-			<div className="flex items-center gap-3">
+            <div className="flex items-center gap-3">
 				<button
 					type="button"
 					className="rounded-full border border-slate-200 p-2 text-slate-500 transition hover:bg-slate-50"
@@ -36,7 +35,7 @@ export function TopNav() {
 					<BellIcon className="h-5 w-5" />
 				</button>
 
-				<SignedIn>
+				<Show when="signed-in">
 					<OrganizationSwitcher
 						hidePersonal
 						appearance={{
@@ -47,17 +46,17 @@ export function TopNav() {
 							},
 						}}
 					/>
-					<UserButton afterSignOutUrl="/" />
-				</SignedIn>
+					<UserButton />
+				</Show>
 
-				<SignedOut>
+				<Show when="signed-out">
 					<SignInButton mode="modal">
 						<button className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-900">
 							Sign in
 						</button>
 					</SignInButton>
-				</SignedOut>
+				</Show>
 			</div>
-		</div>
-	);
+        </div>
+    );
 }

@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.37.3",
+    "@clerk/nextjs": "^7.0.6",
     "@faithflow-ai/api": "workspace:*",
     "@faithflow-ai/ui": "workspace:*",
     "@tanstack/react-query": "^5.90.20",
