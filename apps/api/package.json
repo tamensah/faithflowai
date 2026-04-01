@@ -10,6 +10,7 @@
     "test:e2e": "tsx --test test/e2e/*.test.ts"
   },
   "dependencies": {
+    "@clerk/backend": "^3.2.2",
     "@faithflow-ai/ai": "workspace:*",
     "@faithflow-ai/api": "workspace:*",
     "@faithflow-ai/database": "workspace:*",
