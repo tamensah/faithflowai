@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { router, protectedProcedure } from '../trpc';
+import { adminProcedure, router, staffProcedure } from '../trpc';
 import { AuditActorType, prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { recordAuditLog } from '../audit';
@@ -12,7 +12,7 @@ const createFundSchema = z.object({
 });
 
 export const fundRouter = router({
-  list: protectedProcedure
+  list: staffProcedure
     .input(
       z.object({
         churchId: z.string().optional(),
@@ -28,7 +28,7 @@ export const fundRouter = router({
       });
     }),
 
-  create: protectedProcedure
+  create: adminProcedure
     .input(createFundSchema)
     .mutation(async ({ input, ctx }) => {
       const church = await prisma.church.findFirst({

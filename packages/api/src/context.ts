@@ -12,5 +12,6 @@ export type Context = {
   tenantId: string | null;
   tenantStatus: 'ACTIVE' | 'SUSPENDED' | null;
   requestIp?: string | null;
+  requestOrigin?: string | null;
   authSignals?: AuthSignals | null;
 };

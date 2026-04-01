@@ -13,6 +13,7 @@ import {
 import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
 import { recordAuditLog } from '../audit';
+import { assertAllowedCheckoutRedirects } from '../checkout-redirects';
 import { getTenantUsageSnapshot, resolveTenantEntitlements } from '../entitlements';
 
 const clerk = process.env.CLERK_SECRET_KEY ? createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY }) : null;
@@ -120,36 +121,11 @@ const baselinePlans = [
   },
 ];
 
-// Security: only allow successUrl/cancelUrl that share an origin with our known frontend domains
-// to prevent open-redirect phishing after Stripe/Paystack checkout.
-function isAllowedCheckoutRedirectUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    const adminOrigin = new URL(process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001').origin;
-    const webOrigin = new URL(process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000').origin;
-    return parsed.origin === adminOrigin || parsed.origin === webOrigin;
-  } catch {
-    return false;
-  }
-}
-
 const checkoutInput = z.object({
   planCode: z.string().trim().min(2).max(64),
   provider: z.nativeEnum(PaymentProvider),
-  successUrl: z
-    .string()
-    .url()
-    .optional()
-    .refine((url) => !url || isAllowedCheckoutRedirectUrl(url), {
-      message: 'successUrl must be on an allowed FaithFlow domain',
-    }),
-  cancelUrl: z
-    .string()
-    .url()
-    .optional()
-    .refine((url) => !url || isAllowedCheckoutRedirectUrl(url), {
-      message: 'cancelUrl must be on an allowed FaithFlow domain',
-    }),
+  successUrl: z.string().url().optional(),
+  cancelUrl: z.string().url().optional(),
 });
 const verifyPaystackCheckoutInput = z.object({
   reference: z.string().trim().min(3).max(200),
@@ -1330,6 +1306,7 @@ export const billingRouter = router({
     const email = await getClerkPrimaryEmail(ctx.userId!);
     const successUrl = input.successUrl ?? `${process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001'}/billing`;
     const cancelUrl = input.cancelUrl ?? successUrl;
+    assertAllowedCheckoutRedirects({ successUrl, cancelUrl }, ctx.requestOrigin);
     const planMeta = (plan.metadata ?? {}) as Record<string, unknown>;
     const trialDays = readPlanMetaInt(planMeta, 'trialDays');
 

@@ -36,6 +36,8 @@ import {
   runSupportSlaAutomation,
   runStreamingProviderSync,
   renderReceiptHtml,
+  verifyReceiptAccessToken,
+  verifyStreamAccessToken,
   subscribeRealtime,
   recordAuditLog,
   verifyUnsubscribeToken,
@@ -316,10 +318,21 @@ async function start() {
     }
   });
 
-  server.get('/public/receipts/:receiptNumber', async (request, reply) => {
+  server.get('/public/receipts/:receiptNumber', { config: { rateLimit: { max: 15, timeWindow: 60_000 } } }, async (request, reply) => {
     const receiptNumber = (request.params as { receiptNumber?: string })?.receiptNumber;
+    const token = (request.query as { token?: string })?.token;
     if (!receiptNumber) {
       reply.code(400).send({ error: 'Missing receipt number' });
+      return;
+    }
+    if (!token) {
+      reply.code(401).send({ error: 'Receipt access token required' });
+      return;
+    }
+
+    const verified = verifyReceiptAccessToken(token, receiptNumber);
+    if (!verified.ok) {
+      reply.code(401).send({ error: 'Invalid receipt access token' });
       return;
     }
 
@@ -1004,7 +1017,9 @@ async function start() {
   server.post('/public/giving/checkout', { config: { rateLimit: { max: 20, timeWindow: 60_000 } } }, async (request, reply) => {
     try {
       const input = checkoutInputSchema.parse(request.body);
-      const result = await createDonationCheckout({ ...input, tenantId: null });
+      const originHeader = request.headers.origin;
+      const requestOrigin = Array.isArray(originHeader) ? originHeader[0] : originHeader ?? null;
+      const result = await createDonationCheckout({ ...input, tenantId: null, requestOrigin });
       reply.send(result);
     } catch (error) {
       request.log.error({ error }, 'Public checkout failed');
@@ -1406,24 +1421,21 @@ async function start() {
   });
 
   server.get('/stream', async (request, reply) => {
-    const tokenFromHeader = extractBearerToken(request.headers.authorization);
-    const tokenFromQuery = typeof request.query === 'object' && request.query ? (request.query as any).token : null;
-    const token = tokenFromHeader ?? tokenFromQuery;
+    const token = typeof request.query === 'object' && request.query ? (request.query as any).streamToken : null;
 
     if (!token || typeof token !== 'string') {
       reply.code(401).send({ error: 'Unauthorized' });
       return;
     }
 
-    const claims = await verifyClerkToken(token);
-    const clerkOrgId = claims?.org_id ?? claims?.orgId;
-
-    if (!claims?.sub || !clerkOrgId) {
+    const verified = verifyStreamAccessToken(token);
+    if (!verified.ok) {
       reply.code(401).send({ error: 'Unauthorized' });
       return;
     }
 
-    const tenantId = await provisionTenant(clerkOrgId);
+    const tenant = await provisionTenant(verified.payload.orgId);
+    const tenantId = tenant.tenantId;
 
     reply.raw.writeHead(200, {
       'Content-Type': 'text/event-stream',

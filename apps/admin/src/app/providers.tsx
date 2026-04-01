@@ -39,7 +39,6 @@ function TrpcProvider({ children }: { children: React.ReactNode }) {
             if (token) headers.Authorization = `Bearer ${token}`;
             if (orgId) {
               headers['x-clerk-org-id'] = orgId;
-              headers['x-tenant-id'] = orgId;
             }
             return headers;
           },

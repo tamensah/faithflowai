@@ -13,13 +13,13 @@ export const givingRouter = router({
   createCheckout: protectedProcedure
     .input(protectedCheckoutSchema)
     .mutation(async ({ input, ctx }) => {
-      return createDonationCheckout({ ...input, tenantId: ctx.tenantId });
+      return createDonationCheckout({ ...input, tenantId: ctx.tenantId, requestOrigin: ctx.requestOrigin });
     }),
 
   createCheckoutPublic: publicProcedure
     .input(checkoutInputSchema)
-    .mutation(async ({ input }) => {
-      return createDonationCheckout({ ...input, tenantId: null });
+    .mutation(async ({ input, ctx }) => {
+      return createDonationCheckout({ ...input, tenantId: null, requestOrigin: ctx.requestOrigin });
     }),
 
   churchBySlug: publicProcedure

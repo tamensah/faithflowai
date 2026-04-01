@@ -6,7 +6,8 @@ export { createDonationCheckout, createRecurringCheckout, handlePaystackWebhook,
 export { handlePlatformPaystackWebhook, handlePlatformStripeWebhook, queueTenantWelcomeEmail } from './platform-billing';
 export { checkoutInputSchema, recurringCheckoutInputSchema } from './payments/inputs';
 export { ensureDonationReceipt } from './receipts';
-export { getReceiptByNumber, renderReceiptHtml } from './receipts';
+export { buildPublicReceiptUrl, getReceiptByNumber, renderReceiptHtml, verifyReceiptAccessToken } from './receipts';
+export { createStreamAccessToken, verifyStreamAccessToken } from './stream-auth';
 export { recordAuditLog } from './audit';
 export { createDisputeEvidenceRecord, markEvidenceFailed, markEvidenceSubmitted, submitDisputeEvidence, submitStripeDispute } from './disputes';
 export { dispatchScheduledCommunications } from './communications';

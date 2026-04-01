@@ -47,7 +47,11 @@ export const recurringRouter = router({
         'finance_enabled',
         'Your subscription does not include finance operations.'
       );
-      const result = await createRecurringCheckout({ ...input, tenantId: ctx.tenantId });
+      const result = await createRecurringCheckout({
+        ...input,
+        tenantId: ctx.tenantId,
+        requestOrigin: ctx.requestOrigin,
+      });
       await recordAuditLog({
         tenantId: ctx.tenantId,
         churchId: input.churchId ?? undefined,

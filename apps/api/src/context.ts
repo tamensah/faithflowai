@@ -1,6 +1,8 @@
 import type { Context } from '@faithflow-ai/api';
+import { createClerkClient } from '@clerk/backend';
 import { prisma } from '@faithflow-ai/database';
 import { extractBearerToken, verifyClerkToken } from './auth';
+import { env } from './env';
 
 function normalizeSlug(value: string) {
   return value
@@ -66,14 +68,30 @@ export async function provisionTenant(clerkOrgId: string) {
   };
 }
 
+const clerk = env.CLERK_SECRET_KEY ? createClerkClient({ secretKey: env.CLERK_SECRET_KEY }) : null;
+
+async function resolveAuthorizedOrgId(userId: string, tokenOrgId: string | null, headerOrgId: string | null) {
+  if (tokenOrgId) {
+    return tokenOrgId;
+  }
+  if (!headerOrgId || !clerk) {
+    return null;
+  }
+
+  try {
+    const memberships = await clerk.users.getOrganizationMembershipList({ userId });
+    const authorized = memberships.data.some((membership) => membership.organization.id === headerOrgId);
+    return authorized ? headerOrgId : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createContext({ req }: { req: { headers: Record<string, string | string[] | undefined> } }): Promise<Context> {
   const authHeader = req.headers['authorization'];
   const token = Array.isArray(authHeader) ? authHeader[0] : authHeader;
   const orgHeader = req.headers['x-clerk-org-id'];
-  const tenantHeader = req.headers['x-tenant-id'];
   const parsedOrgHeader = Array.isArray(orgHeader) ? orgHeader[0] : orgHeader ?? null;
-  const parsedTenantHeader = Array.isArray(tenantHeader) ? tenantHeader[0] : tenantHeader ?? null;
-  const fallbackOrg = parsedOrgHeader ?? parsedTenantHeader;
 
   let userId: string | null = null;
   let clerkOrgId: string | null = null;
@@ -84,12 +102,16 @@ export async function createContext({ req }: { req: { headers: Record<string, st
   const forwardedIp = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
   const requestIp =
     (forwardedIp?.split(',')[0]?.trim() || (Array.isArray(realIp) ? realIp[0] : realIp) || null) ?? null;
+  const originHeader = req.headers['origin'];
+  const requestOrigin = Array.isArray(originHeader) ? originHeader[0] : originHeader ?? null;
 
   const bearer = extractBearerToken(token);
   if (bearer) {
     const claims = await verifyClerkToken(bearer);
     userId = claims?.sub ?? null;
-    clerkOrgId = (claims?.org_id ?? claims?.orgId) ?? fallbackOrg;
+    if (userId) {
+      clerkOrgId = await resolveAuthorizedOrgId(userId, (claims?.org_id ?? claims?.orgId) ?? null, parsedOrgHeader);
+    }
     const authMethods = Array.isArray(claims?.amr)
       ? claims.amr.filter((value): value is string => typeof value === 'string')
       : [];
@@ -108,11 +130,6 @@ export async function createContext({ req }: { req: { headers: Record<string, st
         secondFactorAge !== null && Number.isFinite(secondFactorAge) ? secondFactorAge >= 0 : null,
       emailVerified: typeof claims?.email_verified === 'boolean' ? claims.email_verified : null,
     };
-  } else {
-    const fallbackUser = req.headers['x-user-id'];
-    userId = Array.isArray(fallbackUser) ? fallbackUser[0] : fallbackUser ?? null;
-    clerkOrgId = fallbackOrg;
-    authSignals = null;
   }
 
   const tenant = clerkOrgId ? await provisionTenant(clerkOrgId) : null;
@@ -123,6 +140,7 @@ export async function createContext({ req }: { req: { headers: Record<string, st
     tenantId: tenant?.tenantId ?? null,
     tenantStatus: tenant?.tenantStatus ?? null,
     requestIp,
+    requestOrigin,
     authSignals,
   };
 }

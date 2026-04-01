@@ -14,6 +14,7 @@ import {
 import { emitRealtimeEvent } from '../realtime';
 import { ensureDonationReceipt } from '../receipts';
 import { recordAuditLog } from '../audit';
+import { assertAllowedCheckoutRedirects } from '../checkout-redirects';
 import type { CheckoutInput, RecurringCheckoutInput } from './inputs';
 import {
   beginWebhookProcessing,
@@ -31,8 +32,8 @@ type CheckoutResult = {
   providerRef: string;
 };
 
-type CreateCheckoutInput = CheckoutInput & { tenantId?: string | null };
-type CreateRecurringCheckoutInput = RecurringCheckoutInput & { tenantId?: string | null };
+type CreateCheckoutInput = CheckoutInput & { tenantId?: string | null; requestOrigin?: string | null };
+type CreateRecurringCheckoutInput = RecurringCheckoutInput & { tenantId?: string | null; requestOrigin?: string | null };
 type CreateTicketCheckoutInput = {
   eventId: string;
   ticketTypeId: string;
@@ -44,6 +45,7 @@ type CreateTicketCheckoutInput = {
   purchaserPhone?: string;
   successUrl?: string;
   cancelUrl?: string;
+  requestOrigin?: string | null;
 };
 
 const ZERO_DECIMAL_CURRENCIES = new Set(['JPY', 'KRW', 'VND']);
@@ -435,6 +437,7 @@ export async function createDonationCheckout(input: CreateCheckoutInput): Promis
   if (input.provider === PaymentProvider.MANUAL) {
     throw new TRPCError({ code: 'BAD_REQUEST', message: 'Manual provider is not supported for checkout' });
   }
+  assertAllowedCheckoutRedirects(input, input.requestOrigin);
   const church = await resolveChurch(input);
   const normalizedInput = { ...input, churchId: church.id };
   if (input.provider === PaymentProvider.PAYSTACK) {
@@ -578,6 +581,7 @@ export async function createTicketCheckout(input: CreateTicketCheckoutInput) {
   if (input.provider === PaymentProvider.MANUAL) {
     throw new TRPCError({ code: 'BAD_REQUEST', message: 'Manual provider is not supported for checkout' });
   }
+  assertAllowedCheckoutRedirects(input, input.requestOrigin);
 
   const event = await prisma.event.findFirst({
     where: { id: input.eventId },
@@ -701,6 +705,7 @@ export async function createRecurringCheckout(input: CreateRecurringCheckoutInpu
   if (input.provider === PaymentProvider.MANUAL) {
     throw new TRPCError({ code: 'BAD_REQUEST', message: 'Manual provider is not supported for checkout' });
   }
+  assertAllowedCheckoutRedirects(input, input.requestOrigin);
 
   const church = await resolveChurch(input);
 

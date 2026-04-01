@@ -63,7 +63,7 @@ This guide explains how the finance domain works across donations, budgeting, re
 ## 8. Receipts
 
 - Each completed donation can generate one receipt (unique receipt number).
-- Public receipt access: `GET /public/receipts/:receiptNumber`.
+- Public receipt access: `GET /public/receipts/:receiptNumber?token=...` with a signed access token.
 - Receipts can be emailed via Resend.
 
 ## 9. Refunds & Disputes
@@ -112,7 +112,7 @@ This guide explains how the finance domain works across donations, budgeting, re
 - `POST /webhooks/stripe`
 - `POST /webhooks/paystack`
 - `POST /webhooks/twilio/sms`
-- `GET /public/receipts/:receiptNumber`
+- `GET /public/receipts/:receiptNumber?token=...`
 - `GET /public/fundraisers/:churchSlug/:slug`
 - tRPC: `giving`, `finance`, `pledge`, `recurring`, `receipt`, `fund`, `campaign`
 

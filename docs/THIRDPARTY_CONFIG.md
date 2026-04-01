@@ -204,7 +204,8 @@ These are required in Vercel (or your hosting provider) for each frontend app. T
 - Set `INTEGRATION_API_KEY` for API key–based integrations.
 - Use headers:
   - `x-api-key`: integration key
-  - `x-clerk-org-id` or `x-tenant-id`: tenant scoping
+  - `x-clerk-org-id` or `x-tenant-id`: tenant scoping for server-to-server integrations only
+- Browser and admin/member portal requests must use Clerk bearer auth instead of `x-tenant-id`.
 - Dispatch scheduled comms (cron): `POST /tasks/communications/dispatch` with `x-api-key`.
 - Monitor disputes (cron): `POST /tasks/disputes/monitor` with `x-api-key`.
 - Volunteer reminders (cron): `POST /tasks/volunteer/reminders` with `x-api-key`.
@@ -336,7 +337,7 @@ Optional but recommended repository secrets for scheduler failure notifications:
 
 ## 17. Optional: Realtime + Webhooks
 
-- `GET /stream` requires a Clerk JWT in the Authorization header or query string.
+- `GET /stream` requires a short-lived signed `streamToken` issued by `auth.streamToken`.
 - Ensure your reverse proxy supports SSE.
 
 ---

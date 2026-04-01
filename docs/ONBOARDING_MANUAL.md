@@ -47,11 +47,12 @@ Expected result:
 - Signed-in member at admin (no staff role): show restricted state + member portal path.
 
 ## Platform Behavior (Implementation Notes)
-- Tenant is resolved from Clerk org context (`org_id`) or org headers.
-- tRPC clients include org headers:
-  - `x-clerk-org-id`
-  - `x-tenant-id`
-- First user in a fresh tenant can bootstrap as admin.
+- Tenant is resolved from a verified Clerk bearer token plus org context.
+- tRPC clients send:
+  - `Authorization: Bearer <Clerk session token>`
+  - `x-clerk-org-id` when the active organization is selected in Clerk
+- `x-tenant-id` is reserved for API-key integration routes, not browser auth.
+- First user in a fresh tenant can bootstrap as admin only inside non-production environments.
 - Billing routes can bootstrap tenant admin in first-user flow.
 
 ## Required Provider Configuration (Before Beta)
@@ -113,4 +114,3 @@ For full provider setup details, see `docs/THIRDPARTY_CONFIG.md`.
   - `apps/admin/src/app/providers.tsx`
 - Billing onboarding bootstrap: `packages/api/src/router/billing.ts`
 - Tenant context resolver: `apps/api/src/context.ts`
-

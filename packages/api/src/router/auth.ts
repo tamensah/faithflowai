@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import { prisma, UserRole } from '@faithflow-ai/database';
 import { router, protectedProcedure } from '../trpc';
+import { createStreamAccessToken } from '../stream-auth';
 
 const getStaffMembership = async (tenantId: string, clerkUserId: string) => {
   return prisma.staffMembership.findFirst({
@@ -32,6 +33,26 @@ export const authRouter = router({
       churchId: membership?.churchId ?? null,
       userId: membership?.userId ?? null,
       bootstrapAllowed: staffCount === 0,
+    };
+  }),
+
+  streamToken: protectedProcedure.query(async ({ ctx }) => {
+    if (!ctx.clerkOrgId) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'Organization context required' });
+    }
+
+    const token = createStreamAccessToken({
+      userId: ctx.userId!,
+      orgId: ctx.clerkOrgId,
+    });
+
+    if (!token) {
+      throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Stream access is not configured' });
+    }
+
+    return {
+      token,
+      expiresInSeconds: 300,
     };
   }),
 

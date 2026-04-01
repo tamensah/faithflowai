@@ -96,6 +96,8 @@ const parseAllowlist = () => {
     .filter(Boolean);
 };
 
+const canUseFirstUserBootstrap = () => process.env.NODE_ENV !== 'production';
+
 const readPlanTrialDays = (metadata: Prisma.JsonValue | null | undefined) => {
   if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) return null;
   const raw = (metadata as Record<string, unknown>).trialDays;
@@ -167,7 +169,12 @@ export const platformRouter = router({
     const invitedUser = email ? await prisma.platformUser.findUnique({ where: { email: email.toLowerCase() } }) : null;
     const platformUserCount = await prisma.platformUser.count();
     const isAllowlisted = Boolean(email && allowlist.includes(email.toLowerCase()));
-    const canFirstUserBootstrap = Boolean(email && allowlist.length === 0 && platformUserCount === 0);
+    const canFirstUserBootstrap = Boolean(
+      email &&
+      allowlist.length === 0 &&
+      platformUserCount === 0 &&
+      canUseFirstUserBootstrap()
+    );
     const bootstrapAllowed = isAllowlisted || canFirstUserBootstrap || Boolean(invitedUser);
     if (platformUser) {
       await prisma.platformUser.update({
@@ -193,7 +200,12 @@ export const platformRouter = router({
         : null;
       const platformUserCount = await prisma.platformUser.count();
       const isAllowlisted = Boolean(email && allowlist.includes(email));
-      const canFirstUserBootstrap = Boolean(email && allowlist.length === 0 && platformUserCount === 0);
+      const canFirstUserBootstrap = Boolean(
+        email &&
+        allowlist.length === 0 &&
+        platformUserCount === 0 &&
+        canUseFirstUserBootstrap()
+      );
       const canClaimByInvite = Boolean(existingByEmail);
 
       if (!email || (!isAllowlisted && !canFirstUserBootstrap && !canClaimByInvite)) {

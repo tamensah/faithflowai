@@ -5,6 +5,7 @@ This is the live checklist for product scope, implementation status, and next st
 ## Done
 - Multi‑tenant schema (tenant/org/church/campus)
 - Clerk JWT auth + tenant resolution
+- Deployment security hardening: verified bearer auth, signed receipt access, signed stream tokens, redirect allowlists
 - Auto‑create default Organization + Church on first tenant request
 - Clerk org webhook provisioning (organization.created)
 - Fastify API service + tRPC

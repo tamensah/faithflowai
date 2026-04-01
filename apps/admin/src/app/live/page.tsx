@@ -27,8 +27,7 @@ export default function LivePage() {
   const [donationProvider, setDonationProvider] = useState<'MANUAL' | 'STRIPE' | 'PAYSTACK'>('MANUAL');
   const [donationRef, setDonationRef] = useState('demo-ref');
 
-  const { getToken } = useAuth();
-  const [streamUrl, setStreamUrl] = useState<string | null>(null);
+  const { isSignedIn } = useAuth();
 
   const baseUrl = useMemo(() => {
     const base = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000').replace(/\/trpc\/?$/, '');
@@ -37,6 +36,10 @@ export default function LivePage() {
 
   const { data: members } = trpc.member.list.useQuery({});
   const { data: eventList } = trpc.event.list.useQuery({});
+  const { data: streamSession } = trpc.auth.streamToken.useQuery(undefined, {
+    enabled: Boolean(isSignedIn),
+    staleTime: 4 * 60 * 1000,
+  });
 
   const { mutate: checkIn, isPending: isCheckingIn } = trpc.attendance.checkIn.useMutation({
     onSuccess: () => utils.attendance.listByEvent.invalidate(),
@@ -47,20 +50,8 @@ export default function LivePage() {
   });
 
   useEffect(() => {
-    let isMounted = true;
-
-    getToken().then((token) => {
-      if (!token || !isMounted) return;
-      setStreamUrl(`${baseUrl}/stream?token=${encodeURIComponent(token)}`);
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [baseUrl, getToken]);
-
-  useEffect(() => {
-    if (!streamUrl) return;
+    if (!streamSession?.token) return;
+    const streamUrl = `${baseUrl}/stream?streamToken=${encodeURIComponent(streamSession.token)}`;
     const source = new EventSource(streamUrl);
 
     const handle = (type: string) => (event: MessageEvent) => {
@@ -74,7 +65,7 @@ export default function LivePage() {
     return () => {
       source.close();
     };
-  }, [streamUrl]);
+  }, [baseUrl, streamSession?.token]);
 
   const selectedEvent = eventList?.find((event) => event.id === eventId);
 

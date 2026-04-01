@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { prisma, AuditActorType } from '@faithflow-ai/database';
-import { router, protectedProcedure } from '../trpc';
+import { adminProcedure, router, staffProcedure } from '../trpc';
 import { ensureFeatureEnabled, ensureFeatureLimit } from '../entitlements';
 import { recordAuditLog } from '../audit';
 
@@ -12,7 +12,7 @@ const campusInput = z.object({
 });
 
 export const campusRouter = router({
-  list: protectedProcedure
+  list: staffProcedure
     .input(z.object({ churchId: z.string().optional() }).optional())
     .query(async ({ input, ctx }) => {
       return prisma.campus.findMany({
@@ -24,7 +24,7 @@ export const campusRouter = router({
       });
     }),
 
-  create: protectedProcedure
+  create: adminProcedure
     .input(campusInput)
     .mutation(async ({ input, ctx }) => {
       await ensureFeatureEnabled(
@@ -70,7 +70,7 @@ export const campusRouter = router({
       return campus;
     }),
 
-  update: protectedProcedure
+  update: adminProcedure
     .input(
       z.object({
         id: z.string(),

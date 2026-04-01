@@ -514,6 +514,7 @@ export const eventRouter = router({
         purchaserPhone: input.purchaserPhone,
         successUrl: input.successUrl,
         cancelUrl: input.cancelUrl,
+        requestOrigin: ctx.requestOrigin,
       });
     }),
 

@@ -29,9 +29,12 @@
 | `PORT` | 🔴 | Default `4000` if unset | ✅ | | |
 | `DATABASE_URL` | 🔴 | Postgres connection string | ✅ | | |
 | `ALLOWED_ORIGINS` | 🔴 | Comma-separated list of web + admin URLs | ✅ | | |
+| `ALLOWED_CHECKOUT_REDIRECT_ORIGINS` | 🔴 | Comma-separated trusted origins for Stripe/Paystack return URLs | ✅ | | |
 | `NEXT_PUBLIC_WEB_URL` | 🔴 | Web app public URL — used in email links, QR codes | ✅ | | |
 | `NEXT_PUBLIC_ADMIN_URL` | 🔴 | Admin console URL — used in email links | ✅ | | |
 | `NEXT_PUBLIC_API_URL` | 🔴 | API URL — used internally | ✅ | | |
+| `STREAM_SIGNING_SECRET` | 🔴 | Signs short-lived live-feed stream tokens | ✅ | | |
+| `RECEIPT_PUBLIC_SECRET` | 🔴 | Signs public donation receipt access links | ✅ | | |
 
 ### Clerk
 

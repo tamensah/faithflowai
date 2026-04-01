@@ -147,7 +147,7 @@ This makes org setup immediate for new tenants without manual bootstrapping.
 
 ## Realtime
 - SSE endpoint: `GET /stream`
-- Requires Clerk JWT token (query string or Authorization header).
+- Requires a short-lived signed stream token issued from the authenticated session.
 - Events are tenant‑filtered server‑side.
 
 Currently emitting:
@@ -159,7 +159,7 @@ Currently emitting:
 - Finance console: `/finance` for reconciliation, pledges, recurring, budgets, expenses.
 - Public giving form: `/give` (calls `POST /public/giving/checkout`).
 - Public fundraiser page: `/fundraisers/:churchSlug/:slug` (calls `GET /public/fundraisers/:churchSlug/:slug`).
-- Receipts: `GET /public/receipts/:receiptNumber` (HTML).
+- Receipts: `GET /public/receipts/:receiptNumber?token=...` (HTML, signed access required).
 - Shareable links + QR codes generated in admin `/giving` (uses `NEXT_PUBLIC_WEB_URL`).
 - Recurring checkout: Stripe + Paystack via `/finance`.
 - Webhooks:

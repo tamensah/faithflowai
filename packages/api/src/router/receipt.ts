@@ -2,12 +2,11 @@ import { z } from 'zod';
 import { router, protectedProcedure } from '../trpc';
 import { AuditActorType, prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
-import { ensureDonationReceipt, getReceiptByNumber, renderReceiptHtml } from '../receipts';
+import { buildPublicReceiptUrl, ensureDonationReceipt, getReceiptByNumber, renderReceiptHtml } from '../receipts';
 import { sendEmail } from '../email';
 import { recordAuditLog } from '../audit';
 import { ensureFeatureReadAccess, ensureFeatureWriteAccess } from '../entitlements';
 import { renderReceiptResendEmail } from '../email-templates';
-import { apiPublicBaseUrl } from '../unsubscribe';
 
 export const receiptRouter = router({
   list: protectedProcedure
@@ -119,7 +118,10 @@ export const receiptRouter = router({
       }
 
       const html = renderReceiptHtml(receipt);
-      const receiptUrl = `${apiPublicBaseUrl()}/public/receipts/${encodeURIComponent(receipt.receiptNumber)}`;
+      const receiptUrl = buildPublicReceiptUrl(receipt.receiptNumber);
+      if (!receiptUrl) {
+        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Public receipt access is not configured' });
+      }
       const noticeHtml = renderReceiptResendEmail({
         churchName: church.name,
         receiptNumber: receipt.receiptNumber,

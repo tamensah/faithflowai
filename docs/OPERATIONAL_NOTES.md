@@ -118,7 +118,9 @@ This file is the running operations log for implementation details, runtime cons
 
 - Frontends now support optional Clerk JWT template tokens via `NEXT_PUBLIC_CLERK_JWT_TEMPLATE`.
 - If `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` is unset, frontends use default `getToken()` behavior.
-- Render API currently validates Clerk JWT signature via `CLERK_JWT_KEY` + `CLERK_JWT_ISSUER`.
+- API request context now requires a verified bearer token; forged `x-user-id` / `x-tenant-id` browser headers are ignored.
+- `x-clerk-org-id` is accepted only when it matches the token claim or a verified Clerk org membership.
+- API currently validates Clerk tokens via `CLERK_SECRET_KEY`; legacy `CLERK_JWT_*` values can remain for future explicit issuer/audience tightening.
 - Keep `CLERK_JWT_AUDIENCE` unset until JWT template audience is finalized; then set both:
   - Clerk template audience
   - Render `CLERK_JWT_AUDIENCE`

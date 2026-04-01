@@ -1,6 +1,6 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import { createClerkClient } from '@clerk/backend';
-import { AuditActorType, prisma } from '@faithflow-ai/database';
+import { AuditActorType, UserRole, prisma } from '@faithflow-ai/database';
 import superjson from 'superjson';
 import type { Context } from './context';
 import { resolveTenantPlan } from './entitlements';
@@ -51,6 +51,28 @@ async function resolveTenantStaffRole(tenantId: string, clerkUserId: string) {
   });
   return membership?.role ?? null;
 }
+
+const requireTenantStaff = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.userId || !ctx.tenantId) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
+  const role = await resolveTenantStaffRole(ctx.tenantId, ctx.userId);
+  if (!role) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff access required' });
+  }
+  return next({ ctx });
+});
+
+const requireTenantAdmin = t.middleware(async ({ ctx, next }) => {
+  if (!ctx.userId || !ctx.tenantId) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
+  const role = await resolveTenantStaffRole(ctx.tenantId, ctx.userId);
+  if (role !== UserRole.ADMIN) {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+  }
+  return next({ ctx });
+});
 
 async function resolveClerkUserSignals(userId: string) {
   if (!clerk) return { twoFactorEnabled: null, emailVerified: null };
@@ -199,3 +221,5 @@ export const protectedProcedure = t.procedure
   .use(requireTenant)
   .use(enforceTenantSecurityPolicy)
   .use(enforceBillingLockout);
+export const staffProcedure = protectedProcedure.use(requireTenantStaff);
+export const adminProcedure = protectedProcedure.use(requireTenantAdmin);
