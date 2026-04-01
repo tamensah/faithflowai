@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { BellIcon } from '@heroicons/react/24/outline';
-import { OrganizationSwitcher, Show, SignInButton, UserButton } from '@clerk/nextjs';
+import { OrganizationSwitcher, SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs';
 
 function toTitle(pathname: string): string {
 	if (pathname === '/dashboard') return 'Overview';
@@ -35,7 +35,7 @@ export function TopNav() {
 					<BellIcon className="h-5 w-5" />
 				</button>
 
-				<Show when="signed-in">
+				<SignedIn>
 					<OrganizationSwitcher
 						hidePersonal
 						appearance={{
@@ -47,15 +47,15 @@ export function TopNav() {
 						}}
 					/>
 					<UserButton />
-				</Show>
+				</SignedIn>
 
-				<Show when="signed-out">
+				<SignedOut>
 					<SignInButton mode="modal">
 						<button className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-900">
 							Sign in
 						</button>
 					</SignInButton>
-				</Show>
+				</SignedOut>
 			</div>
         </div>
     );
