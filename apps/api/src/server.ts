@@ -5,7 +5,6 @@ import rawBody from 'fastify-raw-body';
 import formbody from '@fastify/formbody';
 import multipart from '@fastify/multipart';
 import swagger from '@fastify/swagger';
-import swaggerUI from '@fastify/swagger-ui';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import { Webhook } from 'svix';
 import { z } from 'zod';
@@ -188,9 +187,10 @@ async function start() {
     specification: { document: openApiSpec },
   });
 
-  await server.register(swaggerUI, {
-    routePrefix: '/docs',
-  });
+  // Expose the static OpenAPI document without the Swagger UI static-file
+  // dependency. The document remains machine-readable and avoids serving a
+  // dependency with unresolved path-traversal advisories on Fastify 5.
+  server.get('/docs', async () => openApiSpec);
 
   await server.register(fastifyTRPCPlugin, {
     prefix: '/trpc',
@@ -1057,11 +1057,12 @@ async function start() {
     let event: { type: string; data: { id?: string } };
 
     try {
-      event = webhook.verify(payload, {
+      webhook.verify(payload, {
         'svix-id': svixId,
         'svix-timestamp': svixTimestamp,
         'svix-signature': svixSignature,
-      }) as { type: string; data: { id?: string } };
+      });
+      event = JSON.parse(payload) as { type: string; data: { id?: string } };
     } catch (error) {
       request.log.warn({ error }, 'Invalid Clerk webhook');
       reply.code(400).send({ error: 'Invalid signature' });
