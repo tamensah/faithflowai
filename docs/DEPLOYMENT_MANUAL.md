@@ -17,11 +17,12 @@ It covers:
 ### Recommended default (alpha and early scale)
 
 - Frontend (`apps/web`, `apps/admin`): Vercel
-- Backend (`apps/api`), Postgres, cron: Render
+- Backend (`apps/api`) and cron: Render
+- PostgreSQL: Neon
 
 Why this is the best default:
 - Vercel is strongest for Next.js performance, cache, and DX.
-- Render is strong for API + Postgres + recurring jobs in one control plane.
+- Render provides the API and recurring jobs; Neon supplies pooled runtime connections, direct migration connections, branching, and restore controls.
 - Keeps blast radius small: frontend deploys do not restart API jobs.
 
 ### Option B (single provider)
@@ -35,9 +36,10 @@ Use this when:
 ## 2) Required Accounts and Access
 
 - GitHub repo access to `tamensah/faithflowai`
-- Render account with permission to create services/databases
+- Render account with permission to create services
+- Neon account with access to the FaithFlow project
 - Vercel account with permission to import the repo
-- Provider accounts: Clerk, Stripe, Paystack, Resend, Twilio, S3 or GCS
+- Provider accounts for the current code: Clerk, Paystack, Stripe, Resend, Twilio, S3 or GCS. Polar is the next billing adapter and is required before the first production release; Stripe remains supported but its live activation is deferred until the US LLC setup is complete.
 
 ## 3) Source of Truth Files
 
@@ -46,6 +48,7 @@ Use this when:
 - Third-party setup checklist: `/Users/tamensah/aihub/faithflow_ai/docs/THIRDPARTY_CONFIG.md`
 - Scheduler strategy and cadence: `/Users/tamensah/aihub/faithflow_ai/docs/SCHEDULER_PROFILES.md`
 - Env baseline: `/Users/tamensah/aihub/faithflow_ai/.env.example`
+- Neon migration runbook: `/Users/tamensah/aihub/faithflow_ai/docs/NEON_MIGRATION_RUNBOOK.md`
 
 ## 4) Backend Deploy on Render (Blueprint)
 
@@ -54,7 +57,6 @@ Use this when:
 3. Use `/Users/tamensah/aihub/faithflow_ai/render.yaml`.
 4. Confirm services:
 - `faithflow-api` (web service)
-- `faithflow-postgres` (database)
 - `faithflow-support-sla-sweep` (cron)
 - `faithflow-tenant-ops-automate` (cron)
 - `faithflow-subscription-metadata-backfill` (cron)
@@ -62,6 +64,8 @@ Use this when:
 
 ### Render API critical envs
 
+- `DATABASE_URL` (Neon pooled URL)
+- `DATABASE_URL_UNPOOLED` (Neon direct URL used by the pre-deploy migration)
 - `ALLOWED_ORIGINS`
 - `NEXT_PUBLIC_WEB_URL`
 - `NEXT_PUBLIC_ADMIN_URL`
@@ -76,7 +80,7 @@ Use this when:
 
 ### Render API optional by feature
 
-- Payments: `STRIPE_*`, `PAYSTACK_*`
+- Payments: `PAYSTACK_*` is implemented and prioritized; `STRIPE_*` is implemented but live activation is deferred. Polar environment variables will be added with its billing adapter.
 - Comms: `RESEND_*`, `TWILIO_*`
 - AI: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`
 - Storage: `STORAGE_PROVIDER` and matching S3/GCS vars
@@ -177,8 +181,8 @@ Run post-deploy checks in this order:
 1. API health/docs loads.
 2. Clerk sign-in works in both web/admin.
 3. Tenant auto-provision works on first org request.
-4. One Stripe test donation succeeds and receipt resolves.
-5. One Paystack test donation succeeds for supported currency/country pair.
+4. One Polar sandbox checkout completes and its signed webhook is idempotent after the Polar adapter lands.
+5. One Paystack test donation succeeds for a supported currency/country pair.
 6. Webhook replay-idempotency verified (no duplicate rows).
 7. Cron jobs execute successfully and write expected audit/log records.
 8. Basic comms send test (Resend email + Twilio SMS if configured).
@@ -187,7 +191,7 @@ Run post-deploy checks in this order:
 
 - Frontend rollback: redeploy previous Vercel deployment.
 - API rollback: rollback Render service to prior deploy.
-- DB safety: never rollback with destructive SQL; use forward-fix migrations.
+- DB safety: create and verify a Neon restore branch or use a reviewed forward-fix migration; never improvise destructive rollback SQL.
 - Webhook safety: idempotency is already enforced in `WebhookEvent`.
 
 ## 10) Render MCP (Optional but Recommended)
