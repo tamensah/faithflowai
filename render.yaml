@@ -14,9 +14,9 @@ services:
       - key: PORT
         value: "10000"
       - key: DATABASE_URL
-        fromDatabase:
-          name: faithflow-postgres
-          property: connectionString
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
       - key: ALLOWED_ORIGINS
         sync: false
       - key: NEXT_PUBLIC_WEB_URL
@@ -181,9 +181,3 @@ services:
       -H "x-api-key: $INTEGRATION_API_KEY"
       -H "content-type: application/json"
       -d '{"limit":200,"applySuggestedTransitions":true,"dryRun":false}'
-
-databases:
-  - name: faithflow-postgres
-    plan: starter
-    databaseName: faithflowdb
-    user: faithflow

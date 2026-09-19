@@ -80,7 +80,11 @@ git push origin feature/my-feature
 - Hotfixes to production must be backported to `develop` immediately
 
 ### Render API deployments
-The Fastify API runs on Render (not Vercel). Render has separate staging and production services. Deploy the API staging service first, validate, then promote to production before merging `develop → main`.
+The Fastify API and scheduled jobs run on Render. PostgreSQL runs on Neon. Render has separate staging and production services; deploy and validate staging before promoting `develop → main`. See [`docs/NEON_MIGRATION_RUNBOOK.md`](./docs/NEON_MIGRATION_RUNBOOK.md).
+
+FaithFlow exposes four product surfaces through two frontend apps: the marketing website and member portal live in `apps/web`; church administration and the role-gated platform operations console live in `apps/admin`. See [`docs/PRODUCT_SURFACES.md`](./docs/PRODUCT_SURFACES.md).
+
+The current recovery and release-gate evidence is tracked in [`docs/RECONCILIATION_STATUS_2026-09-19.md`](./docs/RECONCILIATION_STATUS_2026-09-19.md).
 
 ---
 
@@ -96,7 +100,8 @@ cp .env.example .env
 ```
 
 3. Set Clerk keys and DB connection. At minimum:
-- `DATABASE_URL`
+- `DATABASE_URL` (pooled Neon URL for runtime traffic)
+- `DATABASE_URL_UNPOOLED` (direct Neon URL for migrations)
 - `CLERK_JWT_KEY`, `CLERK_JWT_ISSUER`, `CLERK_JWT_AUDIENCE`
 - `NEXT_PUBLIC_API_URL`
  - `NEXT_PUBLIC_WEB_URL` (used for QR/share links)
@@ -143,7 +148,7 @@ This makes org setup immediate for new tenants without manual bootstrapping.
 
 ## Prisma 7 Notes
 - Prisma config lives at `/Users/tamensah/aihub/faithflow_ai/packages/database/prisma.config.ts`.
-- `DATABASE_URL` is required for the Prisma PG adapter.
+- `DATABASE_URL` is required for the Prisma PG adapter. Prisma CLI migrations prefer `DIRECT_URL`, then `DATABASE_URL_UNPOOLED`, and fall back to `DATABASE_URL` for local compatibility.
 
 ## Realtime
 - SSE endpoint: `GET /stream`

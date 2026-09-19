@@ -28,7 +28,15 @@ Optional guardrail env:
 
 - `AUTH_POLICY_ENFORCE_SSO_STRICT` (`true` to hard-block when tenant policy enforces SSO and token lacks SSO auth method signal)
 
-## 2. Stripe (USD Giving + Payouts)
+## Payment provider release order
+
+- **First production release:** Polar for FaithFlow SaaS billing and Paystack for Ghana/African payment flows.
+- **Retained adapter:** Stripe is already implemented in the codebase but live use is deferred until the US LLC and Stripe account setup are complete.
+- Keep provider SDKs and webhook payloads behind billing/payment adapters. Entitlements, subscription state, pricing, reconciliation, webhook idempotency, and tenant business rules remain server-side and provider-neutral.
+
+Polar is a release requirement but is not implemented in this baseline. Its exact environment variables, webhook events, and sandbox validation steps must be added when that adapter is implemented.
+
+## 2. Stripe (implemented, live activation deferred)
 
 **Goal**: enable card giving, recurring donations, and payout reconciliation.
 
@@ -40,7 +48,7 @@ Optional guardrail env:
   - `STRIPE_SECRET_KEY`
   - `STRIPE_WEBHOOK_SECRET`
 
-## 3. Paystack (Local/African Giving + Settlements)
+## 3. Paystack (implemented, first-release priority)
 
 **Goal**: enable NGN/GHS/KES/ZAR/USD/XOF giving and settlement reconciliation.
 
@@ -152,13 +160,17 @@ Shared:
   - `AI_ANTHROPIC_MODEL` (default: `claude-3-5-sonnet-latest`)
   - `AI_GOOGLE_MODEL` (default: `gemini-1.5-pro`)
 
-## 9. Database (Postgres)
+## 9. Database (Neon Postgres)
 
-- Provision Postgres (Neon, Supabase, RDS, etc.).
-- Set `DATABASE_URL`.
+- Provision an isolated Neon branch for the target environment.
+- Set `DATABASE_URL` to its pooled connection string for application traffic.
+- Set `DATABASE_URL_UNPOOLED` to its direct connection string for Prisma migrations.
 - Run:
-  - `pnpm db:migrate`
-  - `pnpm db:seed`
+  - `pnpm db:validate`
+  - `pnpm db:migrate:deploy`
+  - `pnpm db:migrate:status`
+- Seed only a local or explicitly designated test environment with `pnpm db:seed`.
+- Follow `docs/NEON_MIGRATION_RUNBOOK.md` for promotion, verification, and restore procedures.
 
 ## 10. App URLs / CORS
 

@@ -27,7 +27,8 @@
 |----------|------|-------|-----|---------|------|
 | `NODE_ENV` | 🔴 | Set to `production` in staging/prod | ✅ | | |
 | `PORT` | 🔴 | Default `4000` if unset | ✅ | | |
-| `DATABASE_URL` | 🔴 | Postgres connection string | ✅ | | |
+| `DATABASE_URL` | 🔴 | Neon pooled connection string for runtime traffic | ✅ | | |
+| `DATABASE_URL_UNPOOLED` | 🔴 | Neon direct connection string for migrations | ✅ | | |
 | `ALLOWED_ORIGINS` | 🔴 | Comma-separated list of web + admin URLs | ✅ | | |
 | `ALLOWED_CHECKOUT_REDIRECT_ORIGINS` | 🔴 | Comma-separated trusted origins for Stripe/Paystack return URLs | ✅ | | |
 | `NEXT_PUBLIC_WEB_URL` | 🔴 | Web app public URL — used in email links, QR codes | ✅ | | |
@@ -48,13 +49,17 @@
 | `PLATFORM_ADMIN_EMAILS` | 🔴 | Comma-separated emails that get platform-admin role | ✅ | | |
 | `AUTH_POLICY_ENFORCE_SSO_STRICT` | 🟢 | Set `true` to hard-block non-SSO tokens when tenant policy enforces SSO | | | |
 
-### Payments — Stripe
+### Payments — Stripe (deferred until US LLC setup is complete)
 
 | Variable | Gate | Notes | dev | staging | prod |
 |----------|------|-------|-----|---------|------|
-| `STRIPE_SECRET_KEY` | 🔴 | Stripe secret key (starts `sk_`) | ✅ | | |
-| `STRIPE_WEBHOOK_SECRET` | 🔴 | Signing secret for `/webhooks/stripe` | ✅ | | |
-| `PLATFORM_STRIPE_WEBHOOK_SECRET` | 🔴 | Separate secret for platform-level Stripe webhook | ✅ | | |
+| `STRIPE_SECRET_KEY` | 🟢 | Stripe secret key (starts `sk_`) | ✅ | | |
+| `STRIPE_WEBHOOK_SECRET` | 🟢 | Signing secret for `/webhooks/stripe` | ✅ | | |
+| `PLATFORM_STRIPE_WEBHOOK_SECRET` | 🟢 | Separate secret for platform-level Stripe webhook | ✅ | | |
+
+### Payments — Polar (production-release priority)
+
+Polar variable names and webhook contract must be finalized with the billing adapter before this gate is marked complete. Do not couple provider payloads directly to subscription or entitlement business logic.
 
 ### Payments — Paystack
 
@@ -184,12 +189,12 @@ All items below must be ✅ before flipping any church to production.
 
 ### Minimum viable (hard blockers)
 
-- [ ] `DATABASE_URL` configured and migrations run (`pnpm db:migrate && pnpm db:seed`)
+- [ ] Neon pooled `DATABASE_URL` and direct `DATABASE_URL_UNPOOLED` configured; `pnpm db:migrate:deploy` and `pnpm db:migrate:status` pass
 - [ ] `CLERK_SECRET_KEY`, `CLERK_JWT_KEY`, `CLERK_WEBHOOK_SECRET` set on API
 - [ ] Clerk webhook registered: `POST /webhooks/clerk` → `organization.created`
 - [ ] `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY` set on web and admin apps
 - [ ] Clerk routing env vars set on web (`/sign-in`, `/sign-up`, fallback URLs)
-- [ ] `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` set; all 13 webhook events registered
+- [ ] Polar sandbox checkout and signed, idempotent webhook processing verified
 - [ ] `PAYSTACK_SECRET_KEY` + `PAYSTACK_WEBHOOK_SECRET` set; webhook URL registered
 - [ ] `RESEND_API_KEY` + `RESEND_FROM_EMAIL` set; sending domain verified (DKIM/SPF)
 - [ ] `CONTACT_TO_EMAIL` set on web app
@@ -206,7 +211,7 @@ All items below must be ✅ before flipping any church to production.
 - [ ] `FCM_SERVER_KEY` set; push test sent successfully
 - [ ] At least one AI key set (`OPENAI_API_KEY` or `ANTHROPIC_API_KEY`)
 - [ ] `PLATFORM_ADMIN_EMAILS` includes all platform admin email addresses
-- [ ] Stripe Customer Portal configured (branding, allowed features)
+- [ ] Stripe retained as a deferred adapter; enable only after the US LLC and provider account are ready
 - [ ] Paystack webhook tested end-to-end with a real transaction
 
 ### Can launch without (Phase 2)
@@ -218,4 +223,4 @@ All items below must be ✅ before flipping any church to production.
 
 ---
 
-*Last updated: March 2025 · Cross-reference: `docs/THIRDPARTY_CONFIG.md`*
+*Last updated: September 2026 · Cross-reference: `docs/THIRDPARTY_CONFIG.md` and `docs/NEON_MIGRATION_RUNBOOK.md`*
