@@ -3,7 +3,7 @@
 > Use this as the single source of truth before promoting to production.
 > Fill in the Status column for each environment: ✅ Set · ⚠️ Placeholder · ❌ Missing
 
-**Environments:** `dev` (local) · `staging` (Render/Vercel preview) · `prod` (Render/Vercel production)
+**Environments:** `dev` (local) · `staging` (Neon/Vercel preview) · `prod` (Neon/Vercel production)
 
 ---
 
@@ -19,16 +19,16 @@
 
 ## 1. API Service (`apps/api`)
 
-> Deployed on Render. Set in Render Environment → Environment Variables.
+> Deployed as a Neon Function. Apply the complete protected environment file through `neon config plan/apply --env`.
 
 ### Core
 
 | Variable | Gate | Notes | dev | staging | prod |
 |----------|------|-------|-----|---------|------|
 | `NODE_ENV` | 🔴 | Set to `production` in staging/prod | ✅ | | |
-| `PORT` | 🔴 | Default `4000` if unset | ✅ | | |
+| `PORT` | 🟢 | Standalone local server only; Neon Functions do not require it | ✅ | | |
 | `DATABASE_URL` | 🔴 | Neon pooled connection string for runtime traffic | ✅ | | |
-| `DATABASE_URL_UNPOOLED` | 🔴 | Neon direct connection string for migrations | ✅ | | |
+| `DATABASE_URL_UNPOOLED` | 🔴 | Neon direct connection string for the migration command; not a Function runtime variable | ✅ | | |
 | `ALLOWED_ORIGINS` | 🔴 | Comma-separated list of web + admin URLs | ✅ | | |
 | `ALLOWED_CHECKOUT_REDIRECT_ORIGINS` | 🔴 | Comma-separated trusted origins for Stripe/Paystack return URLs | ✅ | | |
 | `NEXT_PUBLIC_WEB_URL` | 🔴 | Web app public URL — used in email links, QR codes | ✅ | | |
@@ -138,7 +138,7 @@ Polar variable names and webhook contract must be finalized with the billing ada
 | Variable | Gate | Notes | dev | staging | prod |
 |----------|------|-------|-----|---------|------|
 | `INTEGRATION_API_KEY` | 🔴 | API key for all cron task endpoints (`x-api-key` header) | ✅ | | |
-| `API_BASE_URL` | 🔴 | Used by Render cron services to call task endpoints | | | |
+| `API_BASE_URL` | 🟢 | Manual GitHub workflow fallback only | | | |
 | `ENABLE_INTERNAL_SCHEDULER` | 🟢 | `true` for single-instance in-process cron (dev only) | ✅ | | |
 | `SCHEDULER_TIMEZONE` | 🟢 | Default `UTC` | | | |
 | `DOMAIN_PENDING_ESCALATION_HOURS` | 🟢 | Default `24` | | | |

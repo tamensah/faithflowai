@@ -254,7 +254,7 @@ If you prefer in-process scheduling (single-instance only), set:
 - `CRON_SUBSCRIPTION_METADATA_BACKFILL=10 2 * * *`
 - `CRON_STREAMING_PROVIDER_SYNC=*/10 * * * *`
 
-See scheduler profiles: `/Users/tamensah/aihub/faithflow_ai/docs/SCHEDULER_PROFILES.md`.
+See scheduler profiles: [`SCHEDULER_PROFILES.md`](./SCHEDULER_PROFILES.md).
 
 ## 12. Live Streaming Providers (Add-on)
 
@@ -315,7 +315,7 @@ No provider API integration. Relies entirely on HTTP HEAD probe of the `playback
 
 ### Sync cron
 
-The provider sync runs every 10 minutes via the `faithflow-streaming-provider-sync` cron (defined in `render.yaml` / `render.cron.yaml`). It applies suggested SCHEDULED→LIVE and LIVE→ENDED transitions automatically and ingests recording URLs when available.
+The provider sync runs every 10 minutes through the `streaming-provider-sync` Neon Function Trigger declared in `neon.ts`. It applies suggested SCHEDULED→LIVE and LIVE→ENDED transitions automatically and ingests recording URLs when available.
 
 Task endpoint (API key protected):
 - `POST /tasks/streaming/provider-sync`
@@ -326,21 +326,19 @@ Optional in-process scheduler env:
 
 ---
 
-## 15. Deployment (Render)
+## 15. Deployment (Neon + Vercel)
 
-Recommended alpha backend deployment uses Render Blueprint:
+The Fastify API, PostgreSQL, and scheduled jobs run on Neon. The web and admin applications run on Vercel.
 
-- `render.yaml` (API web service + Postgres + cron jobs)
-- `render.cron.yaml` (cron-only fallback if API is hosted elsewhere)
+- `neon.ts` declares the Function and Function Triggers.
+- `apps/api/src/neon-function.ts` is the Neon runtime entry point.
+- [`DEPLOYMENT_MANUAL.md`](./DEPLOYMENT_MANUAL.md) defines environment and promotion steps.
 
-For Render cron services, set:
+Manual task endpoints still require `INTEGRATION_API_KEY`. Neon trigger handlers use Neon platform invocation headers and do not expose that key.
 
-- `API_BASE_URL`
-- `INTEGRATION_API_KEY`
+## 16. Manual Scheduler Fallback Alerts
 
-## 16. Scheduler Alerts (GitHub Actions)
-
-Optional but recommended repository secrets for scheduler failure notifications:
+The GitHub workflows are manual-only fallbacks. Optional repository secrets for their failure notifications:
 
 - `FAITHFLOW_ALERT_SLACK_WEBHOOK_URL`
 - `FAITHFLOW_ALERT_RESEND_API_KEY`

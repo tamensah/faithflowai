@@ -277,7 +277,7 @@ export const operationsRouter = router({
         title: 'Scheduler mode',
         status: process.env.ENABLE_INTERNAL_SCHEDULER === 'true' ? 'WARN' : 'OK',
         env: ['ENABLE_INTERNAL_SCHEDULER', 'CRON_TENANT_OPS_AUTOMATE', 'CRON_SUPPORT_SLA_SWEEP', 'CRON_SUBSCRIPTION_METADATA_BACKFILL'],
-        detail: 'In production, prefer Render cron jobs over internal scheduler for multi-instance safety.',
+        detail: 'In deployed environments, use Neon Function Triggers and keep the internal scheduler disabled.',
       },
     ] as const;
 

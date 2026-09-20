@@ -53,8 +53,8 @@ hotfix/<name>   ──PR──►  main  (+ backport PR to develop)
 
 | Environment | Admin URL | API |
 |-------------|-----------|-----|
-| Staging | `https://admin-staging-tamensahs-projects.vercel.app` | Render staging service |
-| Production | `https://admin-tamensahs-projects.vercel.app` | Render production service |
+| Staging | `https://faithflow-admin-git-develop-tamensahs-projects.vercel.app` | Neon Function on the Neon `develop` branch |
+| Production | Vercel production alias | Neon Function on the Neon default branch after promotion |
 
 ### Day-to-day flow
 
@@ -79,12 +79,12 @@ git push origin feature/my-feature
 - Database migrations (`pnpm db:migrate`) must be run against staging before the `develop → main` PR is merged
 - Hotfixes to production must be backported to `develop` immediately
 
-### Render API deployments
-The Fastify API and scheduled jobs run on Render. PostgreSQL runs on Neon. Render has separate staging and production services; deploy and validate staging before promoting `develop → main`. See [`docs/NEON_MIGRATION_RUNBOOK.md`](./docs/NEON_MIGRATION_RUNBOOK.md).
+### Neon backend deployments
+The Fastify API, PostgreSQL, and scheduled Function Triggers run on Neon. Vercel hosts the two Next.js applications. Deploy and validate the long-lived Neon `develop` branch before promoting `develop → main`. See [`docs/NEON_MIGRATION_RUNBOOK.md`](./docs/NEON_MIGRATION_RUNBOOK.md).
 
 FaithFlow exposes four product surfaces through two frontend apps: the marketing website and member portal live in `apps/web`; church administration and the role-gated platform operations console live in `apps/admin`. See [`docs/PRODUCT_SURFACES.md`](./docs/PRODUCT_SURFACES.md).
 
-The current recovery and release-gate evidence is tracked in [`docs/RECONCILIATION_STATUS_2026-09-19.md`](./docs/RECONCILIATION_STATUS_2026-09-19.md).
+The current recovery and release-gate evidence is tracked in [`docs/RECONCILIATION_STATUS_2026-09-20.md`](./docs/RECONCILIATION_STATUS_2026-09-20.md).
 
 ---
 
@@ -147,7 +147,7 @@ This makes org setup immediate for new tenants without manual bootstrapping.
   - Main Campus
 
 ## Prisma 7 Notes
-- Prisma config lives at `/Users/tamensah/aihub/faithflow_ai/packages/database/prisma.config.ts`.
+- Prisma config lives at `packages/database/prisma.config.ts`.
 - `DATABASE_URL` is required for the Prisma PG adapter. Prisma CLI migrations prefer `DIRECT_URL`, then `DATABASE_URL_UNPOOLED`, and fall back to `DATABASE_URL` for local compatibility.
 
 ## Realtime
@@ -201,24 +201,24 @@ Currently emitting:
   - support SLA: every 5 minutes
   - tenant ops automation: every 15 minutes
   - subscription metadata backfill: daily at 02:10 UTC
-- Render Blueprint (API + Postgres + cron): `/Users/tamensah/aihub/faithflow_ai/render.yaml`
-- Render cron-only Blueprint: `/Users/tamensah/aihub/faithflow_ai/render.cron.yaml`
-- Optional in-process scheduler is available in API server (`ENABLE_INTERNAL_SCHEDULER=true`).
-- Scheduler profiles guide: `/Users/tamensah/aihub/faithflow_ai/docs/SCHEDULER_PROFILES.md`.
+- Neon Function and triggers: `neon.ts`
+- The deployed scheduler uses Neon Function Triggers.
+- The in-process scheduler is local-only (`ENABLE_INTERNAL_SCHEDULER=true`) and must stay disabled on Neon.
+- Scheduler profiles guide: `docs/SCHEDULER_PROFILES.md`.
 
 ## Membership
 - Member profiles, households, groups, tags, milestones, and volunteer roles.
 - Onboarding workflows, directory privacy, and group events.
 - Admin `/members` for core management workflows.
 - Member self‑service portal: `/portal`.
-- Manual: `/Users/tamensah/aihub/faithflow_ai/docs/MEMBERSHIP_MANUAL.md`.
+- Manual: [`docs/MEMBERSHIP_MANUAL.md`](./docs/MEMBERSHIP_MANUAL.md).
 
 ## Refunds + Disputes
 - Refunds supported for Stripe, Paystack, and manual donations.
 - Disputes recorded from provider webhooks.
 - Evidence submission supported for Stripe disputes.
 - Task endpoint: `POST /tasks/disputes/monitor` (API key).
-- Operational playbook: `/Users/tamensah/aihub/faithflow_ai/docs/DISPUTE_PLAYBOOK.md`.
+- Operational playbook: [`docs/DISPUTE_PLAYBOOK.md`](./docs/DISPUTE_PLAYBOOK.md).
 
 ## Payout Reconciliation
 - Sync payouts from Stripe and settlements from Paystack in `/finance`.
@@ -251,14 +251,14 @@ Currently emitting:
 - `pnpm db:seed` – seed demo tenant + data
 
 ## Brand Guide
-See `/Users/tamensah/aihub/faithflow_ai/docs/BRAND_GUIDE.md`.
+See [`docs/BRAND_GUIDE.md`](./docs/BRAND_GUIDE.md).
 
 ## Deployment
-- Full deployment runbook: `/Users/tamensah/aihub/faithflow_ai/docs/DEPLOYMENT_MANUAL.md`
-- Provider setup checklist: `/Users/tamensah/aihub/faithflow_ai/docs/THIRDPARTY_CONFIG.md`
-- Scheduler profiles: `/Users/tamensah/aihub/faithflow_ai/docs/SCHEDULER_PROFILES.md`
-- Onboarding runbook: `/Users/tamensah/aihub/faithflow_ai/docs/ONBOARDING_MANUAL.md`
-- Demo playbook (seeded accounts + pastor demo flow): `/Users/tamensah/aihub/faithflow_ai/docs/DEMO_PLAYBOOK.md`
+- Full deployment runbook: [`docs/DEPLOYMENT_MANUAL.md`](./docs/DEPLOYMENT_MANUAL.md)
+- Provider setup checklist: [`docs/THIRDPARTY_CONFIG.md`](./docs/THIRDPARTY_CONFIG.md)
+- Scheduler profiles: [`docs/SCHEDULER_PROFILES.md`](./docs/SCHEDULER_PROFILES.md)
+- Onboarding runbook: [`docs/ONBOARDING_MANUAL.md`](./docs/ONBOARDING_MANUAL.md)
+- Demo playbook: [`docs/DEMO_PLAYBOOK.md`](./docs/DEMO_PLAYBOOK.md)
 
 ## Next Focus Areas
 - Payments refinements (refunds, disputes, multi-account routing)

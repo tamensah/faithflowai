@@ -71,7 +71,7 @@ Expected result:
 For full provider setup details, see `docs/THIRDPARTY_CONFIG.md`.
 
 ## Operational Runbook (Beta Onboarding)
-1. Verify API deployment is current (Render auto-deploy complete).
+1. Verify the Neon Function deployment is current and `/ready` returns 200.
 2. Verify web/admin deployments are current (Vercel production ready).
 3. Test with a fresh email:
    - Complete `/get-started` flow end-to-end.

@@ -14,13 +14,13 @@ This file is the running operations log for implementation details, runtime cons
 
 ### Repository canonical path and doc consolidation
 
-- Canonical active workspace for ongoing development is now `/Users/tamensah/aihub/faithflow_ai`.
+- Canonical active workspace for ongoing development is `/Users/tamensah/aihub/faithlow`.
 - Legacy parallel workspace `/Users/tamensah/aihub/faithlow` is treated as historical/reference only and should not receive active feature edits.
 - Markdown documentation from the legacy workspace has been consolidated into this repo under:
   - `docs/` (top-level architecture/process docs)
   - `docs/notes/` (reference specs and blueprint notes)
 - Operational rule going forward:
-  - execute code changes, docs updates, and deploy scripts only from `faithflow_ai` to avoid branch/repo drift.
+  - execute code changes, docs updates, and deploy scripts only from `faithlow` or its explicit Git worktrees to avoid branch/repo drift.
 
 ### Paystack subscription reconciliation hardening
 
@@ -78,22 +78,15 @@ This file is the running operations log for implementation details, runtime cons
 - Billing cache invalidation now refreshes entitlements after cancel/resume actions so locked/unlocked UX updates immediately.
 - Billing now has a Paystack checkout verification fallback (`billing.verifyPaystackCheckout`) that can activate subscription state from a checkout reference when webhook processing is delayed.
 
-### Deployment state (Render hybrid backend)
+### Neon staging deployment state
 
-- Workspace: `tea-csuufv56l47c7382nnrg` (`My Workspace`)
-- API service: `faithflow-api` (`srv-d66giolum26s738rsus0`)
-- API URL: `https://faithflow-api.onrender.com`
-- Postgres: `faithflow-postgres` (`dpg-d66gic14tr6s73alhg10-a`)
-- Cron jobs:
-  - `faithflow-support-sla-sweep` (`crn-d66giv24d50c738rcpv0`)
-  - `faithflow-tenant-ops-automate` (`crn-d66givp4tr6s73alhuqg`)
-  - `faithflow-subscription-metadata-backfill` (`crn-d66gj0ili9vc739t6mg0`)
-- Latest deploy status check:
-  - API deploy `dep-d66giotum26s738rsv6g`: `live` (`deploy_ended` -> `succeeded`)
-  - Cron deploys: all `live`; manual trigger test runs completed `successful`
-- Health and logs:
-  - `GET /docs` on API URL returns `200`
-  - Render error log query in first 30 minutes after deploy: `0` error logs
+- API: Neon Function `faithflowapi`
+- Branch: `develop` (`br-fragrant-salad-aukk1pvs`)
+- Database: `faithflow_canonical`
+- Schema: 32 migrations and 97 public tables
+- Scheduled jobs: four Neon Function Triggers declared in `neon.ts`
+- Readiness: `GET /ready` verifies both connectivity and the canonical schema
+- Current evidence and remaining gates: [`RECONCILIATION_STATUS_2026-09-20.md`](./RECONCILIATION_STATUS_2026-09-20.md)
 
 ### Deployment state (Vercel frontend)
 
@@ -123,7 +116,7 @@ This file is the running operations log for implementation details, runtime cons
 - API currently validates Clerk tokens via `CLERK_SECRET_KEY`; legacy `CLERK_JWT_*` values can remain for future explicit issuer/audience tightening.
 - Keep `CLERK_JWT_AUDIENCE` unset until JWT template audience is finalized; then set both:
   - Clerk template audience
-  - Render `CLERK_JWT_AUDIENCE`
+  - Neon Function `CLERK_JWT_AUDIENCE`
 
 ### Billing and subscriptions
 

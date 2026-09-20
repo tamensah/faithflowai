@@ -61,7 +61,7 @@ FaithFlow uses the Vercel AI SDK for a thin provider abstraction:
 - Providers: OpenAI, Anthropic, Google (Gemini)
 - Default models can be overridden via env vars
 
-Required env vars (set values in your `.env.local` / Render/Vercel env UI; do not commit secrets):
+Required env vars (set values in local development, the protected Neon Function environment, or Vercel as appropriate; do not commit secrets):
 
 - `OPENAI_API_KEY` (optional if not using OpenAI)
 - `ANTHROPIC_API_KEY` (optional if not using Anthropic)

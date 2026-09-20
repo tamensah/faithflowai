@@ -118,7 +118,7 @@ Add these roles once the foundation is solid and revenue supports it.
 ### 5. DevOps / Platform Reliability Engineer
 
 **What they do:**
-- Own infrastructure: Render services, Vercel deployments, Postgres, cron jobs
+- Own infrastructure: Neon services, Vercel deployments, Postgres, and Function Triggers
 - Build and maintain monitoring, alerting, and on-call runbooks
 - Manage deployment pipelines across dev → staging → production
 - Implement infrastructure-as-code for reproducibility
@@ -127,7 +127,7 @@ Add these roles once the foundation is solid and revenue supports it.
 - Respond to production incidents and conduct post-mortems
 
 **What they need:**
-- Solid experience with Render, Railway, or similar PaaS platforms — or AWS/GCP if we migrate there
+- Solid experience with Neon, Vercel, or comparable managed cloud platforms
 - PostgreSQL operations: connection pooling (PgBouncer/Neon), read replicas, backup verification
 - GitHub Actions CI/CD pipelines
 - Familiarity with Node.js runtime characteristics (memory, event loop, connection limits)
