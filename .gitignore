@@ -5,7 +5,9 @@ dist
 .env
 .env.*
 !.env.example
+!.env.neon.example
 coverage
 .DS_Store
 apps/api/uploads
 .vercel
+.neon

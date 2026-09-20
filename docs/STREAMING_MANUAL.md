@@ -120,7 +120,7 @@ Use **Admin → Streaming → Provider sync** to:
 
 The preview shows each session's current status, provider-confirmed status, live viewer count, and recommended action.
 
-To disable automatic transitions on the cron, set `applySuggestedTransitions: false` in the cron body in `render.yaml`.
+To disable automatic transitions, change `applySuggestedTransitions` in the `/__triggers/streaming-sync` handler and deploy the reviewed function.
 
 ### Health signals
 
@@ -235,6 +235,6 @@ The `STREAMING_SUITE` add-on is not enabled for your tenant. Contact your platfo
 ## Reference
 
 - Provider setup: [THIRDPARTY_CONFIG.md §12](THIRDPARTY_CONFIG.md)
-- Cron schedule: `render.yaml` → `faithflow-streaming-provider-sync` (every 10 minutes)
+- Trigger schedule: `neon.ts` → `streaming-provider-sync` (every 10 minutes)
 - Task endpoint: `POST /tasks/streaming/provider-sync` (requires `INTEGRATION_API_KEY`)
 - Internal scheduler env: `CRON_STREAMING_PROVIDER_SYNC` (default `*/10 * * * *`)

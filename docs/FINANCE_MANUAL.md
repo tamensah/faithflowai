@@ -73,7 +73,7 @@ This guide explains how the finance domain works across donations, budgeting, re
 - Disputes (chargebacks) are tracked per provider and linked to donations when possible.
 - Evidence can be uploaded and submitted for Stripe disputes (text or files).
 - Dispute monitoring task alerts staff before evidence deadlines: `POST /tasks/disputes/monitor`.
-- See the dispute playbook: `/Users/tamensah/aihub/faithflow_ai/docs/DISPUTE_PLAYBOOK.md`.
+- See the dispute playbook: [`DISPUTE_PLAYBOOK.md`](./DISPUTE_PLAYBOOK.md).
 
 ## 10. Reporting & Exports
 

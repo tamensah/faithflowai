@@ -1,84 +1,109 @@
-# Neon Database Migration Runbook
+# Neon Migration Runbook
 
-This runbook is the source of truth for moving FaithFlow's PostgreSQL database from Render to Neon. The application architecture stays the same: Vercel hosts the two Next.js frontends, and Render hosts the Fastify API and scheduled jobs.
+This runbook records the move of FaithFlow's PostgreSQL database, Fastify API, and scheduled jobs to Neon. Vercel continues to host the two Next.js applications.
 
-## Connection contract
+## Scope and evidence boundary
 
-Use two Neon connection strings for each environment:
+- The former host contained no production FaithFlow data, so no customer-row copy is required.
+- The canonical target database is `faithflow_canonical`.
+- The canonical schema has 32 Prisma migrations and 97 application tables.
+- The Neon `develop` branch is `br-fragrant-salad-aukk1pvs`.
+- Staging is the only environment deployed during this migration. Production remains unchanged until a separate `develop → main` approval.
 
-| Variable | Endpoint | Used by |
-| --- | --- | --- |
-| `DATABASE_URL` | Pooled | API runtime and normal application traffic |
-| `DATABASE_URL_UNPOOLED` | Direct | Prisma migration deploy and database administration |
-| `DIRECT_URL` | Direct, optional alias | Local or CI override; Prisma prefers it when present |
+## Target architecture
 
-Never expose either value in client-side variables, logs, commits, screenshots, or issue comments.
+```text
+Vercel web + admin
+        |
+        v
+Neon Function (Fastify adapter)
+        |
+        v
+faithflow_canonical on the same Neon branch
 
-## Environment mapping
-
-| Git branch | App environment | Neon target |
-| --- | --- | --- |
-| Feature branch | Ephemeral preview | Isolated Neon branch when database changes need preview validation |
-| `develop` | Stable staging | Long-lived Neon `develop` branch |
-| `main` | Production | Neon default branch |
-
-Vercel production deployments track `main`; preview deployments track non-production branches. Render staging tracks `develop`; Render production tracks `main`.
-
-## Migration workflow
-
-1. Create a feature branch from current `develop`.
-2. Add a Prisma migration with `pnpm db:migrate` against a disposable or development database.
-3. Validate the schema with `pnpm db:validate`.
-4. Create an isolated Neon branch from the intended parent.
-5. Set its pooled URL as `DATABASE_URL` and direct URL as `DATABASE_URL_UNPOOLED`.
-6. Apply checked-in migrations with `pnpm db:migrate:deploy`.
-7. Confirm `pnpm db:migrate:status` reports the database is up to date.
-8. Run API and browser smoke tests against the isolated branch.
-9. Merge the feature PR to `develop`; deploy migrations to the Neon `develop` branch before the staging API starts.
-10. Promote `develop` to `main` only after staging sign-off. The same checked-in migrations then run against the default Neon branch.
-
-Do not use `prisma db push` in staging or production. It does not provide the reviewed migration history required for promotion and rollback decisions.
-
-## Initial Render-to-Neon cutover
-
-1. Record a source-database backup or snapshot and source row counts.
-2. Create a fresh target database on an isolated Neon branch.
-3. Apply every checked-in migration with `pnpm db:migrate:deploy`.
-4. If source data exists, copy it with PostgreSQL-native tools using direct connections, then compare row counts and critical tenant records.
-5. Run schema, API, auth, tenant-isolation, webhook-idempotency, and browser smoke checks.
-6. Configure Render staging with the Neon staging pooled and direct URLs.
-7. Validate staging before changing production configuration.
-8. Configure Render production with the Neon default-branch pooled and direct URLs during the approved cutover window.
-9. Keep the source database read-only and available through the rollback window.
-
-The September 2026 recovery started from a Neon database containing a small, incompatible test schema and no production data. That schema must remain isolated for reference; it is not a valid migration baseline.
-
-## Verification queries
-
-Run read-only checks after every migration deploy:
-
-```sql
-SELECT COUNT(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL;
-
-SELECT table_name
-FROM information_schema.tables
-WHERE table_schema = 'public'
-ORDER BY table_name;
+Neon Function Triggers ──> protected scheduler handlers
 ```
 
-Then run:
+Clerk, Resend, Paystack, Polar, Stripe, Twilio, AI providers, and storage remain independent integrations. Moving hosting to Neon does not require replacing these providers.
+
+## Branch mapping
+
+| Git branch | Vercel | Neon |
+| --- | --- | --- |
+| Feature branch | PR preview | no automatic persistent backend branch yet |
+| `develop` | stable staging aliases | long-lived Neon `develop` branch |
+| `main` | production | Neon default branch after approved promotion |
+
+## Completed staging migration
+
+1. Reconciled the feature work against `develop`.
+2. Applied and verified all 32 migrations in `faithflow_canonical`.
+3. Added the Neon Function adapter while preserving the standalone Fastify entry point.
+4. Added a readiness probe that verifies the canonical FaithFlow schema, not only network reachability.
+5. Deployed the API on Node.js 24 to the Neon `develop` branch.
+6. Declared and enabled four Neon Function Triggers from `neon.ts`.
+7. Pointed the Vercel `develop` previews at the Neon staging API.
+8. Aligned the web and admin `develop` previews to one Clerk project.
+9. Removed the former-host blueprints and disabled duplicate GitHub schedules.
+
+## Database URL rule
+
+Neon Functions inject a branch-default `DATABASE_URL`. FaithFlow must override it with the pooled URL for `faithflow_canonical`. The initial scheduler smoke caught this distinction: the function was connected, but application tables were missing from the branch-default database.
+
+The release gate is:
+
+```text
+GET /ready → 200 and { "database": "ready" }
+```
+
+`/health` alone is insufficient because it does not access PostgreSQL.
+
+## Deploy or update staging
+
+Use the complete, protected environment file described in [`DEPLOYMENT_MANUAL.md`](./DEPLOYMENT_MANUAL.md):
 
 ```bash
-pnpm db:migrate:status
-pnpm typecheck
-pnpm build
-pnpm lint
-pnpm audit --prod
+pnpm exec neon config plan \
+  --project-id delicate-bird-01532427 \
+  --branch br-fragrant-salad-aukk1pvs \
+  --env /secure/path/faithflow-neon-staging.env
+
+pnpm exec neon config apply \
+  --project-id delicate-bird-01532427 \
+  --branch br-fragrant-salad-aukk1pvs \
+  --env /secure/path/faithflow-neon-staging.env \
+  --update-existing \
+  --no-env-pull
 ```
+
+Never accept a plan that points `DATABASE_URL` at a database other than `faithflow_canonical`.
+
+## Verification
+
+- `/health`, `/ready`, and `/docs` return 200.
+- Public calls to `/__triggers/*` return 403.
+- All four triggers are enabled.
+- Fresh scheduled runs contain no `Scheduled trigger failed` entries.
+- The web and admin staging origins receive the expected CORS headers.
+- Both frontends use the same Clerk project.
+- A new organization provisions its FaithFlow tenant and initial organization hierarchy.
+- The canonical database remains empty until deliberate staging onboarding creates records.
+
+## Production promotion
+
+1. Complete the remaining provider and browser release gates.
+2. Create and verify a recovery point on the Neon default branch.
+3. Apply schema migrations to `faithflow_canonical` on that branch.
+4. Review the production environment file without displaying its values.
+5. Apply `neon.ts` to the default branch.
+6. Update Vercel production variables and deploy `main`.
+7. Update Clerk and payment-provider webhooks to the stable production API domain.
+8. Run the verification list with fresh production logs.
 
 ## Rollback
 
-- Application regression: redeploy the prior Vercel or Render build while keeping schema compatibility.
-- Failed forward migration: stop promotion and fix the migration on the feature branch.
-- Production data incident: use a Neon snapshot or point-in-time branch, verify it, and switch connections through the provider controls.
-- Never improvise destructive rollback SQL against production. Prefer a reviewed forward fix or a verified snapshot restore.
+- Disable the affected trigger if a scheduled job is failing.
+- Redeploy the previous reviewed function source for an API regression.
+- Restore the previous Vercel deployment for a frontend regression.
+- Use a Neon recovery branch or reviewed forward migration for database recovery.
+- Do not reconnect FaithFlow to the former host.

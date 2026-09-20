@@ -10,6 +10,7 @@ import { Webhook } from 'svix';
 import { z } from 'zod';
 import path from 'path';
 import fs from 'fs/promises';
+import type { FastifyInstance } from 'fastify';
 import {
   appRouter,
   checkoutInputSchema,
@@ -59,8 +60,6 @@ import {
 } from '@faithflow-ai/database';
 import { buildTwimlMessage, normalizePhoneNumber, parseTextToGiveBody, verifyTwilioSignature } from './twilio';
 import { startInternalSchedulers } from './scheduler';
-
-const server = Fastify({ logger: true });
 
 function extractIntegrationKey(request: { headers: Record<string, string | string[] | undefined> }) {
   const headerKey = request.headers['x-api-key'];
@@ -152,7 +151,9 @@ function buildCalendarIcs(
   return `${header}\r\n${body}\r\nEND:VCALENDAR`;
 }
 
-async function start() {
+export async function buildServer(): Promise<FastifyInstance> {
+  const server = Fastify({ logger: true });
+
   // Rate limiting — applied globally; sensitive routes override with tighter limits below
   await server.register(rateLimit, {
     global: true,
@@ -1393,6 +1394,34 @@ async function start() {
 
   server.get('/health', async () => ({ ok: true, timestamp: new Date().toISOString() }));
 
+  server.get('/ready', async (_request, reply) => {
+    try {
+      const rows = await prisma.$queryRaw<Array<{ table_name: string | null }>>`
+        SELECT to_regclass('public."Tenant"')::text AS table_name
+      `;
+      if (!rows[0]?.table_name) {
+        return reply.code(503).send({
+          ok: false,
+          database: 'schema-missing',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      return {
+        ok: true,
+        database: 'ready',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      _request.log.error(error);
+      return reply.code(503).send({
+        ok: false,
+        database: 'unavailable',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  });
+
   server.get('/health/auth-guardrails', async () => {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const [policyCount, blockedCount, warningCount] = await Promise.all([
@@ -1463,15 +1492,23 @@ async function start() {
     });
   });
 
+  await server.ready();
+  return server;
+}
+
+async function startStandalone() {
+  const server = await buildServer();
   const scheduler = startInternalSchedulers(server.log);
   server.addHook('onClose', async () => {
     scheduler.stop();
   });
-
   await server.listen({ port: env.PORT, host: '0.0.0.0' });
 }
 
-start().catch((error) => {
-  server.log.error(error);
-  process.exit(1);
-});
+const entrypoint = process.argv[1];
+if (entrypoint && /(?:^|\/)server\.(?:ts|js)$/.test(entrypoint)) {
+  startStandalone().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}

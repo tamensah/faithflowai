@@ -10,8 +10,8 @@ This document is the source of truth for how code moves from a developer's machi
 |-------------|---------|--------|-----------|-----|
 | **Local** | Development | any feature branch | `localhost:3001` | `localhost:3000` |
 | **Preview** | Per-PR review | `feature/*` or `hotfix/*` | Ephemeral Vercel URL per PR | Local or staging API |
-| **Staging** | Integration QA — must pass before prod | `develop` | `https://admin-staging-tamensahs-projects.vercel.app` | Render staging service |
-| **Production** | Live SaaS platform | `main` | `https://admin-tamensahs-projects.vercel.app` | Render production service |
+| **Staging** | Integration QA — must pass before prod | `develop` | `https://faithflow-admin-git-develop-tamensahs-projects.vercel.app` | Neon Function on `develop` |
+| **Production** | Live SaaS platform | `main` | Vercel production alias | Neon Function on the default branch |
 
 ---
 
@@ -70,7 +70,7 @@ Vercel automatically builds an **ephemeral preview URL** for every push to a non
 ### 4. PR merged → staging validates
 
 Once the PR is merged to `develop`:
-- Vercel auto-deploys to staging (`https://admin-staging-tamensahs-projects.vercel.app`)
+- Vercel auto-deploys to staging (`https://faithflow-admin-git-develop-tamensahs-projects.vercel.app`)
 - Run through the staging verification checklist (see below)
 - If any issues found: fix on a new `feature/*` branch, PR back to `develop`
 
@@ -162,7 +162,7 @@ In Vercel Dashboard → Project Settings → Git:
 To have Vercel automatically update the staging alias on every `develop` push **without manual CLI aliasing**:
 
 1. Go to **Vercel Dashboard → Project → Settings → Domains**
-2. Add domain: `admin-staging-tamensahs-projects.vercel.app`
+2. Add domain: the final FaithFlow staging admin custom domain; use the Vercel `develop` alias until it is assigned
 3. Set **Git Branch** to `develop`
 
 Vercel will now update this alias automatically on every successful `develop` deploy. You no longer need to run `vercel alias` manually after each push.
@@ -194,55 +194,41 @@ Set these in **GitHub → Settings → Branches → Add rule**:
 
 ---
 
-## Render API Environments
+## Neon Backend Environments
 
-The Fastify API runs on Render, not Vercel. Render has **two separate services** — staging and production.
+The Fastify API, PostgreSQL, and scheduled jobs run on Neon. Vercel hosts the web and admin applications.
 
-| Service | Render branch | Blueprint | Purpose |
-|---------|--------------|-----------|---------|
-| `faithflow-api-staging` | `develop` | `render.staging.yaml` | Staging API for the staging frontend |
-| `faithflow-api` | `main` | `render.yaml` | Production API |
+| Environment | Git branch | Neon branch | Purpose |
+| --- | --- | --- | --- |
+| Staging | `develop` | `br-fragrant-salad-aukk1pvs` | Integration and onboarding QA |
+| Production | `main` | Neon default branch | Public release after staging sign-off |
 
-**Always deploy the staging API first** when a PR introduces backend changes. The `develop → main` PR should only be opened after both the staging frontend and staging API are verified together.
+Always apply and verify `neon.ts` on the staging branch when a PR changes the API, schema, or schedules. Open the `develop → main` PR only after the staging frontend, API, database readiness probe, and fresh Function logs pass together.
 
-Cron jobs (`render.cron.yaml`) run against the production API only. Staging uses manual task triggers via the health page — no staging cron services.
+The target database in each branch is `faithflow_canonical`. Neon Functions also expose a branch-default database, so `DATABASE_URL` must explicitly name `faithflow_canonical`.
 
-### One-time staging service setup
-
-The staging blueprint (`render.staging.yaml`) provisions a web service + Postgres database tracking the `develop` branch.
-
-1. Go to **Render Dashboard → New → Blueprint**
-2. Connect the `faithflowai` GitHub repo and select `render.staging.yaml`
-3. Fill in all `sync: false` env vars — use **test/staging API keys only**, never production secrets
-4. Deploy — Render creates `faithflow-api-staging` + `faithflow-postgres-staging`
-
-All future `develop` pushes auto-deploy to the staging service after this.
-
-### Day-to-day Render CLI commands
+### Day-to-day Neon commands
 
 ```bash
-# List all services and their IDs
-render services --output json
+# Review API/function/trigger changes without applying them
+pnpm exec neon config plan --project-id delicate-bird-01532427 \
+  --branch br-fragrant-salad-aukk1pvs \
+  --env /secure/path/faithflow-neon-staging.env
 
-# Trigger a manual deploy (staging)
-render deploys create <staging-service-id> --output json
+# Apply the reviewed staging configuration
+pnpm exec neon config apply --project-id delicate-bird-01532427 \
+  --branch br-fragrant-salad-aukk1pvs \
+  --env /secure/path/faithflow-neon-staging.env \
+  --update-existing --no-env-pull
 
-# Tail logs
-render logs <service-id>
-
-# Restart a service
-render restart <service-id>
-
-# Connect to staging Postgres
-render psql <staging-db-id>
-
-# Connect to production Postgres
-render psql dpg-d66gic14tr6s73alhg10-a
+# Verify deployed resources
+pnpm exec neon functions list --project-id delicate-bird-01532427 \
+  --branch br-fragrant-salad-aukk1pvs
+pnpm exec neon triggers list --project-id delicate-bird-01532427 \
+  --branch br-fragrant-salad-aukk1pvs
 ```
 
-> **Production service IDs (never modify without staging sign-off):**
-> - API: `srv-d66giolum26s738rsus0`
-> - Postgres: `dpg-d66gic14tr6s73alhg10-a`
+See [`DEPLOYMENT_MANUAL.md`](./DEPLOYMENT_MANUAL.md) for environment handling, smoke tests, and rollback.
 
 ---
 
@@ -269,8 +255,8 @@ docs: establish dev→staging→prod branch workflow
 
 ## Reference
 
-- Deployment runbook (Render + Vercel setup, env vars, webhooks): `docs/DEPLOYMENT_MANUAL.md`
+- Deployment runbook (Neon + Vercel setup, env vars, webhooks): `docs/DEPLOYMENT_MANUAL.md`
 - Third-party provider credentials: `docs/THIRDPARTY_CONFIG.md`
 - Scheduler profiles and cron cadence: `docs/SCHEDULER_PROFILES.md`
-- Staging admin: https://admin-staging-tamensahs-projects.vercel.app
-- Production admin: https://admin-tamensahs-projects.vercel.app
+- Staging admin: https://faithflow-admin-git-develop-tamensahs-projects.vercel.app
+- Staging web: https://faithflow-web-git-develop-tamensahs-projects.vercel.app

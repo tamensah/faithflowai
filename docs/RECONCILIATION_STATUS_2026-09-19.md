@@ -1,6 +1,6 @@
 # FaithFlow Reconciliation Status — 2026-09-19
 
-Status: **migration baseline complete; staging service configuration pending**
+Status: **Superseded by [the 2026-09-20 staging cutover status](./RECONCILIATION_STATUS_2026-09-20.md).**
 
 ## Canonical source line
 
@@ -48,17 +48,16 @@ The Fastify service exposes its static OpenAPI document at `/docs` without the v
 - Production dependency audit: passed with 0 known vulnerabilities
 - CI workflow added for pull requests and pushes to `develop` and `main`
 
-## Deployment configuration prepared
+## Deployment configuration prepared at this checkpoint
 
-- Render blueprints no longer provision Render PostgreSQL.
-- Runtime `DATABASE_URL` is the Neon pooled connection.
-- Migration `DATABASE_URL_UNPOOLED` is the Neon direct connection.
-- Vercel continues to host `apps/web` and `apps/admin`.
-- Render continues to host `apps/api` and scheduled jobs.
+- Runtime `DATABASE_URL` was prepared for the Neon pooled connection.
+- Migration `DATABASE_URL_UNPOOLED` was prepared for the Neon direct connection.
+- Vercel continued to host `apps/web` and `apps/admin`.
+- The subsequent 2026-09-20 cutover moved the API and schedules to Neon Functions.
 
 ## Remaining staging gates
 
-1. Configure Render staging with the Neon `develop` branch's pooled and direct connection strings.
+1. Deploy and verify the API and schedules on the Neon `develop` branch.
 2. Configure the correct Clerk staging instance, domains, JWT template, and webhook.
 3. Merge this feature branch to `develop` through a reviewed PR and verify CI.
 4. Run browser tests for marketing → sign-up → organization → church workspace → admin dashboard.

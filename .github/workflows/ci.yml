@@ -19,8 +19,12 @@ jobs:
     timeout-minutes: 30
     env:
       DATABASE_URL: postgresql://faithflow:faithflow@127.0.0.1:5432/faithflow
+      ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001
+      NEXT_PUBLIC_WEB_URL: http://localhost:3000
+      NEXT_PUBLIC_ADMIN_URL: http://localhost:3001
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZHVtbXkuY2xlcmsuYWNjb3VudHMuZGV2JA
       CLERK_SECRET_KEY: sk_test_build_only
+      RESEND_API_KEY: re_build_only
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -32,7 +36,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:validate
+      - run: pnpm exec tsc --noEmit --module nodenext --moduleResolution nodenext --target es2022 neon.ts
       - run: pnpm typecheck
+      - run: pnpm --filter @faithflow-ai/api-server exec tsx --test test/e2e/neon-function-adapter.test.ts
       - run: pnpm lint
       - run: pnpm build
       - run: pnpm audit --prod

@@ -2,6 +2,7 @@ import path from 'node:path';
 import { config } from 'dotenv';
 import { PrismaClient } from './generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { attachDatabasePool } from '@neon/functions';
 import { Pool } from 'pg';
 
 config({
@@ -22,6 +23,7 @@ if (!connectionString) {
 }
 
 const pool = globalThis.__prismaPool ?? new Pool({ connectionString });
+attachDatabasePool(pool);
 const adapter = new PrismaPg(pool);
 
 export const prisma = global.prisma ?? new PrismaClient({ adapter });

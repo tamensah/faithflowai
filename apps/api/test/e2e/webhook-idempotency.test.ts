@@ -16,6 +16,23 @@ function uniqueSuffix() {
 test('platform stripe webhook processing is idempotent by provider event id', async () => {
   const suffix = uniqueSuffix();
   const webhookSecret = 'whsec_test_faithflow';
+  const existingPlan = await prisma.subscriptionPlan.findFirst({
+    where: { isActive: true },
+    orderBy: { createdAt: 'asc' },
+  });
+  const plan =
+    existingPlan ??
+    (await prisma.subscriptionPlan.create({
+      data: {
+        code: `stripe-webhook-${suffix}`,
+        name: `Stripe Webhook Test ${suffix}`,
+        currency: 'USD',
+        interval: 'MONTHLY',
+        amountMinor: 1000,
+        isActive: true,
+        isDefault: false,
+      },
+    }));
   const tenant = await prisma.tenant.create({
     data: {
       name: `Webhook Tenant ${suffix}`,
@@ -23,8 +40,6 @@ test('platform stripe webhook processing is idempotent by provider event id', as
       clerkOrgId: `org_webhook_${suffix}`,
     },
   });
-  const plan = await prisma.subscriptionPlan.findFirst({ where: { isActive: true }, orderBy: { createdAt: 'asc' } });
-  assert.ok(plan, 'Expected at least one active subscription plan');
 
   const providerRef = `sub_test_${suffix}`;
   const subscription = await prisma.tenantSubscription.create({
@@ -93,5 +108,8 @@ test('platform stripe webhook processing is idempotent by provider event id', as
     await prisma.tenantSubscription.deleteMany({ where: { id: subscription.id } });
     await prisma.organization.deleteMany({ where: { tenantId: tenant.id } });
     await prisma.tenant.deleteMany({ where: { id: tenant.id } });
+    if (!existingPlan) {
+      await prisma.subscriptionPlan.deleteMany({ where: { id: plan.id } });
+    }
   }
 });

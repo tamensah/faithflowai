@@ -1,220 +1,179 @@
 # FaithFlow AI Deployment Manual
 
-> **Branch & git workflow** → See [`docs/GITFLOW_WORKFLOW.md`](./GITFLOW_WORKFLOW.md) for the authoritative `feature/* → develop → main` branch model, staging verification checklist, and branch protection rules. **Never deploy to production without staging sign-off.**
+> Follow [`GITFLOW_WORKFLOW.md`](./GITFLOW_WORKFLOW.md): feature branches merge into `develop`, staging is verified, and only then does `develop` move to `main`.
 
-This manual is the end-to-end go-live runbook for alpha.
+This is the deployment source of truth for the Vercel + Neon topology.
 
-It covers:
-- Recommended hosting topology
-- Render backend deployment
-- Vercel frontend deployment
-- Third-party webhook setup
-- Scheduler/ops hardening
-- Verification and rollback
+## Hosting topology
 
-## 1) Hosting Decision
+| Surface | Staging | Production |
+| --- | --- | --- |
+| Marketing site + member portal (`apps/web`) | Vercel preview for `develop` | Vercel production from `main` |
+| Church admin + platform operations (`apps/admin`) | Vercel preview for `develop` | Vercel production from `main` |
+| Fastify API (`apps/api`) | Neon Function on the Neon `develop` branch | Neon Function on the Neon default branch |
+| PostgreSQL | `faithflow_canonical` on Neon `develop` | `faithflow_canonical` on the Neon default branch |
+| Scheduled jobs | Neon Function Triggers declared in `neon.ts` | Neon Function Triggers declared in `neon.ts` |
 
-### Recommended default (alpha and early scale)
+Clerk remains the identity provider. Resend handles email. Paystack and Polar are the priority payment providers for the first release; Stripe remains supported for later activation after the US LLC setup.
 
-- Frontend (`apps/web`, `apps/admin`): Vercel
-- Backend (`apps/api`) and cron: Render
-- PostgreSQL: Neon
+## Repository deployment contract
 
-Why this is the best default:
-- Vercel is strongest for Next.js performance, cache, and DX.
-- Render provides the API and recurring jobs; Neon supplies pooled runtime connections, direct migration connections, branching, and restore controls.
-- Keeps blast radius small: frontend deploys do not restart API jobs.
+- `neon.ts` declares the API function, Node.js 24 runtime, and schedules.
+- `apps/api/src/neon-function.ts` adapts web-standard Neon requests to Fastify and owns trigger-only routes.
+- `apps/api/src/server.ts` remains the local/standalone Fastify entry point.
+- `DATABASE_URL` must be the pooled connection string for the `faithflow_canonical` database. Do not accept the branch default database implicitly.
+- Neon supplies the function runtime; Vercel supplies only the two Next.js applications.
 
-### Option B (single provider)
+The current staging API URL is:
 
-- Host frontend + backend on Render.
+`https://br-fragrant-salad-aukk1pvs-faithflowapi.compute.c-10.us-east-1.aws.neon.tech`
 
-Use this when:
-- You want one infra bill/provider.
-- You can accept less specialized Next.js hosting behavior than Vercel.
+Use a custom API domain before public production launch. Provider webhooks must use the final stable domain.
 
-## 2) Required Accounts and Access
+## Required access
 
-- GitHub repo access to `tamensah/faithflowai`
-- Render account with permission to create services
-- Neon account with access to the FaithFlow project
-- Vercel account with permission to import the repo
-- Provider accounts for the current code: Clerk, Paystack, Stripe, Resend, Twilio, S3 or GCS. Polar is the next billing adapter and is required before the first production release; Stripe remains supported but its live activation is deferred until the US LLC setup is complete.
+- GitHub repository `tamensah/faithflowai`
+- Neon project `delicate-bird-01532427`
+- Vercel projects `faithflow-web` and `faithflow-admin`
+- The shared Clerk project used by both frontend applications and the API
+- Resend, Paystack, Polar, and any enabled optional provider accounts
 
-## 3) Source of Truth Files
+## Neon environment file
 
-- Render full blueprint: `/Users/tamensah/aihub/faithflow_ai/render.yaml`
-- Render cron-only fallback: `/Users/tamensah/aihub/faithflow_ai/render.cron.yaml`
-- Third-party setup checklist: `/Users/tamensah/aihub/faithflow_ai/docs/THIRDPARTY_CONFIG.md`
-- Scheduler strategy and cadence: `/Users/tamensah/aihub/faithflow_ai/docs/SCHEDULER_PROFILES.md`
-- Env baseline: `/Users/tamensah/aihub/faithflow_ai/.env.example`
-- Neon migration runbook: `/Users/tamensah/aihub/faithflow_ai/docs/NEON_MIGRATION_RUNBOOK.md`
+Keep the real file outside Git and restrict it to the operator account. Start from `.env.neon.example`.
 
-## 4) Backend Deploy on Render (Blueprint)
+Required for every API deployment:
 
-1. In Render Dashboard, choose Blueprint deploy.
-2. Select repo `tamensah/faithflowai` and branch `main`.
-3. Use `/Users/tamensah/aihub/faithflow_ai/render.yaml`.
-4. Confirm services:
-- `faithflow-api` (web service)
-- `faithflow-support-sla-sweep` (cron)
-- `faithflow-tenant-ops-automate` (cron)
-- `faithflow-subscription-metadata-backfill` (cron)
-5. Fill all `sync: false` env values before promoting.
-
-### Render API critical envs
-
-- `DATABASE_URL` (Neon pooled URL)
-- `DATABASE_URL_UNPOOLED` (Neon direct URL used by the pre-deploy migration)
-- `ALLOWED_ORIGINS`
+- `DATABASE_URL`: pooled URL for `faithflow_canonical` on the target branch
+- `ALLOWED_ORIGINS`: exact web and admin origins for the target environment
+- `CLERK_SECRET_KEY`: must match the Clerk publishable key used by both frontends
 - `NEXT_PUBLIC_WEB_URL`
 - `NEXT_PUBLIC_ADMIN_URL`
-- `INTEGRATION_API_KEY`
-- `ENABLE_INTERNAL_SCHEDULER=false` (must stay false in multi-instance external scheduler setup)
-- Clerk:
-  - `CLERK_SECRET_KEY`
-  - `CLERK_JWT_KEY`
-  - `CLERK_JWT_ISSUER`
-  - `CLERK_JWT_AUDIENCE`
-  - `CLERK_WEBHOOK_SECRET`
+- `RESEND_API_KEY`
 
-### Render API optional by feature
+Required before email release testing:
 
-- Payments: `PAYSTACK_*` is implemented and prioritized; `STRIPE_*` is implemented but live activation is deferred. Polar environment variables will be added with its billing adapter.
-- Comms: `RESEND_*`, `TWILIO_*`
-- AI: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`
-- Storage: `STORAGE_PROVIDER` and matching S3/GCS vars
+- `RESEND_FROM_EMAIL`: verified sender on the FaithFlow sending domain
 
-### Render cron envs (each cron service)
+Required when each integration is enabled:
 
-- `API_BASE_URL` (the Render API public URL)
-- `INTEGRATION_API_KEY` (same value used by API service)
+- Clerk webhooks: `CLERK_WEBHOOK_SECRET`
+- Paystack: `PAYSTACK_SECRET_KEY`, `PAYSTACK_WEBHOOK_SECRET`, `PLATFORM_PAYSTACK_WEBHOOK_SECRET`
+- Polar: variables introduced by the reviewed Polar adapter
+- Stripe: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PLATFORM_STRIPE_WEBHOOK_SECRET`
+- Twilio, AI, storage, and streaming provider variables listed in [`ENV_CHECKLIST.md`](./ENV_CHECKLIST.md)
 
-## 5) Frontend Deploy on Vercel (Recommended)
+Never print or commit the environment file. When a provider key changes, deploy a complete reviewed environment file so a partial update does not remove another integration.
 
-Create two Vercel projects from the same repo.
+## Deploy staging API and triggers
 
-### Project A: Web app
+From the repository root:
 
-- Root directory: `apps/web`
-- Install command: `pnpm install --frozen-lockfile`
-- Build command: `pnpm --filter @faithflow-ai/web build`
-- Output: Next.js default
-
-Required env:
-- `NEXT_PUBLIC_API_URL` = Render API URL
-- `NEXT_PUBLIC_WEB_URL` = public web URL
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-- `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` (optional; required only if using Clerk custom JWT template)
-- `CLERK_SECRET_KEY`
-
-### Project B: Admin app
-
-- Root directory: `apps/admin`
-- Install command: `pnpm install --frozen-lockfile`
-- Build command: `pnpm --filter @faithflow-ai/admin build`
-- Output: Next.js default
-
-Required env:
-- `NEXT_PUBLIC_API_URL` = Render API URL
-- `NEXT_PUBLIC_ADMIN_URL` = public admin URL
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-- `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` (optional; required only if using Clerk custom JWT template)
-- `CLERK_SECRET_KEY`
-
-### Monorepo deploy command profile (Codex/Vercel CLI)
-
-For this workspace, use prebuilt deploys from repo root with project-specific settings:
-
-- Web:
-  - `npx vercel@latest build --prod --yes`
-  - `npx vercel@latest deploy --prebuilt --prod --yes`
-  - with project settings: `rootDirectory=apps/web`, `buildCommand=pnpm --filter @faithflow-ai/web build`
-- Admin:
-  - `npx vercel@latest build --prod --yes`
-  - `npx vercel@latest deploy --prebuilt --prod --yes`
-  - with project settings: `rootDirectory=apps/admin`, `buildCommand=pnpm --filter @faithflow-ai/admin build`
-
-Using `--prebuilt` avoids workspace protocol install failures on direct app-folder deploys.
-
-### Cross-origin rule
-
-`ALLOWED_ORIGINS` in Render API must include both Vercel app origins.
-
-Example:
-`ALLOWED_ORIGINS=https://app.faithflow.ai,https://admin.faithflow.ai,http://localhost:3000,http://localhost:3001`
-
-## 6) Third-Party Webhooks (Provider Side)
-
-Configure these provider endpoints after API is live:
-
-- Clerk: `POST https://<api-domain>/webhooks/clerk`
-- Stripe: `POST https://<api-domain>/webhooks/stripe`
-- Stripe platform: `POST https://<api-domain>/webhooks/stripe/platform`
-- Paystack: `POST https://<api-domain>/webhooks/paystack`
-- Paystack platform: `POST https://<api-domain>/webhooks/paystack/platform`
-- Twilio SMS: `POST https://<api-domain>/webhooks/twilio/sms`
-
-Use exact event lists from `/Users/tamensah/aihub/faithflow_ai/docs/THIRDPARTY_CONFIG.md`.
-
-## 7) Operations and Alerts
-
-GitHub workflows already exist:
-- `/Users/tamensah/aihub/faithflow_ai/.github/workflows/support-sla-sweep.yml`
-- `/Users/tamensah/aihub/faithflow_ai/.github/workflows/tenant-ops-automate.yml`
-- `/Users/tamensah/aihub/faithflow_ai/.github/workflows/subscription-metadata-backfill.yml`
-
-Set GitHub environment `alpha-ops` and required secrets:
-- `FAITHFLOW_API_BASE_URL`
-- `FAITHFLOW_INTEGRATION_API_KEY`
-
-Optional alerting secrets:
-- `FAITHFLOW_ALERT_SLACK_WEBHOOK_URL`
-- `FAITHFLOW_ALERT_RESEND_API_KEY`
-- `FAITHFLOW_ALERT_EMAIL_FROM`
-- `FAITHFLOW_ALERT_EMAIL_TO`
-
-## 8) Release Verification Checklist
-
-Run post-deploy checks in this order:
-
-1. API health/docs loads.
-2. Clerk sign-in works in both web/admin.
-3. Tenant auto-provision works on first org request.
-4. One Polar sandbox checkout completes and its signed webhook is idempotent after the Polar adapter lands.
-5. One Paystack test donation succeeds for a supported currency/country pair.
-6. Webhook replay-idempotency verified (no duplicate rows).
-7. Cron jobs execute successfully and write expected audit/log records.
-8. Basic comms send test (Resend email + Twilio SMS if configured).
-
-## 9) Rollback Strategy
-
-- Frontend rollback: redeploy previous Vercel deployment.
-- API rollback: rollback Render service to prior deploy.
-- DB safety: create and verify a Neon restore branch or use a reviewed forward-fix migration; never improvise destructive rollback SQL.
-- Webhook safety: idempotency is already enforced in `WebhookEvent`.
-
-## 10) Render MCP (Optional but Recommended)
-
-If you want deployment/ops from AI tools via MCP:
-
-1. Create Render API key in Render dashboard.
-2. Export key locally:
 ```bash
-export RENDER_API_KEY="YOUR_RENDER_API_KEY"
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm build
+pnpm exec neon config plan \
+  --project-id delicate-bird-01532427 \
+  --branch br-fragrant-salad-aukk1pvs \
+  --env /secure/path/faithflow-neon-staging.env
+pnpm exec neon config apply \
+  --project-id delicate-bird-01532427 \
+  --branch br-fragrant-salad-aukk1pvs \
+  --env /secure/path/faithflow-neon-staging.env \
+  --update-existing \
+  --no-env-pull
 ```
-3. Add Render MCP to Codex:
+
+The configuration creates these UTC schedules:
+
+| Trigger | Schedule | Handler |
+| --- | --- | --- |
+| Support SLA sweep | every 5 minutes | `/__triggers/support-sla` |
+| Tenant operations | every 15 minutes | `/__triggers/tenant-ops` |
+| Subscription metadata backfill | daily at 02:10 | `/__triggers/subscription-metadata` |
+| Streaming provider sync | every 10 minutes | `/__triggers/streaming-sync` |
+
+Neon attaches `X-Neon-Trigger-Invocation-Id` to trigger requests. The API rejects direct public calls to these routes.
+
+## Configure Vercel staging
+
+Both Vercel projects must use the same Clerk project. For the `develop` preview environment set:
+
+- `NEXT_PUBLIC_API_URL` to the Neon staging function URL
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` to the shared Clerk project
+- `CLERK_SECRET_KEY` to the matching shared Clerk secret
+- `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` if the shared Clerk project uses a custom template
+- the application-specific sign-in, sign-up, and fallback URLs
+
+Stable staging aliases:
+
+- Web: `https://faithflow-web-git-develop-tamensahs-projects.vercel.app`
+- Admin: `https://faithflow-admin-git-develop-tamensahs-projects.vercel.app`
+
+Environment changes apply on the next Vercel deployment. Merge through `develop` or redeploy the current `develop` deployment after changing them.
+
+## Database migrations
+
+Use the direct connection string for Prisma migrations and the pooled string for application traffic.
+
 ```bash
-codex mcp add render --url https://mcp.render.com/mcp --bearer-token-env-var RENDER_API_KEY
+DATABASE_URL_UNPOOLED='<direct faithflow_canonical URL>' pnpm db:migrate:status
+DATABASE_URL_UNPOOLED='<direct faithflow_canonical URL>' pnpm db:migrate:deploy
 ```
-4. Restart Codex and verify MCP resources list.
 
-If MCP is unavailable, use Dashboard Blueprint deploy with `/Users/tamensah/aihub/faithflow_ai/render.yaml`.
+Verify `/ready` after deployment. A 200 response confirms both database connectivity and the canonical FaithFlow schema; `/health` verifies only that the function can serve requests.
 
-## 11) Production Hardening Before Beta
+## Provider webhooks
 
-- Enforce least-privilege API keys per provider.
-- Add WAF/rate-limits at edge for webhook and public endpoints.
-- Add uptime checks for API and scheduled task endpoints.
-- Enable centralized logging/metrics and error alert routing.
-- Add DB backup retention policy and restore test.
+Register these routes only after the target API domain is stable:
+
+- Clerk: `POST /webhooks/clerk`
+- Paystack: `POST /webhooks/paystack`
+- Paystack platform: `POST /webhooks/paystack/platform`
+- Stripe: `POST /webhooks/stripe`
+- Stripe platform: `POST /webhooks/stripe/platform`
+- Twilio SMS: `POST /webhooks/twilio/sms`
+
+See [`THIRDPARTY_CONFIG.md`](./THIRDPARTY_CONFIG.md) for events and signing secrets.
+
+## Staging verification
+
+1. `/health` returns 200.
+2. `/ready` returns 200 with `database: ready`.
+3. `/docs` returns 200.
+4. A normal client call to `/__triggers/support-sla` returns 403.
+5. Neon shows all four triggers enabled and recent scheduled invocations without application errors.
+6. The web and admin `develop` aliases load and call the Neon API without CORS errors.
+7. A new Clerk user creates or selects an organization and the first authenticated request provisions the tenant.
+8. Member and church-admin journeys use the same Clerk organization context.
+9. Resend sends from a verified FaithFlow sender.
+10. Paystack sandbox checkout and signed webhook replay pass. Add the equivalent Polar check when its adapter lands.
+
+## Production promotion
+
+Production is a separate reviewed action after staging sign-off:
+
+1. Merge `develop` into `main` through a PR.
+2. Create a fresh Neon restore branch or other reviewed recovery point.
+3. Apply migrations to `faithflow_canonical` on the Neon default branch.
+4. Apply `neon.ts` to the Neon default branch with the complete production environment file.
+5. Set the Vercel production API URL and shared production Clerk configuration.
+6. Deploy both Vercel projects from `main`.
+7. Run the full verification list and inspect fresh Neon Function logs.
+
+## Rollback
+
+- Frontend: restore the previous Vercel deployment.
+- API: redeploy the previous reviewed function source to the same Neon branch.
+- Trigger: disable the affected Neon trigger while investigating; do not enable a second scheduler.
+- Database: restore from a verified Neon branch or ship a reviewed forward migration. Do not improvise destructive SQL.
+- Webhooks remain replay-safe through `WebhookEvent` idempotency.
+
+## Current release gates
+
+- `RESEND_FROM_EMAIL` must be configured and verified.
+- Paystack secrets and signed webhook testing remain outstanding.
+- The Polar adapter and its signed webhook path remain outstanding.
+- Browser testing must confirm the unified Clerk organization flow on the redeployed `develop` aliases.
+- SSE fan-out is process-local in the current implementation; validate a shared event transport before relying on multi-instance realtime delivery in production.
