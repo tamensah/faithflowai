@@ -1,9 +1,9 @@
-# FaithFlow Technical Specification Document
+# ChurchTrack Technical Specification Document
 Version 1.0 | December 20, 2024
 
 ## 1. Executive Summary
 
-FaithFlow is a modern, cloud-native SaaS platform designed to serve global religious organizations with multi-tenant, multi-location, and multi-language capabilities. The platform aims to provide comprehensive church management solutions while maintaining strict data isolation and security standards.
+ChurchTrack is a modern, cloud-native SaaS platform designed to serve global religious organizations with multi-tenant, multi-location, and multi-language capabilities. The platform aims to provide comprehensive church management solutions while maintaining strict data isolation and security standards.
 
 ## 2. System Architecture
 

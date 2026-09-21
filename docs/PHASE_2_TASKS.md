@@ -1,4 +1,4 @@
-# FaithFlow Phase 2 Implementation Tasks
+# ChurchTrack Phase 2 Implementation Tasks
 
 ## Week 1: Core Features Implementation 
 

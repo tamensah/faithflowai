@@ -1,4 +1,4 @@
-# FaithFlow Security Features Documentation
+# ChurchTrack Security Features Documentation
 Version 1.0 | December 21, 2024
 
 ## Core Security Architecture

@@ -82,17 +82,17 @@ function redactLabel(label: string) {
 function getQuestionGuardrailMessage(value: string) {
   const normalized = value.toLowerCase();
   if (/(api[\s_-]*key|secret|password|session cookie|jwt|bearer token|access token)/i.test(normalized)) {
-    return 'FaithFlow AI will not retrieve secrets, credentials, or session data.';
+    return 'ChurchTrack will not retrieve secrets, credentials, or session data.';
   }
   if (
     /(list|export|dump|show|reveal|give me).*(emails?|phone numbers?|addresses?|contact list|member directory)/i.test(
       normalized
     )
   ) {
-    return 'FaithFlow AI will not expose bulk contact data. Use approved member directory and export workflows instead.';
+    return 'ChurchTrack will not expose bulk contact data. Use approved member directory and export workflows instead.';
   }
   if (/(list|dump|show|reveal|all|every|full).*(care notes?|pastoral notes?|counseling|counselling|medical|prayer requests?)/i.test(normalized)) {
-    return 'FaithFlow AI will not expose private care or counseling records in bulk.';
+    return 'ChurchTrack will not expose private care or counseling records in bulk.';
   }
   return null;
 }
@@ -548,7 +548,7 @@ export const aiRouter = router({
         .join('\n');
 
       const prompt = [
-        'You are FaithFlow AI, an assistant for church staff.',
+        'You are ChurchTrack, an assistant for church staff.',
         'Use ONLY the provided SOURCES. If a question cannot be answered from sources, say what is missing and suggest what to check next.',
         'Cite sources inline using [S#] for any factual claim derived from sources.',
         'Be concise and action-oriented.',
@@ -637,7 +637,7 @@ export const aiRouter = router({
       });
 
       const prompt = [
-        'You are FaithFlow AI generating a church communication draft.',
+        'You are ChurchTrack generating a church communication draft.',
         'Return ONLY valid JSON with keys: subject, body, reviewChecklist.',
         'subject: short line; leave empty for SMS/WhatsApp.',
         'body: ready-to-send message using plain language; no markdown.',
@@ -736,7 +736,7 @@ export const aiRouter = router({
 
       try {
         const prompt = [
-          'You are FaithFlow AI preparing executive summary packs for church operators.',
+          'You are ChurchTrack preparing executive summary packs for church operators.',
           'Return ONLY valid JSON with shape {"packs":[{"key","summary","highlights"}]}.',
           'Use the provided keys exactly: executive, attendance, giving, volunteer.',
           'Each summary must be one concise paragraph.',

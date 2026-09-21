@@ -1,8 +1,8 @@
-# FaithFlow API Documentation
+# ChurchTrack API Documentation
 
 ## API Overview
 
-The FaithFlow API is built using tRPC with TypeScript for full end-to-end type safety. All endpoints are accessible through a single API gateway with proper authentication and rate limiting.
+The ChurchTrack API is built using tRPC with TypeScript for full end-to-end type safety. All endpoints are accessible through a single API gateway with proper authentication and rate limiting.
 
 ## Authentication
 

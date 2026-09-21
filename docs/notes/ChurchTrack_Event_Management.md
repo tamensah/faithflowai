@@ -1,7 +1,7 @@
 
-# Event Management Features for FaithFlow
+# Event Management Features for ChurchTrack
 
-To make **FaithFlow's event management system** stand out in the competitive space of church SaaS platforms, you need to prioritize features that align with the unique needs of churches. Here’s a list of **must-have features** and **innovative functionalities** to set your platform apart:
+To make **ChurchTrack's event management system** stand out in the competitive space of church SaaS platforms, you need to prioritize features that align with the unique needs of churches. Here’s a list of **must-have features** and **innovative functionalities** to set your platform apart:
 
 ---
 
@@ -78,7 +78,7 @@ To make **FaithFlow's event management system** stand out in the competitive spa
 
 ### **Multi-Campus Support**
 - Allow churches with multiple campuses to manage events independently under the same tenant.
-- Subdomain or custom domain event links (e.g., `events.churchname.faithflow.com`).
+- Subdomain or custom domain event links (e.g., `events.churchname.churchtrack.example`).
 
 ### **Cross-Campus Coordination**
 - Centralized visibility for managing events across campuses.

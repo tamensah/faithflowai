@@ -104,7 +104,7 @@ export const registrationRouter = router({
         try {
           await sendEmail({
             to: email,
-            subject: `Verify your FaithFlow membership`,
+            subject: `Verify your ChurchTrack membership`,
             html: renderMemberVerificationEmail({
               firstName: input.firstName,
               churchName: church.name,
@@ -202,7 +202,7 @@ export const registrationRouter = router({
       if (process.env.RESEND_API_KEY && process.env.RESEND_FROM_EMAIL) {
         await sendEmail({
           to: member.email,
-          subject: `Verify your FaithFlow membership`,
+          subject: `Verify your ChurchTrack membership`,
           html: renderMemberVerificationEmail({
             firstName: member.firstName,
             churchName,

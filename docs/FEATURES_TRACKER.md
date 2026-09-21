@@ -1,4 +1,4 @@
-# FaithFlow AI Feature Tracker
+# ChurchTrack Feature Tracker
 
 This is the live checklist for product scope, implementation status, and next steps.
 
@@ -182,7 +182,7 @@ This is the live checklist for product scope, implementation status, and next st
   - Root layout now minimal (ClerkProvider + Providers only) — portal and admin fully isolated
   - Comprehensive SaaS footer (5-column layout, payment badges, trust signals, legal bar)
   - Dedicated sign-in and sign-up pages (`/sign-in`, `/sign-up`) — no modal-only flow
-  - Clerk branding override via `localization` prop ("Sign in to FaithFlow AI")
+  - Clerk branding override via `localization` prop ("Sign in to ChurchTrack")
   - Admin guide page (`/guide`) — 10-step onboarding flow, module reference, roles, portal access, quick links
   - Church onboarding wizard redesigned (`/get-started`):
     - Progressive 3-step wizard with locked/active/done visual states

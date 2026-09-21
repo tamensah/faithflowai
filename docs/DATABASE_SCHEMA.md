@@ -1,8 +1,8 @@
-# FaithFlow Database Schema
+# ChurchTrack Database Schema
 
 ## Overview
 
-The FaithFlow platform uses PostgreSQL with Prisma as the ORM. The schema is designed to support multi-tenancy with complete data isolation between churches.
+The ChurchTrack platform uses PostgreSQL with Prisma as the ORM. The schema is designed to support multi-tenancy with complete data isolation between churches.
 
 ## Core Models
 

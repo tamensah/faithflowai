@@ -1,4 +1,4 @@
-# FaithFlow AI — Beta Smoke Test
+# ChurchTrack — Beta Smoke Test
 
 > Run this before every major deploy and before onboarding any new beta church.
 > Each test should be run by a tester with a **fresh account** (not a pre-existing test church) unless noted.
@@ -198,5 +198,5 @@ Run these with Stripe CLI (`stripe trigger`) and Paystack test webhooks.
 
 ---
 
-*FaithFlow AI — Beta Smoke Test · Last updated March 2025*
+*ChurchTrack — Beta Smoke Test · Last updated March 2025*
 *Run after every deploy to staging before promoting to production.*

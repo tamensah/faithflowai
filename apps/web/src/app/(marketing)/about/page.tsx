@@ -42,12 +42,12 @@ export default function AboutPage() {
       <section className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.1),_transparent_50%)]" />
         <div className="relative mx-auto max-w-6xl px-6 py-20">
-          <Badge variant="default">About FaithFlow AI</Badge>
+          <Badge variant="default">About ChurchTrack</Badge>
           <h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-tight text-foreground">
             A complete operating system built for the modern church.
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted">
-            Most church software solves one problem well and forces you to stitch together the rest. FaithFlow AI is
+            Most church software solves one problem well and forces you to stitch together the rest. ChurchTrack is
             built from the ground up as one unified platform — so finance, membership, events, communications, and care
             all share the same data, the same members, and the same workflows.
           </p>
@@ -67,7 +67,7 @@ export default function AboutPage() {
                 Church leaders are managing more than ever — giving records in one tool, membership in another, events in a third, and communications in a spreadsheet. Every transition between systems is a chance for data to get lost or a person to fall through the cracks.
               </p>
               <p>
-                FaithFlow AI was built to end that fragmentation. We started with the hardest problems — multi-currency finance, tenant-isolated multi-campus membership, and real-time event operations — and built outward from there.
+                ChurchTrack was built to end that fragmentation. We started with the hardest problems — multi-currency finance, tenant-isolated multi-campus membership, and real-time event operations — and built outward from there.
               </p>
               <p>
                 The result is a platform where a member added to the directory shows up in events, communications, and volunteer scheduling automatically. Where a donation triggers a receipt, updates the dashboard, and feeds the AI giving analysis without anyone exporting a CSV.

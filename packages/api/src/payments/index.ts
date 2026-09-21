@@ -349,7 +349,7 @@ async function createPaystackPlan(input: CreateRecurringCheckoutInput, recurring
       interval: mapPaystackInterval(input.interval),
       amount: toMinorUnits(input.amount, input.currency),
       currency: input.currency.toUpperCase(),
-      description: `FaithFlow recurring donation for church ${input.churchId ?? input.churchSlug ?? ''}`,
+      description: `ChurchTrack recurring donation for church ${input.churchId ?? input.churchSlug ?? ''}`,
     }),
   });
 

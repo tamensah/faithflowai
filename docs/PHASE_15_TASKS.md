@@ -1,4 +1,4 @@
-# FaithFlow Phase 15: Platform Scaling & Global Expansion
+# ChurchTrack Phase 15: Platform Scaling & Global Expansion
 
 ## Week 1: Infrastructure Scaling
 

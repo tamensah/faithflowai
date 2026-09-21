@@ -44,14 +44,14 @@ export function assertAllowedCheckoutRedirects(
   if (input.successUrl && !isAllowedCheckoutRedirectUrl(input.successUrl, requestOrigin)) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: 'successUrl must be on an allowed FaithFlow domain',
+      message: 'successUrl must be on an allowed ChurchTrack domain',
     });
   }
 
   if (input.cancelUrl && !isAllowedCheckoutRedirectUrl(input.cancelUrl, requestOrigin)) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: 'cancelUrl must be on an allowed FaithFlow domain',
+      message: 'cancelUrl must be on an allowed ChurchTrack domain',
     });
   }
 }

@@ -1,4 +1,4 @@
-# FaithFlow AI Deployment Manual
+# ChurchTrack Deployment Manual
 
 > Follow [`GITFLOW_WORKFLOW.md`](./GITFLOW_WORKFLOW.md): feature branches merge into `develop`, staging is verified, and only then does `develop` move to `main`.
 
@@ -53,11 +53,11 @@ Required for every API deployment:
 
 Required before email release testing:
 
-- `RESEND_FROM_EMAIL`: verified sender on the FaithFlow sending domain
+- `RESEND_FROM_EMAIL`: verified sender on the ChurchTrack sending domain
 
-Staging currently uses `FaithFlow <notifications@susubiribi.com>`. `susubiribi.com` is a verified interim transactional-email domain; the primary FaithFlow public domain has not been purchased. After that domain is selected and purchased, verify it in Resend before changing the sender or publishing branded production URLs.
+Staging currently uses `ChurchTrack <notifications@susubiribi.com>`. `susubiribi.com` is a verified interim transactional-email domain; the primary ChurchTrack public domain has not been purchased. After that domain is selected and purchased, verify it in Resend before changing the sender or publishing branded production URLs.
 
-Use a dedicated sending-only Resend API key restricted to the configured sending domain. FaithFlow staging uses the key named `faithflow-staging-sending`; do not reuse account-wide or other-product credentials.
+Use a dedicated sending-only Resend API key restricted to the configured sending domain. ChurchTrack staging uses the key named `faithflow-staging-sending`; do not reuse account-wide or other-product credentials.
 
 Required when each integration is enabled:
 
@@ -126,7 +126,7 @@ DATABASE_URL_UNPOOLED='<direct faithflow_canonical URL>' pnpm db:migrate:status
 DATABASE_URL_UNPOOLED='<direct faithflow_canonical URL>' pnpm db:migrate:deploy
 ```
 
-Verify `/ready` after deployment. A 200 response confirms both database connectivity and the canonical FaithFlow schema; `/health` verifies only that the function can serve requests.
+Verify `/ready` after deployment. A 200 response confirms both database connectivity and the canonical ChurchTrack schema; `/health` verifies only that the function can serve requests.
 
 ## Provider webhooks
 
@@ -151,7 +151,7 @@ See [`THIRDPARTY_CONFIG.md`](./THIRDPARTY_CONFIG.md) for events and signing secr
 6. The web and admin `develop` aliases load and call the Neon API without CORS errors.
 7. A new Clerk user creates or selects an organization and the first authenticated request provisions the tenant.
 8. Member and church-admin journeys use the same Clerk organization context.
-9. Resend sends from a verified FaithFlow sender.
+9. Resend sends from a verified ChurchTrack sender.
 10. Paystack sandbox checkout and signed webhook replay pass. Add the equivalent Polar check when its adapter lands.
 
 ## Production promotion
@@ -176,7 +176,7 @@ Production is a separate reviewed action after staging sign-off:
 
 ## Current release gates
 
-- A staging transactional email must be sent and confirmed from the verified interim sender; the eventual primary FaithFlow domain must be purchased and verified before the sender is switched.
+- A staging transactional email must be sent and confirmed from the verified interim sender; the eventual primary ChurchTrack domain must be purchased and verified before the sender is switched.
 - Paystack secrets and signed webhook testing remain outstanding.
 - The Polar adapter and its signed webhook path remain outstanding.
 - Browser testing must confirm the unified Clerk organization flow on the redeployed `develop` aliases.

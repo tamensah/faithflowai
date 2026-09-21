@@ -1,8 +1,8 @@
-# FaithFlow Platform Roles and Permissions
+# ChurchTrack Platform Roles and Permissions
 Version 1.0 | December 21, 2024
 
 ## Overview
-This document outlines the role-based access control (RBAC) system for the FaithFlow platform administration. It defines the various platform-level roles, their responsibilities, and associated permissions.
+This document outlines the role-based access control (RBAC) system for the ChurchTrack platform administration. It defines the various platform-level roles, their responsibilities, and associated permissions.
 
 ## Role Hierarchy
 

@@ -1,1 +1,1 @@
-export const APP_NAME = 'FaithFlow AI';
+export const APP_NAME = 'ChurchTrack';

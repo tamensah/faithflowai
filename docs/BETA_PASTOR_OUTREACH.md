@@ -1,4 +1,4 @@
-# FaithFlow AI — Beta Church Outreach
+# ChurchTrack — Beta Church Outreach
 
 > Template message for inviting key churches to the beta programme.
 > Personalise the bracketed fields before sending.
@@ -18,7 +18,7 @@ Good [morning/afternoon], Pastor [Name],
 
 I hope you and the family are well. I wanted to reach out to you personally about something I've been building that I think could be genuinely useful for [Church Name].
 
-I've spent the past year building a church management platform called **FaithFlow AI** — it's a complete system for running a modern church: membership, multi-campus coordination, giving (including Ghana cedis via mobile money and card), communications, volunteer scheduling, events, and live streaming, all in one place.
+I've spent the past year building a church management platform called **ChurchTrack** — it's a complete system for running a modern church: membership, multi-campus coordination, giving (including Ghana cedis via mobile money and card), communications, volunteer scheduling, events, and live streaming, all in one place.
 
 We're approaching our beta launch and I'm looking for one or two serious churches to test it with — churches that have real operational complexity, not just a small single-campus congregation. [Church Name], with the branches across Ghana, is exactly the kind of church that would stress-test the platform properly and help shape it into something every African church can rely on.
 
@@ -63,4 +63,4 @@ Blessings,
 
 ---
 
-*FaithFlow AI · Beta Church Outreach · March 2026*
+*ChurchTrack · Beta Church Outreach · March 2026*

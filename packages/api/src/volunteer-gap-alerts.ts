@@ -93,7 +93,7 @@ export async function scheduleVolunteerGapAlerts(hoursAhead = 48, limit = 200): 
         <li>Role: ${shift.role.name}</li>
         <li>When: ${shift.startAt.toLocaleString()} - ${shift.endAt.toLocaleString()}</li>
       </ul>
-      <p>Open FaithFlow Admin → Members → Volunteer shifts to assign coverage.</p>
+      <p>Open ChurchTrack Admin → Members → Volunteer shifts to assign coverage.</p>
     `;
 
     await prisma.communicationSchedule.createMany({

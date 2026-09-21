@@ -1,4 +1,4 @@
-# FaithFlow AI — Member Portal Manual
+# ChurchTrack — Member Portal Manual
 
 > This manual is written for **church members** using the self-service portal. For admin and staff operations, see [ONBOARDING_MANUAL.md](./ONBOARDING_MANUAL.md) or visit the admin guide at `/guide` on the marketing site.
 
@@ -512,4 +512,4 @@ Quiet hours are set per member per channel in the portal. When a notification is
 
 ---
 
-*Last updated: March 2025 · FaithFlow AI*
+*Last updated: March 2025 · ChurchTrack*

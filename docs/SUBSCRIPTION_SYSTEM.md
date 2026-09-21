@@ -1,6 +1,6 @@
-# FaithFlow Subscription System
+# ChurchTrack Subscription System
 
-This document defines the SaaS subscription control plane for FaithFlow AI: plan catalog, tenant subscriptions, and feature entitlements.
+This document defines the SaaS subscription control plane for ChurchTrack: plan catalog, tenant subscriptions, and feature entitlements.
 
 ## Goals
 

@@ -1,5 +1,5 @@
 
-# Membership Management Features for FaithFlow
+# Membership Management Features for ChurchTrack
 
 ## 1. Member Profiles
 - **Customizable Member Profiles**: Allow members to personalize their profiles with photos, personal information, spiritual journey, and ministry involvement.

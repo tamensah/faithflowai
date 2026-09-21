@@ -1,4 +1,4 @@
-# FaithFlow AI - Next 5 Workstreams (Beta)
+# ChurchTrack - Next 5 Workstreams (Beta)
 
 This is the “move in order” execution list for beta readiness. Each workstream has clear acceptance criteria so we can ship without ambiguous gaps.
 
@@ -70,7 +70,7 @@ Acceptance criteria:
 
 ## 5) AI Layer (Useful + Governed)
 
-- [x] “Ask FaithFlow” admin assistant (tenant-scoped)
+- [x] “Ask ChurchTrack” admin assistant (tenant-scoped)
 - [x] Citations + prompt/output logging (audit)
 - [x] RBAC + redaction for sensitive fields
 - [x] Opinionated starter insights (giving/attendance/volunteers)

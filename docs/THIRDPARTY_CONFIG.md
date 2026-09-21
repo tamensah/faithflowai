@@ -1,4 +1,4 @@
-# FaithFlow AI Third‑Party Configuration (Beta Go‑Live)
+# ChurchTrack Third‑Party Configuration (Beta Go‑Live)
 
 This doc lists the required provider‑side configuration to run the alpha. Once the API keys and webhooks below are set in environment variables, the app should be live without additional code changes.
 
@@ -30,14 +30,14 @@ Optional guardrail env:
 
 ## Payment provider release order
 
-- **First production release:** Polar for FaithFlow SaaS billing and Paystack for Ghana/African payment flows.
+- **First production release:** Polar for ChurchTrack SaaS billing and Paystack for Ghana/African payment flows.
 - **Retained adapter:** Stripe is already implemented in the codebase but live use is deferred until the US LLC and Stripe account setup are complete.
 - Keep provider SDKs and webhook payloads behind billing/payment adapters. Entitlements, subscription state, pricing, reconciliation, webhook idempotency, and tenant business rules remain server-side and provider-neutral.
 
-Polar is the first-release SaaS subscription provider. The adapter uses the official `@polar-sh/sdk` and keeps provider payloads behind FaithFlow's subscription boundary.
+Polar is the first-release SaaS subscription provider. The adapter uses the official `@polar-sh/sdk` and keeps provider payloads behind ChurchTrack's subscription boundary.
 
-- Use the Polar sandbox organization for staging.
-- Add each Polar recurring product ID to the matching FaithFlow plan as `metadata.polarProductId`.
+- Use the Polar sandbox organization `churchtrack` for staging. OAuth authorization and organization creation were confirmed on 2026-09-21.
+- Add each Polar recurring product ID to the matching ChurchTrack plan as `metadata.polarProductId`.
 - Configure `POST /webhooks/polar/platform` for subscription lifecycle events.
 - Required env: `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER=sandbox`.
 - Complete hosted checkout, signed webhook, customer portal, cancellation, and recovery tests before enabling production.
@@ -104,9 +104,9 @@ Inbound STOP/unsubscribe keywords (`STOP`, `UNSUBSCRIBE`, `CANCEL`, etc.) are pr
 - Verify sending domain (DNS records for DKIM/SPF).
 - Required env:
   - `RESEND_API_KEY`
-  - `RESEND_FROM_EMAIL` (`FaithFlow <notifications@susubiribi.com>` in staging)
+  - `RESEND_FROM_EMAIL` (`ChurchTrack <notifications@susubiribi.com>` in staging)
   - `CONTACT_TO_EMAIL` (where marketing site contact messages should be delivered)
-- `susubiribi.com` is the verified interim sending domain. It is not the future public FaithFlow domain; purchase and verify that domain before switching production branding.
+- `susubiribi.com` is the verified interim sending domain. It is not the future public ChurchTrack domain; purchase and verify that domain before switching production branding.
 - Use a product-specific sending-only API key restricted to that domain. Staging uses the key named `faithflow-staging-sending`.
 - Validation path in admin:
   - Open `Admin -> Ops -> Health`
@@ -280,7 +280,7 @@ When provider credentials are absent, the sync runtime falls back to HTTP HEAD p
   - `YOUTUBE_API_KEY`
 
 Signal mapping:
-| YouTube `lifeCycleStatus` | FaithFlow action |
+| YouTube `lifeCycleStatus` | ChurchTrack action |
 |--------------------------|-----------------|
 | `liveStarting`, `live` | → LIVE transition suggested |
 | `complete`, `revoked` | → ENDED transition suggested |
@@ -294,7 +294,7 @@ Signal mapping:
   - `FACEBOOK_PAGE_ACCESS_TOKEN`
 
 Signal mapping:
-| Facebook `status` | FaithFlow action |
+| Facebook `status` | ChurchTrack action |
 |-------------------|-----------------|
 | `LIVE`, `SCHEDULED_LIVE` | → LIVE transition suggested |
 | `VOD`, `PROCESSING` | → ENDED transition suggested |
@@ -308,7 +308,7 @@ Signal mapping:
   - `VIMEO_ACCESS_TOKEN`
 
 Signal mapping:
-| Vimeo `status` | FaithFlow action |
+| Vimeo `status` | ChurchTrack action |
 |----------------|-----------------|
 | `streaming` | → LIVE transition suggested |
 | `archive_in_progress`, `archived` | → ENDED + recording URL auto-ingested |

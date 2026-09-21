@@ -1,4 +1,4 @@
-# FaithFlow
+# ChurchTrack
 
 A modern, cloud-native SaaS platform for comprehensive church management.
 
@@ -64,4 +64,4 @@ faithflow/
 
 ## License
 
-Copyright © 2024 FaithFlow. All rights reserved.
+Copyright © 2024 ChurchTrack. All rights reserved.

@@ -1,4 +1,4 @@
-# FaithFlow Phase 17: AI-Powered Features & Advanced Automation
+# ChurchTrack Phase 17: AI-Powered Features & Advanced Automation
 
 ## Week 1: AI Integration Enhancement
 

@@ -64,7 +64,7 @@ jobs:
             exit 0
           fi
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          payload=$(printf '{"text":"[FaithFlow] Support SLA sweep failed. Run: %s"}' "${run_url}")
+          payload=$(printf '{"text":"[ChurchTrack] Support SLA sweep failed. Run: %s"}' "${run_url}")
           curl --fail --show-error --silent \
             -X POST "${ALERT_SLACK_WEBHOOK_URL}" \
             -H "content-type: application/json" \
@@ -82,7 +82,7 @@ jobs:
             exit 0
           fi
           run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          body=$(printf '{"from":"%s","to":["%s"],"subject":"FaithFlow scheduler failure: support-sla-sweep","html":"<p>Support SLA sweep failed.</p><p>Run: <a href=\"%s\">%s</a></p>"}' "${ALERT_EMAIL_FROM}" "${ALERT_EMAIL_TO}" "${run_url}" "${run_url}")
+          body=$(printf '{"from":"%s","to":["%s"],"subject":"ChurchTrack scheduler failure: support-sla-sweep","html":"<p>Support SLA sweep failed.</p><p>Run: <a href=\"%s\">%s</a></p>"}' "${ALERT_EMAIL_FROM}" "${ALERT_EMAIL_TO}" "${run_url}" "${run_url}")
           curl --fail --show-error --silent \
             -X POST "https://api.resend.com/emails" \
             -H "Authorization: Bearer ${ALERT_RESEND_API_KEY}" \

@@ -1,4 +1,4 @@
-# FaithFlow Phase 3 Implementation Tasks
+# ChurchTrack Phase 3 Implementation Tasks
 
 ## Week 1: Member Management (Days 1-3)
 

@@ -1,4 +1,4 @@
-# FaithFlow Technical Specification
+# ChurchTrack Technical Specification
 
 ## System Architecture
 

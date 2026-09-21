@@ -1,10 +1,10 @@
 # Neon Migration Runbook
 
-This runbook records the move of FaithFlow's PostgreSQL database, Fastify API, and scheduled jobs to Neon. Vercel continues to host the two Next.js applications.
+This runbook records the move of ChurchTrack's PostgreSQL database, Fastify API, and scheduled jobs to Neon. Vercel continues to host the two Next.js applications.
 
 ## Scope and evidence boundary
 
-- The former host contained no production FaithFlow data, so no customer-row copy is required.
+- The former host contained no production ChurchTrack data, so no customer-row copy is required.
 - The canonical target database is `faithflow_canonical`.
 - The canonical schema has 32 Prisma migrations and 97 application tables.
 - The Neon `develop` branch is `br-fragrant-salad-aukk1pvs`.
@@ -39,7 +39,7 @@ Clerk, Resend, Paystack, Polar, Stripe, Twilio, AI providers, and storage remain
 1. Reconciled the feature work against `develop`.
 2. Applied and verified all 32 migrations in `faithflow_canonical`.
 3. Added the Neon Function adapter while preserving the standalone Fastify entry point.
-4. Added a readiness probe that verifies the canonical FaithFlow schema, not only network reachability.
+4. Added a readiness probe that verifies the canonical ChurchTrack schema, not only network reachability.
 5. Deployed the API on Node.js 24 to the Neon `develop` branch.
 6. Declared and enabled four Neon Function Triggers from `neon.ts`.
 7. Pointed the Vercel `develop` previews at the Neon staging API.
@@ -48,7 +48,7 @@ Clerk, Resend, Paystack, Polar, Stripe, Twilio, AI providers, and storage remain
 
 ## Database URL rule
 
-Neon Functions inject a branch-default `DATABASE_URL`. FaithFlow must override it with the pooled URL for `faithflow_canonical`. The initial scheduler smoke caught this distinction: the function was connected, but application tables were missing from the branch-default database.
+Neon Functions inject a branch-default `DATABASE_URL`. ChurchTrack must override it with the pooled URL for `faithflow_canonical`. The initial scheduler smoke caught this distinction: the function was connected, but application tables were missing from the branch-default database.
 
 The release gate is:
 
@@ -86,7 +86,7 @@ Never accept a plan that points `DATABASE_URL` at a database other than `faithfl
 - Fresh scheduled runs contain no `Scheduled trigger failed` entries.
 - The web and admin staging origins receive the expected CORS headers.
 - Both frontends use the same Clerk project.
-- A new organization provisions its FaithFlow tenant and initial organization hierarchy.
+- A new organization provisions its ChurchTrack tenant and initial organization hierarchy.
 - The canonical database remains empty until deliberate staging onboarding creates records.
 
 ## Production promotion
@@ -106,4 +106,4 @@ Never accept a plan that points `DATABASE_URL` at a database other than `faithfl
 - Redeploy the previous reviewed function source for an API regression.
 - Restore the previous Vercel deployment for a frontend regression.
 - Use a Neon recovery branch or reviewed forward migration for database recovery.
-- Do not reconnect FaithFlow to the former host.
+- Do not reconnect ChurchTrack to the former host.

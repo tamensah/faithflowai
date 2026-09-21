@@ -34,7 +34,7 @@ const footerNav = [
   {
     heading: 'Company',
     links: [
-      { href: '/about', label: 'About FaithFlow AI' },
+      { href: '/about', label: 'About ChurchTrack' },
       { href: '/contact', label: 'Contact us' },
       { href: '/guide', label: 'Documentation' },
     ],
@@ -60,7 +60,7 @@ export function SiteFooter() {
           {/* Brand column */}
           <div className="space-y-5">
             <div>
-              <p className="text-base font-semibold text-foreground">FaithFlow AI</p>
+              <p className="text-base font-semibold text-foreground">ChurchTrack</p>
               <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">
                 A complete operating system for the modern church — finance, membership,
                 events, communications, and AI insights in one unified platform.
@@ -117,7 +117,7 @@ export function SiteFooter() {
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
           <p className="text-xs text-muted">
-            © {year} FaithFlow AI. All rights reserved.
+            © {year} ChurchTrack. All rights reserved.
           </p>
           <div className="flex flex-wrap gap-4 text-xs text-muted">
             <Link href="/privacy" className="transition-colors hover:text-foreground">

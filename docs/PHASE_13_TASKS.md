@@ -1,4 +1,4 @@
-# FaithFlow Phase 13: Real-time Features & WebSocket Integration
+# ChurchTrack Phase 13: Real-time Features & WebSocket Integration
 
 ## Week 1: WebSocket Infrastructure
 

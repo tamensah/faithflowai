@@ -1,13 +1,13 @@
-# FaithFlow AI — Platform Admin Manual
+# ChurchTrack — Platform Admin Manual
 
-> This manual is for **platform-level staff** only (FaithFlow AI team, not church admins).
+> This manual is for **platform-level staff** only (ChurchTrack team, not church admins).
 > It covers every page, tool, and workflow available in the platform admin section of the admin console.
 
 ---
 
 ## Who is a Platform Admin?
 
-Platform admins are internal FaithFlow AI team members who manage all tenants (churches) on the SaaS platform. They are separate from church-level admins who manage a single church's data.
+Platform admins are internal ChurchTrack team members who manage all tenants (churches) on the SaaS platform. They are separate from church-level admins who manage a single church's data.
 
 Platform access is role-gated. Roles are assigned from `/platform` and stored in the `PlatformUser` table. A Clerk user must be listed in `PLATFORM_ADMIN_EMAILS` (environment variable) or have an assigned role to access platform pages.
 
@@ -249,7 +249,7 @@ Policy violations trigger guardrail audit events logged to the tenant's audit ti
 ### A tenant domain is stuck on PENDING
 
 1. Ops page → Domain automation sweep (dry-run first to see what would happen)
-2. If FAILED: check DNS records on the church's registrar match what FaithFlow expects
+2. If FAILED: check DNS records on the church's registrar match what ChurchTrack expects
 3. If escalated to a support ticket: resolve it from `/support` once DNS is correct and domain transitions to ACTIVE
 
 ### Tenant needs to be suspended immediately (ToS / fraud)
@@ -285,5 +285,5 @@ Policy violations trigger guardrail audit events logged to the tenant's audit ti
 
 ---
 
-*FaithFlow AI — Platform Admin Manual · Last updated March 2026*
+*ChurchTrack — Platform Admin Manual · Last updated March 2026*
 *This document is internal. Do not share with church admins or the public.*

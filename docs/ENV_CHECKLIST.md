@@ -1,4 +1,4 @@
-# FaithFlow AI — Beta Go-Live Environment Variable Checklist
+# ChurchTrack — Beta Go-Live Environment Variable Checklist
 
 > Use this as the single source of truth before promoting to production.
 > Fill in the Status column for each environment: ✅ Set · ⚠️ Placeholder · ❌ Missing
@@ -80,7 +80,7 @@ Each active plan must also contain its Polar recurring product ID in `Subscripti
 | Variable | Gate | Notes | dev | staging | prod |
 |----------|------|-------|-----|---------|------|
 | `RESEND_API_KEY` | 🔴 | Product-specific sending-only key restricted to the verified domain | ✅ | ✅ | |
-| `RESEND_FROM_EMAIL` | 🔴 | Verified sender; staging uses `FaithFlow <notifications@susubiribi.com>` | ✅ | ✅ | |
+| `RESEND_FROM_EMAIL` | 🔴 | Verified sender; staging uses `ChurchTrack <notifications@susubiribi.com>` | ✅ | ✅ | |
 
 ### SMS / WhatsApp — Twilio
 
@@ -203,7 +203,7 @@ All items below must be ✅ before flipping any church to production.
 - [ ] Polar sandbox checkout and signed, idempotent webhook processing verified
 - [ ] `PAYSTACK_SECRET_KEY` + `PAYSTACK_WEBHOOK_SECRET` set; webhook URL registered
 - [x] Staging `RESEND_API_KEY` + `RESEND_FROM_EMAIL` set; interim `susubiribi.com` sending domain verified (DKIM/SPF)
-- [ ] Purchase the primary FaithFlow domain, verify it in Resend, and switch production sender branding
+- [ ] Purchase the primary ChurchTrack domain, verify it in Resend, and switch production sender branding
 - [ ] `CONTACT_TO_EMAIL` set on web app
 - [ ] `COMMS_UNSUBSCRIBE_SECRET` set on API
 - [ ] `STORAGE_PROVIDER` + bucket credentials set; upload test passing in go-live checks

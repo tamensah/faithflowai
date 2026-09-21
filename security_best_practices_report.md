@@ -1,4 +1,4 @@
-# FaithFlow AI Security Review
+# ChurchTrack Security Review
 
 Date: 2026-04-01
 

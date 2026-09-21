@@ -1,7 +1,7 @@
 # TypeScript Error Fix Roadmap
 
 ## Overview
-This document outlines the systematic approach to fixing TypeScript errors in the FaithFlow project, following the guidelines in `TYPESCRIPT_STRUCTURE.md`.
+This document outlines the systematic approach to fixing TypeScript errors in the ChurchTrack project, following the guidelines in `TYPESCRIPT_STRUCTURE.md`.
 
 ## Phase 1: Type Definitions
 **Priority: HIGH**

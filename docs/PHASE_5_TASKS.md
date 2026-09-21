@@ -1,4 +1,4 @@
-# FaithFlow Phase 5: Analytics & Platform Optimization
+# ChurchTrack Phase 5: Analytics & Platform Optimization
 
 ## Week 1: Analytics Infrastructure
 

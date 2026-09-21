@@ -1,4 +1,4 @@
-# FaithFlow AI Beta Tasklist
+# ChurchTrack Beta Tasklist
 
 This is the prioritized beta execution list. Goal: reduce onboarding friction, make billing reliable, and ship operationally resilient defaults.
 
@@ -129,7 +129,7 @@ Deliverables:
 
 ## 5) AI Layer (Useful + Governed)
 
-- [~] Admin “Ask FaithFlow” assistant:
+- [~] Admin “Ask ChurchTrack” assistant:
   - [x] Tenant-scoped retrieval
   - [x] Citations (source records + timestamps)
   - [~] Role-based access and redaction

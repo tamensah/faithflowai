@@ -1,4 +1,4 @@
-# FaithFlow Phase 8: Deployment & Production Infrastructure
+# ChurchTrack Phase 8: Deployment & Production Infrastructure
 
 ## Week 1: Infrastructure Setup
 
@@ -126,7 +126,7 @@ groups:
 # grafana/dashboards/main.json
 {
   "dashboard": {
-	"title": "FaithFlow Overview",
+	"title": "ChurchTrack Overview",
 	"panels": [
 	  {
 		"title": "Request Rate",

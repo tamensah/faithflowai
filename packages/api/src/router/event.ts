@@ -266,7 +266,7 @@ function defaultPlaybookSteps(eventTitle: string) {
       offsetHours: -168,
       channel: CommunicationChannel.EMAIL,
       subject: `You're invited: ${eventTitle}`,
-      body: `Hi {{firstName}},\n\nJust a reminder about ${eventTitle}. We look forward to seeing you!\n\nFaithFlow Team`,
+      body: `Hi {{firstName}},\n\nJust a reminder about ${eventTitle}. We look forward to seeing you!\n\nChurchTrack Team`,
     },
     {
       offsetHours: -24,

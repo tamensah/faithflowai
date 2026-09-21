@@ -1,4 +1,4 @@
-# FaithFlow Phase 1 Implementation Tasks
+# ChurchTrack Phase 1 Implementation Tasks
 
 ## Week 1: Initial Setup & Configuration
 

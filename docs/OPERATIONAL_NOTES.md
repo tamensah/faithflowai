@@ -1,4 +1,4 @@
-# FaithFlow AI Operational Notes
+# ChurchTrack Operational Notes
 
 This file is the running operations log for implementation details, runtime constraints, and production-readiness gaps.
 

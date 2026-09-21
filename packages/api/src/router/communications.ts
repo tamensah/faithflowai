@@ -155,7 +155,7 @@ function appendUnsubscribeFooter(html: string, unsubscribeUrl: string | null) {
     html,
     '<hr style="margin:24px 0;border:none;border-top:1px solid #e2e8f0" />',
     `<p style="margin:0;font-size:12px;line-height:1.5;color:#64748b">`,
-    `You are receiving this message from FaithFlow. `,
+    `You are receiving this message from ChurchTrack. `,
     `<a href="${unsubscribeUrl}" style="color:#0f172a;text-decoration:underline">Unsubscribe</a>`,
     `</p>`,
   ].join('\n');

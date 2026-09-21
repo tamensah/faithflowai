@@ -1,4 +1,4 @@
-# FaithFlow Phase 18: Community & Marketplace Features
+# ChurchTrack Phase 18: Community & Marketplace Features
 
 ## Week 1: Community Platform
 

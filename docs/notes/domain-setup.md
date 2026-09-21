@@ -1,12 +1,14 @@
-# FaithFlow Domain Setup Guide
+# ChurchTrack Domain Setup Guide
+
+> The primary ChurchTrack domain has not been purchased. Every `churchtrack.example` hostname in this note is a reserved example and must be replaced only after a domain is selected and verified.
 
 ## Overview
 
-FaithFlow provides two types of domain configurations for churches:
+ChurchTrack provides two types of domain configurations for churches:
 
 1. **Platform Subdomain** (Default & Free)
-   - Format: `[church-name].faithflow.church`
-   - Example: `grace.faithflow.church`
+   - Format: `[church-name].churchtrack.example`
+   - Example: `grace.churchtrack.example`
    - Automatically provisioned
    - Includes SSL certificate
    
@@ -18,19 +20,19 @@ FaithFlow provides two types of domain configurations for churches:
 ## Platform Subdomain
 
 ### Automatic Setup
-1. When a church registers on FaithFlow, a subdomain is automatically generated from the church name:
+1. When a church registers on ChurchTrack, a subdomain is automatically generated from the church name:
    - Spaces are replaced with hyphens
    - Special characters are removed
    - Converted to lowercase
    - Numbers are appended if the name is already taken
    
    Examples:
-   - "Grace Church" → `grace-church.faithflow.church`
-   - "St. Mary's Cathedral" → `st-marys-cathedral.faithflow.church`
-   - "Grace Church #2" → `grace-church-2.faithflow.church`
+   - "Grace Church" → `grace-church.churchtrack.example`
+   - "St. Mary's Cathedral" → `st-marys-cathedral.churchtrack.example`
+   - "Grace Church #2" → `grace-church-2.churchtrack.example`
 
 ### Technical Implementation
-- DNS managed by FaithFlow
+- DNS managed by ChurchTrack
 - Automatic SSL certificate provisioning
 - Global CDN distribution
 - DDoS protection included
@@ -40,7 +42,7 @@ FaithFlow provides two types of domain configurations for churches:
 ### Prerequisites
 1. Own a registered domain name
 2. Access to domain's DNS settings
-3. Completed church profile setup on FaithFlow
+3. Completed church profile setup on ChurchTrack
 
 ### Setup Process
 
@@ -56,7 +58,7 @@ FaithFlow provides two types of domain configurations for churches:
    # For www subdomain
    Type: CNAME
    Name: www
-   Value: cname.faithflow.church
+   Value: cname.churchtrack.example
    ```
 
 2. **Domain Verification**
@@ -111,7 +113,7 @@ FaithFlow provides two types of domain configurations for churches:
 
 For domain-related issues:
 1. Check DNS propagation: https://dnschecker.org
-2. Contact FaithFlow support: support@faithflow.church
+2. Contact ChurchTrack support: support@churchtrack.example
 3. Include domain name and error details
 
 ## Domain Management
@@ -208,7 +210,7 @@ TTL: 3600
 # WWW subdomain
 Type: CNAME
 Name: www
-Value: cname.faithflow.church
+Value: cname.churchtrack.example
 TTL: 3600
 
 # Domain verification

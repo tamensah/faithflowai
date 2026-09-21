@@ -2,14 +2,14 @@
 
 ## Why this matters
 
-Winners Chapel Ghana is a strong stress test for FaithFlow because it combines:
+Winners Chapel Ghana is a strong stress test for ChurchTrack because it combines:
 - National HQ + HQ branch overlap
 - Multi-region / multi-branch structure
 - Campus ministries with distinct governance
 - Zone/cell layer with member-led executives
 - Members holding multiple roles across different units
 
-If FaithFlow can model this cleanly, we can reliably serve small churches through mega multi-campus ministries.
+If ChurchTrack can model this cleanly, we can reliably serve small churches through mega multi-campus ministries.
 
 ## Product decisions to adopt now
 

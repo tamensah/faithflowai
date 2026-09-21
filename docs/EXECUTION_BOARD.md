@@ -1,4 +1,4 @@
-# FaithFlow Unified Execution Board
+# ChurchTrack Unified Execution Board
 
 Last updated: 2026-03-06
 

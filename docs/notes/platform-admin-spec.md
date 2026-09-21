@@ -1,8 +1,8 @@
-# FaithFlow Platform Administration Specification
+# ChurchTrack Platform Administration Specification
 Version 1.0 | December 20, 2024
 
 ## Overview
-This document outlines the comprehensive platform administration features for FaithFlow, a modern SaaS church management platform. These features enable efficient management, monitoring, and optimization of the entire ecosystem while ensuring security, compliance, and scalability.
+This document outlines the comprehensive platform administration features for ChurchTrack, a modern SaaS church management platform. These features enable efficient management, monitoring, and optimization of the entire ecosystem while ensuring security, compliance, and scalability.
 
 ## Table of Contents
 1. [Super Admin Dashboard](#1-super-admin-dashboard)

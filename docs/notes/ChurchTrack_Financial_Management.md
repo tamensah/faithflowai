@@ -1,5 +1,5 @@
 
-# Financial Management Features for FaithFlow
+# Financial Management Features for ChurchTrack
 
 ## 1. Core Financial Management Features
 

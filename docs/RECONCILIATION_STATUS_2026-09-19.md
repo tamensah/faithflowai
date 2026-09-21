@@ -1,4 +1,4 @@
-# FaithFlow Reconciliation Status — 2026-09-19
+# ChurchTrack Reconciliation Status — 2026-09-19
 
 Status: **Superseded by [the 2026-09-20 staging cutover status](./RECONCILIATION_STATUS_2026-09-20.md).**
 

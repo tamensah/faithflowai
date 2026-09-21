@@ -193,7 +193,7 @@ async function sendTwilioMessage({
 
 export async function sendCommunication({ channel, to, subject, body }: SendParams) {
   if (channel === CommunicationChannel.EMAIL) {
-    await sendEmail({ to, subject: subject ?? 'FaithFlow AI', html: body });
+    await sendEmail({ to, subject: subject ?? 'ChurchTrack', html: body });
     return { provider: CommunicationProvider.RESEND, providerRef: null };
   }
 

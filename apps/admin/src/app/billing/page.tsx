@@ -219,11 +219,11 @@ export default function BillingPage() {
     if (current.provider === 'PAYSTACK') {
       if (selectedPlanChangeKind === 'UPGRADE') {
         return paystackDisableReady
-          ? 'Paystack upgrades open a new checkout immediately. FaithFlow can disable the older Paystack subscription after the replacement activates.'
+          ? 'Paystack upgrades open a new checkout immediately. ChurchTrack can disable the older Paystack subscription after the replacement activates.'
           : 'Paystack upgrades open a new checkout immediately. If current subscription tokens are missing, finance ops may need to cancel the older Paystack subscription manually.';
       }
       return paystackDisableReady
-        ? 'For downgrades or lateral changes, complete checkout close to renewal time to minimize overlap. FaithFlow can disable the older subscription after the new one activates.'
+        ? 'For downgrades or lateral changes, complete checkout close to renewal time to minimize overlap. ChurchTrack can disable the older subscription after the new one activates.'
         : 'For downgrades or lateral changes, complete checkout close to renewal time to minimize overlap. Manual Paystack dashboard cancellation may still be required.';
     }
     if (current.provider === 'POLAR') {
@@ -533,7 +533,7 @@ export default function BillingPage() {
             </Button>
             {current?.provider === 'PAYSTACK' ? (
               <p className="mt-2 text-xs text-muted">
-                Paystack tier changes start a new checkout. After the new subscription activates, FaithFlow will attempt
+                Paystack tier changes start a new checkout. After the new subscription activates, ChurchTrack will attempt
                 to disable the previous Paystack subscription when subscription tokens are available; otherwise finance
                 ops must cancel it in Paystack.
               </p>

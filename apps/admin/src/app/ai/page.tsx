@@ -36,12 +36,12 @@ export default function AiAssistantPage() {
         <FeatureLocked
           featureKey="ai_insights"
           title="AI insights are locked"
-          description="Your current subscription does not include AI insights. Upgrade to unlock Ask FaithFlow."
+          description="Your current subscription does not include AI insights. Upgrade to unlock Ask ChurchTrack."
         />
       ) : (
       <PageSectionLayout rootId="ai-page-sections" title="Intelligence sections" className="space-y-8">
         <div>
-          <h1 className="text-3xl font-semibold">Ask FaithFlow</h1>
+          <h1 className="text-3xl font-semibold">Ask ChurchTrack</h1>
           <p className="mt-2 text-sm text-muted">Tenant-scoped assistant with sources and audit logging.</p>
         </div>
 

@@ -1,4 +1,4 @@
-# FaithFlow Phase 6: AI Integration & Advanced Features
+# ChurchTrack Phase 6: AI Integration & Advanced Features
 
 ## Week 1: AI Infrastructure Setup
 
