@@ -61,9 +61,9 @@
 
 | Variable | Gate | Notes | dev | staging | prod |
 |----------|------|-------|-----|---------|------|
-| `POLAR_ACCESS_TOKEN` | 🔴 | Organization access token; use the isolated sandbox token in staging | | | |
-| `POLAR_WEBHOOK_SECRET` | 🔴 | Signing secret for `/webhooks/polar/platform` | | | |
-| `POLAR_SERVER` | 🔴 | `sandbox` in staging; `production` only after live approval | ✅ | | |
+| `POLAR_ACCESS_TOKEN` | 🔴 | Organization access token; use the isolated sandbox token in staging | | ✅ | |
+| `POLAR_WEBHOOK_SECRET` | 🔴 | Signing secret for `/webhooks/polar/platform` | | ✅ | |
+| `POLAR_SERVER` | 🔴 | `sandbox` in staging; `production` only after live approval | ✅ | ✅ | |
 
 Each active plan must also contain its Polar recurring product ID in `SubscriptionPlan.metadata.polarProductId`.
 
