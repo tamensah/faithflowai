@@ -15,7 +15,10 @@ export async function sendEmail({
   }
 
   const resend = new Resend(apiKey);
-  const from = process.env.RESEND_FROM_EMAIL ?? 'FaithFlow AI <receipts@faithflow.ai>';
+  const from = process.env.RESEND_FROM_EMAIL;
+  if (!from) {
+    throw new Error('RESEND_FROM_EMAIL is not configured');
+  }
   await resend.emails.send({
     from,
     to,

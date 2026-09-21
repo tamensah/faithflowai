@@ -55,6 +55,10 @@ Required before email release testing:
 
 - `RESEND_FROM_EMAIL`: verified sender on the FaithFlow sending domain
 
+Staging currently uses `FaithFlow <notifications@susubiribi.com>`. `susubiribi.com` is a verified interim transactional-email domain; the primary FaithFlow public domain has not been purchased. After that domain is selected and purchased, verify it in Resend before changing the sender or publishing branded production URLs.
+
+Use a dedicated sending-only Resend API key restricted to the configured sending domain. FaithFlow staging uses the key named `faithflow-staging-sending`; do not reuse account-wide or other-product credentials.
+
 Required when each integration is enabled:
 
 - Clerk webhooks: `CLERK_WEBHOOK_SECRET`
@@ -172,7 +176,7 @@ Production is a separate reviewed action after staging sign-off:
 
 ## Current release gates
 
-- `RESEND_FROM_EMAIL` must be configured and verified.
+- A staging transactional email must be sent and confirmed from the verified interim sender; the eventual primary FaithFlow domain must be purchased and verified before the sender is switched.
 - Paystack secrets and signed webhook testing remain outstanding.
 - The Polar adapter and its signed webhook path remain outstanding.
 - Browser testing must confirm the unified Clerk organization flow on the redeployed `develop` aliases.

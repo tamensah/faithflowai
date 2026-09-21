@@ -98,8 +98,10 @@ Inbound STOP/unsubscribe keywords (`STOP`, `UNSUBSCRIBE`, `CANCEL`, etc.) are pr
 - Verify sending domain (DNS records for DKIM/SPF).
 - Required env:
   - `RESEND_API_KEY`
-  - `RESEND_FROM_EMAIL` (e.g., `FaithFlow AI <no-reply@yourdomain>`)
+  - `RESEND_FROM_EMAIL` (`FaithFlow <notifications@susubiribi.com>` in staging)
   - `CONTACT_TO_EMAIL` (where marketing site contact messages should be delivered)
+- `susubiribi.com` is the verified interim sending domain. It is not the future public FaithFlow domain; purchase and verify that domain before switching production branding.
+- Use a product-specific sending-only API key restricted to that domain. Staging uses the key named `faithflow-staging-sending`.
 - Validation path in admin:
   - Open `Admin -> Ops -> Health`
   - Use **Queue welcome email** and **Queue trial reminder** buttons to enqueue transactional templates through the normal provider/outbox path.
@@ -185,9 +187,9 @@ These are required in Vercel (or your hosting provider) for each frontend app. T
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `NEXT_PUBLIC_API_URL` | ✅ | API base URL (e.g. `https://api.faithflow.ai`) |
-| `NEXT_PUBLIC_WEB_URL` | ✅ | Web app base URL (e.g. `https://faithflow.ai`) |
-| `NEXT_PUBLIC_ADMIN_URL` | ✅ | Admin console URL (e.g. `https://admin.faithflow.ai`) |
+| `NEXT_PUBLIC_API_URL` | ✅ | API base URL; use the current Neon Function URL in staging |
+| `NEXT_PUBLIC_WEB_URL` | ✅ | Web app base URL; use the stable Vercel `develop` alias until a primary domain is purchased |
+| `NEXT_PUBLIC_ADMIN_URL` | ✅ | Admin console URL; use the stable Vercel `develop` alias until a primary domain is purchased |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | ✅ | Clerk publishable key (starts `pk_`) |
 | `CLERK_SECRET_KEY` | ✅ | Clerk secret key (server-side only, starts `sk_`) |
 | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | ✅ | Set to `/sign-in` |

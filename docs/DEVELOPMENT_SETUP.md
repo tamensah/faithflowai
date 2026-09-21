@@ -55,7 +55,7 @@ PAYSTACK_SUPPORTED_CURRENCIES="NGN,GHS,ZAR,KES,USD"
 
 # Communication
 RESEND_API_KEY="re_..."
-RESEND_FROM_EMAIL="FaithFlow <onboarding@yourdomain.com>"
+RESEND_FROM_EMAIL="FaithFlow <notifications@susubiribi.com>"
 TWILIO_ACCOUNT_SID="AC..."
 TWILIO_AUTH_TOKEN="your-auth-token"
 TWILIO_PHONE_NUMBER="+15551234567"

@@ -73,8 +73,8 @@ Polar variable names and webhook contract must be finalized with the billing ada
 
 | Variable | Gate | Notes | dev | staging | prod |
 |----------|------|-------|-----|---------|------|
-| `RESEND_API_KEY` | 🔴 | Resend API key — receipts, transactional, campaigns | ✅ | | |
-| `RESEND_FROM_EMAIL` | 🔴 | Verified sending address (e.g. `no-reply@faithflow.ai`) | ✅ | | |
+| `RESEND_API_KEY` | 🔴 | Product-specific sending-only key restricted to the verified domain | ✅ | ✅ | |
+| `RESEND_FROM_EMAIL` | 🔴 | Verified sender; staging uses `FaithFlow <notifications@susubiribi.com>` | ✅ | ✅ | |
 
 ### SMS / WhatsApp — Twilio
 
@@ -161,8 +161,8 @@ Polar variable names and webhook contract must be finalized with the billing ada
 | `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` | 🔴 | Set to `/portal` | ✅ | | |
 | `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` | 🔴 | Set to `/get-started` | ✅ | | |
 | `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` | 🟡 | Custom JWT template name (e.g. `faithflow-api`) | | | |
-| `RESEND_API_KEY` | 🔴 | For contact form email delivery | | | |
-| `RESEND_FROM_EMAIL` | 🔴 | Verified sending address for contact form | | | |
+| `RESEND_API_KEY` | 🔴 | For contact form email delivery | | ✅ | |
+| `RESEND_FROM_EMAIL` | 🔴 | Verified sending address for contact form | | ✅ | |
 | `CONTACT_TO_EMAIL` | 🔴 | Recipient address for contact form submissions | | | |
 
 ---
@@ -196,7 +196,8 @@ All items below must be ✅ before flipping any church to production.
 - [ ] Clerk routing env vars set on web (`/sign-in`, `/sign-up`, fallback URLs)
 - [ ] Polar sandbox checkout and signed, idempotent webhook processing verified
 - [ ] `PAYSTACK_SECRET_KEY` + `PAYSTACK_WEBHOOK_SECRET` set; webhook URL registered
-- [ ] `RESEND_API_KEY` + `RESEND_FROM_EMAIL` set; sending domain verified (DKIM/SPF)
+- [x] Staging `RESEND_API_KEY` + `RESEND_FROM_EMAIL` set; interim `susubiribi.com` sending domain verified (DKIM/SPF)
+- [ ] Purchase the primary FaithFlow domain, verify it in Resend, and switch production sender branding
 - [ ] `CONTACT_TO_EMAIL` set on web app
 - [ ] `COMMS_UNSUBSCRIBE_SECRET` set on API
 - [ ] `STORAGE_PROVIDER` + bucket credentials set; upload test passing in go-live checks
