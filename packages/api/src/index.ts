@@ -3,7 +3,13 @@ export type { Context } from './context';
 export { router, publicProcedure, protectedProcedure, userProcedure } from './trpc';
 export { emitRealtimeEvent, subscribeRealtime, type RealtimeEvent } from './realtime';
 export { createDonationCheckout, createRecurringCheckout, handlePaystackWebhook, handleStripeWebhook } from './payments';
-export { handlePlatformPaystackWebhook, handlePlatformStripeWebhook, queueTenantWelcomeEmail } from './platform-billing';
+export {
+  handlePlatformPaystackWebhook,
+  handlePlatformPolarWebhook,
+  handlePlatformStripeWebhook,
+  isPolarWebhookVerificationError,
+  queueTenantWelcomeEmail,
+} from './platform-billing';
 export { checkoutInputSchema, recurringCheckoutInputSchema } from './payments/inputs';
 export { ensureDonationReceipt } from './receipts';
 export { buildPublicReceiptUrl, getReceiptByNumber, renderReceiptHtml, verifyReceiptAccessToken } from './receipts';
@@ -20,4 +26,5 @@ export { runSubscriptionMetadataBackfill } from './subscription-metadata-backfil
 export { runTenantDomainAutomation } from './tenant-ops-automation';
 export { runSupportSlaAutomation } from './support-sla';
 export { runStreamingProviderSync } from './streaming-sync';
+export { mapPolarStatus } from './subscription-providers/polar';
 export { apiPublicBaseUrl, buildUnsubscribeUrl, createUnsubscribeToken, verifyUnsubscribeToken } from './unsubscribe';

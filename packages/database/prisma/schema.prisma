@@ -160,6 +160,7 @@ enum SubscriptionProvider {
   MANUAL
   STRIPE
   PAYSTACK
+  POLAR
 }
 
 enum TenantDomainStatus {
@@ -631,6 +632,7 @@ enum WebhookProvider {
   PAYSTACK
   STRIPE_PLATFORM
   PAYSTACK_PLATFORM
+  POLAR_PLATFORM
 }
 
 enum WebhookEventStatus {

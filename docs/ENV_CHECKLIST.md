@@ -59,7 +59,13 @@
 
 ### Payments — Polar (production-release priority)
 
-Polar variable names and webhook contract must be finalized with the billing adapter before this gate is marked complete. Do not couple provider payloads directly to subscription or entitlement business logic.
+| Variable | Gate | Notes | dev | staging | prod |
+|----------|------|-------|-----|---------|------|
+| `POLAR_ACCESS_TOKEN` | 🔴 | Organization access token; use the isolated sandbox token in staging | | | |
+| `POLAR_WEBHOOK_SECRET` | 🔴 | Signing secret for `/webhooks/polar/platform` | | | |
+| `POLAR_SERVER` | 🔴 | `sandbox` in staging; `production` only after live approval | ✅ | | |
+
+Each active plan must also contain its Polar recurring product ID in `SubscriptionPlan.metadata.polarProductId`.
 
 ### Payments — Paystack
 

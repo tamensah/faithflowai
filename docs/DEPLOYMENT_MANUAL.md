@@ -63,7 +63,7 @@ Required when each integration is enabled:
 
 - Clerk webhooks: `CLERK_WEBHOOK_SECRET`
 - Paystack: `PAYSTACK_SECRET_KEY`, `PAYSTACK_WEBHOOK_SECRET`, `PLATFORM_PAYSTACK_WEBHOOK_SECRET`
-- Polar: variables introduced by the reviewed Polar adapter
+- Polar: `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER`; each plan also needs `metadata.polarProductId`
 - Stripe: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PLATFORM_STRIPE_WEBHOOK_SECRET`
 - Twilio, AI, storage, and streaming provider variables listed in [`ENV_CHECKLIST.md`](./ENV_CHECKLIST.md)
 

@@ -29,6 +29,8 @@ import {
   scheduleVolunteerGapAlerts,
   handlePlatformStripeWebhook,
   handlePlatformPaystackWebhook,
+  handlePlatformPolarWebhook,
+  isPolarWebhookVerificationError,
   runSubscriptionAutomation,
   runSubscriptionDunning,
   runSubscriptionMetadataBackfill,
@@ -1167,6 +1169,31 @@ export async function buildServer(): Promise<FastifyInstance> {
     } catch (error) {
       request.log.error({ error }, 'Platform Paystack webhook failed');
       reply.code(400).send({ error: 'Platform Paystack webhook error' });
+    }
+  });
+
+  server.post('/webhooks/polar/platform', { config: { rawBody: true } }, async (request, reply) => {
+    const payload = (request as typeof request & { rawBody?: string | Buffer }).rawBody;
+    if (!payload || !env.POLAR_WEBHOOK_SECRET) {
+      reply.code(400).send({ error: 'Missing platform Polar webhook configuration' });
+      return;
+    }
+
+    const headers = Object.fromEntries(
+      Object.entries(request.headers).flatMap(([name, value]) => {
+        const headerValue = Array.isArray(value) ? value[0] : value;
+        return typeof headerValue === 'string' ? [[name, headerValue]] : [];
+      })
+    );
+
+    try {
+      const result = await handlePlatformPolarWebhook(payload, headers, env.POLAR_WEBHOOK_SECRET);
+      reply.send(result);
+    } catch (error) {
+      request.log.error({ error }, 'Platform Polar webhook failed');
+      reply
+        .code(isPolarWebhookVerificationError(error) ? 403 : 400)
+        .send({ error: 'Platform Polar webhook error' });
     }
   });
 
