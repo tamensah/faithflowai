@@ -79,7 +79,7 @@ const optionalEnvironment = Object.fromEntries(
 export default defineConfig({
   functions: {
     faithflowapi: {
-      name: 'FaithFlow API',
+      name: 'ChurchTrack API',
       source: './apps/api/src/neon-function.ts',
       env: {
         DATABASE_URL: requiredEnv('DATABASE_URL'),

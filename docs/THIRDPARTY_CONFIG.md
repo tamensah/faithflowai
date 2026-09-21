@@ -37,9 +37,10 @@ Optional guardrail env:
 Polar is the first-release SaaS subscription provider. The adapter uses the official `@polar-sh/sdk` and keeps provider payloads behind ChurchTrack's subscription boundary.
 
 - Use the Polar sandbox organization `churchtrack` for staging. OAuth authorization and organization creation were confirmed on 2026-09-21.
-- Add each Polar recurring product ID to the matching ChurchTrack plan as `metadata.polarProductId`.
-- Configure `POST /webhooks/polar/platform` for subscription lifecycle events.
+- Starter (`46305a55-da31-495f-98b0-e763a0ccc926`) and Growth (`9db3247e-2ecb-4deb-b6ee-d9887e790b47`) are configured as private monthly products with 14-day trials and are mapped to the matching ChurchTrack plans through `metadata.polarProductId`.
+- The enabled webhook (`41e4ae0e-91c6-472f-86f1-e80b7e8fef34`) sends the required subscription lifecycle events to `POST /webhooks/polar/platform` on the Neon staging Function.
 - Required env: `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER=sandbox`.
+- Neon staging deployment 11 contains these variables. Runtime checks confirm that the token can read subscriptions, denied ungranted product access, and the webhook rejects unsigned payloads.
 - Complete hosted checkout, signed webhook, customer portal, cancellation, and recovery tests before enabling production.
 
 ## 2. Stripe (implemented, live activation deferred)
