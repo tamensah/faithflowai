@@ -15,6 +15,13 @@ import { router, protectedProcedure } from '../trpc';
 import { recordAuditLog } from '../audit';
 import { assertAllowedCheckoutRedirects } from '../checkout-redirects';
 import { getTenantUsageSnapshot, resolveTenantEntitlements } from '../entitlements';
+import {
+  createPolarCheckout,
+  createPolarClient,
+  mapPolarStatus,
+  normalizePolarSubscription,
+} from '../subscription-providers/polar';
+import { saasBillingProviderSchema } from '../subscription-providers/types';
 
 const clerk = process.env.CLERK_SECRET_KEY ? createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY }) : null;
 
@@ -123,7 +130,7 @@ const baselinePlans = [
 
 const checkoutInput = z.object({
   planCode: z.string().trim().min(2).max(64),
-  provider: z.nativeEnum(PaymentProvider),
+  provider: saasBillingProviderSchema,
   successUrl: z.string().url().optional(),
   cancelUrl: z.string().url().optional(),
 });
@@ -272,6 +279,37 @@ function getSubscriptionActionReadiness(active: Awaited<ReturnType<typeof getAct
         enabled: false,
         severity: 'default' as const,
         message: 'Paystack resume is not supported in-app. Start a fresh checkout if the subscription has been disabled.',
+      },
+    };
+  }
+
+  if (active.provider === SubscriptionProvider.POLAR) {
+    const providerRefReady = Boolean(active.providerRef);
+    return {
+      hasSubscription: true,
+      refresh: {
+        enabled: providerRefReady,
+        severity: providerRefReady ? ('success' as const) : ('warning' as const),
+        message: providerRefReady
+          ? 'Polar subscription reference is present. Provider refresh can reconcile live status.'
+          : 'Polar subscription reference is missing. Wait for the signed webhook before managing this subscription.',
+      },
+      cancel: {
+        enabled: providerRefReady,
+        severity: providerRefReady ? ('default' as const) : ('warning' as const),
+        message: active.cancelAtPeriodEnd
+          ? 'Subscription is already scheduled to end at the current period boundary.'
+          : providerRefReady
+            ? 'Cancel-at-period-end is available for this Polar subscription.'
+            : 'Polar subscription reference is missing, so cancellation cannot be requested safely yet.',
+      },
+      resume: {
+        enabled: providerRefReady && Boolean(active.cancelAtPeriodEnd),
+        severity: providerRefReady && active.cancelAtPeriodEnd ? ('success' as const) : ('default' as const),
+        message:
+          providerRefReady && active.cancelAtPeriodEnd
+            ? 'Resume is available because this Polar subscription is set to cancel at period end.'
+            : 'Resume becomes available after a Polar subscription is marked cancel-at-period-end.',
       },
     };
   }
@@ -686,6 +724,40 @@ export const billingRouter = router({
       });
 
       return { ok: true, provider: PaymentProvider.PAYSTACK, status: next.status };
+    }
+
+    if (active.provider === SubscriptionProvider.POLAR) {
+      if (!active.providerRef) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Polar subscription reference missing. Sync webhooks first.',
+        });
+      }
+      const providerSub = await createPolarClient().subscriptions.get({ id: active.providerRef });
+      const next = await prisma.tenantSubscription.update({
+        where: { id: active.id },
+        data: {
+          status: mapPolarStatus(providerSub.status),
+          currentPeriodStart: providerSub.currentPeriodStart,
+          currentPeriodEnd: providerSub.currentPeriodEnd,
+          trialEndsAt: providerSub.trialEnd,
+          cancelAtPeriodEnd: providerSub.cancelAtPeriodEnd,
+          canceledAt: providerSub.canceledAt,
+          metadata: normalizePolarSubscription(providerSub),
+        },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.subscription_refreshed',
+        targetType: 'TenantSubscription',
+        targetId: active.id,
+        metadata: { provider: active.provider, status: next.status },
+      });
+
+      return { ok: true, provider: 'POLAR' as const, status: next.status };
     }
 
     throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Unsupported billing provider.' });
@@ -1136,6 +1208,70 @@ export const billingRouter = router({
       };
     }
 
+    if (active.provider === SubscriptionProvider.POLAR) {
+      if (!active.providerRef) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Polar subscription reference missing. Sync webhooks before changing plans.',
+        });
+      }
+      const targetMeta = (targetPlan.metadata ?? {}) as Record<string, unknown>;
+      const polarProductId = readPlanMetaString(targetMeta, 'polarProductId');
+      if (!polarProductId) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Target plan is missing polarProductId metadata.',
+        });
+      }
+
+      const providerSub = await createPolarClient().subscriptions.update({
+        id: active.providerRef,
+        subscriptionUpdate: {
+          productId: polarProductId,
+          prorationBehavior: input.effective === 'IMMEDIATE' ? 'invoice' : 'next_period',
+        },
+      });
+
+      await prisma.tenantSubscription.update({
+        where: { id: active.id },
+        data: {
+          planId: providerSub.productId === polarProductId ? targetPlan.id : active.planId,
+          status: mapPolarStatus(providerSub.status),
+          currentPeriodStart: providerSub.currentPeriodStart,
+          currentPeriodEnd: providerSub.currentPeriodEnd,
+          trialEndsAt: providerSub.trialEnd,
+          cancelAtPeriodEnd: providerSub.cancelAtPeriodEnd,
+          canceledAt: providerSub.canceledAt,
+          metadata: normalizePolarSubscription(providerSub),
+        },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: input.effective === 'IMMEDIATE' ? 'billing.self_serve.plan_changed' : 'billing.self_serve.plan_change_scheduled',
+        targetType: 'TenantSubscription',
+        targetId: active.id,
+        metadata: {
+          provider: active.provider,
+          fromPlan: active.plan.code,
+          toPlan: targetPlan.code,
+          changeKind,
+          effective: input.effective,
+          polarProductId,
+        },
+      });
+
+      return {
+        ok: true,
+        provider: 'POLAR' as const,
+        mode: input.effective === 'IMMEDIATE' ? ('updated' as const) : ('scheduled' as const),
+        changeKind,
+        effectiveAt: input.effective === 'NEXT_CYCLE' ? providerSub.currentPeriodEnd.toISOString() : null,
+      };
+    }
+
     throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Unsupported billing provider for plan changes.' });
   }),
 
@@ -1250,6 +1386,47 @@ export const billingRouter = router({
       return { ok: true, provider: PaymentProvider.PAYSTACK, atPeriodEnd: false };
     }
 
+    if (active.provider === SubscriptionProvider.POLAR) {
+      if (!active.providerRef) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Polar subscription reference missing. Sync webhooks first.',
+        });
+      }
+      const polar = createPolarClient();
+      const providerSub = input.atPeriodEnd
+        ? await polar.subscriptions.update({
+            id: active.providerRef,
+            subscriptionUpdate: { cancelAtPeriodEnd: true },
+          })
+        : await polar.subscriptions.revoke({ id: active.providerRef });
+
+      await prisma.tenantSubscription.update({
+        where: { id: active.id },
+        data: {
+          status: mapPolarStatus(providerSub.status),
+          currentPeriodStart: providerSub.currentPeriodStart,
+          currentPeriodEnd: providerSub.currentPeriodEnd,
+          trialEndsAt: providerSub.trialEnd,
+          cancelAtPeriodEnd: providerSub.cancelAtPeriodEnd,
+          canceledAt: providerSub.canceledAt ?? (input.atPeriodEnd ? null : new Date()),
+          metadata: normalizePolarSubscription(providerSub),
+        },
+      });
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.subscription_canceled',
+        targetType: 'TenantSubscription',
+        targetId: active.id,
+        metadata: { provider: active.provider, atPeriodEnd: input.atPeriodEnd },
+      });
+
+      return { ok: true, provider: 'POLAR' as const, atPeriodEnd: input.atPeriodEnd };
+    }
+
     throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Unsupported billing provider.' });
   }),
 
@@ -1259,10 +1436,41 @@ export const billingRouter = router({
     if (!active) {
       throw new TRPCError({ code: 'NOT_FOUND', message: 'No active subscription found.' });
     }
+    if (active.provider === SubscriptionProvider.POLAR) {
+      if (!active.providerRef) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Polar subscription reference missing. Sync webhooks first.',
+        });
+      }
+      const providerSub = await createPolarClient().subscriptions.update({
+        id: active.providerRef,
+        subscriptionUpdate: { cancelAtPeriodEnd: false },
+      });
+      await prisma.tenantSubscription.update({
+        where: { id: active.id },
+        data: {
+          status: mapPolarStatus(providerSub.status),
+          cancelAtPeriodEnd: providerSub.cancelAtPeriodEnd,
+          canceledAt: providerSub.canceledAt,
+          metadata: normalizePolarSubscription(providerSub),
+        },
+      });
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.subscription_resumed',
+        targetType: 'TenantSubscription',
+        targetId: active.id,
+        metadata: { provider: active.provider },
+      });
+      return { ok: true, provider: 'POLAR' as const };
+    }
     if (active.provider !== SubscriptionProvider.STRIPE) {
       throw new TRPCError({
         code: 'PRECONDITION_FAILED',
-        message: 'Resume is currently supported for Stripe subscriptions only.',
+        message: 'Resume is supported for Polar and Stripe subscriptions.',
       });
     }
     if (!active.providerRef) {
@@ -1291,9 +1499,6 @@ export const billingRouter = router({
 
   startCheckout: protectedProcedure.input(checkoutInput).mutation(async ({ ctx, input }) => {
     await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
-    if (input.provider === PaymentProvider.MANUAL) {
-      throw new TRPCError({ code: 'BAD_REQUEST', message: 'Manual provider is not supported for billing checkout' });
-    }
 
     await ensureBaselinePlans();
     const plan = await prisma.subscriptionPlan.findUnique({
@@ -1301,6 +1506,12 @@ export const billingRouter = router({
     });
     if (!plan || !plan.isActive) {
       throw new TRPCError({ code: 'NOT_FOUND', message: 'Plan not found or inactive' });
+    }
+    if (plan.amountMinor <= 0) {
+      throw new TRPCError({
+        code: 'PRECONDITION_FAILED',
+        message: 'Enterprise plans require assisted setup. Contact the FaithFlow team to continue.',
+      });
     }
 
     const email = await getClerkPrimaryEmail(ctx.userId!);
@@ -1310,7 +1521,51 @@ export const billingRouter = router({
     const planMeta = (plan.metadata ?? {}) as Record<string, unknown>;
     const trialDays = readPlanMetaInt(planMeta, 'trialDays');
 
-    if (input.provider === PaymentProvider.STRIPE) {
+    if (input.provider === 'POLAR') {
+      const polarProductId = readPlanMetaString(planMeta, 'polarProductId');
+      if (!polarProductId) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Plan is missing polarProductId metadata.',
+        });
+      }
+      let checkout: Awaited<ReturnType<typeof createPolarCheckout>>;
+      try {
+        checkout = await createPolarCheckout({
+          productId: polarProductId,
+          tenantId: ctx.tenantId!,
+          clerkOrgId: ctx.clerkOrgId,
+          planCode: plan.code,
+          customerEmail: email,
+          successUrl,
+          cancelUrl,
+          trialDays,
+        });
+      } catch (error) {
+        if (error instanceof Error && error.message === 'Polar is not configured') {
+          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: error.message });
+        }
+        throw error;
+      }
+
+      await recordAuditLog({
+        tenantId: ctx.tenantId,
+        actorType: AuditActorType.USER,
+        actorId: ctx.userId,
+        action: 'billing.self_serve.checkout_started',
+        targetType: 'SubscriptionPlan',
+        targetId: plan.id,
+        metadata: { provider: input.provider, planCode: plan.code, checkoutId: checkout.id, polarProductId },
+      });
+
+      return {
+        provider: 'POLAR' as const,
+        checkoutUrl: checkout.url,
+        reference: checkout.id,
+      };
+    }
+
+    if (input.provider === 'STRIPE') {
       const stripe = new Stripe(requireStripeSecret());
       const stripePriceId = typeof planMeta.stripePriceId === 'string' ? planMeta.stripePriceId : null;
 
@@ -1447,19 +1702,38 @@ export const billingRouter = router({
     .input(z.object({ returnUrl: z.string().url().optional() }))
     .mutation(async ({ ctx, input }) => {
       await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
-      const stripe = new Stripe(requireStripeSecret());
-
       const subscription = await prisma.tenantSubscription.findFirst({
         where: {
           tenantId: ctx.tenantId!,
-          provider: 'STRIPE',
+          provider: { in: [SubscriptionProvider.POLAR, SubscriptionProvider.STRIPE] },
           status: { in: activeStatuses as unknown as TenantSubscriptionStatus[] },
         },
         orderBy: { createdAt: 'desc' },
       });
       if (!subscription) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'No Stripe subscription found for tenant' });
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'No hosted billing portal is available for this tenant.' });
       }
+
+      const returnUrl = input.returnUrl ?? `${process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001'}/billing`;
+
+      if (subscription.provider === SubscriptionProvider.POLAR) {
+        const portal = await createPolarClient().customerSessions.create({
+          externalCustomerId: ctx.tenantId!,
+          returnUrl,
+        });
+        await recordAuditLog({
+          tenantId: ctx.tenantId,
+          actorType: AuditActorType.USER,
+          actorId: ctx.userId,
+          action: 'billing.self_serve.portal_opened',
+          targetType: 'TenantSubscription',
+          targetId: subscription.id,
+          metadata: { provider: SubscriptionProvider.POLAR, customerId: portal.customerId },
+        });
+        return { provider: 'POLAR' as const, url: portal.customerPortalUrl };
+      }
+
+      const stripe = new Stripe(requireStripeSecret());
 
       let customerId = extractStripeCustomerId(subscription.metadata);
 
@@ -1476,7 +1750,7 @@ export const billingRouter = router({
 
       const portal = await stripe.billingPortal.sessions.create({
         customer: customerId,
-        return_url: input.returnUrl ?? `${process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001'}/billing`,
+        return_url: returnUrl,
       });
 
       await recordAuditLog({
@@ -1499,7 +1773,7 @@ export const billingRouter = router({
     .input(
       z
         .object({
-          provider: z.nativeEnum(PaymentProvider).optional(),
+          provider: saasBillingProviderSchema.optional(),
           limit: z.number().int().min(1).max(50).default(20),
         })
         .optional()
@@ -1510,7 +1784,11 @@ export const billingRouter = router({
       const limit = input?.limit ?? 20;
 
       const activeSub = await getActiveSubscription(ctx.tenantId!);
-      const provider = selectedProvider ?? activeSub?.provider ?? PaymentProvider.STRIPE;
+      const provider = selectedProvider ?? (activeSub?.provider === SubscriptionProvider.POLAR ? 'POLAR' : activeSub?.provider) ?? 'POLAR';
+
+      if (provider === 'POLAR') {
+        return { provider, invoices: [] };
+      }
 
       if (provider === PaymentProvider.STRIPE) {
         const stripe = new Stripe(requireStripeSecret());

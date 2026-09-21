@@ -137,21 +137,34 @@ Recommended sync events:
   - `subscription.create`
   - `subscription.disable`
   - `charge.success` (for period renewal tracking)
+- Polar:
+  - `subscription.created`
+  - `subscription.updated`
+  - `subscription.active`
+  - `subscription.canceled`
+  - `subscription.uncanceled`
+  - `subscription.revoked`
+  - `subscription.past_due`
 
 Implemented webhook handlers now upsert/update `TenantSubscription` status and period dates:
 
 - `handlePlatformStripeWebhook(...)`
 - `handlePlatformPaystackWebhook(...)`
+- `handlePlatformPolarWebhook(...)`
 
 Mapped API endpoints:
 
 - `POST /webhooks/stripe/platform`
 - `POST /webhooks/paystack/platform`
+- `POST /webhooks/polar/platform`
 
 Required env placeholders:
 
 - `PLATFORM_STRIPE_WEBHOOK_SECRET`
 - `PLATFORM_PAYSTACK_WEBHOOK_SECRET`
+- `POLAR_ACCESS_TOKEN`
+- `POLAR_WEBHOOK_SECRET`
+- `POLAR_SERVER`
 
 Checkout trial handling:
 
@@ -159,6 +172,7 @@ Checkout trial handling:
 - Paystack checkout supports trial plan mapping via metadata:
   - `paystackPlanCode` (standard recurring plan)
   - `paystackTrialPlanCode` (optional trial-specific plan code used when `trialDays > 0`)
+- Polar checkout uses `polarProductId` from plan metadata and passes `trialDays` to the hosted checkout.
 
 ## Usage Metering + Automation
 

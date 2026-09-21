@@ -8,7 +8,7 @@ import { trpc } from '../../lib/trpc';
 import { useWriteAccess } from '../../lib/entitlements';
 import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
-const checkoutProviders = ['STRIPE', 'PAYSTACK'] as const;
+const checkoutProviders = ['POLAR', 'PAYSTACK', 'STRIPE'] as const;
 const changeEffectiveOptions = ['NEXT_CYCLE', 'IMMEDIATE'] as const;
 const billingSectionOptions = [
   { key: 'overview', label: 'Overview' },
@@ -64,7 +64,7 @@ function classifyPlanChange(
 export default function BillingPage() {
   const utils = trpc.useUtils();
   const { canWrite } = useWriteAccess();
-  const [provider, setProvider] = useState<(typeof checkoutProviders)[number]>('STRIPE');
+  const [provider, setProvider] = useState<(typeof checkoutProviders)[number]>('POLAR');
   const [selectedPlanCode, setSelectedPlanCode] = useState('');
   const [effective, setEffective] = useState<(typeof changeEffectiveOptions)[number]>('NEXT_CYCLE');
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -79,7 +79,7 @@ export default function BillingPage() {
 
   useEffect(() => {
     if (!current?.provider) return;
-    if (current.provider === 'STRIPE' || current.provider === 'PAYSTACK') {
+    if (current.provider === 'POLAR' || current.provider === 'STRIPE' || current.provider === 'PAYSTACK') {
       setProvider(current.provider);
     }
   }, [current?.provider]);
@@ -226,6 +226,11 @@ export default function BillingPage() {
         ? 'For downgrades or lateral changes, complete checkout close to renewal time to minimize overlap. FaithFlow can disable the older subscription after the new one activates.'
         : 'For downgrades or lateral changes, complete checkout close to renewal time to minimize overlap. Manual Paystack dashboard cancellation may still be required.';
     }
+    if (current.provider === 'POLAR') {
+      return effective === 'IMMEDIATE'
+        ? 'Polar will apply this plan change now using its configured proration policy.'
+        : 'Polar will schedule this plan change for the next billing period.';
+    }
     return null;
   }, [current, effective, paystackDisableReady, selectedPlanChangeKind]);
 
@@ -343,15 +348,35 @@ export default function BillingPage() {
                 <Button
                   size="sm"
                   onClick={() => createPortalSession({})}
-                  disabled={!canWrite || isOpeningPortal || current.provider !== 'STRIPE'}
+                  disabled={!canWrite || isOpeningPortal || (current.provider !== 'STRIPE' && current.provider !== 'POLAR')}
                 >
-                  {current.provider !== 'STRIPE'
-                    ? 'Stripe portal unavailable'
+                  {current.provider !== 'STRIPE' && current.provider !== 'POLAR'
+                    ? 'Hosted portal unavailable'
                     : isOpeningPortal
                       ? 'Opening...'
-                      : 'Open Stripe billing portal'}
+                      : `Open ${current.provider === 'POLAR' ? 'Polar' : 'Stripe'} billing portal`}
                 </Button>
                 {current.provider === 'STRIPE' ? (
+                  current.cancelAtPeriodEnd ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={isResuming || !actionReadiness?.resume.enabled}
+                      onClick={() => resumeSubscription()}
+                    >
+                      {isResuming ? 'Resuming...' : 'Resume'}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={isCanceling || !actionReadiness?.cancel.enabled}
+                      onClick={() => cancelSubscription({ atPeriodEnd: true })}
+                    >
+                      {isCanceling ? 'Canceling...' : 'Cancel at period end'}
+                    </Button>
+                  )
+                ) : current.provider === 'POLAR' ? (
                   current.cancelAtPeriodEnd ? (
                     <Button
                       size="sm"
@@ -420,7 +445,7 @@ export default function BillingPage() {
               ))}
             </select>
             {current ? (
-              current.provider === 'STRIPE' ? (
+              current.provider === 'STRIPE' || current.provider === 'POLAR' ? (
                 <select
                   className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
                   value={effective}
@@ -480,12 +505,12 @@ export default function BillingPage() {
           ) : null}
           <div className="mt-4">
             <Button
-              disabled={!selectedPlanCode || isStartingCheckout || isChangingPlan}
+              disabled={!selectedPlanCode || isStartingCheckout || isChangingPlan || selectedPlan?.amountMinor === 0}
               onClick={() => {
                 if (current) {
                   changePlan({
                     planCode: selectedPlanCode,
-                    effective: current.provider === 'STRIPE' ? effective : 'NEXT_CYCLE',
+                    effective: current.provider === 'STRIPE' || current.provider === 'POLAR' ? effective : 'NEXT_CYCLE',
                   });
                 } else {
                   startCheckout({ planCode: selectedPlanCode, provider });
@@ -495,14 +520,16 @@ export default function BillingPage() {
               {current
                 ? isChangingPlan
                   ? 'Applying...'
-                  : current.provider === 'STRIPE'
+                  : current.provider === 'STRIPE' || current.provider === 'POLAR'
                     ? effective === 'NEXT_CYCLE'
                       ? 'Schedule plan change'
                       : 'Upgrade now'
                     : 'Continue to Paystack checkout'
                 : isStartingCheckout
                   ? 'Redirecting...'
-                  : 'Continue to checkout'}
+                  : selectedPlan?.amountMinor === 0
+                    ? 'Contact platform team'
+                    : 'Continue to checkout'}
             </Button>
             {current?.provider === 'PAYSTACK' ? (
               <p className="mt-2 text-xs text-muted">

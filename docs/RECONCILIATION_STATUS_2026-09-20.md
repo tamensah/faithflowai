@@ -51,7 +51,10 @@ Stable `develop` applications:
   - subscription metadata backfill daily at 02:10 UTC
 - After correcting `DATABASE_URL` to `faithflow_canonical`, support, tenant-ops, and streaming invocations emitted `Scheduled trigger completed` records through 2026-09-21 00:05 UTC. No `Scheduled trigger failed` records appeared in the final 30-minute verification window.
 - API typecheck passed.
-- API end-to-end tests passed: 17 of 17.
+- API end-to-end tests passed: 19 of 19, including Polar's signed-webhook coverage.
+- The focused Polar adapter suite passed 3 of 3 against the isolated Neon `develop` database and verified tenant-scoped activation, duplicate-delivery handling, invalid-signature rejection, and fail-closed handling for unknown provider states.
+- Neon `develop` now has migration `20260921010000_polar_platform_billing`; production/default branches remain unchanged.
+- Polar's live MCP endpoint is authenticated in Codex, the separate sandbox authorization remains pending, and the official `setup-polar`, `polar-integration`, `polar-testing`, and `polar-migration` skills are installed.
 - Neon Function adapter coverage includes health routing, public trigger rejection, and empty CORS preflight handling.
 - Production builds passed for the API, web, and admin applications.
 - Production dependency audit reported no known vulnerabilities.
@@ -83,7 +86,7 @@ The merged `develop` deployments include these environment changes.
 3. Confirm protected admin and member tRPC calls reach the Neon API without authorization or CORS errors.
 4. Send and confirm a staging transactional email, and configure `CONTACT_TO_EMAIL` after the monitored recipient inbox is selected.
 5. Configure Paystack staging secrets and pass sandbox checkout plus signed webhook replay.
-6. Implement and verify the provider-neutral Polar adapter and signed webhook.
+6. Use the authenticated Polar MCP after session refresh to create or verify the sandbox organization, recurring products, and webhook; then add product IDs and sandbox secrets to staging and complete checkout/customer-portal/lifecycle tests.
 7. Keep Stripe dormant until the US LLC and live provider setup are complete.
 8. Add shared realtime fan-out before treating SSE delivery as multi-instance production-ready.
 

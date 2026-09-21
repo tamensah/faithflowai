@@ -34,7 +34,13 @@ Optional guardrail env:
 - **Retained adapter:** Stripe is already implemented in the codebase but live use is deferred until the US LLC and Stripe account setup are complete.
 - Keep provider SDKs and webhook payloads behind billing/payment adapters. Entitlements, subscription state, pricing, reconciliation, webhook idempotency, and tenant business rules remain server-side and provider-neutral.
 
-Polar is a release requirement but is not implemented in this baseline. Its exact environment variables, webhook events, and sandbox validation steps must be added when that adapter is implemented.
+Polar is the first-release SaaS subscription provider. The adapter uses the official `@polar-sh/sdk` and keeps provider payloads behind FaithFlow's subscription boundary.
+
+- Use the Polar sandbox organization for staging.
+- Add each Polar recurring product ID to the matching FaithFlow plan as `metadata.polarProductId`.
+- Configure `POST /webhooks/polar/platform` for subscription lifecycle events.
+- Required env: `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER=sandbox`.
+- Complete hosted checkout, signed webhook, customer portal, cancellation, and recovery tests before enabling production.
 
 ## 2. Stripe (implemented, live activation deferred)
 

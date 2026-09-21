@@ -1,5 +1,7 @@
 import crypto from 'crypto';
 import Stripe from 'stripe';
+import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks';
+import type { Subscription as PolarSubscription } from '@polar-sh/sdk/models/components/subscription';
 import {
   prisma,
   Prisma,
@@ -22,6 +24,11 @@ import {
   markWebhookFailed,
   markWebhookProcessed,
 } from './webhook-idempotency';
+import { mapPolarStatus, normalizePolarSubscription } from './subscription-providers/polar';
+
+export function isPolarWebhookVerificationError(error: unknown) {
+  return error instanceof WebhookVerificationError;
+}
 
 const stripeStatusMap: Record<string, TenantSubscriptionStatus> = {
   trialing: TenantSubscriptionStatus.TRIALING,
@@ -186,6 +193,7 @@ async function resolveTenantAndPlan(options: {
   planCode?: string | null;
   stripePriceId?: string | null;
   paystackPlanCode?: string | null;
+  polarProductId?: string | null;
 }) {
   const tenant = options.tenantId
     ? await prisma.tenant.findUnique({ where: { id: options.tenantId } })
@@ -211,6 +219,11 @@ async function resolveTenantAndPlan(options: {
           { metadata: { path: ['paystackTrialPlanCode'], equals: options.paystackPlanCode } },
         ],
       },
+    });
+  }
+  if (!plan && options.polarProductId) {
+    plan = await prisma.subscriptionPlan.findFirst({
+      where: { metadata: { path: ['polarProductId'], equals: options.polarProductId } },
     });
   }
   if (!plan) {
@@ -677,6 +690,114 @@ export async function handlePlatformPaystackWebhook(payload: string, signature: 
       recordId: idempotency.recordId!,
       error,
       result: { event: event.event } as Prisma.InputJsonValue,
+    });
+    throw error;
+  }
+}
+
+export async function handlePlatformPolarWebhook(
+  payload: string | Buffer,
+  headers: Record<string, string>,
+  webhookSecret: string
+) {
+  const event = validateEvent(payload, headers, webhookSecret);
+  const eventId = headers['webhook-id'] || buildWebhookExternalEventId([event.type, event.timestamp.toISOString()]);
+  const idempotency = await beginWebhookProcessing({
+    provider: WebhookProvider.POLAR_PLATFORM,
+    externalEventId: eventId,
+    eventType: event.type,
+    payload,
+  });
+  if (idempotency.duplicate) {
+    return { ok: true, duplicate: true, event: event.type };
+  }
+
+  try {
+    const subscriptionEventTypes = new Set([
+      'subscription.created',
+      'subscription.updated',
+      'subscription.active',
+      'subscription.canceled',
+      'subscription.uncanceled',
+      'subscription.revoked',
+      'subscription.past_due',
+    ]);
+
+    if (!subscriptionEventTypes.has(event.type) || !('data' in event) || !('productId' in event.data)) {
+      const result = { ok: true, ignored: true, event: event.type } as const;
+      await markWebhookProcessed({
+        recordId: idempotency.recordId!,
+        result: { event: event.type, ignored: true } as Prisma.InputJsonValue,
+      });
+      return result;
+    }
+
+    const subscription = event.data as PolarSubscription;
+    const metadata = subscription.metadata ?? {};
+    const metadataTenantId = typeof metadata.tenantId === 'string' ? metadata.tenantId : null;
+    const tenantId = subscription.customer.externalId ?? metadataTenantId;
+    if (subscription.customer.externalId && metadataTenantId && subscription.customer.externalId !== metadataTenantId) {
+      throw new Error('Polar customer external ID does not match subscription tenant metadata');
+    }
+
+    const { tenant, plan } = await resolveTenantAndPlan({
+      tenantId,
+      clerkOrgId: typeof metadata.clerkOrgId === 'string' ? metadata.clerkOrgId : null,
+      // Polar's product is authoritative for plan changes. Checkout metadata can retain
+      // the original plan code while a next-period update is pending.
+      planCode: null,
+      polarProductId: subscription.productId,
+    });
+    if (!tenant || !plan) {
+      const result = { ok: true, skipped: true, reason: 'tenant_or_plan_not_found', event: event.type } as const;
+      await markWebhookProcessed({
+        recordId: idempotency.recordId!,
+        result: { event: event.type, reason: result.reason } as Prisma.InputJsonValue,
+      });
+      return result;
+    }
+
+    const record = await upsertSubscription({
+      tenantId: tenant.id,
+      planId: plan.id,
+      provider: SubscriptionProvider.POLAR,
+      providerRef: subscription.id,
+      status: event.type === 'subscription.revoked' ? TenantSubscriptionStatus.CANCELED : mapPolarStatus(subscription.status),
+      currentPeriodStart: subscription.currentPeriodStart,
+      currentPeriodEnd: subscription.currentPeriodEnd,
+      trialEndsAt: subscription.trialEnd,
+      canceledAt: subscription.canceledAt ?? (event.type === 'subscription.revoked' ? new Date() : null),
+      cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+      metadata: normalizePolarSubscription(subscription),
+    });
+
+    await recordAuditLog({
+      tenantId: tenant.id,
+      actorType: AuditActorType.WEBHOOK,
+      action: 'platform.subscription.synced_polar',
+      targetType: 'TenantSubscription',
+      targetId: record.id,
+      metadata: { eventType: event.type, polarSubscriptionId: subscription.id, status: record.status },
+    });
+
+    if (record.status === TenantSubscriptionStatus.ACTIVE || record.status === TenantSubscriptionStatus.TRIALING) {
+      await queueTenantWelcomeEmail(tenant.id);
+    }
+    if (record.status === TenantSubscriptionStatus.PAST_DUE) {
+      runSubscriptionDunning({ tenantIds: [tenant.id], graceDays: 0 }).catch(() => {});
+    }
+
+    await markWebhookProcessed({
+      recordId: idempotency.recordId!,
+      tenantId: tenant.id,
+      result: { event: event.type, provider: 'polar', subscriptionId: record.id } as Prisma.InputJsonValue,
+    });
+    return { ok: true, provider: 'polar' as const, event: event.type, subscriptionId: record.id };
+  } catch (error) {
+    await markWebhookFailed({
+      recordId: idempotency.recordId!,
+      error,
+      result: { event: event.type } as Prisma.InputJsonValue,
     });
     throw error;
   }

@@ -12,7 +12,7 @@ import {
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { trpc } from '../../../lib/trpc';
 
-const providers = ['STRIPE', 'PAYSTACK'] as const;
+const providers = ['POLAR', 'PAYSTACK', 'STRIPE'] as const;
 
 function formatPlan(amountMinor: number, currency: string, interval: string) {
   return `${currency} ${(amountMinor / 100).toFixed(2)} / ${interval.toLowerCase()}`;
@@ -92,7 +92,7 @@ export default function GetStartedPage() {
   const utils = trpc.useUtils();
   const { isSignedIn, orgId } = useAuth();
   const { user } = useUser();
-  const [provider, setProvider] = useState<(typeof providers)[number]>('STRIPE');
+  const [provider, setProvider] = useState<(typeof providers)[number]>('POLAR');
   const [selectedPlanCode, setSelectedPlanCode] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);
@@ -275,8 +275,9 @@ export default function GetStartedPage() {
                   value={provider}
                   onChange={(e) => setProvider(e.target.value as (typeof providers)[number])}
                 >
-                  <option value="STRIPE">Stripe — card / international</option>
+                  <option value="POLAR">Polar — card / international</option>
                   <option value="PAYSTACK">Paystack — Africa / local currency</option>
+                  <option value="STRIPE">Stripe — available after US setup</option>
                 </select>
               </div>
             </div>
@@ -304,7 +305,7 @@ export default function GetStartedPage() {
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <Button
-                disabled={!selectedPlanCode || isStartingCheckout || !plans?.length}
+                disabled={!selectedPlanCode || isStartingCheckout || !plans?.length || selectedPlan?.amountMinor === 0}
                 onClick={() => {
                   if (!selectedPlanCode) { setLocalError('Select a plan first.'); return; }
                   setLocalError(null);
@@ -316,8 +317,17 @@ export default function GetStartedPage() {
                   });
                 }}
               >
-                {isStartingCheckout ? 'Redirecting to checkout…' : 'Start free trial'}
+                {selectedPlan?.amountMinor === 0
+                  ? 'Contact us for Enterprise'
+                  : isStartingCheckout
+                    ? 'Redirecting to checkout…'
+                    : 'Start free trial'}
               </Button>
+              {selectedPlan?.amountMinor === 0 ? (
+                <Link href="/contact" className="text-sm font-medium text-primary underline underline-offset-4">
+                  Request assisted setup
+                </Link>
+              ) : null}
             </div>
 
             {localError ? <p className="mt-2 text-xs text-destructive">{localError}</p> : null}

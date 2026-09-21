@@ -11,7 +11,7 @@ import { EmptyState } from '../../../components/EmptyState';
 
 const intervalOptions = ['MONTHLY', 'YEARLY', 'CUSTOM'] as const;
 const subscriptionStatusOptions = ['TRIALING', 'ACTIVE', 'PAST_DUE', 'PAUSED', 'CANCELED', 'EXPIRED'] as const;
-const providerOptions = ['MANUAL', 'STRIPE', 'PAYSTACK'] as const;
+const providerOptions = ['MANUAL', 'POLAR', 'PAYSTACK', 'STRIPE'] as const;
 const sectionOptions = [
   { key: 'plan-form', label: 'Plan editor' },
   { key: 'assign-plan', label: 'Tenant assignment' },

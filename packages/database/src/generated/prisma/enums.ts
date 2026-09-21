@@ -221,7 +221,8 @@ export type TenantSubscriptionStatus = (typeof TenantSubscriptionStatus)[keyof t
 export const SubscriptionProvider = {
   MANUAL: 'MANUAL',
   STRIPE: 'STRIPE',
-  PAYSTACK: 'PAYSTACK'
+  PAYSTACK: 'PAYSTACK',
+  POLAR: 'POLAR'
 } as const
 
 export type SubscriptionProvider = (typeof SubscriptionProvider)[keyof typeof SubscriptionProvider]
@@ -896,7 +897,8 @@ export const WebhookProvider = {
   STRIPE: 'STRIPE',
   PAYSTACK: 'PAYSTACK',
   STRIPE_PLATFORM: 'STRIPE_PLATFORM',
-  PAYSTACK_PLATFORM: 'PAYSTACK_PLATFORM'
+  PAYSTACK_PLATFORM: 'PAYSTACK_PLATFORM',
+  POLAR_PLATFORM: 'POLAR_PLATFORM'
 } as const
 
 export type WebhookProvider = (typeof WebhookProvider)[keyof typeof WebhookProvider]
