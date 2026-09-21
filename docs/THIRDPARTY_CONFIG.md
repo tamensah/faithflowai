@@ -217,7 +217,9 @@ These are required in Vercel (or your hosting provider) for each frontend app. T
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | ✅ | Clerk publishable key |
 | `CLERK_SECRET_KEY` | ✅ | Clerk secret key |
 | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | ✅ | Set to `/sign-in` |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | ✅ | Set to `/sign-up` |
 | `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` | ✅ | Set to `/` |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` | ✅ | Set to `/` |
 | `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` | Optional | Custom JWT template name |
 
 ## 11. External Integrations (OpenAPI)
