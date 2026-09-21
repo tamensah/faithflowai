@@ -179,7 +179,7 @@ import { createTRPCClient } from '@trpc/client';
 import type { AppRouter } from '@faithflow/api';
 
 const client = createTRPCClient<AppRouter>({
-	url: 'https://api.faithflow.church/trpc',
+	url: 'https://your-api-domain.example/trpc',
 });
 
 // Example: Create a new member

@@ -9,7 +9,7 @@
 
 ### How do I get into the portal?
 
-1. Go to your church's portal link (your admin will share this — it usually looks like `yourchurch.faithflow.ai/portal`).
+1. Go to the portal link shared by your church administrator.
 2. You'll see a sign-in screen. Enter your email and password, or sign in with Google if your church has that set up.
 3. If your email is already in your church's records, you'll go straight in.
 4. If not, you'll see a short form asking for your name, email, and church. Fill it in and submit — a staff member will approve your request, usually within a day or two.

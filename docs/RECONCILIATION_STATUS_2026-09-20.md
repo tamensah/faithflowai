@@ -20,7 +20,8 @@ Last verified: **2026-09-21**
 - Database: `faithflow_canonical` on the same Neon branch
 - Scheduler: four Neon Function Triggers declared in `neon.ts`
 - Identity: one shared staging Clerk project across web, admin, and API
-- Email provider: Resend API key present; verified sender is still missing
+- Email provider: Resend with `susubiribi.com` verified and the interim sender `FaithFlow <notifications@susubiribi.com>` configured
+- Public product domain: not purchased; the Vercel `develop` aliases remain the canonical staging URLs
 
 Staging API:
 
@@ -55,6 +56,10 @@ Stable `develop` applications:
 - Production builds passed for the API, web, and admin applications.
 - Production dependency audit reported no known vulnerabilities.
 - GitHub Actions run `35538712270` passed install, Prisma validation, Neon configuration typecheck, monorepo typecheck, adapter tests, lint, build, and production dependency audit.
+- Resend reports `susubiribi.com` as verified with sending enabled and its DKIM, SPF MX, and SPF TXT records verified.
+- FaithFlow staging uses the dedicated `faithflow-staging-sending` Resend key with sending-only permission restricted to `susubiribi.com`.
+- Neon Function deployment 8 includes `RESEND_FROM_EMAIL` and the restricted sending key; `/health` and `/ready` remained 200, and no scheduled-trigger failures appeared in the final verification window.
+- The web `develop` environment includes the same interim sender.
 
 ## Defect caught during staging
 
@@ -65,6 +70,7 @@ The first Function deployment used Neon's branch-default database. Network healt
 - Both Vercel `develop` environments now point `NEXT_PUBLIC_API_URL` at the Neon staging API.
 - The web `develop` environment was aligned to the admin staging Clerk project.
 - The Neon Function uses the matching Clerk secret.
+- The Neon Function and web `develop` environment use `FaithFlow <notifications@susubiribi.com>` until a primary FaithFlow domain is purchased and verified.
 - Former-host deployment blueprints were removed.
 - GitHub cron schedules were disabled; their workflows remain manual incident fallbacks.
 
@@ -75,10 +81,10 @@ The merged `develop` deployments include these environment changes.
 1. Test marketing → sign-up → organization creation/selection → tenant provisioning → church-admin dashboard.
 2. Test an existing member portal session under the same Clerk organization.
 3. Confirm protected admin and member tRPC calls reach the Neon API without authorization or CORS errors.
-4. Configure and verify `RESEND_FROM_EMAIL`.
+4. Send and confirm a staging transactional email, and configure `CONTACT_TO_EMAIL` after the monitored recipient inbox is selected.
 5. Configure Paystack staging secrets and pass sandbox checkout plus signed webhook replay.
 6. Implement and verify the provider-neutral Polar adapter and signed webhook.
 7. Keep Stripe dormant until the US LLC and live provider setup are complete.
 8. Add shared realtime fan-out before treating SSE delivery as multi-instance production-ready.
 
-No production-readiness claim should be made until these browser and provider gates have current evidence.
+The interim email domain is an infrastructure choice, not the public FaithFlow domain. No production-readiness claim should be made until the browser and provider gates have current evidence.

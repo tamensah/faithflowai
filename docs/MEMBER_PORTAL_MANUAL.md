@@ -60,7 +60,7 @@ Email matches a member record?
 
 ### Step by step
 
-1. Visit the portal URL (e.g. `https://yourchurch.faithflow.ai/portal`)
+1. Visit the portal URL shared by the church administrator.
 2. If you are not signed in, a sign-in form appears inline. Sign in with your email or create an account — no separate sign-in page redirect is needed.
 3. If your email address matches a member record already in the system, the portal opens immediately.
 4. If no record matches your email, you will see the **"Request member access"** screen. Fill in:
