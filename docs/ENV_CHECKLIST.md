@@ -184,7 +184,9 @@ Each active plan must also contain its Polar recurring product ID in `Subscripti
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | 🔴 | Clerk publishable key | ✅ | | |
 | `CLERK_SECRET_KEY` | 🔴 | Clerk secret key | ✅ | | |
 | `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | 🔴 | Set to `/sign-in` | ✅ | | |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | 🔴 | Set to `/sign-up` | ✅ | | |
 | `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` | 🔴 | Set to `/` | ✅ | | |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` | 🔴 | Set to `/` so a new church administrator enters onboarding | ✅ | | |
 | `NEXT_PUBLIC_CLERK_JWT_TEMPLATE` | 🟡 | Custom JWT template name | | | |
 
 ---

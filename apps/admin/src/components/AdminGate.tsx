@@ -2,10 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { OrganizationSwitcher, useAuth, useUser } from '@clerk/nextjs';
+import { usePathname } from 'next/navigation';
 import { Card, Button } from '@faithflow-ai/ui';
 import { trpc } from '../lib/trpc';
 
 export function AdminGate({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  if (pathname.startsWith('/sign-in') || pathname.startsWith('/sign-up')) {
+    return <>{children}</>;
+  }
+
+  return <ProtectedAdminGate>{children}</ProtectedAdminGate>;
+}
+
+function ProtectedAdminGate({ children }: { children: React.ReactNode }) {
   const { orgId } = useAuth();
   const utils = trpc.useUtils();
   const { user, isLoaded, isSignedIn } = useUser();
