@@ -1,6 +1,6 @@
-# FaithFlow AI Events Manual
+# ChurchTrack Events Manual
 
-This guide explains the event model, operations, and recommended workflows for FaithFlow AI. It is written for developers and early adopters running events at scale.
+This guide explains the event model, operations, and recommended workflows for ChurchTrack. It is written for developers and early adopters running events at scale.
 
 ## 1. Core Concepts
 

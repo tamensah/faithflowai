@@ -1,4 +1,4 @@
-# FaithFlow UI Components
+# ChurchTrack UI Components
 
 ## Design System
 

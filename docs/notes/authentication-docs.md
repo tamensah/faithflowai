@@ -1,4 +1,4 @@
-# FaithFlow Authentication Documentation
+# ChurchTrack Authentication Documentation
 Version 1.0 | December 21, 2024
 
 ## Core Authentication Features

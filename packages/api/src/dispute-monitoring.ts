@@ -86,7 +86,7 @@ function buildBody(params: {
       <li>Donor: ${params.donorName ?? 'Unknown'} ${params.donorEmail ? `(${params.donorEmail})` : ''}</li>
       <li>Due by: ${params.dueDate}</li>
     </ul>
-    <p>Open FaithFlow Finance → Refunds &amp; disputes to upload evidence.</p>
+    <p>Open ChurchTrack Finance → Refunds &amp; disputes to upload evidence.</p>
   `;
 }
 

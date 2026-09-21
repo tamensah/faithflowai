@@ -1,4 +1,4 @@
-# FaithFlow AI — Pricing Strategy
+# ChurchTrack — Pricing Strategy
 
 > Internal reference for pricing decisions, competitive positioning, and market strategy.
 > Last reviewed: March 2026.
@@ -7,7 +7,7 @@
 
 ## Our Position
 
-FaithFlow AI is the only church management platform that combines:
+ChurchTrack is the only church management platform that combines:
 - **Full-suite SaaS** (membership, finance, events, comms, volunteer, pastoral care, streaming, AI) in a single subscription
 - **Native multi-currency giving** — Stripe (USD/international) + Paystack (NGN, GHS, KES, ZAR, XOF, USD)
 - **Live streaming integrations** — YouTube, Facebook, Vimeo with auto-transitions and moderation (no competitor at this price tier)
@@ -36,7 +36,7 @@ This combination is not available from any single competitor at any price. We ar
 
 No major global ChMS has native Paystack integration or local-currency giving flows. Local alternatives (ChurchCast, DaChurchMan) are operationally basic. The 500M+ Christian population across sub-Saharan Africa, West Africa, and the diaspora is almost entirely unserved by modern SaaS ChMS.
 
-**FaithFlow is the first global ChMS built to serve this market natively.**
+**ChurchTrack is the first global ChMS built to serve this market natively.**
 
 MTN MoMo alone processes GHS 1.4 trillion annually in Ghana. The demand for digital church giving is proven — the infrastructure for a platform to capture it is not yet there from any competitor.
 
@@ -62,7 +62,7 @@ MTN MoMo alone processes GHS 1.4 trillion annually in Ghana. The demand for digi
 
 **Why 1,000 members (not 500):** The original 500-member cap was defensive. Breeze offers unlimited at $72. Our cap at 500 created a "less for less" perception. 1,000 members covers ~95% of small churches and signals confidence in our value.
 
-**Why Pastoral Care is included at Starter:** It's a low-infrastructure feature (forms + notes + assignment tracking) but high in ministry value. Including it at Starter differentiates us immediately — no competitor includes pastoral care workflows at this price point. It shows FaithFlow is built for ministry, not just administration.
+**Why Pastoral Care is included at Starter:** It's a low-infrastructure feature (forms + notes + assignment tracking) but high in ministry value. Including it at Starter differentiates us immediately — no competitor includes pastoral care workflows at this price point. It shows ChurchTrack is built for ministry, not just administration.
 
 **What's excluded at Starter:** Streaming (requires provider integrations + infrastructure), Facilities, Custom Domain. These are growth-appropriate features that justify the Growth upgrade.
 
@@ -138,5 +138,5 @@ This is a genuine competitive differentiator:
 
 ---
 
-*FaithFlow AI Pricing Strategy · Internal document · March 2026*
+*ChurchTrack Pricing Strategy · Internal document · March 2026*
 *Cross-reference: `docs/FEATURES_TRACKER.md`, `docs/SUBSCRIPTION_SYSTEM.md`*

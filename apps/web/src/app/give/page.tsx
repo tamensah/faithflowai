@@ -110,7 +110,7 @@ function GivePageContent() {
     <main className="min-h-screen bg-background px-6 py-12">
       <div className="mx-auto max-w-2xl space-y-6">
         <div>
-          <p className="text-sm uppercase tracking-widest text-muted">FaithFlow AI Giving</p>
+          <p className="text-sm uppercase tracking-widest text-muted">ChurchTrack Giving</p>
           <h1 className="mt-3 text-4xl font-semibold text-foreground">Give to your church</h1>
           <p className="mt-3 text-muted">Secure giving with Stripe or Paystack.</p>
         </div>

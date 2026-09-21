@@ -144,7 +144,7 @@ function buildCalendarIcs(
   const header = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//FaithFlow AI//EN',
+    'PRODID:-//ChurchTrack//EN',
     `X-WR-CALNAME:${escapeIcs(churchName)} Events`,
     'CALSCALE:GREGORIAN',
   ].join('\r\n');
@@ -382,7 +382,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     reply.header('Content-Type', 'text/html; charset=utf-8').send(
       [
         '<!doctype html><html lang="en">',
-        `<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Unsubscribe - FaithFlow</title><style>${unsubscribeStyle}</style></head>`,
+        `<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Unsubscribe - ChurchTrack</title><style>${unsubscribeStyle}</style></head>`,
         '<body><div class="card">',
         '<h1>Confirm unsubscribe</h1>',
         `<p class="muted">Channel: ${escapeHtml(channel)}</p>`,
@@ -446,7 +446,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     reply.header('Content-Type', 'text/html; charset=utf-8').send(
       [
         '<!doctype html><html lang="en">',
-        `<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Unsubscribed - FaithFlow</title><style>${unsubscribeStyle}</style></head>`,
+        `<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Unsubscribed - ChurchTrack</title><style>${unsubscribeStyle}</style></head>`,
         '<body><div class="card">',
         '<h1>You are unsubscribed.</h1>',
         `<p class="muted">Channel: ${escapeHtml(channel)}</p>`,

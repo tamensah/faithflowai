@@ -10,12 +10,12 @@ export default function TermsPage() {
 
       <div className="prose prose-sm mt-10 max-w-none text-muted">
         <p>
-          By using FaithFlow AI you agree to these terms. Please read them carefully.
+          By using ChurchTrack you agree to these terms. Please read them carefully.
         </p>
 
         <h2 className="mt-8 text-base font-semibold text-foreground">Service</h2>
         <p>
-          FaithFlow AI provides a cloud-based church management platform on a subscription basis.
+          ChurchTrack provides a cloud-based church management platform on a subscription basis.
           We reserve the right to modify, suspend, or discontinue features with reasonable notice.
         </p>
 
@@ -28,7 +28,7 @@ export default function TermsPage() {
 
         <h2 className="mt-8 text-base font-semibold text-foreground">Acceptable use</h2>
         <p>
-          FaithFlow AI may only be used for lawful purposes by religious organizations and their
+          ChurchTrack may only be used for lawful purposes by religious organizations and their
           affiliates. You must not use the platform to process fraudulent transactions, send
           unsolicited communications, or circumvent access controls.
         </p>
@@ -42,13 +42,13 @@ export default function TermsPage() {
 
         <h2 className="mt-8 text-base font-semibold text-foreground">Data ownership</h2>
         <p>
-          You own your church's data. FaithFlow AI acts as a data processor. We do not sell or
+          You own your church's data. ChurchTrack acts as a data processor. We do not sell or
           share your data with third parties except as required to operate the service.
         </p>
 
         <h2 className="mt-8 text-base font-semibold text-foreground">Limitation of liability</h2>
         <p>
-          FaithFlow AI is provided "as is". Our liability is limited to the fees paid in the three
+          ChurchTrack is provided "as is". Our liability is limited to the fees paid in the three
           months preceding any claim. We are not liable for indirect, incidental, or consequential
           damages.
         </p>

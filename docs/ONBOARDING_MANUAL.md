@@ -1,6 +1,6 @@
 # Onboarding Manual
 
-This manual defines the standard onboarding flow for FaithFlow AI beta and the expected UX for admins, staff, and members.
+This manual defines the standard onboarding flow for ChurchTrack beta and the expected UX for admins, staff, and members.
 
 ## Goals
 - Make first-time church onboarding deterministic and fast.

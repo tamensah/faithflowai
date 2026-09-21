@@ -1,13 +1,15 @@
-# FaithFlow Platform Blueprint
+# ChurchTrack Platform Blueprint
+
+> Domain names ending in `churchtrack.example` are planning placeholders. ChurchTrack does not yet have a purchased primary domain.
 
 ## Platform Overview
 
-FaithFlow is a modern, multi-tenant SaaS platform for church management, designed to support churches with headquarters, branches, and campuses across multiple countries with different languages and currencies.
+ChurchTrack is a modern, multi-tenant SaaS platform for church management, designed to support churches with headquarters, branches, and campuses across multiple countries with different languages and currencies.
 
 ## Core Architecture
 
 ### Multi-tenancy Model
-- Each church gets a unique subdomain: `{churchname}.faithflow.com`
+- Each church gets a unique subdomain: `{churchname}.churchtrack.example`
 - Complete tenant isolation
 - Headquarters-branch hierarchy support
 - No cross-church data sharing
@@ -56,48 +58,48 @@ FaithFlow is a modern, multi-tenant SaaS platform for church management, designe
 ## Domain Architecture
 
 ### Primary Domains
-- Marketing: `faithflow.church`
-- Application: `app.faithflow.church`
-- API: `api.faithflow.church`
-- Documentation: `docs.faithflow.church`
-- Status: `status.faithflow.church`
+- Marketing: `churchtrack.example`
+- Application: `app.churchtrack.example`
+- API: `api.churchtrack.example`
+- Documentation: `docs.churchtrack.example`
+- Status: `status.churchtrack.example`
 
 ### Tenant Domains
-- Church Pattern: `{churchname}.faithflow.church`
-- Branch Pattern: `{branch}.{churchname}.faithflow.church`
+- Church Pattern: `{churchname}.churchtrack.example`
+- Branch Pattern: `{branch}.{churchname}.churchtrack.example`
 - Examples:
-  - Main church: `gracechapel.faithflow.church`
-  - Branch: `downtown.gracechapel.faithflow.church`
+  - Main church: `gracechapel.churchtrack.example`
+  - Branch: `downtown.gracechapel.churchtrack.example`
 
 ### Environment Domains
-- Development: `dev.faithflow.church`
-- Staging: `staging.faithflow.church`
-- Preview: `preview.faithflow.church`
+- Development: `dev.churchtrack.example`
+- Staging: `staging.churchtrack.example`
+- Preview: `preview.churchtrack.example`
 
 ### DNS Configuration
 ```dns
 ; Root domain
-faithflow.church.                   A     [VERCEL_IP]
-*.faithflow.church.                CNAME  cname.vercel-dns.com.
+churchtrack.example.                   A     [VERCEL_IP]
+*.churchtrack.example.                CNAME  cname.vercel-dns.com.
 
 ; Primary services
-app.faithflow.church.              CNAME  cname.vercel-dns.com.
-api.faithflow.church.              CNAME  cname.vercel-dns.com.
-docs.faithflow.church.             CNAME  cname.vercel-dns.com.
-status.faithflow.church.           CNAME  cname.vercel-dns.com.
+app.churchtrack.example.              CNAME  cname.vercel-dns.com.
+api.churchtrack.example.              CNAME  cname.vercel-dns.com.
+docs.churchtrack.example.             CNAME  cname.vercel-dns.com.
+status.churchtrack.example.           CNAME  cname.vercel-dns.com.
 
 ; Wildcard for tenant subdomains
-*.faithflow.church.                CNAME  cname.vercel-dns.com.
+*.churchtrack.example.                CNAME  cname.vercel-dns.com.
 
 ; Email configuration
-faithflow.church.                  MX     mx1.resend.com.
-faithflow.church.                  MX     mx2.resend.com.
-faithflow.church.                  TXT    "v=spf1 include:spf.resend.com -all"
-_dmarc.faithflow.church.           TXT    "v=DMARC1; p=reject; rua=mailto:dmarc@faithflow.church"
+churchtrack.example.                  MX     mx1.resend.com.
+churchtrack.example.                  MX     mx2.resend.com.
+churchtrack.example.                  TXT    "v=spf1 include:spf.resend.com -all"
+_dmarc.churchtrack.example.           TXT    "v=DMARC1; p=reject; rua=mailto:dmarc@churchtrack.example"
 ```
 
 ### SSL Configuration
-- Wildcard SSL certificate for `*.faithflow.church`
+- Wildcard SSL certificate for `*.churchtrack.example`
 - Automated certificate management via Cloudflare
 - Let's Encrypt integration for development
 - SSL enforcement across all domains
@@ -128,7 +130,7 @@ add_header Permissions-Policy "camera=(), microphone=(), geolocation=()";
 
 ## Public-Facing Pages
 
-### FaithFlow.church Platform Website
+### ChurchTrack.church Platform Website
 ```typescript
 interface PlatformWebsite {
   layout: {
@@ -412,7 +414,7 @@ interface FooterPromotion {
 
 #### Footer Options by Plan
 - **Starter Plan**
-  - "Powered by FaithFlow"
+  - "Powered by ChurchTrack"
   - Standard link
   - Basic analytics
 
@@ -3399,7 +3401,7 @@ interface Metrics {
 ```typescript
 interface StarterWebsite {
   domain: {
-    type: 'subdomain'; // church.faithflow.church
+    type: 'subdomain'; // church.churchtrack.example
     ssl: boolean;
   };
   

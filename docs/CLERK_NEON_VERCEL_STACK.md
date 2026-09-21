@@ -1,6 +1,6 @@
 # Clerk + Neon + Vercel Reference
 
-FaithFlow uses one Clerk project per environment across the web application, admin application, and Neon Function API.
+ChurchTrack uses one Clerk project per environment across the web application, admin application, and Neon Function API.
 
 ## Surface ownership
 
@@ -10,7 +10,7 @@ FaithFlow uses one Clerk project per environment across the web application, adm
 | Vercel web | marketing pages and member portal |
 | Vercel admin | church administration and platform operations |
 | Neon Function | token verification, authorization, tenant provisioning, API and webhooks |
-| Neon Postgres | FaithFlow tenant, church, member, role, billing, and audit data |
+| Neon Postgres | ChurchTrack tenant, church, member, role, billing, and audit data |
 
 ## Shared Clerk project rule
 
@@ -34,7 +34,7 @@ This is an environment-level requirement:
 2. The user creates or selects a Clerk organization.
 3. The frontend sends the Clerk bearer token and active organization context to the Neon API.
 4. The API verifies the token with `CLERK_SECRET_KEY`.
-5. The first authorized request provisions the FaithFlow tenant, organization, church, and main campus for the Clerk organization.
+5. The first authorized request provisions the ChurchTrack tenant, organization, church, and main campus for the Clerk organization.
 6. Role claims and persisted staff assignments determine access to church-admin and platform operations features.
 
 An authenticated user with no active organization should see an onboarding action, not a dashboard that can only return authorization errors.
@@ -70,7 +70,7 @@ Store the Svix signing secret as `CLERK_WEBHOOK_SECRET`. The handler provisions 
 
 ## Domain behavior
 
-Use Vercel provider domains for private staging only. Before a public production launch, configure real FaithFlow domains in Clerk and use the matching web, admin, and API custom domains.
+Use Vercel provider domains for private staging only. Before a public production launch, configure real ChurchTrack domains in Clerk and use the matching web, admin, and API custom domains.
 
 ## Troubleshooting
 
@@ -80,7 +80,7 @@ Compare the Clerk publishable-key project and secret-key project across both Ver
 
 ### Signed in but “no role claims” appears
 
-Confirm an active Clerk organization, its organization membership, and the FaithFlow staff assignment. Then sign out and back in so the session carries the current organization context.
+Confirm an active Clerk organization, its organization membership, and the ChurchTrack staff assignment. Then sign out and back in so the session carries the current organization context.
 
 ### Browser reports a CORS error
 

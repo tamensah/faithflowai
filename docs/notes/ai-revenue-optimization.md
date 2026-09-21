@@ -237,9 +237,9 @@ const implementRecommendation = async (recommendationId: string) => {
 4. Cache invalidation
 
 ### Contact
-- Technical Support: support@faithflow.com
-- Documentation: docs.faithflow.com/revenue-optimization
-- API Reference: api.faithflow.com/docs/revenue
+- Technical Support: support@churchtrack.example
+- Documentation: docs.churchtrack.example/revenue-optimization
+- API Reference: api.churchtrack.example/docs/revenue
 
 ## Version History
 

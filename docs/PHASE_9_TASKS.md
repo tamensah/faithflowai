@@ -1,4 +1,4 @@
-# FaithFlow Phase 9: Internationalization & Localization
+# ChurchTrack Phase 9: Internationalization & Localization
 
 ## Week 1: Translation Infrastructure
 

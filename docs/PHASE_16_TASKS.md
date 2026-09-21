@@ -1,9 +1,9 @@
-# FaithFlow Phase 16: Developer Experience & Platform Tools
+# ChurchTrack Phase 16: Developer Experience & Platform Tools
 
 ## Week 1: Developer Tools
 
 ### Day 1-2: CLI Tool Development
-1. FaithFlow CLI
+1. ChurchTrack CLI
    - Project scaffolding
    - Code generation
    - Development utilities
@@ -126,8 +126,8 @@ function run_tests() {
 ```json
 {
   "name": "faithflow-tools",
-  "displayName": "FaithFlow Tools",
-  "description": "Development tools for FaithFlow platform",
+  "displayName": "ChurchTrack Tools",
+  "description": "Development tools for ChurchTrack platform",
   "version": "0.1.0",
   "engines": {
 	"vscode": "^1.60.0"

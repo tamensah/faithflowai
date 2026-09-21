@@ -87,7 +87,7 @@ export default function HomePage() {
               Run your entire church from one platform.
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-muted">
-              FaithFlow AI covers finance, membership, events, communications, pastoral care, volunteer management,
+              ChurchTrack covers finance, membership, events, communications, pastoral care, volunteer management,
               and AI-assisted insights — with a member portal your congregation will actually use.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -216,7 +216,7 @@ export default function HomePage() {
               Fewer dashboards. More answers.
             </h2>
             <p className="mt-3 text-sm text-muted">
-              FaithFlow AI surfaces patterns in your data so you spend less time reading spreadsheets and more time leading. Every suggestion is traceable and requires human approval before action.
+              ChurchTrack surfaces patterns in your data so you spend less time reading spreadsheets and more time leading. Every suggestion is traceable and requires human approval before action.
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               {[
@@ -302,7 +302,7 @@ export default function HomePage() {
       <section className="bg-primary">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 py-16 text-center">
           <h4 className="text-3xl font-semibold text-primary-foreground">
-            Ready to see FaithFlow AI in action?
+            Ready to see ChurchTrack in action?
           </h4>
           <p className="max-w-xl text-sm text-primary-foreground/80">
             Start your 14-day free trial. Set up your church, explore every module, and bring your team along — no credit card needed.

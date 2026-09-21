@@ -1,4 +1,4 @@
-# FaithFlow Phase 14: Platform Marketplace & Extensions
+# ChurchTrack Phase 14: Platform Marketplace & Extensions
 
 ## Week 1: Extension System Infrastructure
 

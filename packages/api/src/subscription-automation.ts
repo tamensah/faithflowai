@@ -126,7 +126,7 @@ export async function runSubscriptionAutomation(options?: {
           if (existing) continue;
 
           const billingUrl = `${process.env.NEXT_PUBLIC_ADMIN_URL ?? process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3001'}/billing`;
-          const subject = 'Your FaithFlow trial is ending soon';
+          const subject = 'Your ChurchTrack trial is ending soon';
           const body = renderTrialEndingEmail({ trialEndsAtIso: trialEndsAt.toISOString(), billingUrl });
 
           await prisma.communicationSchedule.create({

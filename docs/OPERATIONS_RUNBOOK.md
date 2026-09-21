@@ -1,4 +1,4 @@
-# FaithFlow Operations Runbook
+# ChurchTrack Operations Runbook
 
 Last updated: 2026-02-24
 

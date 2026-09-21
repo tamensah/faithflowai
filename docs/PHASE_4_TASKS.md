@@ -1,4 +1,4 @@
-# FaithFlow Phase 4: Financial System Implementation
+# ChurchTrack Phase 4: Financial System Implementation
 
 ## Week 1: Payment Infrastructure
 

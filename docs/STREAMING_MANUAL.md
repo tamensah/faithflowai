@@ -1,12 +1,12 @@
-# FaithFlow AI — Live Streaming Manual
+# ChurchTrack — Live Streaming Manual
 
-This manual covers everything an admin or media team member needs to manage live streams, moderation, recording, and provider sync through the FaithFlow Streaming console.
+This manual covers everything an admin or media team member needs to manage live streams, moderation, recording, and provider sync through the ChurchTrack Streaming console.
 
 ---
 
 ## Overview
 
-FaithFlow's live streaming module lets church and campus teams broadcast services, events, and programs through major video providers while logging all operational activity for accountability. The module is available on plans that include the `STREAMING_SUITE` add-on.
+ChurchTrack's live streaming module lets church and campus teams broadcast services, events, and programs through major video providers while logging all operational activity for accountability. The module is available on plans that include the `STREAMING_SUITE` add-on.
 
 Key concepts:
 

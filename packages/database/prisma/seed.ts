@@ -1035,7 +1035,7 @@ async function main() {
     create: {
       title: 'How to Set Up Online Giving',
       slug: 'how-to-set-up-online-giving',
-      body: '## Getting Started with Online Giving\n\nFaithFlow AI supports giving via Stripe (USD) and Paystack (GHS/NGN/KES and more).\n\n### Steps\n1. Go to **Finance → Funds** and create a fund.\n2. Go to **Finance → Giving Links** to generate a shareable giving link or QR code.\n3. Share the link with your congregation via SMS, WhatsApp, or print.\n\n### Paystack Setup\n- Add your Paystack Secret Key in **Operations → Health**.\n- Test with a small transaction before going live.\n\n### Need help?\nContact support from the Help menu.',
+      body: '## Getting Started with Online Giving\n\nChurchTrack supports giving via Stripe (USD) and Paystack (GHS/NGN/KES and more).\n\n### Steps\n1. Go to **Finance → Funds** and create a fund.\n2. Go to **Finance → Giving Links** to generate a shareable giving link or QR code.\n3. Share the link with your congregation via SMS, WhatsApp, or print.\n\n### Paystack Setup\n- Add your Paystack Secret Key in **Operations → Health**.\n- Test with a small transaction before going live.\n\n### Need help?\nContact support from the Help menu.',
       category: 'Finance',
       tags: ['giving', 'paystack', 'stripe', 'setup'],
       published: true,

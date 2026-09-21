@@ -10,7 +10,7 @@ export default function PrivacyPage() {
 
       <div className="prose prose-sm mt-10 max-w-none text-muted">
         <p>
-          FaithFlow AI takes the privacy of your church and congregation data seriously. This policy
+          ChurchTrack takes the privacy of your church and congregation data seriously. This policy
           explains what data we collect, how we use it, and the controls you have over it.
         </p>
 

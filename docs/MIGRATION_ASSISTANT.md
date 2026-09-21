@@ -1,4 +1,4 @@
-# FaithFlow Migration Assistant
+# ChurchTrack Migration Assistant
 
 Goal: migrate real church data safely (members, households, donations) with dry-run validation and rollback.
 
@@ -13,7 +13,7 @@ Audience: developers, implementation partners, and early adopters.
 ## Recommended migration flow
 
 1. Export CSV files from your current ChMS.
-2. Start from FaithFlow templates:
+2. Start from ChurchTrack templates:
    - `docs/import_templates/members.csv`
    - `docs/import_templates/households.csv` (staging/template for normalizing household names before member import)
    - `docs/import_templates/donations.csv`
@@ -52,7 +52,7 @@ Accepted member header aliases include:
 
 Household behavior:
 - If `householdName` matches an existing household in the selected church, member links to it.
-- If not found, FaithFlow creates household during apply import.
+- If not found, ChurchTrack creates household during apply import.
 - Dry-run validates row shape but does not persist households.
 
 Deduplication:
@@ -76,7 +76,7 @@ Accepted donation header aliases include:
 - `date` -> `createdAt`
 
 Donation linking behavior:
-- FaithFlow attempts member match via `memberEmail`, then `memberPhone`.
+- ChurchTrack attempts member match via `memberEmail`, then `memberPhone`.
 - `fundName`/`campaignName` are upserted by name when missing.
 - Invalid rows are skipped and returned in import error summary.
 

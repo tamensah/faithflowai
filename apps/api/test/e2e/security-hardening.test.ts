@@ -69,7 +69,7 @@ test('checkout redirects are restricted to trusted origins', () => {
     (error: unknown) =>
       error instanceof TRPCError &&
       error.code === 'BAD_REQUEST' &&
-      error.message.includes('allowed FaithFlow domain')
+      error.message.includes('allowed ChurchTrack domain')
   );
 });
 
@@ -130,7 +130,7 @@ test('public receipt html escapes donor and church fields and omits sensitive me
     church: {
       id: 'church_1',
       organizationId: 'org_1',
-      name: 'FaithFlow <Main>',
+      name: 'ChurchTrack <Main>',
       slug: 'faithflow-main',
       countryCode: 'GH',
       timezone: 'Africa/Accra',
@@ -141,7 +141,7 @@ test('public receipt html escapes donor and church fields and omits sensitive me
     },
   } as never);
 
-  assert.match(html, /FaithFlow &lt;Main&gt; Donation Receipt/);
+  assert.match(html, /ChurchTrack &lt;Main&gt; Donation Receipt/);
   assert.doesNotMatch(html, /<script>alert\(1\)<\/script>/);
   assert.doesNotMatch(html, /hidden@example\.com/);
   assert.doesNotMatch(html, /\+233555000000/);

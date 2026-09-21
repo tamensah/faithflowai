@@ -1,6 +1,6 @@
 # Scheduler Profiles
 
-FaithFlow uses Neon Function Triggers as the single scheduler in deployed environments. The schedules and handler paths live in `neon.ts`.
+ChurchTrack uses Neon Function Triggers as the single scheduler in deployed environments. The schedules and handler paths live in `neon.ts`.
 
 ## Staging and production
 
@@ -44,4 +44,4 @@ After applying `neon.ts`:
 2. Confirm their next run times match the UTC schedules above.
 3. Query fresh Neon Function logs after at least one run.
 4. Treat any `Scheduled trigger failed` record as a failed release gate.
-5. Confirm `/ready` before investigating scheduler-specific code; it detects the wrong database and missing FaithFlow schema.
+5. Confirm `/ready` before investigating scheduler-specific code; it detects the wrong database and missing ChurchTrack schema.

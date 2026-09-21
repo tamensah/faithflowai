@@ -96,7 +96,7 @@ const differentiators = [
   },
   {
     heading: 'Every module. One price.',
-    body: 'Planning Center charges separately for People, Services, Giving, Check-Ins, and Groups. A typical church pays $150–250/mo for the basics. FaithFlow includes everything.',
+    body: 'Planning Center charges separately for People, Services, Giving, Check-Ins, and Groups. A typical church pays $150–250/mo for the basics. ChurchTrack includes everything.',
   },
   {
     heading: 'AI built in, not bolted on.',
@@ -180,15 +180,15 @@ export default function PlansPage() {
         ))}
       </section>
 
-      {/* ── Why FaithFlow leads ── */}
+      {/* ── Why ChurchTrack leads ── */}
       <section className="mt-20">
         <div className="mb-8 max-w-xl">
-          <Badge variant="default">Why FaithFlow</Badge>
+          <Badge variant="default">Why ChurchTrack</Badge>
           <h2 className="mt-4 text-3xl font-semibold">
             The only ChMS built for the global church.
           </h2>
           <p className="mt-3 text-sm text-muted">
-            Most church management software was built for a single market, with giving integrations added as an afterthought. FaithFlow was designed from the ground up to serve churches across currencies, campuses, and continents.
+            Most church management software was built for a single market, with giving integrations added as an afterthought. ChurchTrack was designed from the ground up to serve churches across currencies, campuses, and continents.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -240,7 +240,7 @@ export default function PlansPage() {
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           {[
             {
-              q: 'Does FaithFlow take a cut of donations?',
+              q: 'Does ChurchTrack take a cut of donations?',
               a: 'No. We never charge a platform giving fee. You pay standard Stripe or Paystack processing rates and keep everything else.',
             },
             {

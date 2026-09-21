@@ -130,10 +130,10 @@ export async function runSubscriptionDunning(input: RunSubscriptionDunningInput 
   for (const target of targets) {
     const subject =
       tier === 1
-        ? `Action required: FaithFlow subscription payment issue (${target.planCode})`
+        ? `Action required: ChurchTrack subscription payment issue (${target.planCode})`
         : tier === 2
-          ? `Reminder: FaithFlow subscription past due (${target.planCode})`
-          : `Final notice: FaithFlow subscription will be suspended (${target.planCode})`;
+          ? `Reminder: ChurchTrack subscription past due (${target.planCode})`
+          : `Final notice: ChurchTrack subscription will be suspended (${target.planCode})`;
     const body = buildDunningBody({
       planName: target.planName,
       periodEnd: target.currentPeriodEnd,

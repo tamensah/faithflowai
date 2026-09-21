@@ -1,6 +1,6 @@
-# FaithFlow AI Development Guide
+# ChurchTrack Development Guide
 
-This guide provides a systematic approach for AI agents to develop the FaithFlow platform, with clear steps, validation points, and error prevention strategies.
+This guide provides a systematic approach for AI agents to develop the ChurchTrack platform, with clear steps, validation points, and error prevention strategies.
 
 ## Development Process
 

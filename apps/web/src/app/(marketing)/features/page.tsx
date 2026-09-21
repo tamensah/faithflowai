@@ -254,7 +254,7 @@ export default function FeaturesPage() {
             <Badge variant="default">Infrastructure</Badge>
             <h2 className="mt-4 text-3xl font-semibold text-foreground">Built on infrastructure you can trust.</h2>
             <p className="mt-3 text-sm text-muted">
-              Church data is sensitive. Every layer of FaithFlow AI is chosen for security, reliability, and compliance.
+              Church data is sensitive. Every layer of ChurchTrack is chosen for security, reliability, and compliance.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

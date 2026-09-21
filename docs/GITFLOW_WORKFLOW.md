@@ -1,4 +1,4 @@
-# FaithFlow AI — Git & Deployment Workflow
+# ChurchTrack — Git & Deployment Workflow
 
 This document is the source of truth for how code moves from a developer's machine to production. Every contributor and automation must follow this workflow. **Production (`main`) is never touched directly.**
 
@@ -162,7 +162,7 @@ In Vercel Dashboard → Project Settings → Git:
 To have Vercel automatically update the staging alias on every `develop` push **without manual CLI aliasing**:
 
 1. Go to **Vercel Dashboard → Project → Settings → Domains**
-2. Add domain: the final FaithFlow staging admin custom domain; use the Vercel `develop` alias until it is assigned
+2. Add domain: the final ChurchTrack staging admin custom domain; use the Vercel `develop` alias until it is assigned
 3. Set **Git Branch** to `develop`
 
 Vercel will now update this alias automatically on every successful `develop` deploy. You no longer need to run `vercel alias` manually after each push.

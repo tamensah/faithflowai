@@ -28,7 +28,7 @@ export default function RegistrationPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-8">
       <Card className="p-6">
-        <h1 className="text-2xl font-semibold">Join FaithFlow</h1>
+        <h1 className="text-2xl font-semibold">Join ChurchTrack</h1>
         <p className="mt-2 text-sm text-muted">Register your membership and verify your email.</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <select

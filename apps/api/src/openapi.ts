@@ -1,7 +1,7 @@
 export const openApiSpec: any = {
   openapi: '3.0.0',
   info: {
-    title: 'FaithFlow AI API',
+    title: 'ChurchTrack API',
     version: '0.0.1',
     description: 'OpenAPI spec for external integrations.'
   },

@@ -1,4 +1,4 @@
-# FaithFlow Reconciliation Status — 2026-09-20
+# ChurchTrack Reconciliation Status — 2026-09-20
 
 Status: **Neon staging stack deployed and publicly verified; authenticated onboarding verification pending**
 
@@ -20,7 +20,7 @@ Last verified: **2026-09-21**
 - Database: `faithflow_canonical` on the same Neon branch
 - Scheduler: four Neon Function Triggers declared in `neon.ts`
 - Identity: one shared staging Clerk project across web, admin, and API
-- Email provider: Resend with `susubiribi.com` verified and the interim sender `FaithFlow <notifications@susubiribi.com>` configured
+- Email provider: Resend with `susubiribi.com` verified and the interim sender `ChurchTrack <notifications@susubiribi.com>` configured
 - Public product domain: not purchased; the Vercel `develop` aliases remain the canonical staging URLs
 
 Staging API:
@@ -54,26 +54,26 @@ Stable `develop` applications:
 - API end-to-end tests passed: 19 of 19, including Polar's signed-webhook coverage.
 - The focused Polar adapter suite passed 3 of 3 against the isolated Neon `develop` database and verified tenant-scoped activation, duplicate-delivery handling, invalid-signature rejection, and fail-closed handling for unknown provider states.
 - Neon `develop` now has migration `20260921010000_polar_platform_billing`; production/default branches remain unchanged.
-- Polar's live MCP endpoint is authenticated in Codex, the separate sandbox authorization remains pending, and the official `setup-polar`, `polar-integration`, `polar-testing`, and `polar-migration` skills are installed.
+- Polar's live and sandbox MCP endpoints are authenticated in Codex. The sandbox organization `churchtrack` has been created, and the official `setup-polar`, `polar-integration`, `polar-testing`, and `polar-migration` skills are installed. The current long-running Codex session has not reloaded the sandbox MCP tool surface yet, so provider-side product and webhook creation remains pending.
 - Neon Function adapter coverage includes health routing, public trigger rejection, and empty CORS preflight handling.
 - Production builds passed for the API, web, and admin applications.
 - Production dependency audit reported no known vulnerabilities.
 - GitHub Actions run `35538712270` passed install, Prisma validation, Neon configuration typecheck, monorepo typecheck, adapter tests, lint, build, and production dependency audit.
 - Resend reports `susubiribi.com` as verified with sending enabled and its DKIM, SPF MX, and SPF TXT records verified.
-- FaithFlow staging uses the dedicated `faithflow-staging-sending` Resend key with sending-only permission restricted to `susubiribi.com`.
+- ChurchTrack staging uses the dedicated `faithflow-staging-sending` Resend key with sending-only permission restricted to `susubiribi.com`.
 - Neon Function deployment 8 includes `RESEND_FROM_EMAIL` and the restricted sending key; `/health` and `/ready` remained 200, and no scheduled-trigger failures appeared in the final verification window.
 - The web `develop` environment includes the same interim sender.
 
 ## Defect caught during staging
 
-The first Function deployment used Neon's branch-default database. Network health passed, but scheduled jobs could not find FaithFlow tables. The deployment now explicitly supplies the pooled `faithflow_canonical` URL, and `/ready` prevents this configuration from passing again.
+The first Function deployment used Neon's branch-default database. Network health passed, but scheduled jobs could not find ChurchTrack tables. The deployment now explicitly supplies the pooled `faithflow_canonical` URL, and `/ready` prevents this configuration from passing again.
 
 ## Configuration changes
 
 - Both Vercel `develop` environments now point `NEXT_PUBLIC_API_URL` at the Neon staging API.
 - The web `develop` environment was aligned to the admin staging Clerk project.
 - The Neon Function uses the matching Clerk secret.
-- The Neon Function and web `develop` environment use `FaithFlow <notifications@susubiribi.com>` until a primary FaithFlow domain is purchased and verified.
+- The Neon Function and web `develop` environment use `ChurchTrack <notifications@susubiribi.com>` until a primary ChurchTrack domain is purchased and verified.
 - Former-host deployment blueprints were removed.
 - GitHub cron schedules were disabled; their workflows remain manual incident fallbacks.
 
@@ -86,8 +86,8 @@ The merged `develop` deployments include these environment changes.
 3. Confirm protected admin and member tRPC calls reach the Neon API without authorization or CORS errors.
 4. Send and confirm a staging transactional email, and configure `CONTACT_TO_EMAIL` after the monitored recipient inbox is selected.
 5. Configure Paystack staging secrets and pass sandbox checkout plus signed webhook replay.
-6. Use the authenticated Polar MCP after session refresh to create or verify the sandbox organization, recurring products, and webhook; then add product IDs and sandbox secrets to staging and complete checkout/customer-portal/lifecycle tests.
+6. Use the authenticated Polar sandbox MCP after its tool surface reloads to create the Starter and Growth recurring products and webhook in organization `churchtrack`; then add product IDs and sandbox secrets to staging and complete checkout/customer-portal/lifecycle tests.
 7. Keep Stripe dormant until the US LLC and live provider setup are complete.
 8. Add shared realtime fan-out before treating SSE delivery as multi-instance production-ready.
 
-The interim email domain is an infrastructure choice, not the public FaithFlow domain. No production-readiness claim should be made until the browser and provider gates have current evidence.
+The interim email domain is an infrastructure choice, not the public ChurchTrack domain. No production-readiness claim should be made until the browser and provider gates have current evidence.

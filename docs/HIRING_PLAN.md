@@ -1,4 +1,4 @@
-# FaithFlow AI — Hiring Plan
+# ChurchTrack — Hiring Plan
 
 > Key positions needed to operate and grow the platform.
 > Prioritised by impact at each stage of growth.
@@ -7,7 +7,7 @@
 
 ## Hiring Philosophy
 
-FaithFlow AI is a global product serving churches that handle pastoral care, finances, and community relationships. Every hire must carry two qualities above technical skill: **genuine care for the church community** and **operational reliability**. A support agent who loves churches will outperform one who merely knows the software.
+ChurchTrack is a global product serving churches that handle pastoral care, finances, and community relationships. Every hire must carry two qualities above technical skill: **genuine care for the church community** and **operational reliability**. A support agent who loves churches will outperform one who merely knows the software.
 
 ---
 
@@ -102,7 +102,7 @@ Add these roles once the foundation is solid and revenue supports it.
 - Maintain and expand the knowledge base (articles, video guides, FAQ updates)
 - Triage issues — distinguish configuration problems (handle directly) from bugs (escalate to engineering)
 - Build and run proactive comms: "here's what's new this month" updates to church admins
-- Serve as the day-to-day voice of FaithFlow to church staff
+- Serve as the day-to-day voice of ChurchTrack to church staff
 
 **What they need:**
 - Patient, clear communicator — church admins range from tech-savvy to first-time SaaS users
@@ -176,7 +176,7 @@ Add these roles once the foundation is solid and revenue supports it.
 
 ## Equity & Compensation Philosophy
 
-At beta stage, FaithFlow AI can offer:
+At beta stage, ChurchTrack can offer:
 - Competitive base salary for the market (adjust for Ghana, UK, or US based on location)
 - Early-stage equity (0.25–1.5% depending on role seniority and timing)
 - Meaningful mission — building the operating system for the global church
@@ -198,4 +198,4 @@ The equity conversation should be honest: this is early-stage, the value is spec
 
 ---
 
-*FaithFlow AI — Hiring Plan · March 2026 · Internal document*
+*ChurchTrack — Hiring Plan · March 2026 · Internal document*

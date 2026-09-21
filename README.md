@@ -1,6 +1,6 @@
-# FaithFlow AI
+# ChurchTrack
 
-FaithFlow AI is a performance-first, security‑first church management platform designed to serve everyone from single‑campus churches to multi‑campus and diaspora ministries. The product focus is operational clarity and AI leverage that demonstrably saves admin time.
+ChurchTrack is a performance-first, security‑first church management platform designed to serve everyone from single‑campus churches to multi‑campus and diaspora ministries. The product focus is operational clarity and AI leverage that demonstrably saves admin time.
 
 ## Principles
 - Tenant isolation by default
@@ -34,7 +34,7 @@ packages/
 
 ## Branch & Deployment Workflow
 
-FaithFlow follows a **dev → staging → production** model. Production (`main`) is protected — no direct commits.
+ChurchTrack follows a **dev → staging → production** model. Production (`main`) is protected — no direct commits.
 
 ### Branch model
 
@@ -82,9 +82,9 @@ git push origin feature/my-feature
 ### Neon backend deployments
 The Fastify API, PostgreSQL, and scheduled Function Triggers run on Neon. Vercel hosts the two Next.js applications. Deploy and validate the long-lived Neon `develop` branch before promoting `develop → main`. See [`docs/NEON_MIGRATION_RUNBOOK.md`](./docs/NEON_MIGRATION_RUNBOOK.md).
 
-FaithFlow exposes four product surfaces through two frontend apps: the marketing website and member portal live in `apps/web`; church administration and the role-gated platform operations console live in `apps/admin`. See [`docs/PRODUCT_SURFACES.md`](./docs/PRODUCT_SURFACES.md).
+ChurchTrack exposes four product surfaces through two frontend apps: the marketing website and member portal live in `apps/web`; church administration and the role-gated platform operations console live in `apps/admin`. See [`docs/PRODUCT_SURFACES.md`](./docs/PRODUCT_SURFACES.md).
 
-The current recovery and release-gate evidence is tracked in [`docs/RECONCILIATION_STATUS_2026-09-20.md`](./docs/RECONCILIATION_STATUS_2026-09-20.md).
+The current recovery and release-gate evidence is tracked in [`docs/RECONCILIATION_STATUS_2026-09-21.md`](./docs/RECONCILIATION_STATUS_2026-09-21.md).
 
 ---
 

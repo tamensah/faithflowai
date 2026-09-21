@@ -8,7 +8,7 @@ const sora = Sora({ subsets: ['latin'], variable: '--font-sora' });
 const sourceSans = Source_Sans_3({ subsets: ['latin'], variable: '--font-source-sans' });
 
 export const metadata: Metadata = {
-  title: 'FaithFlow AI',
+  title: 'ChurchTrack',
   description: 'AI-powered church management platform',
 };
 
@@ -19,8 +19,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ClerkProvider
           afterSignOutUrl="/"
           localization={{
-            signIn: { start: { title: 'Sign in to FaithFlow AI' } },
-            signUp: { start: { title: 'Create your FaithFlow AI account' } },
+            signIn: { start: { title: 'Sign in to ChurchTrack' } },
+            signUp: { start: { title: 'Create your ChurchTrack account' } },
           }}
         >
           <Providers>{children}</Providers>

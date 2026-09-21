@@ -1,4 +1,4 @@
-# FaithFlow Phase 10: Enterprise Features & Platform Expansion
+# ChurchTrack Phase 10: Enterprise Features & Platform Expansion
 
 ## Week 1: Multi-tenancy Enhancement
 

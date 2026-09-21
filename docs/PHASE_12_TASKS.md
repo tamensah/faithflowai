@@ -1,4 +1,4 @@
-# FaithFlow Phase 12: Progressive Web App & Offline Features
+# ChurchTrack Phase 12: Progressive Web App & Offline Features
 
 ## Week 1: PWA Foundation
 
@@ -153,8 +153,8 @@ interface OfflineAction {
 ### PWA Manifest
 ```json
 {
-  "name": "FaithFlow",
-  "short_name": "FaithFlow",
+  "name": "ChurchTrack",
+  "short_name": "ChurchTrack",
   "description": "Church Management System",
   "start_url": "/",
   "display": "standalone",

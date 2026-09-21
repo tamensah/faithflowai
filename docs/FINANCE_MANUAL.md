@@ -1,4 +1,4 @@
-# FaithFlow AI Finance Manual
+# ChurchTrack Finance Manual
 
 This guide explains how the finance domain works across donations, budgeting, reconciliation, and reporting. It is written for both developers and early adopters who need to operate the platform confidently.
 

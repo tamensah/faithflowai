@@ -110,7 +110,7 @@ function EventBadgesPageContent() {
                   )}
                 </div>
                 <p className="mt-2 text-center text-[11px] text-muted">
-                  {event?.title ?? 'FaithFlow Event'}
+                  {event?.title ?? 'ChurchTrack Event'}
                 </p>
               </Card>
             );

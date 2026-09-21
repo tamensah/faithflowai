@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Use a real enterprise church model (Winners Chapel Ghana) as a hard reference to ensure FaithFlow can support:
+Use a real enterprise church model (Winners Chapel Ghana) as a hard reference to ensure ChurchTrack can support:
 - Headquarters + headquarters branch operations
 - Regional structures with many branches
 - Campus ministries with separate governance
@@ -10,7 +10,7 @@ Use a real enterprise church model (Winners Chapel Ghana) as a hard reference to
 - Multi-role leadership assignments across units
 - Platform-level and church-level admin separation
 
-If FaithFlow can run this model cleanly, the platform can handle small-to-mega churches globally.
+If ChurchTrack can run this model cleanly, the platform can handle small-to-mega churches globally.
 
 Reference detail: `/Users/tamensah/aihub/faithlow/docs/notes/WINNERS_GHANA_ENTERPRISE_REFERENCE.md`
 

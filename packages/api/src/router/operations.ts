@@ -318,9 +318,9 @@ export const operationsRouter = router({
       const now = new Date();
       await sendEmail({
         to,
-        subject: 'FaithFlow AI test email',
+        subject: 'ChurchTrack test email',
         // Security: do not include tenantId or internal details in outbound email body
-        html: `<p>This is a test email from FaithFlow AI.</p><p>Sent at: ${now.toISOString()}</p>`,
+        html: `<p>This is a test email from ChurchTrack.</p><p>Sent at: ${now.toISOString()}</p>`,
       });
 
       return { ok: true, to, sentAt: now.toISOString() };
@@ -450,9 +450,9 @@ export const operationsRouter = router({
 
         const subject =
           input.template === 'WELCOME_ONBOARDING'
-            ? 'Welcome to FaithFlow AI'
+            ? 'Welcome to ChurchTrack'
             : input.template === 'TRIAL_ENDING'
-              ? 'Your FaithFlow trial is ending soon'
+              ? 'Your ChurchTrack trial is ending soon'
               : 'Payment failed - action required';
         const body =
           input.template === 'WELCOME_ONBOARDING'

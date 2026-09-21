@@ -266,13 +266,13 @@ function getSubscriptionActionReadiness(active: Awaited<ReturnType<typeof getAct
         severity: disableReady ? ('success' as const) : ('warning' as const),
         message: disableReady
           ? 'Paystack subscription metadata is complete enough for sync and disable flows.'
-          : 'Refresh provider status after each checkout so FaithFlow can capture subscription tokens needed for safe cancellation.',
+          : 'Refresh provider status after each checkout so ChurchTrack can capture subscription tokens needed for safe cancellation.',
       },
       cancel: {
         enabled: disableReady,
         severity: disableReady ? ('default' as const) : ('warning' as const),
         message: disableReady
-          ? 'Disable can be attempted from FaithFlow because Paystack subscription tokens are present.'
+          ? 'Disable can be attempted from ChurchTrack because Paystack subscription tokens are present.'
           : 'Paystack cancellation may still require manual dashboard action until subscription_code and email_token have been synced.',
       },
       resume: {
@@ -1190,9 +1190,9 @@ export const billingRouter = router({
 
       const guidance =
         changeKind === 'UPGRADE'
-          ? 'Complete checkout to activate the higher tier. FaithFlow will try to retire the older Paystack subscription after the new one is confirmed.'
+          ? 'Complete checkout to activate the higher tier. ChurchTrack will try to retire the older Paystack subscription after the new one is confirmed.'
           : disablePreviousReady
-            ? 'Complete checkout near the end of the current cycle to reduce overlap. FaithFlow can disable the older Paystack subscription after activation.'
+            ? 'Complete checkout near the end of the current cycle to reduce overlap. ChurchTrack can disable the older Paystack subscription after activation.'
             : 'Complete checkout near the end of the current cycle to reduce overlap. Manual Paystack dashboard cancellation may still be required because the current subscription tokens are incomplete.';
 
       return {
@@ -1510,7 +1510,7 @@ export const billingRouter = router({
     if (plan.amountMinor <= 0) {
       throw new TRPCError({
         code: 'PRECONDITION_FAILED',
-        message: 'Enterprise plans require assisted setup. Contact the FaithFlow team to continue.',
+        message: 'Enterprise plans require assisted setup. Contact the ChurchTrack team to continue.',
       });
     }
 
@@ -1580,7 +1580,7 @@ export const billingRouter = router({
                 interval: plan.interval === 'YEARLY' ? 'year' : 'month',
               },
               product_data: {
-                name: `FaithFlow ${plan.name}`,
+                name: `ChurchTrack ${plan.name}`,
                 description: plan.description ?? undefined,
               },
             },

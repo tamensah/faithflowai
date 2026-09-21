@@ -1,4 +1,4 @@
-# FaithFlow Church Administrator Features
+# ChurchTrack Church Administrator Features
 Version 1.0 | December 21, 2024
 
 ## Membership Management
@@ -209,4 +209,4 @@ Version 1.0 | December 21, 2024
 
 ---
 
-This documentation outlines the comprehensive administrative features available to church administrators within the FaithFlow platform. Features may vary based on subscription tier (Basic, Standard, or Premium) and specific organizational needs.
+This documentation outlines the comprehensive administrative features available to church administrators within the ChurchTrack platform. Features may vary based on subscription tier (Basic, Standard, or Premium) and specific organizational needs.

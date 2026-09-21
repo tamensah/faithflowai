@@ -1,4 +1,4 @@
-# FaithFlow Phase 11: Machine Learning & Advanced Analytics
+# ChurchTrack Phase 11: Machine Learning & Advanced Analytics
 
 ## Week 1: ML Infrastructure Setup
 

@@ -1,6 +1,6 @@
 # Church Onboarding Sales Guide
 
-> **Audience:** FaithFlow AI sales team and customer success managers.
+> **Audience:** ChurchTrack sales team and customer success managers.
 > This guide covers how to qualify, onboard, and hand off a new church from first contact to a live admin workspace. Keep this open during every onboarding call.
 
 ---
@@ -24,7 +24,7 @@
 A church is **fully onboarded** when:
 
 - [ ] Church admin account is created and signed in
-- [ ] Church organisation is created in FaithFlow AI
+- [ ] Church organisation is created in ChurchTrack
 - [ ] At least one plan is active (trial or paid)
 - [ ] Admin console is accessible and loaded
 - [ ] At least one church is configured under the organisation
@@ -40,7 +40,7 @@ A church is **at risk** if they completed the trial sign-up but have not logged 
 
 ## 2. Church Profiles — Who We Sell To
 
-Understanding who you're talking to changes how you pitch and onboard. FaithFlow AI typically sells to three profiles:
+Understanding who you're talking to changes how you pitch and onboard. ChurchTrack typically sells to three profiles:
 
 ### The Senior Pastor / Founder
 - Usually the decision-maker but not the day-to-day user
@@ -137,7 +137,7 @@ They are now on Step 2 of the wizard.
 - Avoid acronyms unless that's genuinely how you're known
 
 **What happens automatically after they create the org:**
-- FaithFlow AI provisions their tenant in the background (takes 2–3 seconds)
+- ChurchTrack provisions their tenant in the background (takes 2–3 seconds)
 - Admin access is claimed automatically — they will see Step 2 tick to done on its own
 - **You do not need to explain or help with "admin access" — it is invisible to them**
 
@@ -438,5 +438,5 @@ Notes:
 
 ---
 
-*FaithFlow AI — Internal Sales Guide · Last updated March 2025*
+*ChurchTrack — Internal Sales Guide · Last updated March 2025*
 *For questions about this guide, contact the customer success lead.*

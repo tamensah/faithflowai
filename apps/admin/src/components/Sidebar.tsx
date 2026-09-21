@@ -51,7 +51,7 @@ export function Sidebar() {
 						FF
 					</div>
 					<div>
-						<p className="text-sm font-semibold text-slate-900">FaithFlow Admin</p>
+						<p className="text-sm font-semibold text-slate-900">ChurchTrack Admin</p>
 						<p className="text-xs text-slate-500">Operations console</p>
 					</div>
 				</div>

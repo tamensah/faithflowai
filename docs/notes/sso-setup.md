@@ -1,6 +1,6 @@
-# Setting Up Single Sign-On (SSO) for FaithFlow
+# Setting Up Single Sign-On (SSO) for ChurchTrack
 
-This guide provides detailed instructions for setting up Single Sign-On (SSO) with Google, Facebook, and Apple for FaithFlow. Each service requires specific configuration steps and credentials that need to be added to your `.env` file.
+This guide provides detailed instructions for setting up Single Sign-On (SSO) with Google, Facebook, and Apple for ChurchTrack. Each service requires specific configuration steps and credentials that need to be added to your `.env` file.
 
 ## Table of Contents
 - [Google OAuth Setup](#google-oauth-setup)
@@ -15,7 +15,7 @@ This guide provides detailed instructions for setting up Single Sign-On (SSO) wi
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
 2. Click on the project dropdown at the top
 3. Click "New Project"
-4. Name: "FaithFlow" (or your preferred name)
+4. Name: "ChurchTrack" (or your preferred name)
 5. Click "Create"
 
 ### Step 2: Enable OAuth API
@@ -27,7 +27,7 @@ This guide provides detailed instructions for setting up Single Sign-On (SSO) wi
 1. Go to "APIs & Services" > "OAuth consent screen"
 2. Select "External" user type
 3. Fill in the required information:
-   - App name: "FaithFlow"
+   - App name: "ChurchTrack"
    - User support email: Your email
    - Developer contact information: Your email
 4. Click "Save and Continue"
@@ -44,7 +44,7 @@ This guide provides detailed instructions for setting up Single Sign-On (SSO) wi
 1. Go to "APIs & Services" > "Credentials"
 2. Click "Create Credentials" > "OAuth client ID"
 3. Choose "Web application"
-4. Name: "FaithFlow Web Client"
+4. Name: "ChurchTrack Web Client"
 5. Add Authorized JavaScript origins:
    ```
    http://localhost:3000
@@ -75,8 +75,8 @@ When deploying to production, you'll need to:
 
 For example:
 ```
-https://faithflow.com
-https://api.faithflow.com/auth/google/callback
+https://churchtrack.example
+https://api.churchtrack.example/auth/google/callback
 ```
 
 ## Facebook OAuth Setup
@@ -86,7 +86,7 @@ https://api.faithflow.com/auth/google/callback
 2. Click "Create App"
 3. Select "Consumer" as the app type
 4. Fill in app details:
-   - App Name: "FaithFlow"
+   - App Name: "ChurchTrack"
    - App Contact Email: Your email
 5. Click "Create App"
 
@@ -129,7 +129,7 @@ https://api.faithflow.com/auth/google/callback
 4. Click the "+" button to register a new identifier
 5. Select "Services ID"
 6. Configure the service:
-   - Description: "FaithFlow Web"
+   - Description: "ChurchTrack Web"
    - Identifier: com.faithflow.web
 7. Check "Sign In with Apple"
 8. Click "Configure"
@@ -149,7 +149,7 @@ https://api.faithflow.com/auth/google/callback
 ### Step 4: Create Private Key
 1. Go to Keys in the Developer Portal
 2. Click the "+" button to add a new key
-3. Name: "FaithFlow Sign In with Apple Key"
+3. Name: "ChurchTrack Sign In with Apple Key"
 4. Check "Sign In with Apple"
 5. Configure the key:
    - Select your Primary App ID

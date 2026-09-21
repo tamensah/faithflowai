@@ -1,10 +1,10 @@
-# FaithFlow AI Manual
+# ChurchTrack Manual
 
-This guide explains how the AI layer works in FaithFlow AI today, how it is governed (RBAC, entitlements, audit), and how to extend it safely. It is written for both developers and early adopters.
+This guide explains how the AI layer works in ChurchTrack today, how it is governed (RBAC, entitlements, audit), and how to extend it safely. It is written for both developers and early adopters.
 
 ## 1) What AI Does (Current Scope)
 
-- **Admin assistant ("Ask FaithFlow")**: staff-only Q&A over tenant data with citations and audit logging.
+- **Admin assistant ("Ask ChurchTrack")**: staff-only Q&A over tenant data with citations and audit logging.
 - **Starter insights**: quick operational metrics (attendance, giving, volunteer gaps) for the last 30 days.
 - **Communication draft assistant**: AI-generated outbound message drafts with required human review checklist.
 - **Interaction history**: recent questions/answers are stored per tenant.
@@ -17,7 +17,7 @@ Where it lives:
 
 ## 2) Access Control + Governance
 
-FaithFlow treats AI like an operational tool, not a consumer chatbot.
+ChurchTrack treats AI like an operational tool, not a consumer chatbot.
 
 - **Staff-only**: the API requires a matching `StaffMembership` for the requesting Clerk user.
 - **Plan entitlement**: feature key `ai_insights` must be enabled for the tenant plan.
@@ -26,7 +26,7 @@ FaithFlow treats AI like an operational tool, not a consumer chatbot.
   - `AiInteraction` row (question, answer, sources)
   - `AuditLog` event (`ai.ask`) with provider/model metadata
  - **RBAC (beta-safe)**:
-   - Staff can use Ask FaithFlow.
+   - Staff can use Ask ChurchTrack.
    - Finance-linked sources (donation record lookups and giving sum details) are only included for `ADMIN` staff.
 
 ## 3) Data Sources + Citations
@@ -50,13 +50,13 @@ Current sources (see `collectSources(...)` in `packages/api/src/router/ai.ts`):
 
 Important note:
 
-- FaithFlow intentionally avoids feeding raw PII into prompts by filtering query tokens that look like emails or phone numbers.
+- ChurchTrack intentionally avoids feeding raw PII into prompts by filtering query tokens that look like emails or phone numbers.
 - Source labels redact email-like strings; deeper redaction is tracked as a follow-up.
 - This is not a vector database / RAG system yet; it's a governed, structured "sources list" approach.
 
 ## 4) AI Providers + Runtime Configuration
 
-FaithFlow uses the Vercel AI SDK for a thin provider abstraction:
+ChurchTrack uses the Vercel AI SDK for a thin provider abstraction:
 
 - Providers: OpenAI, Anthropic, Google (Gemini)
 - Default models can be overridden via env vars

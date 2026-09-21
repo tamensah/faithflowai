@@ -1,4 +1,4 @@
-# FaithFlow Phase 7: Mobile Development & Cross-Platform Integration
+# ChurchTrack Phase 7: Mobile Development & Cross-Platform Integration
 
 ## Week 1: Mobile App Foundation
 

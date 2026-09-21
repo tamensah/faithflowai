@@ -131,7 +131,7 @@ export async function queueTenantWelcomeEmail(tenantId: string) {
         channel: CommunicationChannel.EMAIL,
         provider: CommunicationProvider.RESEND,
         to,
-        subject: 'Welcome to FaithFlow AI',
+        subject: 'Welcome to ChurchTrack',
         body: renderWelcomeOrgEmail({ churchName: admin.church.name, adminUrl }),
         sendAt: new Date(),
         status: CommunicationScheduleStatus.QUEUED,

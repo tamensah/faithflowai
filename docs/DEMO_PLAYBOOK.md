@@ -1,4 +1,4 @@
-# FaithFlow Demo Playbook
+# ChurchTrack Demo Playbook
 
 Use this guide to demo the current beta to church leadership without onboarding friction.
 
@@ -37,7 +37,7 @@ Create/prepare three real accounts:
 ### Step B — Create demo org and bootstrap admin
 
 1. Sign in on web onboarding: `https://web-nu-eight-62.vercel.app/get-started`
-2. Create org: e.g. `FaithFlow Demo Church`
+2. Create org: e.g. `ChurchTrack Demo Church`
 3. Complete onboarding flow and land in admin.
 4. First admin bootstrap is automatic when no staff exists.
 

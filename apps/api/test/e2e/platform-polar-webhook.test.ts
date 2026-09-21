@@ -67,7 +67,7 @@ test('signed Polar subscription webhook activates the matching tenant once', asy
     trial_interval: 'day',
     trial_interval_count: 14,
     name: 'Growth',
-    description: 'FaithFlow growth plan',
+    description: 'ChurchTrack growth plan',
     visibility: 'private',
     recurring_interval: 'month',
     recurring_interval_count: 1,
@@ -167,7 +167,9 @@ test('signed Polar subscription webhook activates the matching tenant once', asy
     await prisma.webhookEvent.deleteMany({
       where: { provider: WebhookProvider.POLAR_PLATFORM, externalEventId: webhookId },
     });
-    await prisma.tenantSubscription.deleteMany({ where: { tenantId: tenant.id } });
+    await prisma.tenantSubscription.deleteMany({
+      where: { OR: [{ tenantId: tenant.id }, { planId: plan.id }] },
+    });
     await prisma.subscriptionPlan.delete({ where: { id: plan.id } });
     await prisma.organization.deleteMany({ where: { tenantId: tenant.id } });
     await prisma.tenant.delete({ where: { id: tenant.id } });

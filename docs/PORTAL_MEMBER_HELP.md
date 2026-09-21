@@ -1,4 +1,4 @@
-# FaithFlow AI — Member Help Guide
+# ChurchTrack — Member Help Guide
 
 > **For church members using the portal.**
 > Plain-language answers to everyday questions. No technical knowledge required.
@@ -308,8 +308,8 @@ Names and email addresses are managed by your church admin to keep records accur
 
 ### Who do I contact if something isn't working?
 
-First, try your church admin or the staff member who invited you to the portal. They can fix most account issues. For technical problems that your admin can't resolve, they can escalate to FaithFlow AI support through the admin console.
+First, try your church admin or the staff member who invited you to the portal. They can fix most account issues. For technical problems that your admin can't resolve, they can escalate to ChurchTrack support through the admin console.
 
 ---
 
-*FaithFlow AI — Member Portal · Help Guide*
+*ChurchTrack — Member Portal · Help Guide*

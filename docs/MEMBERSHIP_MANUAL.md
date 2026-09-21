@@ -1,6 +1,6 @@
-# FaithFlow AI Membership Manual
+# ChurchTrack Membership Manual
 
-This guide explains how membership data is modeled and operated in FaithFlow AI. It is written for developers and early adopters who need a reliable operating playbook.
+This guide explains how membership data is modeled and operated in ChurchTrack. It is written for developers and early adopters who need a reliable operating playbook.
 
 ## 1. Core Concepts
 

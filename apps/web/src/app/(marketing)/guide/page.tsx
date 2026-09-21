@@ -274,7 +274,7 @@ export default function GuidePage() {
         <div className="relative mx-auto max-w-6xl px-6 py-20">
           <Badge variant="default">Admin manual</Badge>
           <h1 className="mt-5 max-w-3xl text-5xl font-semibold leading-tight text-foreground">
-            Getting started with FaithFlow AI.
+            Getting started with ChurchTrack.
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted">
             Complete onboarding guide, admin module reference, user roles, and member portal access — everything in one place.
@@ -388,7 +388,7 @@ export default function GuidePage() {
           <Badge variant="default">Access control</Badge>
           <h2 className="mt-4 text-3xl font-semibold text-foreground">User roles</h2>
           <p className="mt-3 max-w-2xl text-sm text-muted">
-            FaithFlow AI has four distinct access levels. Staff and admins use the admin console. Members use the portal.
+            ChurchTrack has four distinct access levels. Staff and admins use the admin console. Members use the portal.
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {roles.map((r) => (

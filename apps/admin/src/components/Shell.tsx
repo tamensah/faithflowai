@@ -213,7 +213,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               FF
             </span>
             <div className="leading-tight">
-              <p className="font-display text-base font-semibold text-foreground">FaithFlow Admin</p>
+              <p className="font-display text-base font-semibold text-foreground">ChurchTrack Admin</p>
               <p className="text-[11px] text-muted">Trustworthy, modern operations</p>
             </div>
           </Link>

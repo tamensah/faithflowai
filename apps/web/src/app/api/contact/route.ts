@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     }
 
     const resend = new Resend(apiKey);
-    const subject = `FaithFlow AI inquiry: ${name}`;
+    const subject = `ChurchTrack inquiry: ${name}`;
 
     const bodyLines = [
       `Name: ${name}`,
