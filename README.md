@@ -84,7 +84,7 @@ The Fastify API, PostgreSQL, and scheduled Function Triggers run on Neon. Vercel
 
 ChurchTrack exposes four product surfaces through two frontend apps: the marketing website and member portal live in `apps/web`; church administration and the role-gated platform operations console live in `apps/admin`. See [`docs/PRODUCT_SURFACES.md`](./docs/PRODUCT_SURFACES.md).
 
-The current recovery and release-gate evidence is tracked in [`docs/RECONCILIATION_STATUS_2026-09-21.md`](./docs/RECONCILIATION_STATUS_2026-09-21.md).
+The current recovery and release-gate evidence is tracked in [`docs/RECONCILIATION_STATUS_2026-09-22.md`](./docs/RECONCILIATION_STATUS_2026-09-22.md).
 
 ---
 

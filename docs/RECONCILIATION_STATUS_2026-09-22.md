@@ -1,11 +1,12 @@
-# ChurchTrack Reconciliation Status — 2026-09-21
+# ChurchTrack Reconciliation Status — 2026-09-22
 
 ## Product identity
 
 - The public product name is **ChurchTrack**.
 - Product interfaces, authentication copy, transactional-email content, API titles, operational alerts, manuals, and current product documentation have been updated from the former FaithFlow name.
 - The primary ChurchTrack domain has not been purchased. Documentation uses the reserved `churchtrack.example` domain for planning examples.
-- Existing lowercase technical identifiers remain unchanged for compatibility, including the `@faithflow-ai/*` package scope, repository name, environment-variable names, `faithflow_canonical` database, `faithflowapi` Neon Function slug, and current Vercel project aliases.
+- Existing lowercase technical identifiers remain unchanged for compatibility, including the `@faithflow-ai/*` package scope, repository name, environment-variable names, `faithflow_canonical` database, `faithflowapi` Neon Function slug, and current Vercel deployment aliases.
+- Vercel project display names are now `churchtrack-web` and `churchtrack-admin`. The existing develop aliases remain reachable so frontend and API configuration did not need to change.
 - Production `main` remains untouched. The rebrand is being validated through the normal feature branch → `develop` workflow.
 
 ## Polar sandbox
@@ -36,11 +37,14 @@
 - An unsigned Polar webhook request returned 403, confirming that deployed signature verification rejects untrusted payloads.
 - The deployed token returned 200 from Polar's sandbox subscription-list endpoint and 403 from the ungranted product-list endpoint, confirming both validity and least-privilege enforcement.
 - The stale `polar-growth-*` test plan had no subscriptions and was removed from the Neon `develop` database after approval.
+- The admin `/sign-in` and `/sign-up` routes now render their Clerk forms outside the protected admin gate. Real-browser checks confirmed both forms on the merged `develop` deployment.
+- Clean `develop`-specific Clerk route values now override inherited preview values that contained trailing newlines.
+- Legacy `/dashboard`, `/dashboard/payments`, and `/dashboard/comms` entry points redirect into the canonical admin overview, billing, and communications surfaces. Their duplicate consoles and route handlers have been removed.
 
 ## Remaining release gates
 
 1. Revoke the unused duplicate Polar token after explicit credential-revocation approval.
 2. Complete authenticated hosted checkout, signed webhook delivery, customer portal, cancellation, recovery, and entitlement tests.
 3. Configure Paystack staging credentials and complete its sandbox checkout and signed-webhook tests.
-4. Test marketing → sign-up → organization creation → church onboarding → admin dashboard and member portal in a real browser.
+4. Complete the authenticated portion of marketing → sign-up → organization creation → church onboarding → admin dashboard and member portal in a real browser. Public sign-in and sign-up entry routes are verified.
 5. Promote `develop` to `main` only after the staging gates pass.

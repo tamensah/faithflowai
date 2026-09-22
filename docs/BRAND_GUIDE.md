@@ -4,7 +4,7 @@
 
 - **Public product name:** ChurchTrack
 - Use **ChurchTrack** in product interfaces, customer communications, documentation, and provider catalog labels.
-- Existing technical identifiers and provider-side service labels such as the `@faithflow-ai/*` package scope, repository name, environment-variable names, database name, Neon Function slug, Function display name, and current deployment aliases remain unchanged during the compatibility period. They are implementation identifiers, not the public brand.
+- Existing technical identifiers such as the `@faithflow-ai/*` package scope, repository name, environment-variable names, database name, Neon Function slug, and current deployment aliases remain unchanged during the compatibility period. They are implementation identifiers, not the public brand. Vercel project display names are `churchtrack-web` and `churchtrack-admin`.
 - Rename a technical identifier only through a separately planned migration that preserves deployments, authentication, webhooks, and rollback paths.
 
 ## Brand Essence
