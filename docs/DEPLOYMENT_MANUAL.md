@@ -34,7 +34,7 @@ Use a custom API domain before public production launch. Provider webhooks must 
 
 - GitHub repository `tamensah/faithflowai`
 - Neon project `delicate-bird-01532427`
-- Vercel projects `faithflow-web` and `faithflow-admin`
+- Vercel projects `churchtrack-web` and `churchtrack-admin`
 - The shared Clerk project used by both frontend applications and the API
 - Resend, Paystack, Polar, and any enabled optional provider accounts
 

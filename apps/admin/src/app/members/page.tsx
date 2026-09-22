@@ -1107,7 +1107,7 @@ export default function MembersPage() {
           <DialogHeader><DialogTitle>Import Members from CSV</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => downloadCsv('firstName,lastName,email,phone,householdName,preferredName,status,tags,notes\n', 'faithflow-member-import-template.csv')}>
+              <Button variant="outline" size="sm" onClick={() => downloadCsv('firstName,lastName,email,phone,householdName,preferredName,status,tags,notes\n', 'churchtrack-member-import-template.csv')}>
                 Download Template
               </Button>
               <label className="cursor-pointer inline-flex items-center h-9 px-3 text-sm rounded-md border border-border bg-white hover:bg-muted/5">
@@ -1179,7 +1179,7 @@ export default function MembersPage() {
           <DialogHeader><DialogTitle>Import Households from CSV</DialogTitle></DialogHeader>
           <DialogBody className="space-y-4">
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => downloadCsv('name,primaryEmail,primaryPhone,memberEmails\nFamily Doe,primary@example.com,+15551234567,"member1@example.com;member2@example.com"\n', 'faithflow-household-import-template.csv')}>
+              <Button variant="outline" size="sm" onClick={() => downloadCsv('name,primaryEmail,primaryPhone,memberEmails\nFamily Doe,primary@example.com,+15551234567,"member1@example.com;member2@example.com"\n', 'churchtrack-household-import-template.csv')}>
                 Download Template
               </Button>
               <label className="cursor-pointer inline-flex items-center h-9 px-3 text-sm rounded-md border border-border bg-white hover:bg-muted/5">

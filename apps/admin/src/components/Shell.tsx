@@ -210,7 +210,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
           <Link href="/" className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary font-display text-sm font-semibold text-primary-foreground">
-              FF
+              CT
             </span>
             <div className="leading-tight">
               <p className="font-display text-base font-semibold text-foreground">ChurchTrack Admin</p>

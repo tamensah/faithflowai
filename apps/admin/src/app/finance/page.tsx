@@ -404,7 +404,7 @@ export default function FinancePage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'faithflow-donations-import-template.csv';
+    link.download = 'churchtrack-donations-import-template.csv';
     link.click();
     URL.revokeObjectURL(url);
   };

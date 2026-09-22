@@ -41,7 +41,7 @@ An authenticated user with no active organization should see an onboarding actio
 
 ## Vercel variables
 
-Set these on both `faithflow-web` and `faithflow-admin` for the appropriate environment:
+Set these on both `churchtrack-web` and `churchtrack-admin` for the appropriate environment:
 
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
@@ -78,9 +78,9 @@ Use Vercel provider domains for private staging only. Before a public production
 
 Compare the Clerk publishable-key project and secret-key project across both Vercel deployments and the Neon Function. Align all three to the same environment.
 
-### Signed in but “no role claims” appears
+### Signed in but access is restricted
 
-Confirm an active Clerk organization, its organization membership, and the ChurchTrack staff assignment. Then sign out and back in so the session carries the current organization context.
+Confirm an active Clerk organization, its organization membership, and the ChurchTrack staff assignment. The frontend sends the selected organization in both the session token and the verified organization header; the API does not depend on custom role claims. If membership was just changed, reload the Clerk session or sign out and back in.
 
 ### Browser reports a CORS error
 
