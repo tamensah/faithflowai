@@ -42,41 +42,27 @@ const onboardingSteps = [
   },
   {
     n: 5,
-    title: 'Open the admin console',
+    title: 'Complete your church details',
     detail:
-      'After checkout you are redirected to the admin console. At this point your Clerk account is linked, but you still need to create your in-app organization and church.',
+      'After checkout, open the admin console. Your organization and first church already exist. On Overview, give them the right names and set your church slug and country. Add another organization or church only if you need one.',
     link: { label: 'Open admin', href: adminLink('/') },
   },
   {
     n: 6,
-    title: 'Create your in-app Organization',
-    detail:
-      'On the admin Overview page, use the "Organizations" panel to create your church organization. This is the database-level entity that groups your churches — name it the same as your Clerk org.',
-    link: { label: 'Admin overview', href: adminLink('/') },
-  },
-  {
-    n: 7,
-    title: 'Create your first Church',
-    detail:
-      'In the "Churches" panel (below Organizations), add your church with a name, a URL slug (e.g. grace-chapel-main), and a two-letter country code (e.g. US, GH, NG). For multi-campus networks, add additional churches under the same organization.',
-    link: null,
-  },
-  {
-    n: 8,
     title: 'Invite your staff team',
     detail:
       'Go to Staff → send invite emails to co-admins and staff. Each person clicks their invite link, signs in (or creates an account), and is automatically linked to your church.',
     link: { label: 'Staff page', href: adminLink('/staff') },
   },
   {
-    n: 9,
+    n: 7,
     title: 'Add your congregation',
     detail:
       'Import members via CSV or add them individually. Once added, they can sign in to the member portal and request access if not already linked.',
     link: { label: 'Members page', href: adminLink('/members') },
   },
   {
-    n: 10,
+    n: 8,
     title: 'Run the go-live checklist',
     detail:
       'Operations → Go-live checks runs a readiness audit across all modules. Address any MISSING or WARN items before opening the portal to your congregation.',
@@ -313,7 +299,7 @@ export default function GuidePage() {
         <Badge variant="default">Step by step</Badge>
         <h2 className="mt-4 text-3xl font-semibold text-foreground">Onboarding flow</h2>
         <p className="mt-3 max-w-2xl text-sm text-muted">
-          Follow these steps in order. Steps 1–4 happen on the marketing site. Steps 5–10 happen inside the admin console.
+            Follow these steps in order. Steps 1–4 happen on the marketing site. Steps 5–8 happen inside the admin console.
         </p>
         <div className="mt-10 space-y-4">
           {onboardingSteps.map((step) => (

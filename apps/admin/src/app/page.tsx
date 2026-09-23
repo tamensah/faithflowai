@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Badge, Button, Card, Input } from '@faithflow-ai/ui';
 import { trpc } from '../lib/trpc';
@@ -37,11 +37,12 @@ export default function AdminHome() {
   const utils = trpc.useUtils();
   const canWrite = writeGate.canWrite;
   const [orgName, setOrgName] = useState('');
+  const [orgNameDraft, setOrgNameDraft] = useState<{ id: string; name: string } | null>(null);
   const [churchName, setChurchName] = useState('');
   const [churchSlug, setChurchSlug] = useState('');
   const [churchCountry, setChurchCountry] = useState('US');
   const [selectedChurchId, setSelectedChurchId] = useState<string | null>(null);
-  const [updateCountry, setUpdateCountry] = useState('');
+  const [churchDraft, setChurchDraft] = useState<{ id: string; name: string; slug: string; country: string } | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [orgError, setOrgError] = useState<string | null>(null);
   const [churchError, setChurchError] = useState<string | null>(null);
@@ -51,11 +52,8 @@ export default function AdminHome() {
 
   const { data: organizations } = trpc.organization.list.useQuery();
 
-  useEffect(() => {
-    if (!organizationId && organizations?.length) {
-      setOrganizationId(organizations[0].id);
-    }
-  }, [organizationId, organizations]);
+  const selectedOrganization = organizations?.find((org) => org.id === organizationId) ?? organizations?.[0];
+  const updatedOrgName = orgNameDraft && orgNameDraft.id === selectedOrganization?.id ? orgNameDraft.name : selectedOrganization?.name ?? '';
 
   const { mutate: createOrganization, isPending: isCreatingOrg } = trpc.organization.create.useMutation({
     onSuccess: async (org) => {
@@ -66,16 +64,26 @@ export default function AdminHome() {
     },
   });
 
-  const { data: churches } = trpc.church.list.useQuery({
-    organizationId: organizationId ?? undefined,
+  const { mutate: updateOrganization, isPending: isUpdatingOrg } = trpc.organization.update.useMutation({
+    onSuccess: async () => {
+      setOrgError(null);
+      setOrgNameDraft(null);
+      await utils.organization.list.invalidate();
+    },
+    onError: (error) => setOrgError(error.message),
   });
 
-  useEffect(() => {
-    if (!selectedChurchId && churches?.length) {
-      setSelectedChurchId(churches[0].id);
-      setUpdateCountry(churches[0].countryCode ?? '');
-    }
-  }, [selectedChurchId, churches]);
+  const { data: churches } = trpc.church.list.useQuery({
+    organizationId: selectedOrganization?.id,
+  }, { enabled: Boolean(selectedOrganization?.id) });
+
+  const selectedChurch = churches?.find((church) => church.id === selectedChurchId) ?? churches?.[0];
+  const churchForm = churchDraft && churchDraft.id === selectedChurch?.id ? churchDraft : {
+    id: selectedChurch?.id ?? '',
+    name: selectedChurch?.name ?? '',
+    slug: selectedChurch?.slug ?? '',
+    country: selectedChurch?.countryCode ?? '',
+  };
 
   const { mutate: createChurch, isPending: isCreatingChurch } = trpc.church.create.useMutation({
     onSuccess: async () => {
@@ -90,8 +98,10 @@ export default function AdminHome() {
   const { mutate: updateChurch, isPending: isUpdatingChurch } = trpc.church.update.useMutation({
     onSuccess: async () => {
       setUpdateError(null);
+      setChurchDraft(null);
       await utils.church.list.invalidate();
     },
+    onError: (error) => setUpdateError(error.message),
   });
 
   const { data: memberAnalytics } = trpc.member.analytics.useQuery(
@@ -110,7 +120,7 @@ export default function AdminHome() {
     { retry: false }
   );
 
-  const selectedOrg = organizationId ?? organizations?.[0]?.id ?? null;
+  const selectedOrg = selectedOrganization?.id ?? null;
 
   const financeSummary = useMemo(() => {
     const donationRows = financeDashboard?.donations ?? [];
@@ -178,6 +188,15 @@ export default function AdminHome() {
         </Card>
 
         {writeGate.readOnly ? <ReadOnlyNotice /> : null}
+
+        {(selectedOrganization?.name === 'Default Organization' || selectedChurch?.name === 'Default Church') ? (
+          <Card className="border-amber-200 bg-amber-50 p-5">
+            <h2 className="font-display text-base font-semibold text-amber-900">Finish your church setup</h2>
+            <p className="mt-1 text-sm text-amber-800">
+              Your workspace is ready. Save your organization and church names in the panels below, then set your church slug and country. You do not need to create another church.
+            </p>
+          </Card>
+        ) : null}
 
         {/* First-time setup wizard — shown until a church exists */}
         {churches !== undefined && churches.length === 0 ? (
@@ -280,14 +299,14 @@ export default function AdminHome() {
         <div className="grid gap-5 lg:grid-cols-[1.2fr_1fr]">
           <Card className="ff-surface p-6">
             <h2 className="font-display text-xl font-semibold">Organizations</h2>
-            <p className="mt-1 text-sm text-muted">Each tenant can run one or more church organizations.</p>
+            <p className="mt-1 text-sm text-muted">Your first organization is ready. Name it for your church or network; add another only if you run a separate organization.</p>
 
             <div className="mt-4 flex flex-wrap gap-2">
               {organizations?.map((org) => (
                 <button
                   key={org.id}
                   className={`rounded-lg border px-3 py-1.5 text-sm transition ${
-                    (organizationId ?? organizations?.[0]?.id) === org.id
+                    selectedOrganization?.id === org.id
                       ? 'border-primary bg-primary/5 text-primary'
                       : 'border-border bg-white text-muted hover:text-foreground'
                   }`}
@@ -299,9 +318,31 @@ export default function AdminHome() {
               ))}
             </div>
 
+            {selectedOrganization ? (
+              <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted">Selected organization name *</label>
+                  <Input
+                    value={updatedOrgName}
+                    onChange={(event) => {
+                      setOrgError(null);
+                      setOrgNameDraft({ id: selectedOrganization.id, name: event.target.value });
+                    }}
+                  />
+                </div>
+                <Button
+                  className="self-end"
+                  onClick={() => updateOrganization({ id: selectedOrganization.id, name: updatedOrgName.trim() })}
+                  disabled={!canWrite || updatedOrgName.trim().length < 2 || updatedOrgName.trim() === selectedOrganization.name || isUpdatingOrg}
+                >
+                  {isUpdatingOrg ? 'Saving...' : 'Save name'}
+                </Button>
+              </div>
+            ) : null}
+
             <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-muted">Organization name *</label>
+                <label className="text-xs font-medium text-muted">Another organization name</label>
                 <Input
                   placeholder="Organization name"
                   value={orgName}
@@ -369,7 +410,7 @@ export default function AdminHome() {
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <h2 className="font-display text-xl font-semibold">Churches</h2>
-              <p className="mt-1 text-sm text-muted">Create churches under the selected organization and keep geo metadata accurate.</p>
+              <p className="mt-1 text-sm text-muted">Your first church is ready. Set its name, slug, and country before adding members.</p>
             </div>
             <div className="text-xs text-muted">
               {churches?.length ?? 0} church{(churches?.length ?? 0) === 1 ? '' : 'es'} in this organization
@@ -381,13 +422,13 @@ export default function AdminHome() {
               <button
                 key={church.id}
                 className={`rounded-lg border px-3 py-1.5 text-sm transition ${
-                  (selectedChurchId ?? churches?.[0]?.id) === church.id
+                  selectedChurch?.id === church.id
                     ? 'border-primary bg-primary/5 text-primary'
                     : 'border-border bg-white text-muted hover:text-foreground'
                 }`}
                 onClick={() => {
                   setSelectedChurchId(church.id);
-                  setUpdateCountry(church.countryCode ?? '');
+                  setChurchDraft(null);
                 }}
                 type="button"
               >
@@ -396,7 +437,67 @@ export default function AdminHome() {
             ))}
           </div>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-4">
+          {selectedChurch ? <div className="mt-5 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.5fr)_auto]">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Selected church name *</label>
+              <Input value={churchForm.name} onChange={(event) => { setUpdateError(null); setChurchDraft({ ...churchForm, name: event.target.value }); }} />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Church slug *</label>
+              <Input value={churchForm.slug} onChange={(event) => { setUpdateError(null); setChurchDraft({ ...churchForm, slug: event.target.value.toLowerCase().replace(/\s+/g, '-') }); }} />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted">Country (ISO 2) *</label>
+              <Input
+                placeholder="GH"
+                value={churchForm.country}
+                onChange={(event) => {
+                  setUpdateError(null);
+                  setChurchDraft({ ...churchForm, country: event.target.value.toUpperCase() });
+                }}
+              />
+            </div>
+            <Button
+              variant="outline"
+              className="self-end"
+              onClick={() => {
+                if (!canWrite) return;
+                const country = churchForm.country.trim().toUpperCase();
+                if (!selectedChurch) {
+                  setUpdateError('Select a church first.');
+                  return;
+                }
+                if (churchForm.name.trim().length < 2) {
+                  setUpdateError('Church name must have at least two characters.');
+                  return;
+                }
+                if (!slugRegex.test(churchForm.slug.trim()) || churchForm.slug.trim().length < 2) {
+                  setUpdateError('Slug must use lowercase letters, numbers, and hyphens only.');
+                  return;
+                }
+                if (!countryRegex.test(country)) {
+                  setUpdateError('Country must be a valid 2-letter ISO code.');
+                  return;
+                }
+                updateChurch({
+                  id: selectedChurch.id,
+                  name: churchForm.name.trim(),
+                  slug: churchForm.slug.trim(),
+                  countryCode: country,
+                });
+              }}
+              disabled={!canWrite || isUpdatingChurch || (
+                churchForm.name.trim() === selectedChurch.name &&
+                churchForm.slug.trim() === selectedChurch.slug &&
+                churchForm.country.trim() === (selectedChurch.countryCode ?? '')
+              )}
+            >
+              {isUpdatingChurch ? 'Saving...' : 'Save church'}
+            </Button>
+          </div> : null}
+          {updateError ? <p className="mt-2 text-xs text-destructive">{updateError}</p> : null}
+          <h3 className="mt-6 text-sm font-semibold">Add another church</h3>
+          <div className="mt-3 grid gap-3 md:grid-cols-4">
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted">Church name *</label>
               <Input
@@ -462,44 +563,6 @@ export default function AdminHome() {
             </Button>
           </div>
           {churchError ? <p className="mt-2 text-xs text-destructive">{churchError}</p> : null}
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted">Update country (ISO 2) *</label>
-              <Input
-                placeholder="US"
-                value={updateCountry}
-                onChange={(event) => {
-                  setUpdateError(null);
-                  setUpdateCountry(event.target.value.toUpperCase());
-                }}
-              />
-            </div>
-            <Button
-              variant="outline"
-              className="self-end"
-              onClick={() => {
-                if (!canWrite) return;
-                const country = updateCountry.trim().toUpperCase();
-                if (!selectedChurchId) {
-                  setUpdateError('Select a church first.');
-                  return;
-                }
-                if (country && !countryRegex.test(country)) {
-                  setUpdateError('Country must be a valid 2-letter ISO code.');
-                  return;
-                }
-                updateChurch({
-                  id: selectedChurchId,
-                  countryCode: country || undefined,
-                });
-              }}
-              disabled={!canWrite || !selectedChurchId || isUpdatingChurch}
-            >
-              {isUpdatingChurch ? 'Updating...' : 'Update country'}
-            </Button>
-          </div>
-          {updateError ? <p className="mt-2 text-xs text-destructive">{updateError}</p> : null}
           {writeGate.readOnly ? (
             <p className="mt-2 text-xs text-muted">Church setup actions are disabled in view-only mode.</p>
           ) : null}
