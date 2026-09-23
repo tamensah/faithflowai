@@ -1,12 +1,12 @@
-# ChurchTrack Reconciliation Status — 2026-09-22
+# ChurchTrack Reconciliation Status — 2026-09-23
 
 ## Product identity
 
 - The public product name is **ChurchTrack**.
 - Product interfaces, authentication copy, transactional-email content, API titles, operational alerts, manuals, and current product documentation have been updated from the former FaithFlow name.
 - The primary ChurchTrack domain has not been purchased. Documentation uses the reserved `churchtrack.example` domain for planning examples.
-- Existing lowercase technical identifiers remain unchanged for compatibility, including the `@faithflow-ai/*` package scope, repository name, environment-variable names, `faithflow_canonical` database, `faithflowapi` Neon Function slug, and current Vercel deployment aliases.
-- Vercel project display names are now `churchtrack-web` and `churchtrack-admin`. The existing develop aliases remain reachable so frontend and API configuration did not need to change.
+- The `@faithflow-ai/*` package scope, repository name, environment-variable names, `faithflow_canonical` database, and `faithflowapi` Neon Function slug remain service identifiers pending a coordinated migration.
+- Vercel projects and `develop` aliases use `churchtrack-web` and `churchtrack-admin`. The preview cross-app URLs and Clerk route settings now point to ChurchTrack aliases without trailing newlines.
 - Production `main` remains untouched. The rebrand is being validated through the normal feature branch → `develop` workflow.
 
 ## Polar sandbox
@@ -39,7 +39,9 @@
 - The stale `polar-growth-*` test plan had no subscriptions and was removed from the Neon `develop` database after approval.
 - The admin `/sign-in` and `/sign-up` routes now render their Clerk forms outside the protected admin gate. Real-browser checks confirmed both forms on the merged `develop` deployment.
 - Clean `develop`-specific Clerk route values now override inherited preview values that contained trailing newlines.
-- Legacy `/dashboard`, `/dashboard/payments`, and `/dashboard/comms` entry points redirect into the canonical admin overview, billing, and communications surfaces. Their duplicate consoles and route handlers have been removed.
+- The duplicate `/dashboard`, `/dashboard/payments`, and `/dashboard/comms` routes and their consoles have been removed. AI summary links point directly to the canonical overview, events, finance, and members routes.
+- The Neon `develop` canonical database now has zero tenants, organizations, churches, users, staff memberships, and tenant subscriptions. One orphan Polar test tenant and its single audit entry were deleted; all three configured subscription plans remain.
+- The shared Clerk development instance still contains six test users and five test organizations, including `Algebra_Church`. Deleting those identities is a separate reset action; authenticated onboarding has not yet been repeated against a fresh account.
 
 ## Remaining release gates
 

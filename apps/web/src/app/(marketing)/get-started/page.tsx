@@ -96,7 +96,7 @@ export default function GetStartedPage() {
   const [selectedPlanCode, setSelectedPlanCode] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);
-  const adminBaseUrl = (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://admin-gamma-beryl.vercel.app').replace(/\/+$/, '');
+  const adminBaseUrl = (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app').replace(/\/+$/, '');
 
   const { data: authSelf } = trpc.auth.self.useQuery(undefined, {
     enabled: Boolean(orgId),

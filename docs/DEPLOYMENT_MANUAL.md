@@ -112,8 +112,8 @@ Both Vercel projects must use the same Clerk project. For the `develop` preview 
 
 Stable staging aliases:
 
-- Web: `https://faithflow-web-git-develop-tamensahs-projects.vercel.app`
-- Admin: `https://faithflow-admin-git-develop-tamensahs-projects.vercel.app`
+- Web: `https://churchtrack-web-git-develop-tamensahs-projects.vercel.app`
+- Admin: `https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app`
 
 Environment changes apply on the next Vercel deployment. Merge through `develop` or redeploy the current `develop` deployment after changing them.
 

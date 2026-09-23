@@ -20,7 +20,7 @@ function ProtectedAdminGate({ children }: { children: React.ReactNode }) {
   const { orgId } = useAuth();
   const utils = trpc.useUtils();
   const { user, isLoaded, isSignedIn } = useUser();
-  const webPortalUrl = `${(process.env.NEXT_PUBLIC_WEB_URL ?? 'https://web-nu-eight-62.vercel.app').replace(/\/+$/, '')}/portal`;
+  const webPortalUrl = `${(process.env.NEXT_PUBLIC_WEB_URL ?? 'https://churchtrack-web-git-develop-tamensahs-projects.vercel.app').replace(/\/+$/, '')}/portal`;
   const { data: platformSelf, isLoading: isPlatformLoading } = trpc.platform.self.useQuery(undefined, {
     enabled: Boolean(isSignedIn),
   });
