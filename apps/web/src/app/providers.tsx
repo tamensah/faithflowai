@@ -15,7 +15,7 @@ function resolveTrpcUrl() {
 
 function TrpcProvider({ children }: { children: React.ReactNode }) {
   const { getToken, orgId } = useAuth();
-  const tokenTemplate = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
+  const tokenTemplate = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE?.trim();
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -36,12 +36,7 @@ function TrpcProvider({ children }: { children: React.ReactNode }) {
           url: resolveTrpcUrl(),
           transformer: superjson,
           headers: async () => {
-            let token: string | null = null;
-            try {
-              token = await getToken(tokenTemplate ? { template: tokenTemplate } : undefined);
-            } catch {
-              // getToken throws in Core 3 when offline or session is invalid
-            }
+            const token = await getToken(tokenTemplate ? { template: tokenTemplate } : undefined);
             const headers: Record<string, string> = {};
             if (token) headers.Authorization = `Bearer ${token}`;
             if (orgId) {
