@@ -31,11 +31,12 @@
 | # | Step | Expected result | Status |
 |---|------|----------------|--------|
 | 2.1 | Sign in to admin console directly at `/sign-in` | Redirected to overview `/` after auth | |
-| 2.2 | Overview page loads after onboarding | First Organization and Church are present; setup banner guides naming them | |
-| 2.3 | Rename the existing Organization and save | Updated name appears in the panel | |
-| 2.4 | Rename the existing Church, choose a readable slug and country, then save | Updated Church appears with name, slug, and country; no duplicate Church created | |
+| 2.2 | Overview page loads after onboarding | First Organization and Church are present; Organization uses the workspace name when available; setup banner guides remaining details | |
+| 2.3 | Confirm or correct the existing Organization name and save if needed | Updated name appears in the panel; no second Organization is required | |
+| 2.4 | Rename the existing Church, use or edit the slug suggestion, choose its real country, then save | Updated Church appears with name, slug, and country; no duplicate Church created and no US country is assumed | |
 | 2.5 | Go to Staff → invite a second email | Invite email received; invitee can sign in and access admin | |
 | 2.6 | Go to Access Requests → approve one | Member linked; they can now sign in to portal | |
+| 2.7 | In a second test workspace, try to create a Church using the first workspace's public slug | Clear conflict error; original Church and public routes still resolve to the first workspace | |
 
 ---
 

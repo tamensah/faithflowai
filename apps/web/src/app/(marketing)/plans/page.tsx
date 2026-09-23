@@ -34,12 +34,12 @@ const tiers = [
     cadence: '/mo',
     trial: '14-day free trial',
     highlight: true,
-    summary: 'For growing churches running multiple campuses and global giving.',
+    summary: 'For growing churches with several teams and locations.',
     features: [
       'Up to 5,000 members · 5 campuses',
       'Live streaming — YouTube, Facebook, Vimeo',
       'AI insights: giving trends, donor risk, attendance',
-      'Stripe (USD) + Paystack (local currency) giving',
+      'Giving-provider setup reviewed for your market',
       'No platform giving fee',
     ],
   },
@@ -77,7 +77,7 @@ const comparisonRows: Row[] = [
   { label: 'AI insights', starter: 'Limited', growth: 'Included', enterprise: 'Included' },
   { label: 'Facilities management', starter: 'Not included', growth: 'Included', enterprise: 'Included' },
   { label: 'Live streaming (YouTube / Facebook / Vimeo)', starter: 'Not included', growth: 'Included', enterprise: 'Included' },
-  { label: 'Paystack local currency giving', starter: 'Included', growth: 'Included', enterprise: 'Included' },
+  { label: 'Local payment provider', starter: 'Review', growth: 'Review', enterprise: 'Review' },
   { label: 'Platform giving fee', starter: 'None', growth: 'None', enterprise: 'None' },
   { label: 'Custom domain', starter: 'Not included', growth: 'Included', enterprise: 'Included' },
   { label: 'Monthly events', starter: '30', growth: '200', enterprise: 'Unlimited' },
@@ -87,12 +87,12 @@ const comparisonRows: Row[] = [
 
 const differentiators = [
   {
-    heading: 'No giving fee. Ever.',
-    body: 'We never take a cut of your donations. Standard Stripe and Paystack processing rates apply — that\'s it. Competitors like Pushpay layer their own fee on top. We don\'t.',
+    heading: 'Clear giving costs.',
+    body: 'We review available giving providers and their current processing costs with each church before enabling payments.',
   },
   {
-    heading: 'Global giving, natively built.',
-    body: 'Stripe for USD giving. Paystack for NGN, GHS, KES, ZAR, XOF, and more. Run both side by side from one dashboard. No third-party integration required.',
+    heading: 'Built for churches worldwide.',
+    body: 'A church can manage congregations in different countries. Giving and billing availability depend on the provider and each market.',
   },
   {
     heading: 'Every module. One price.',
@@ -120,11 +120,10 @@ export default function PlansPage() {
       {/* ── Header ── */}
       <Badge variant="default">Pricing</Badge>
       <h1 className="mt-4 text-4xl font-semibold leading-tight">
-        One platform. One price. Built for the global church.
+        One platform, with plans for churches worldwide.
       </h1>
       <p className="mt-3 max-w-3xl text-sm text-muted">
-        Start with a 14-day free trial. Run USD giving on Stripe and local currency giving on Paystack — no platform
-        fee on either. Scale from one campus to a diaspora network without switching systems.
+        Start with a 14-day preview trial. Confirm your church structure, country, and payment needs with the team before rollout.
       </p>
 
       {/* ── Annual savings callout ── */}
@@ -185,7 +184,7 @@ export default function PlansPage() {
         <div className="mb-8 max-w-xl">
           <Badge variant="default">Why ChurchTrack</Badge>
           <h2 className="mt-4 text-3xl font-semibold">
-            The only ChMS built for the global church.
+            Church management designed for churches worldwide.
           </h2>
           <p className="mt-3 text-sm text-muted">
             Most church management software was built for a single market, with giving integrations added as an afterthought. ChurchTrack was designed from the ground up to serve churches across currencies, campuses, and continents.
@@ -230,7 +229,7 @@ export default function PlansPage() {
           </table>
         </div>
         <p className="mt-3 text-xs text-muted">
-          * No platform giving fee on any plan. Stripe processing: 2.9% + $0.30 per transaction. Paystack processing: 1.5% + local fee. Standard rates — we add nothing on top.
+          * Subscription checkout is currently being tested in Polar sandbox. Giving-provider availability and processing fees vary by market and will be confirmed before activation.
         </p>
       </section>
 
@@ -241,11 +240,11 @@ export default function PlansPage() {
           {[
             {
               q: 'Does ChurchTrack take a cut of donations?',
-              a: 'No. We never charge a platform giving fee. You pay standard Stripe or Paystack processing rates and keep everything else.',
+              a: 'The plan currently lists no platform giving fee. We will confirm the applicable provider and its processing fees before enabling giving.',
             },
             {
               q: 'Can I run giving in Ghanaian Cedis or Nigerian Naira?',
-              a: 'Yes. Paystack is natively integrated and supports NGN, GHS, KES, ZAR, XOF, and more. Stripe handles USD and other international currencies. Both run from the same giving dashboard.',
+              a: 'ChurchTrack is designed for churches in multiple countries. Local-currency giving depends on the provider available for your market and requires activation and testing.',
             },
             {
               q: 'What happens after the 14-day trial?',
@@ -261,7 +260,7 @@ export default function PlansPage() {
             },
             {
               q: 'We have multiple campuses across different countries. Does that work?',
-              a: 'Yes. Growth supports up to 5 campuses, each with their own timezone, currency, and giving setup. Enterprise supports unlimited campuses — ideal for denominations and diaspora networks.',
+              a: 'Separate operating congregations can be created as Churches. Regional oversight, per-location billing, and international rollout needs should be reviewed with the team first.',
             },
           ].map((item) => (
             <Card key={item.q} className="border-border bg-white p-5">
@@ -278,7 +277,7 @@ export default function PlansPage() {
           Start your free trial today.
         </h2>
         <p className="mt-3 max-w-lg mx-auto text-sm text-primary-foreground/80">
-          14 days. Every feature. No credit card required. Cancel any time.
+          Explore a 14-day preview trial. Checkout shows any card requirement before you continue.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/get-started">

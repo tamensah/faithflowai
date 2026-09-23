@@ -1057,7 +1057,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     }
 
     const webhook = new Webhook(env.CLERK_WEBHOOK_SECRET);
-    let event: { type: string; data: { id?: string } };
+    let event: { type: string; data: { id?: string; name?: string } };
 
     try {
       webhook.verify(payload, {
@@ -1065,7 +1065,7 @@ export async function buildServer(): Promise<FastifyInstance> {
         'svix-timestamp': svixTimestamp,
         'svix-signature': svixSignature,
       });
-      event = JSON.parse(payload) as { type: string; data: { id?: string } };
+      event = JSON.parse(payload) as { type: string; data: { id?: string; name?: string } };
     } catch (error) {
       request.log.warn({ error }, 'Invalid Clerk webhook');
       reply.code(400).send({ error: 'Invalid signature' });
@@ -1073,7 +1073,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     }
 
     if (event.type === 'organization.created' && event.data?.id) {
-      const provisioned = await provisionTenant(event.data.id);
+      const provisioned = await provisionTenant(event.data.id, event.data.name);
       // Fire-and-forget: dedup key prevents double-sending if a subscription webhook also fires.
       queueTenantWelcomeEmail(provisioned.tenantId).catch((err: unknown) => {
         request.log.warn({ err }, 'Failed to queue welcome email after org creation');

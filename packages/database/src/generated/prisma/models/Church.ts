@@ -411,13 +411,12 @@ export type ChurchOrderByWithRelationInput = {
 
 export type ChurchWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  organizationId_slug?: Prisma.ChurchOrganizationIdSlugCompoundUniqueInput
+  slug?: string
   AND?: Prisma.ChurchWhereInput | Prisma.ChurchWhereInput[]
   OR?: Prisma.ChurchWhereInput[]
   NOT?: Prisma.ChurchWhereInput | Prisma.ChurchWhereInput[]
   organizationId?: Prisma.StringFilter<"Church"> | string
   name?: Prisma.StringFilter<"Church"> | string
-  slug?: Prisma.StringFilter<"Church"> | string
   countryCode?: Prisma.StringNullableFilter<"Church"> | string | null
   timezone?: Prisma.StringFilter<"Church"> | string
   quietHoursEnabled?: Prisma.BoolFilter<"Church"> | boolean
@@ -482,7 +481,7 @@ export type ChurchWhereUniqueInput = Prisma.AtLeast<{
   supportTickets?: Prisma.SupportTicketListRelationFilter
   webhookEvents?: Prisma.WebhookEventListRelationFilter
   importBatches?: Prisma.ImportBatchListRelationFilter
-}, "id" | "organizationId_slug">
+}, "id" | "slug">
 
 export type ChurchOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -854,11 +853,6 @@ export type ChurchListRelationFilter = {
 
 export type ChurchOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type ChurchOrganizationIdSlugCompoundUniqueInput = {
-  organizationId: string
-  slug: string
 }
 
 export type ChurchCountOrderByAggregateInput = {

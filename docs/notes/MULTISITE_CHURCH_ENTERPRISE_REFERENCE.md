@@ -1,15 +1,15 @@
-# Winners Chapel Ghana Enterprise Reference Model
+# Multi-site Church Enterprise Reference Model
 
 ## Why this matters
 
-Winners Chapel Ghana is a strong stress test for ChurchTrack because it combines:
+This anonymized reference scenario is a strong stress test for ChurchTrack because it combines:
 - National HQ + HQ branch overlap
 - Multi-region / multi-branch structure
 - Campus ministries with distinct governance
 - Zone/cell layer with member-led executives
 - Members holding multiple roles across different units
 
-If ChurchTrack can model this cleanly, we can reliably serve small churches through mega multi-campus ministries.
+Modeling this scenario would address one form of network complexity. Single congregations and other global structures still need their own validation.
 
 ## Product decisions to adopt now
 
@@ -73,7 +73,7 @@ If ChurchTrack can model this cleanly, we can reliably serve small churches thro
 
 ## Immediate backlog candidates
 
-1. Add `org_units` + `role_assignments` migrations and seed examples for Winners-style hierarchy.
+1. Add the oversight-unit hierarchy and scoped-role migrations, then test them against the anonymized reference scenario.
 2. Add policy engine checks by `(actor, action, unit_scope)`.
 3. Add GO dashboard endpoint returning hierarchy rollups.
 4. Add alias configuration UI in church settings.

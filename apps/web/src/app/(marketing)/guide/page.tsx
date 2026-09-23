@@ -21,9 +21,9 @@ const onboardingSteps = [
   },
   {
     n: 2,
-    title: 'Create your church organization',
+    title: 'Create your organization workspace',
     detail:
-      'On the onboarding page, use the organization switcher to create (or select) your church organization. This is your tenant boundary — name it after your church or network.',
+      'On the onboarding page, use the organization switcher to create (or select) the account for your church or network. This workspace holds your subscription and admin access. Name it after your church or network.',
     link: { label: 'Start onboarding', href: webLink('/get-started') },
   },
   {
@@ -44,7 +44,7 @@ const onboardingSteps = [
     n: 5,
     title: 'Complete your church details',
     detail:
-      'After checkout, open the admin console. Your organization and first church already exist. On Overview, name the network and its first congregation, then set a readable church slug and country. The initial slug was generated at sign-up and does not change with the church name. Save the existing church; add another only for a separate congregation.',
+      'After checkout, open the admin console. Your first organization and church already exist. On Overview, confirm the network name and name its first congregation, then review the church slug and set its country. Save the existing church; add another only for a separate congregation.',
     link: { label: 'Open admin', href: adminLink('/') },
   },
   {
@@ -244,7 +244,7 @@ const roles = [
 const portalSections = [
   { label: 'Profile', path: '/portal/profile', desc: 'Edit preferred name, phone, address. Control directory visibility per field.' },
   { label: 'Directory', path: '/portal/directory', desc: 'Browse fellow members. Visibility respects each member\'s privacy settings.' },
-  { label: 'Events', path: '/portal/events', desc: 'Browse, RSVP, register with custom forms, and purchase tickets (Stripe/Paystack).' },
+  { label: 'Events', path: '/portal/events', desc: 'Browse, RSVP, and register; paid tickets depend on provider setup for your market.' },
   { label: 'Messages', path: '/portal/messages', desc: 'Direct messages with staff and members. File attachments up to 10 MB, typing indicators, read receipts.' },
   { label: 'Volunteer', path: '/portal/volunteer', desc: 'Browse open shifts, sign up, cancel, and set weekly availability windows.' },
   { label: 'Notifications', path: '/portal/notifications', desc: 'Inbox (mark read) plus per-channel preferences: In-App, Email, SMS, WhatsApp, Push.' },
@@ -341,7 +341,7 @@ export default function GuidePage() {
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { name: 'Workspace', detail: 'Your account, access, and subscription.' },
-              { name: 'Organization', detail: 'The church network or ministry, such as Winners Chapel Ghana.' },
+              { name: 'Organization', detail: 'The church network or ministry, such as ChurchTrack Organization.' },
               { name: 'Church', detail: 'A congregation or branch with its own members, staff, events, and giving.' },
               { name: 'Campus', detail: 'A site within one church, used by some events and facilities.' },
             ].map((entity) => (
@@ -354,17 +354,17 @@ export default function GuidePage() {
           <div className="mt-6 rounded-xl border border-border bg-white p-5 text-sm text-muted">
             <p className="font-semibold text-foreground">For a network with many branches</p>
             <p className="mt-2">
-              Name the organization after the network. Rename the first church to its headquarters congregation and give it a readable slug,
-              such as <code>winners-chapel-ghana-hq</code>, with country <code>GH</code>. Add independently operated branches as more churches.
-              A Switzerland branch can use country <code>CH</code> if it belongs in the same workspace.
+              For a fictional ChurchTrack Organization, rename the first church to Headquarters Church and use a readable slug,
+              such as <code>churchtrack-organization-hq</code>. Add independently operated branches as more churches, whether the organization calls them branches, campuses, or assemblies.
+              Set each church's country: <code>GH</code> for Ghana or <code>CH</code> for a Swiss branch, for example.
             </p>
             <p className="mt-3">
-              The slug is generated once at sign-up; changing the church name does not update it. It is used in public links,
-              so choose it before sharing those links. The headquarters office and headquarters congregation are different concepts.
+              The first slug is generated at sign-up; changing the church name does not update it. A suggested readable slug is available in the admin console.
+              Choose it before sharing public links. The headquarters office and headquarters congregation are different concepts.
             </p>
             <p className="mt-3">
-              Regional groups and nested branches are not yet available. A campus is a site within one church, not a regional branch.
-              If you need regional oversight and reporting, plan that structure before onboarding the whole network.
+              Regional groups and nested branches are not yet available. A campus in the current system is a site within one church, not a regional branch.
+              If a university campus ministry runs its own members and staff, treat it as a church. ChurchTrack serves churches globally; this example is one possible structure, not a required template.
             </p>
           </div>
         </div>

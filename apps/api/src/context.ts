@@ -4,6 +4,8 @@ import { prisma } from '@faithflow-ai/database';
 import { extractBearerToken, verifyClerkToken } from './auth';
 import { env } from './env';
 
+const clerk = env.CLERK_SECRET_KEY ? createClerkClient({ secretKey: env.CLERK_SECRET_KEY }) : null;
+
 function normalizeSlug(value: string) {
   return value
     .toLowerCase()
@@ -24,19 +26,45 @@ export async function resolveTenant(clerkOrgId: string) {
   });
 }
 
-async function ensureDefaultOrgAndChurch(tenantId: string, clerkOrgId: string) {
+async function ensureDefaultOrgAndChurch(tenantId: string, clerkOrgId: string, suppliedName?: string) {
   const existingOrg = await prisma.organization.findFirst({
     where: { tenantId },
   });
 
+  if (existingOrg && existingOrg.name !== 'Default Organization') {
+    return;
+  }
+
+  let organizationName = suppliedName?.trim();
+  if (!organizationName && clerk) {
+    try {
+      organizationName = (await clerk.organizations.getOrganization({ organizationId: clerkOrgId })).name.trim();
+    } catch {
+      // Keep the onboarding flow available if Clerk's backend API is temporarily unavailable.
+    }
+  }
+
+  if (organizationName) {
+    await prisma.tenant.updateMany({
+      where: { id: tenantId, name: `Tenant ${clerkOrgId}` },
+      data: { name: organizationName },
+    });
+  }
+
   if (existingOrg) {
+    if (organizationName) {
+      await prisma.organization.updateMany({
+        where: { id: existingOrg.id, name: 'Default Organization' },
+        data: { name: organizationName },
+      });
+    }
     return;
   }
 
   const org = await prisma.organization.create({
     data: {
       tenantId,
-      name: `Default Organization`,
+      name: organizationName || 'Default Organization',
     },
   });
 
@@ -45,7 +73,7 @@ async function ensureDefaultOrgAndChurch(tenantId: string, clerkOrgId: string) {
       organizationId: org.id,
       name: 'Default Church',
       slug: normalizeSlug(`church-${clerkOrgId}`) || 'default-church',
-      countryCode: 'US',
+      countryCode: null,
       timezone: 'UTC',
     },
   });
@@ -59,16 +87,14 @@ async function ensureDefaultOrgAndChurch(tenantId: string, clerkOrgId: string) {
   });
 }
 
-export async function provisionTenant(clerkOrgId: string) {
+export async function provisionTenant(clerkOrgId: string, organizationName?: string) {
   const tenant = await resolveTenant(clerkOrgId);
-  await ensureDefaultOrgAndChurch(tenant.id, clerkOrgId);
+  await ensureDefaultOrgAndChurch(tenant.id, clerkOrgId, organizationName);
   return {
     tenantId: tenant.id,
     tenantStatus: tenant.status,
   };
 }
-
-const clerk = env.CLERK_SECRET_KEY ? createClerkClient({ secretKey: env.CLERK_SECRET_KEY }) : null;
 
 async function resolveAuthorizedOrgId(userId: string, tokenOrgId: string | null, headerOrgId: string | null) {
   if (tokenOrgId) {

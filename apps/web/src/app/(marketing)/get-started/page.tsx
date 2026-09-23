@@ -197,15 +197,15 @@ export default function GetStartedPage() {
         </StepRow>
 
         {/* ── Step 2: Set up your church ── */}
-        <StepRow n={2} state={step2} title="Set up your church">
+        <StepRow n={2} state={step2} title="Create your organization workspace">
           {step2 === 'done' ? (
             <p className="text-sm text-emerald-700">
-              Church organisation ready. Admin access active.
+              Organization workspace ready. Admin access active.
             </p>
           ) : (
             <Card className="p-5">
               <p className="text-sm text-muted">
-                Create your church organisation. This groups your members, events, and billing together under one workspace.
+                Create a workspace for your church or network. This is the account that holds its subscription and admin access. You will confirm your first church's details in the admin console.
               </p>
               <div className="mt-4">
                 <OrganizationSwitcher
@@ -216,7 +216,7 @@ export default function GetStartedPage() {
               </div>
               {!orgId ? (
                 <p className="mt-3 text-xs text-muted">
-                  Click the switcher above and choose <strong>Create organisation</strong> — name it after your church.
+                  Click the switcher above and choose <strong>Create organisation</strong> — use your church or network name.
                 </p>
               ) : isAuthError ? (
                 <div className="mt-3 space-y-2">

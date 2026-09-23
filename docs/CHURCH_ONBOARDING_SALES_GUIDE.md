@@ -21,7 +21,7 @@
 
 ## 1. What "Onboarded" Means
 
-A church is **fully onboarded** when:
+A church's **preview setup is complete** when:
 
 - [ ] Church admin account is created and signed in
 - [ ] Church organisation is created in ChurchTrack
@@ -32,7 +32,7 @@ A church is **fully onboarded** when:
 - [ ] Member import has started (CSV or manual)
 - [ ] Admin has visited the go-live checklist and understands open items
 
-A church is **partially onboarded** (requires follow-up) if they stopped at account creation or plan selection but haven't opened the admin console.
+A church's preview setup is **incomplete** if they stopped at account creation or plan selection but have not opened the admin console.
 
 A church is **at risk** if they completed the trial sign-up but have not logged in to the admin console within 3 days. Flag these immediately.
 
@@ -53,13 +53,13 @@ Understanding who you're talking to changes how you pitch and onboard. ChurchTra
 - The actual user who will run the platform daily
 - Cares about: ease of use, member import, how communications work, and whether it replaces their current spreadsheets
 - Needs: a live walkthrough of the admin console, to see member import work, and to see a communication sent
-- **Talking point:** "You can import your existing member list from Excel or Google Sheets in under 5 minutes. We'll do that together on the call."
+- **Talking point:** "We can review your existing member list and test an import together during onboarding."
 
 ### The IT Lead or Finance Manager
 - Often pulled in for sign-off on billing and data
 - Cares about: data security, payment providers, how billing works, cancellation terms
 - Needs: straight answers on PCI compliance, data residency, and pricing tiers
-- **Talking point:** "Payments go through Stripe (international) or Paystack (Africa). We never store card details. Cancellation is month-to-month with no lock-in."
+- **Talking point:** "We will confirm which payment options are enabled for your market and plan before taking a payment."
 
 ---
 
@@ -129,20 +129,20 @@ Direct the admin to: `[web-url]/get-started`
 
 They are now on Step 2 of the wizard.
 
-**Script:** *"Now click the organisation switcher — it should say 'No organisation selected'. Click 'Create organisation' and name it after your church. If you're a network with multiple churches, name it after the network (e.g. 'Grace Chapel International'), not a single location."*
+**Script:** *"Now click the organisation switcher. Create a workspace for your church or network, using the name you want for the account that will manage access and the subscription."*
 
 **Naming guidance:**
-- Single church: use the full church name (e.g. `Redemption Church Accra`)
+- Single church: use its full name (e.g. `ChurchTrack Community Church`)
 - Multi-campus network: use the network name, not a campus name
 - Avoid acronyms unless that's genuinely how you're known
 
 **What happens automatically after they create the org:**
-- ChurchTrack provisions their tenant in the background (takes 2–3 seconds)
+- ChurchTrack provisions their workspace in the background; allow for network delays
 - Admin access is claimed automatically — they will see Step 2 tick to done on its own
-- **You do not need to explain or help with "admin access" — it is invisible to them**
+- If the access step stalls, refresh once and use the troubleshooting section rather than creating another workspace
 
 **Watch for:**
-- "It says this org already has an admin" — this means someone else already created an org with that name. Ask if a colleague may have already signed up. If not, they should create a new organisation.
+- If the account is already managed by someone else, verify with the customer's authorized administrator before creating a separate workspace.
 
 ---
 
@@ -150,18 +150,15 @@ They are now on Step 2 of the wizard.
 
 They are now on Step 3.
 
-**Script:** *"Now choose your plan. I'd recommend [plan name] based on what we discussed — it covers [key features]. For payment, choose [Stripe / Paystack] — [reason]."*
+**Script:** *"Now choose a plan that covers the features you need. We will use the payment provider actually enabled for this preview."*
 
-**Payment provider guidance:**
-- **Stripe** — churches in the US, UK, Canada, Europe, Australia
-- **Paystack** — churches in Ghana, Nigeria, Kenya, South Africa, and most of Africa
-- If unsure: ask what currency they give in. If it's USD/GBP/EUR → Stripe. If it's GHS/NGN/KES/ZAR → Paystack.
+**Payment provider guidance:** The current staging checkout uses Polar sandbox. Paystack and Stripe must not be represented as available until their credentials, supported markets, webhook handling, and checkout flow are verified in the target environment.
 
-**Script for trial:** *"You're starting a 14-day free trial — no card required today. You'll get the full platform to explore. At the end of the trial you'll be prompted to add a card to continue."*
+**Script for trial:** *"This preview offers a 14-day trial through a sandbox checkout. We will review the amount, billing date, and any card requirement on the checkout screen before continuing."*
 
 **What happens after they click "Start free trial":**
-- They are redirected to a Stripe or Paystack checkout page
-- Trial activation does not require a card (if your plan is configured for no-card trials)
+- In staging, they are redirected to Polar sandbox checkout
+- Follow the payment requirements displayed by that checkout; no live payment is processed in sandbox
 - After completing, they land on the admin console billing page
 
 ---
@@ -170,16 +167,18 @@ They are now on Step 3.
 
 They are now in the admin console. Walk them through:
 
-#### 4a. Create the in-app Organisation and Church
+#### 4a. Confirm the in-app Organization and first Church
 
 On the Overview page, there is a setup wizard banner. Help them:
-1. Create an Organisation (matches their Clerk org name)
-2. Create a Church under that organisation (the specific campus or church entity)
+1. Confirm the existing Organization's name; it should match the workspace name when Clerk supplied it
+2. Rename the existing first Church to the operating congregation
    - Name: full church name
-   - Slug: short URL-safe identifier (e.g. `grace-chapel-accra`)
+   - Slug: use the suggested, globally unique public-link identifier (e.g. `churchtrack-organization-hq`), or enter another distinct slug
    - Country: two-letter country code
 
-**Script:** *"Think of the Organisation as the legal entity or network, and the Church as the physical congregation. Even if you only have one location, you still create one of each."*
+**Script:** *"Your workspace is the account and subscription. The Organization is your ministry network, and the Church is the congregation whose members and activities you will manage. Both initial records are already here; confirm them before adding more."*
+
+If the customer calls independent congregations “campuses,” create them as Churches. Use Campus only for a site that shares one Church's operating records. Regional oversight and nested branches are not available in the current beta; escalate that requirement rather than presenting the flat Church list as a hierarchy.
 
 #### 4b. Invite at least one other staff member
 
@@ -210,7 +209,7 @@ Go to **Admin → Operations → Go-live checks**
 Walk through any MISSING items together. Common ones:
 - No members imported → fix now or book follow-up
 - No communication templates → offer to help set them up
-- Stripe/Paystack not configured for giving → note as Phase 2
+- A required giving provider is not configured → record as a release dependency, not a completed setup item
 
 ---
 
@@ -223,7 +222,7 @@ Before ending the call, confirm:
 - [ ] They know who to contact if they get stuck (your contact + support email)
 - [ ] Next call is booked if there are open items (import, comms setup, etc.)
 
-**Closing script:** *"You're live. Your workspace is set up, your team is invited, and you've got [X] days left on your trial. My recommendation for this week: focus on getting your full member list imported, and send one test communication to a few people so you can see how that works. I'll check in with you on [date]."*
+**Closing script:** *"Your preview workspace is set up. Next, complete the open go-live checks, finish the member import, and try one test communication. We will confirm readiness together before inviting your congregation."*
 
 ---
 
@@ -235,7 +234,7 @@ Send a follow-up email within 2 hours of the session.
 
 > Hi [Name],
 >
-> Great session today — your workspace is live at [admin URL].
+> Great session today — your preview workspace is available at [admin URL].
 >
 > Here's what we covered and what's next:
 >
