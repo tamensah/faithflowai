@@ -36,14 +36,14 @@ Create/prepare three real accounts:
 
 ### Step B — Create demo org and bootstrap admin
 
-1. Sign in on web onboarding: `https://web-nu-eight-62.vercel.app/get-started`
+1. Sign in on staging web onboarding: `https://churchtrack-web-git-develop-tamensahs-projects.vercel.app/get-started`
 2. Create org: e.g. `ChurchTrack Demo Church`
 3. Complete onboarding flow and land in admin.
 4. First admin bootstrap is automatic when no staff exists.
 
 ### Step C — Build demo dataset in admin
 
-In admin (`https://admin-gamma-beryl.vercel.app`):
+In staging admin (`https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app`):
 
 1. Add 10-30 members (or import CSV).
 2. Create 2-3 events (service, prayer, training).
@@ -91,7 +91,6 @@ Without this mapping, seeded users cannot sign in.
 
 - `PLATFORM_ADMIN_EMAILS` includes your demo admin email.
 - Clerk org switcher is visible and org selected before opening admin.
-- Stripe/Paystack keys present (or clearly marked as sandbox for demo).
+- Polar sandbox configured for subscription checkout; configure and verify Paystack separately before demonstrating it. Stripe remains deferred until US setup.
 - Resend configured if you plan to demo email sends.
 - Twilio configured if you plan to demo SMS/WhatsApp unsubscribe/STOP flows.
-

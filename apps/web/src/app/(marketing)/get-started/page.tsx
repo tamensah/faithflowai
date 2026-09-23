@@ -191,7 +191,7 @@ export default function GetStartedPage() {
                   <Button variant="outline">Sign in</Button>
                 </SignInButton>
               </div>
-              <p className="mt-3 text-xs text-muted">14-day free trial · No credit card required</p>
+              <p className="mt-3 text-xs text-muted">14-day free trial on Starter and Growth</p>
             </Card>
           )}
         </StepRow>

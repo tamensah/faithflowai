@@ -8,10 +8,10 @@ This manual defines the standard onboarding flow for ChurchTrack beta and the ex
 - Ensure payments, org setup, and admin access work in one guided path.
 
 ## Canonical Entry Points
-- Marketing + onboarding: `https://web-nu-eight-62.vercel.app`
-- Guided onboarding: `https://web-nu-eight-62.vercel.app/get-started`
-- Member portal: `https://web-nu-eight-62.vercel.app/portal`
-- Admin console: `https://admin-gamma-beryl.vercel.app`
+- Marketing + onboarding (staging): `https://churchtrack-web-git-develop-tamensahs-projects.vercel.app`
+- Guided onboarding (staging): `https://churchtrack-web-git-develop-tamensahs-projects.vercel.app/get-started`
+- Member portal (staging): `https://churchtrack-web-git-develop-tamensahs-projects.vercel.app/portal`
+- Admin console (staging): `https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app`
 
 ## Standard User Flows
 
@@ -19,8 +19,8 @@ This manual defines the standard onboarding flow for ChurchTrack beta and the ex
 1. User opens `/get-started`.
 2. User signs in/signs up with Clerk.
 3. User creates/selects a Clerk Organization (church tenant boundary).
-4. User claims admin access (auto bootstrap for first staff in tenant).
-5. User selects plan and starts checkout (Stripe/Paystack).
+4. The first user in the new organization receives admin access automatically in staging.
+5. User selects a plan and starts Polar sandbox checkout in staging. Paystack and Stripe remain listed in the interface but require their own configuration before use.
 6. User lands in admin billing/admin workspace.
 
 Expected result:
@@ -65,14 +65,15 @@ Expected result:
   - `NEXT_PUBLIC_ADMIN_URL`
   - `PLATFORM_ADMIN_EMAILS` (recommended for deterministic super-admin access)
 - Payments:
-  - Stripe keys and webhook secret
-  - Paystack keys and webhook secret
+  - Polar sandbox token, product mapping, and signed webhook for staging subscription tests
+  - Paystack credentials and signed webhook before its staging tests
+  - Stripe credentials only when that provider is enabled after US setup
 
 For full provider setup details, see `docs/THIRDPARTY_CONFIG.md`.
 
 ## Operational Runbook (Beta Onboarding)
 1. Verify the Neon Function deployment is current and `/ready` returns 200.
-2. Verify web/admin deployments are current (Vercel production ready).
+2. Verify both `develop` web/admin staging deployments are Ready.
 3. Test with a fresh email:
    - Complete `/get-started` flow end-to-end.
    - Confirm admin access.
@@ -103,10 +104,10 @@ For full provider setup details, see `docs/THIRDPARTY_CONFIG.md`.
 
 - **Checkout blocked**
   - User is not tenant admin yet, or payment provider env is missing.
-  - Verify Stripe/Paystack env vars and webhook setup.
+  - Verify the selected provider's credentials, product mapping, and webhook setup.
 
 ## Source Files (Current)
-- Web onboarding: `apps/web/src/app/get-started/page.tsx`
+- Web onboarding: `apps/web/src/app/(marketing)/get-started/page.tsx`
 - Web role redirect: `apps/web/src/app/portal/page.tsx`
 - Admin gate: `apps/admin/src/components/AdminGate.tsx`
 - Org-aware tRPC providers:

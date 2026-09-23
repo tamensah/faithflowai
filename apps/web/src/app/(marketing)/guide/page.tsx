@@ -28,16 +28,16 @@ const onboardingSteps = [
   },
   {
     n: 3,
-    title: 'Claim admin access',
+    title: 'Activate admin access',
     detail:
-      'The first user in a new organization is auto-bootstrapped as admin. Click "Claim admin access" in the wizard. Subsequent staff members must be invited from the Staff page.',
+      'The first user in a new organization is automatically given admin access during staging onboarding. Subsequent staff members must be invited from the Staff page.',
     link: null,
   },
   {
     n: 4,
     title: 'Choose a plan and check out',
     detail:
-      'Select your plan (Starter, Growth, or Enterprise) and your payment provider (Stripe for USD, Paystack for local currency). You start a 14-day free trial — no card required.',
+      'Select Starter or Growth for a 14-day trial. For this preview, use Polar checkout. Enterprise uses assisted onboarding.',
     link: { label: 'View plans', href: webLink('/plans') },
   },
   {
@@ -239,7 +239,7 @@ const roles = [
     role: 'Church admin',
     scope: 'One church (or org)',
     access:
-      'Full read/write on their church. First user in a new org is auto-bootstrapped as admin via the onboarding wizard or the "Claim admin access" button.',
+      'Full read/write on their church. The first user in a new org is automatically given admin access during staging onboarding.',
   },
   {
     role: 'Staff',
@@ -406,7 +406,7 @@ export default function GuidePage() {
               <li>1. Go to <a href={adminLink('/staff')} className="font-medium text-primary hover:underline">Admin → Staff</a></li>
               <li>2. Enter the staff member's email and select their role (Admin or Staff)</li>
               <li>3. They receive an email invite. When they click it and sign in, they're automatically linked.</li>
-              <li>4. For the first admin only: use "Claim admin access" during the <a href={webLink('/get-started')} className="font-medium text-primary hover:underline">onboarding wizard</a></li>
+              <li>4. The first admin is set up automatically when they create their church in the <a href={webLink('/get-started')} className="font-medium text-primary hover:underline">onboarding wizard</a></li>
             </ol>
           </div>
         </div>
