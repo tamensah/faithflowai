@@ -18,8 +18,8 @@
 | 1.3 | Step 1 shows ✓ with signed-in email | Name and email shown, step marked done | |
 | 1.4 | Create a new organisation in the switcher | Step 2 shows "Setting up your admin access…" then ticks to done | |
 | 1.5 | Step 3 unlocks automatically | Plan selector and provider dropdown become interactive | |
-| 1.6 | Select a plan and provider → click "Start free trial" | Redirected to Stripe/Paystack checkout | |
-| 1.7 | Complete checkout (use test card `4242 4242 4242 4242`) | Redirected to admin console `/billing?checkout=success` | |
+| 1.6 | Select a plan and Polar → click "Start free trial" | Redirected to Polar sandbox checkout | |
+| 1.7 | Complete Polar sandbox checkout (use a sandbox test card) | Redirected to admin console `/billing?checkout=success` | |
 | 1.8 | Admin console loads and shows the new church's workspace | No errors, billing page shows active trial | |
 
 **Fail criteria:** If 1.2 redirects to `/` or `/portal`, stop — the `forceRedirectUrl` is broken.
@@ -31,9 +31,9 @@
 | # | Step | Expected result | Status |
 |---|------|----------------|--------|
 | 2.1 | Sign in to admin console directly at `/sign-in` | Redirected to overview `/` after auth | |
-| 2.2 | Overview page loads with setup wizard | Setup banner visible if no org/church created yet | |
-| 2.3 | Create an Organisation from the overview | Organisation appears in the panel | |
-| 2.4 | Create a Church under the organisation | Church appears with name, slug, country | |
+| 2.2 | Overview page loads after onboarding | First Organization and Church are present; setup banner guides naming them | |
+| 2.3 | Rename the existing Organization and save | Updated name appears in the panel | |
+| 2.4 | Rename the existing Church, choose a readable slug and country, then save | Updated Church appears with name, slug, and country; no duplicate Church created | |
 | 2.5 | Go to Staff → invite a second email | Invite email received; invitee can sign in and access admin | |
 | 2.6 | Go to Access Requests → approve one | Member linked; they can now sign in to portal | |
 
