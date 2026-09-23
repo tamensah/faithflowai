@@ -165,7 +165,7 @@ export default function AdminHome() {
                 </Button>
               </Link>
               <a
-                href={`${(process.env.NEXT_PUBLIC_WEB_URL ?? 'https://web-nu-eight-62.vercel.app').replace(/\/+$/, '')}/guide`}
+                href={`${(process.env.NEXT_PUBLIC_WEB_URL ?? 'https://churchtrack-web-git-develop-tamensahs-projects.vercel.app').replace(/\/+$/, '')}/guide`}
                 target="_blank"
                 rel="noreferrer"
               >

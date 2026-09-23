@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 
 const ADMIN_URL =
-  (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://admin-gamma-beryl.vercel.app').replace(/\/+$/, '');
+  (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app').replace(/\/+$/, '');
 const WEB_URL =
-  (process.env.NEXT_PUBLIC_WEB_URL ?? 'https://web-nu-eight-62.vercel.app').replace(/\/+$/, '');
+  (process.env.NEXT_PUBLIC_WEB_URL ?? 'https://churchtrack-web-git-develop-tamensahs-projects.vercel.app').replace(/\/+$/, '');
 
 const adminLink = (path: string) => `${ADMIN_URL}${path}`;
 const webLink = (path: string) => `${WEB_URL}${path}`;

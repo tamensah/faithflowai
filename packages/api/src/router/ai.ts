@@ -434,7 +434,7 @@ function buildFallbackSummaryPacks(
           : 'Giving visibility is limited to non-financial counts for this role',
       ],
       actionLabel: 'Open overview',
-      actionHref: '/dashboard',
+      actionHref: '/',
     },
     {
       key: 'attendance',
@@ -451,7 +451,7 @@ function buildFallbackSummaryPacks(
           : `Delta: ${snapshot.attendance.deltaPct.toFixed(1)}%`,
       ],
       actionLabel: 'Open events',
-      actionHref: '/dashboard/events',
+      actionHref: '/events',
     },
     {
       key: 'giving',
@@ -471,7 +471,7 @@ function buildFallbackSummaryPacks(
             'Revenue amounts are hidden for this role',
           ],
       actionLabel: 'Open finance',
-      actionHref: '/dashboard/finance',
+      actionHref: '/finance',
     },
     {
       key: 'volunteer',
@@ -483,7 +483,7 @@ function buildFallbackSummaryPacks(
         ? snapshot.volunteer.gaps.slice(0, 3).map((gap) => `${gap.title}: gap ${gap.gap} on ${gap.startAt.toISOString().slice(0, 10)}`)
         : [`${snapshot.volunteer.shiftsNext30} shifts scheduled with no detected coverage gaps`],
       actionLabel: 'Open members',
-      actionHref: '/dashboard/members',
+      actionHref: '/members',
     },
   ];
 }

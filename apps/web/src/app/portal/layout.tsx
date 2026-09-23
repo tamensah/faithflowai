@@ -95,7 +95,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     selfError?.data?.code === 'BAD_REQUEST' &&
     (selfError.message ?? '').toLowerCase().includes('tenant');
   const hasAdminAccess = Boolean(authSelf?.isStaff || platformSelf?.platformUser);
-  const adminBaseUrl = (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://admin-gamma-beryl.vercel.app').replace(/\/+$/, '');
+  const adminBaseUrl = (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app').replace(/\/+$/, '');
 
   const { data: accessRequest } = trpc.member.myAccessRequest.useQuery(undefined, {
     enabled: Boolean(showAccessRequest),

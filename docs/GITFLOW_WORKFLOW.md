@@ -10,7 +10,7 @@ This document is the source of truth for how code moves from a developer's machi
 |-------------|---------|--------|-----------|-----|
 | **Local** | Development | any feature branch | `localhost:3001` | `localhost:3000` |
 | **Preview** | Per-PR review | `feature/*` or `hotfix/*` | Ephemeral Vercel URL per PR | Local or staging API |
-| **Staging** | Integration QA — must pass before prod | `develop` | `https://faithflow-admin-git-develop-tamensahs-projects.vercel.app` | Neon Function on `develop` |
+| **Staging** | Integration QA — must pass before prod | `develop` | `https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app` | Neon Function on `develop` |
 | **Production** | Live SaaS platform | `main` | Vercel production alias | Neon Function on the default branch |
 
 ---
@@ -70,7 +70,7 @@ Vercel automatically builds an **ephemeral preview URL** for every push to a non
 ### 4. PR merged → staging validates
 
 Once the PR is merged to `develop`:
-- Vercel auto-deploys to staging (`https://faithflow-admin-git-develop-tamensahs-projects.vercel.app`)
+- Vercel auto-deploys to staging (`https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app`)
 - Run through the staging verification checklist (see below)
 - If any issues found: fix on a new `feature/*` branch, PR back to `develop`
 
@@ -258,5 +258,5 @@ docs: establish dev→staging→prod branch workflow
 - Deployment runbook (Neon + Vercel setup, env vars, webhooks): `docs/DEPLOYMENT_MANUAL.md`
 - Third-party provider credentials: `docs/THIRDPARTY_CONFIG.md`
 - Scheduler profiles and cron cadence: `docs/SCHEDULER_PROFILES.md`
-- Staging admin: https://faithflow-admin-git-develop-tamensahs-projects.vercel.app
-- Staging web: https://faithflow-web-git-develop-tamensahs-projects.vercel.app
+- Staging admin: https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app
+- Staging web: https://churchtrack-web-git-develop-tamensahs-projects.vercel.app
