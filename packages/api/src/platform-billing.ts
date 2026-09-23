@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { Webhook, WebhookVerificationError as StandardWebhookVerificationError } from 'standardwebhooks';
 import Stripe from 'stripe';
 import { validateEvent, WebhookVerificationError } from '@polar-sh/sdk/webhooks';
 import type { Subscription as PolarSubscription } from '@polar-sh/sdk/models/components/subscription';
@@ -27,7 +28,26 @@ import {
 import { mapPolarStatus, normalizePolarSubscription } from './subscription-providers/polar';
 
 export function isPolarWebhookVerificationError(error: unknown) {
-  return error instanceof WebhookVerificationError;
+  return error instanceof WebhookVerificationError || error instanceof StandardWebhookVerificationError;
+}
+
+function validatePolarEvent(payload: string | Buffer, headers: Record<string, string>, secret: string) {
+  try {
+    return validateEvent(payload, headers, secret);
+  } catch (error) {
+    if (!(error instanceof WebhookVerificationError) || !secret.startsWith('whsec_')) throw error;
+
+    // Polar sandbox currently signs whsec_ secrets using the decoded key, while
+    // SDK 0.49 verifies the literal secret. Verify the real delivery first;
+    // then let the SDK parse its typed payload using an equivalent local signature.
+    new Webhook(secret).verify(payload, headers);
+    const id = headers['webhook-id'];
+    const timestamp = headers['webhook-timestamp'];
+    const signature = crypto.createHmac('sha256', secret)
+      .update(`${id}.${timestamp}.${payload.toString()}`)
+      .digest('base64');
+    return validateEvent(payload, { ...headers, 'webhook-signature': `v1,${signature}` }, secret);
+  }
 }
 
 const stripeStatusMap: Record<string, TenantSubscriptionStatus> = {
@@ -700,7 +720,7 @@ export async function handlePlatformPolarWebhook(
   headers: Record<string, string>,
   webhookSecret: string
 ) {
-  const event = validateEvent(payload, headers, webhookSecret);
+  const event = validatePolarEvent(payload, headers, webhookSecret);
   const eventId = headers['webhook-id'] || buildWebhookExternalEventId([event.type, event.timestamp.toISOString()]);
   const idempotency = await beginWebhookProcessing({
     provider: WebhookProvider.POLAR_PLATFORM,

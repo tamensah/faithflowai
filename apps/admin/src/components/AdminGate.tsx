@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { OrganizationSwitcher, useAuth, useUser } from '@clerk/nextjs';
+import { OrganizationSwitcher, useAuth, useOrganizationList, useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 import { Card, Button } from '@faithflow-ai/ui';
 import { trpc } from '../lib/trpc';
@@ -18,6 +18,9 @@ export function AdminGate({ children }: { children: React.ReactNode }) {
 
 function ProtectedAdminGate({ children }: { children: React.ReactNode }) {
   const { orgId } = useAuth();
+  const { isLoaded: organizationsLoaded, setActive, userMemberships } = useOrganizationList({
+    userMemberships: { pageSize: 2 },
+  });
   const utils = trpc.useUtils();
   const { user, isLoaded, isSignedIn } = useUser();
   const webPortalUrl = `${(process.env.NEXT_PUBLIC_WEB_URL ?? 'https://churchtrack-web-git-develop-tamensahs-projects.vercel.app').replace(/\/+$/, '')}/portal`;
@@ -25,13 +28,16 @@ function ProtectedAdminGate({ children }: { children: React.ReactNode }) {
     enabled: Boolean(isSignedIn),
   });
   const { data, isLoading, error: authError } = trpc.auth.self.useQuery(undefined, {
-    enabled: Boolean(isSignedIn),
+    enabled: Boolean(isSignedIn && orgId),
   });
   const { data: memberSelf } = trpc.member.selfProfile.useQuery(undefined, {
     enabled: Boolean(isSignedIn && orgId && !data?.isStaff && !platformSelf?.platformUser),
     retry: false,
   });
   const [inviteAttempted, setInviteAttempted] = useState(false);
+  const [activationAttempted, setActivationAttempted] = useState<string | null>(null);
+  const [activationError, setActivationError] = useState(false);
+  const [activationPending, setActivationPending] = useState(false);
   const { mutate: bootstrap, isPending: isBootstrapping } = trpc.auth.bootstrap.useMutation({
     onSuccess: async () => {
       await utils.auth.self.invalidate();
@@ -47,6 +53,18 @@ function ProtectedAdminGate({ children }: { children: React.ReactNode }) {
       await utils.platform.self.invalidate();
     },
   });
+
+  useEffect(() => {
+    if (!isSignedIn || orgId || !organizationsLoaded || !setActive) return;
+    if (userMemberships.data?.length !== 1 || userMemberships.hasNextPage) return;
+    const organizationId = userMemberships.data[0].organization.id;
+    if (activationAttempted === organizationId) return;
+    setActivationAttempted(organizationId);
+    setActivationPending(true);
+    void setActive({ organization: organizationId })
+      .catch(() => setActivationError(true))
+      .finally(() => setActivationPending(false));
+  }, [activationAttempted, isSignedIn, orgId, organizationsLoaded, setActive, userMemberships.data, userMemberships.hasNextPage]);
 
   useEffect(() => {
     if (!isSignedIn) return;
@@ -110,7 +128,7 @@ function ProtectedAdminGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (isLoading || isPlatformLoading) {
+  if (isLoading || isPlatformLoading || (!orgId && !organizationsLoaded) || activationPending) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-sm text-muted">Verifying access…</p>
@@ -122,9 +140,10 @@ function ProtectedAdminGate({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  const missingTenantContext =
+  const missingTenantContext = !orgId || (
     authError?.data?.code === 'BAD_REQUEST' &&
-    (authError.message ?? '').toLowerCase().includes('tenant');
+    (authError.message ?? '').toLowerCase().includes('tenant')
+  );
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
@@ -133,13 +152,15 @@ function ProtectedAdminGate({ children }: { children: React.ReactNode }) {
         {missingTenantContext ? (
           <div className="mt-2 space-y-3 text-sm text-muted">
             <p>This account has no active church organization in the current session.</p>
-            <p>Select your church organization, then refresh this page.</p>
+            {activationError ? <p>Automatic selection failed. Choose your church below.</p> : null}
+            <p>Select your church organization to continue.</p>
             <OrganizationSwitcher hidePersonal afterSelectOrganizationUrl="/" afterCreateOrganizationUrl="/" />
           </div>
         ) : (
           <div className="mt-2 space-y-2 text-sm text-muted">
             <p>This console is limited to staff and admins.</p>
-            <p>If you are the first admin for this church, use “Claim admin access”.</p>
+            {authError ? <p>We could not verify your access. Select your church and try again.</p> : null}
+            <OrganizationSwitcher hidePersonal afterSelectOrganizationUrl="/" afterCreateOrganizationUrl="/" />
           </div>
         )}
         {data?.bootstrapAllowed || platformSelf?.bootstrapAllowed ? (

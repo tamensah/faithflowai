@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import test from 'node:test';
 import { Webhook } from 'standardwebhooks';
 import { handlePlatformPolarWebhook, mapPolarStatus } from '@faithflow-ai/api';
@@ -12,11 +12,10 @@ import {
 
 function webhookHeaders(body: string, secret: string, webhookId: string) {
   const timestamp = new Date();
-  const encodedSecret = Buffer.from(secret, 'utf8').toString('base64');
   return {
     'webhook-id': webhookId,
     'webhook-timestamp': Math.floor(timestamp.getTime() / 1000).toString(),
-    'webhook-signature': new Webhook(encodedSecret).sign(webhookId, timestamp, body),
+    'webhook-signature': new Webhook(secret).sign(webhookId, timestamp, body),
   };
 }
 
@@ -24,7 +23,7 @@ test('signed Polar subscription webhook activates the matching tenant once', asy
   const suffix = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
   const now = new Date();
   const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-  const webhookSecret = `polar_whs_${suffix}`;
+  const webhookSecret = `whsec_${randomBytes(32).toString('base64')}`;
   const webhookId = `polar_event_${suffix}`;
   const organizationId = randomUUID();
   const productId = randomUUID();
