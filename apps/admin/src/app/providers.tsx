@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
+import superjson from 'superjson';
 import { trpc } from '../lib/trpc';
 
 function resolveTrpcUrl() {
@@ -33,6 +34,7 @@ function TrpcProvider({ children }: { children: React.ReactNode }) {
       links: [
         httpBatchLink({
           url: resolveTrpcUrl(),
+          transformer: superjson,
           headers: async () => {
             const token = await getToken(tokenTemplate ? { template: tokenTemplate } : undefined);
             const headers: Record<string, string> = {};

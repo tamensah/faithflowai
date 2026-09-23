@@ -1257,8 +1257,8 @@ export default function MembersPage() {
           </DialogBody>
           <DialogFooter>
             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-            <Button disabled={!canWrite || !groupEventTitle || !groupEventStart}
-              onClick={() => createGroupEvent({ churchId, groupId: groupIdForEvent, title: groupEventTitle, startAt: groupEventStart, endAt: groupEventEnd || undefined, location: groupEventLocation || undefined })}>
+            <Button disabled={!canWrite || !groupEventTitle || !groupEventStart || !groupEventEnd}
+              onClick={() => createGroupEvent({ churchId, groupId: groupIdForEvent, title: groupEventTitle, startAt: groupEventStart, endAt: groupEventEnd, location: groupEventLocation || undefined })}>
               Create Event
             </Button>
           </DialogFooter>
@@ -1301,8 +1301,8 @@ export default function MembersPage() {
           </DialogBody>
           <DialogFooter>
             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-            <Button disabled={!canWrite || !shiftTitle || !shiftStart}
-              onClick={() => createShift({ churchId, roleId: shiftRoleId, title: shiftTitle, description: shiftDescription || undefined, startAt: shiftStart, endAt: shiftEnd || undefined, capacity: shiftCapacity ? Number(shiftCapacity) : undefined })}>
+            <Button disabled={!canWrite || !shiftTitle || !shiftStart || !shiftEnd}
+              onClick={() => createShift({ churchId, roleId: shiftRoleId, title: shiftTitle, description: shiftDescription || undefined, startAt: shiftStart, endAt: shiftEnd, capacity: shiftCapacity ? Number(shiftCapacity) : undefined })}>
               Create Shift
             </Button>
           </DialogFooter>

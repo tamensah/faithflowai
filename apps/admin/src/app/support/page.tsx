@@ -327,7 +327,7 @@ export default function SupportPage() {
       header: 'Breach type',
       cell: ({ row }) => {
         const t = row.original as PlatformTicket;
-        const parts = [];
+        const parts: string[] = [];
         if (t.firstResponseBreachedAt) parts.push('First response');
         if (t.resolutionBreachedAt) parts.push('Resolution');
         return <span className="text-xs text-muted">{parts.join(' · ') || '—'}</span>;
