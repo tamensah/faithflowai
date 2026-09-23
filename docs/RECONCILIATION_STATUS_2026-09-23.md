@@ -42,7 +42,7 @@
 - The duplicate `/dashboard`, `/dashboard/payments`, and `/dashboard/comms` routes and their consoles have been removed. AI summary links point directly to the canonical overview, events, finance, and members routes.
 - The Neon `develop` canonical database now has zero tenants, organizations, churches, users, staff memberships, and tenant subscriptions. One orphan Polar test tenant and its single audit entry were deleted; all three configured subscription plans remain.
 - The merged `develop` commit passed GitHub Validate. Its ChurchTrack web and admin Vercel deployments are Ready. The web entry, `/get-started`, sign-in, sign-up, and portal routes returned 200; the retired admin `/dashboard*` routes returned 404. Both old stable FaithFlow `develop` aliases were removed and return 404.
-- The shared Clerk development instance still contains six test users and five test organizations, including `Algebra_Church`. Deleting those identities is a separate reset action; authenticated onboarding has not yet been repeated against a fresh account.
+- The shared Clerk development instance was reset after explicit approval: all six test users and five test organizations, including `Algebra_Church`, were deleted. A fresh Clerk inventory returned zero users and zero organizations. Authenticated onboarding has not yet been repeated against a fresh account.
 
 ## Remaining release gates
 
