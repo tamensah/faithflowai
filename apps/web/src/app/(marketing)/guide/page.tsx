@@ -44,7 +44,7 @@ const onboardingSteps = [
     n: 5,
     title: 'Complete your church details',
     detail:
-      'After checkout, open the admin console. Your organization and first church already exist. On Overview, give them the right names and set your church slug and country. Add another organization or church only if you need one.',
+      'After checkout, open the admin console. Your organization and first church already exist. On Overview, name the network and its first congregation, then set a readable church slug and country. The initial slug was generated at sign-up and does not change with the church name. Save the existing church; add another only for a separate congregation.',
     link: { label: 'Open admin', href: adminLink('/') },
   },
   {
@@ -281,7 +281,7 @@ export default function GuidePage() {
         <div className="mx-auto max-w-6xl px-6 py-8">
           <p className="text-xs font-semibold uppercase tracking-widest text-muted">On this page</p>
           <div className="mt-3 flex flex-wrap gap-3 text-sm">
-            {['Onboarding flow', 'Admin modules', 'User roles', 'Member portal', 'Quick links'].map((s) => (
+            {['Onboarding flow', 'Church structure', 'Admin modules', 'User roles', 'Member portal', 'Quick links'].map((s) => (
               <a
                 key={s}
                 href={`#${s.toLowerCase().replace(/\s+/g, '-')}`}
@@ -326,6 +326,47 @@ export default function GuidePage() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Church structure */}
+      <section id="church-structure" className="border-t border-border bg-white/60">
+        <div className="mx-auto max-w-6xl px-6 py-20">
+          <Badge variant="default">Your network</Badge>
+          <h2 className="mt-4 text-3xl font-semibold text-foreground">How your churches fit together</h2>
+          <p className="mt-3 max-w-3xl text-sm text-muted">
+            Your workspace can hold organizations, and each organization can have several churches. Each church can have sites called campuses.
+            ChurchTrack creates the first organization, church, and campus when you sign up, so rename the first records before adding others.
+          </p>
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { name: 'Workspace', detail: 'Your account, access, and subscription.' },
+              { name: 'Organization', detail: 'The church network or ministry, such as Winners Chapel Ghana.' },
+              { name: 'Church', detail: 'A congregation or branch with its own members, staff, events, and giving.' },
+              { name: 'Campus', detail: 'A site within one church, used by some events and facilities.' },
+            ].map((entity) => (
+              <Card key={entity.name} className="border-border bg-white p-5">
+                <h3 className="text-sm font-semibold text-foreground">{entity.name}</h3>
+                <p className="mt-2 text-sm text-muted">{entity.detail}</p>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-6 rounded-xl border border-border bg-white p-5 text-sm text-muted">
+            <p className="font-semibold text-foreground">For a network with many branches</p>
+            <p className="mt-2">
+              Name the organization after the network. Rename the first church to its headquarters congregation and give it a readable slug,
+              such as <code>winners-chapel-ghana-hq</code>, with country <code>GH</code>. Add independently operated branches as more churches.
+              A Switzerland branch can use country <code>CH</code> if it belongs in the same workspace.
+            </p>
+            <p className="mt-3">
+              The slug is generated once at sign-up; changing the church name does not update it. It is used in public links,
+              so choose it before sharing those links. The headquarters office and headquarters congregation are different concepts.
+            </p>
+            <p className="mt-3">
+              Regional groups and nested branches are not yet available. A campus is a site within one church, not a regional branch.
+              If you need regional oversight and reporting, plan that structure before onboarding the whole network.
+            </p>
+          </div>
         </div>
       </section>
 

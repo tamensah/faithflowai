@@ -193,7 +193,7 @@ export default function AdminHome() {
           <Card className="border-amber-200 bg-amber-50 p-5">
             <h2 className="font-display text-base font-semibold text-amber-900">Finish your church setup</h2>
             <p className="mt-1 text-sm text-amber-800">
-              Your workspace is ready. Save your organization and church names in the panels below, then set your church slug and country. You do not need to create another church.
+              Your workspace is ready. Save your organization and church names in the panels below, review the generated church slug, and set its country. You do not need to create another church.
             </p>
           </Card>
         ) : null}
@@ -410,7 +410,7 @@ export default function AdminHome() {
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <h2 className="font-display text-xl font-semibold">Churches</h2>
-              <p className="mt-1 text-sm text-muted">Your first church is ready. Set its name, slug, and country before adding members.</p>
+              <p className="mt-1 text-sm text-muted">Your first church is ready. Name it, review its generated slug, and set its country before adding members.</p>
             </div>
             <div className="text-xs text-muted">
               {churches?.length ?? 0} church{(churches?.length ?? 0) === 1 ? '' : 'es'} in this organization
@@ -445,6 +445,7 @@ export default function AdminHome() {
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted">Church slug *</label>
               <Input value={churchForm.slug} onChange={(event) => { setUpdateError(null); setChurchDraft({ ...churchForm, slug: event.target.value.toLowerCase().replace(/\s+/g, '-') }); }} />
+              <p className="text-xs text-muted">Generated once during setup. Choose a readable value such as winners-chapel-ghana-hq; it is used in public links.</p>
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted">Country (ISO 2) *</label>
