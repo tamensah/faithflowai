@@ -8,7 +8,7 @@ const modules = [
   {
     tag: 'Finance',
     title: 'Finance that stays clean',
-    body: 'Multi-currency giving, pledges, recurring donations, budgets, expenses, reconciliation, and full audit trails. Stripe and Paystack native.',
+    body: 'Track giving, pledges, budgets, expenses, reconciliation, and audit trails. Payment-provider availability is confirmed for each market and rollout.',
   },
   {
     tag: 'Membership',
@@ -57,12 +57,12 @@ const pillars = [
     desc: 'Self-service profiles, events, messages, volunteer sign-up, and notifications.',
   },
   {
-    label: 'Multi-campus',
-    desc: 'Organization → church → campus hierarchy scales from one location to diaspora networks.',
+    label: 'One church or many',
+    desc: 'Manage distinct congregations under one organization. Regional oversight is being designed with multi-site churches.',
   },
   {
-    label: 'Stripe + Paystack',
-    desc: 'USD giving via Stripe and local-currency giving via Paystack — both fully integrated.',
+    label: 'Checkout by market',
+    desc: 'Preview subscriptions use Polar sandbox. Giving providers are enabled only after market-specific testing.',
   },
   {
     label: 'Tenant isolation',
@@ -87,8 +87,8 @@ export default function HomePage() {
               Run your entire church from one platform.
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-muted">
-              ChurchTrack covers finance, membership, events, communications, pastoral care, volunteer management,
-              and AI-assisted insights — with a member portal your congregation will actually use.
+              ChurchTrack brings finance, membership, events, communications, pastoral care, and volunteer management
+              together for churches worldwide, from one congregation to a multi-site organization.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/get-started">
@@ -98,7 +98,7 @@ export default function HomePage() {
                 <Button size="lg" variant="outline">See all features</Button>
               </Link>
             </div>
-            <p className="mt-4 text-xs text-muted">14-day free trial · No credit card required · Cancel anytime</p>
+            <p className="mt-4 text-xs text-muted">14-day trial in preview · Checkout shows any card requirement</p>
           </div>
         </div>
       </div>
@@ -238,7 +238,7 @@ export default function HomePage() {
             <div className="mt-4 space-y-2 text-sm text-muted">
               {[
                 'Postgres with row-level tenant isolation',
-                'Stripe + Paystack payment integrations',
+                'Polar sandbox subscription checkout',
                 'Clerk identity & org management',
                 'Real-time updates via SSE',
                 'GCS / S3 asset storage',
@@ -277,9 +277,9 @@ export default function HomePage() {
                 plan: 'Growth — from $149/mo',
               },
               {
-                stage: 'Multi-campus & diaspora',
-                range: 'Unlimited · Global ready',
-                desc: 'Manage distributed campuses, local-currency payments, and platform-level operations across your entire network.',
+                stage: 'Multi-site & international',
+                range: 'Tailored rollout',
+                desc: 'Discuss branch structure, regional oversight, currencies, and local payment needs before rollout.',
                 plan: 'Enterprise — custom pricing',
               },
             ].map((item) => (
@@ -305,7 +305,7 @@ export default function HomePage() {
             Ready to see ChurchTrack in action?
           </h4>
           <p className="max-w-xl text-sm text-primary-foreground/80">
-            Start your 14-day free trial. Set up your church, explore every module, and bring your team along — no credit card needed.
+            Explore ChurchTrack with a 14-day preview trial. The checkout page shows any card requirement before you continue.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Show when="signed-out">

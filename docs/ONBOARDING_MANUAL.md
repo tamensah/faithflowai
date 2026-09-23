@@ -1,6 +1,6 @@
 # Onboarding Manual
 
-This manual defines the standard onboarding flow for ChurchTrack beta and the expected UX for admins, staff, and members.
+This manual defines the standard onboarding flow for ChurchTrack beta and the expected UX for admins, staff, and members. ChurchTrack is a global church management platform for single congregations and multi-site organizations; the examples below are illustrative, not a required church structure.
 
 ## Goals
 - Make first-time church onboarding deterministic and fast.
@@ -18,7 +18,7 @@ This manual defines the standard onboarding flow for ChurchTrack beta and the ex
 ### 1) Church admin self-serve onboarding
 1. User opens `/get-started`.
 2. User signs in/signs up with Clerk.
-3. User creates/selects a Clerk Organization (church tenant boundary).
+3. User creates/selects a workspace through the organization switcher (church tenant and subscription boundary).
 4. The first user in the new organization receives admin access automatically in staging.
 5. User selects a plan and starts Polar sandbox checkout in staging. Paystack and Stripe remain listed in the interface but require their own configuration before use.
 6. User lands in admin billing/admin workspace.
@@ -30,22 +30,23 @@ Expected result:
 
 ### Name the first organization and church
 
-The first Organization, Church, and Campus are created during onboarding. On the admin Overview, rename the existing Organization and Church, set the Church slug and country, then select **Save church**. Do not create another Church just to replace the default. The first Church slug is generated once from the sign-up organization ID; changing the Church name does not regenerate it. Use lowercase letters, numbers, and hyphens for a readable slug (for example, `winners-chapel-ghana-hq`). `GH` is Ghana's two-letter country code; `CH` is Switzerland's. A changed slug changes public links that use it, so settle it before sharing those links.
+The first Organization, Church, and Campus are created during onboarding. The Organization takes the workspace name when available; the admin can correct it on Overview. Rename the existing Church, review its slug, set its country, then select **Save church**. Do not create another Church just to replace the default. The first Church starts with an ID-based slug; while naming that default Church, Overview suggests a readable slug based on the Organization and Church names (for example, `churchtrack-organization-hq`). A manually edited slug is preserved. A slug must use lowercase letters, numbers, and hyphens and must be unique across ChurchTrack because it appears in public links. A changed slug changes those links, so settle it before sharing them. Select the actual two-letter country code; there is no assumed country for a new church (`GH` is Ghana and `CH` is Switzerland).
 
 ## What the entities mean today
 
 | Entity | Meaning | Example |
 |---|---|---|
-| Workspace / tenant | One customer's isolated account and subscription, tied to the selected Clerk organization | Winners Chapel Ghana account |
-| Organization | A ministry or church network inside that workspace | Winners Chapel Ghana |
-| Church | An operating congregation or branch with its own members, staff, events, and giving | Headquarters congregation, Kumasi branch, Switzerland branch |
-| Campus | A site within one Church; some campus-scoped features include events and facilities | A venue run by the Kumasi branch |
+| Workspace / tenant | One customer's isolated account and subscription, tied to the selected sign-up organization | ChurchTrack Organization account |
+| Organization | A ministry or church network inside that workspace | ChurchTrack Organization |
+| Church | An operating congregation with its own members, staff, events, and giving, whatever local name it uses | Headquarters Church, East Branch, University Campus Church, Zurich Branch |
+| Campus | A meeting site inside one Church; some site-scoped features include events and facilities | A venue run by East Branch |
+| Oversight unit (planned) | A headquarters, region, area, district, or similar group that supervises churches | Accra Region overseeing several branches |
 
-For a network like Winners Chapel Ghana, name the Organization after the network and rename the first Church to the actual headquarters **congregation** (for example, “Headquarters Branch”). The network's administrative headquarters and the congregation meeting there are conceptually different. Give further independently operated branches their own Churches under the same Organization. A Switzerland branch can be another Church with country `CH` if it shares the same workspace and subscription; its legal, billing, and oversight boundaries need a separate decision before real rollout.
+For a network such as the fictional ChurchTrack Organization, name the workspace and Organization after the network and rename the first Church to the actual headquarters **congregation**. The network's administrative headquarters and the congregation meeting there are conceptually different. Give independently operated branches their own Churches under the same Organization. If a university campus church has its own members and staff, it is a Church even when its local name says “campus”; a Campus record is for a site that shares a Church's operational records. A Swiss branch can be another Church with country `CH` if it shares the same workspace and subscription; its legal, billing, and oversight boundaries need a separate decision before real rollout.
 
-**Current limitation:** Churches are siblings under an Organization. ChurchTrack does not yet represent a Region that governs child Churches, or a Church nested beneath another Church. A Campus is nested under one Church and is not a substitute for a regional branch. The requested headquarters → regions → branches → university campuses hierarchy and regional oversight/reporting require further product and data-model work; do not infer that the current Overview supports that hierarchy. Existing brainstorming in `docs/brainstorm/perspective.md` describes that broader goal, not a delivered feature.
+**Current limitation:** Churches are siblings under an Organization. ChurchTrack does not yet represent an oversight unit that governs child Churches. A Campus is nested under one Church and is not a substitute for a regional branch. The requested headquarters → regions → branches → campus churches hierarchy and regional oversight/reporting require further product and data-model work; do not infer that the current Overview supports that hierarchy. See `docs/CHURCH_STRUCTURE_REVIEW_2026-09-23.md` for the verified gap and next design slice.
 
-**Slug routing gate:** The database currently prevents duplicate Church slugs only within an Organization, while some public routes find a Church by slug alone. Use distinctive network-prefixed slugs in staging. Resolve global slug lookup/uniqueness before public self-serve onboarding across multiple customers.
+**Slug routing:** Public routes find a Church by slug alone. The global unique index and API conflict message keep those links unambiguous. Use a distinctive network-prefixed slug, and do not change it after distributing public links without a link-migration plan.
 
 ### 2) Invited admin/staff onboarding
 1. Existing admin invites staff via admin `/staff` (or pre-creates platform user).

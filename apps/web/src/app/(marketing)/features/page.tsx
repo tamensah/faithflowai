@@ -7,7 +7,7 @@ const featureGroups = [
     heading: 'Church finance without the guesswork',
     summary: 'Multi-currency giving, budgets, expenses, reconciliation, and a full audit trail — all in one place.',
     items: [
-      'Stripe (USD) and Paystack (local currency) giving — both native',
+      'Giving-provider setup varies by market and requires verification',
       'One-time and recurring donations with receipt generation',
       'Pledge campaigns and pledge tracking',
       'Budget creation, line-item allocation, and approval workflows',
@@ -39,7 +39,7 @@ const featureGroups = [
     items: [
       'Event creation with location, capacity, and registration settings',
       'Custom registration forms with field builder (text, select, checkbox, date)',
-      'Ticket types with pricing, capacity limits, and Stripe/Paystack checkout',
+      'Ticket types with pricing and capacity limits; payment checkout requires provider setup',
       'QR code generation for event check-in kiosk',
       'Mobile and desktop check-in interfaces',
       'Event series (recurring events with shared config)',
@@ -261,8 +261,8 @@ export default function FeaturesPage() {
             {[
               { name: 'PostgreSQL', desc: 'Row-level tenant isolation. No shared tables between churches.' },
               { name: 'Clerk', desc: 'Identity, org management, and SSO with Clerk — a category leader in auth.' },
-              { name: 'Stripe', desc: 'PCI-compliant card payments for USD giving and ticket checkout.' },
-              { name: 'Paystack', desc: 'Local-currency giving and checkout for African churches.' },
+              { name: 'Polar sandbox', desc: 'Preview subscription checkout for onboarding tests.' },
+              { name: 'Payment providers', desc: 'Giving and ticket checkout are enabled after market-specific provider verification.' },
               { name: 'tRPC', desc: 'Type-safe internal APIs — no schema drift between frontend and backend.' },
               { name: 'GCS / S3', desc: 'Asset storage for media, documents, and member uploads.' },
             ].map((item) => (
@@ -282,7 +282,7 @@ export default function FeaturesPage() {
             Every module. One free trial.
           </h4>
           <p className="max-w-lg text-sm text-primary-foreground/80">
-            14 days to explore everything — finance, events, members, comms, AI, and more. No credit card required.
+            Explore a 14-day preview trial. Checkout shows any card requirement before you continue.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/get-started">

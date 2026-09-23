@@ -1,8 +1,8 @@
-# Mega Church Readiness (Winners Chapel Ghana Perspective)
+# Multi-site Church Readiness
 
 ## Purpose
 
-Use a real enterprise church model (Winners Chapel Ghana) as a hard reference to ensure ChurchTrack can support:
+Use an internal enterprise church scenario as a demanding reference case while designing a global product that also works for a single congregation:
 - Headquarters + headquarters branch operations
 - Regional structures with many branches
 - Campus ministries with separate governance
@@ -10,9 +10,9 @@ Use a real enterprise church model (Winners Chapel Ghana) as a hard reference to
 - Multi-role leadership assignments across units
 - Platform-level and church-level admin separation
 
-If ChurchTrack can run this model cleanly, the platform can handle small-to-mega churches globally.
+Passing this scenario would demonstrate one demanding configuration; it would not by itself prove that every church structure or market is supported.
 
-Reference detail: `/Users/tamensah/aihub/faithlow/docs/notes/WINNERS_GHANA_ENTERPRISE_REFERENCE.md`
+Reference detail: `docs/notes/MULTISITE_CHURCH_ENTERPRISE_REFERENCE.md`
 
 ## Canonical Operating Model to Adopt
 
@@ -73,24 +73,13 @@ Reference detail: `/Users/tamensah/aihub/faithlow/docs/notes/WINNERS_GHANA_ENTER
 6. **Add-on Framework**
    - Bible school and streaming as entitlement-driven modules.
 
-## Current Status (already aligned)
+## Current Status (verified 2026-09-23)
 
-- Member onboarding "next steps" are now actionable and completion-aware.
-- Member setup progress is now persisted server-side via Clerk metadata sync.
-- Overview readiness reflects completion state instead of static placeholders.
-- Org structure now includes `DIASPORA` as a first-class unit type.
-- Scoped role assignment model is in place (`member + role + orgUnit + status + timeline`).
-- Policy checks now gate org-unit and role-assignment mutations by `(actor, action, organization scope)`.
-- Audit events now capture unit hierarchy and role assignment changes (success/denied/failed).
-- Actor identity is now resolved server-side from JWT context (NextAuth token with Clerk/JWT claim fallback), not passed in mutation payloads.
-- Idempotency persistence now protects org mutation retries (`IdempotencyKey` table + request fingerprint checks).
-- Outbox events now capture org/role side effects for async processing (`OutboxEvent` table).
-- Hierarchy read-model rollups now back executive drill-down cards (`OrgUnitRollup` + refresh endpoint).
-- Org terminology aliasing is now writable in admin UI and enforced server-side (`OrgUnitAlias` upsert + validation).
-- End-to-end org smoke coverage now validates idempotency, rollups, aliasing, and audit flow (`scripts/org-e2e-smoke.ts`).
-- Payment mutations are now idempotent and outbox-backed (`payment.create/updateStatus/refund` in API router).
-- Comms mutations are now idempotent and outbox-backed (`comms.createRoom/sendMessage/dispatch` in API router).
-- Payment + comms smoke coverage now validates retries, audit, and outbox publishing (`scripts/payment-comms-e2e-smoke.ts`).
+- The canonical schema has `Tenant → Organization → Church → Campus`; members and staff belong to a Church.
+- There is **no** `OrgUnit`, parent-child region, `OrgUnitAlias`, `OrgUnitRollup`, or scoped unit-role assignment in the canonical schema or API. Earlier statements that these were implemented were stale and must not be used as release evidence.
+- Church admins can create Churches as siblings under one Organization. This does not provide HQ or regional oversight over descendant branches.
+- Payment, communication, audit, and member features must each be verified against their current routes and live provider configuration before making readiness claims; this document does not certify them.
+- See `docs/CHURCH_STRUCTURE_REVIEW_2026-09-23.md` for the present model, global scope, and next hierarchy slice.
 
 ## Implementation Sequence (Recommended)
 

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { router, protectedProcedure, publicProcedure } from '../trpc';
-import { AuditActorType, prisma } from '@faithflow-ai/database';
+import { AuditActorType, Prisma, prisma } from '@faithflow-ai/database';
 import { TRPCError } from '@trpc/server';
 import { recordAuditLog } from '../audit';
 
@@ -14,12 +14,28 @@ async function requireStaff(tenantId: string, clerkUserId: string) {
   return staff;
 }
 
+const churchSlugSchema = z.string().trim().min(2).max(80).regex(
+  /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+  'Slug must use lowercase letters, numbers, and hyphens only'
+);
+const countryCodeSchema = z.string().trim().regex(/^[A-Z]{2}$/, 'Use a two-letter country code');
+
+function rethrowChurchSlugConflict(error: unknown): never {
+  if ((error as Prisma.PrismaClientKnownRequestError)?.code === 'P2002') {
+    throw new TRPCError({
+      code: 'CONFLICT',
+      message: 'That church slug is already in use. Choose another one.',
+    });
+  }
+  throw error;
+}
+
 const createChurchSchema = z.object({
   name: z.string().min(2),
-  slug: z.string().min(2),
+  slug: churchSlugSchema,
   organizationId: z.string(),
   timezone: z.string().default('UTC'),
-  countryCode: z.string().min(2).max(2).optional(),
+  countryCode: countryCodeSchema,
 });
 
 export const churchRouter = router({
@@ -35,7 +51,7 @@ export const churchRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Organization not found' });
       }
 
-      const church = await prisma.church.create({ data: input });
+      const church = await prisma.church.create({ data: input }).catch(rethrowChurchSlugConflict);
       await recordAuditLog({
         tenantId: ctx.tenantId,
         churchId: church.id,
@@ -54,9 +70,9 @@ export const churchRouter = router({
       z.object({
         id: z.string(),
         name: z.string().min(2).optional(),
-        slug: z.string().min(2).optional(),
+        slug: churchSlugSchema.optional(),
         timezone: z.string().optional(),
-        countryCode: z.string().min(2).max(2).optional(),
+        countryCode: countryCodeSchema.optional(),
         quietHoursEnabled: z.boolean().optional(),
         quietHoursStartHour: z.number().int().min(0).max(23).optional(),
         quietHoursEndHour: z.number().int().min(0).max(23).optional(),
@@ -85,7 +101,7 @@ export const churchRouter = router({
           quietHoursEndHour: input.quietHoursEndHour,
           quietHoursRescheduleMinutes: input.quietHoursRescheduleMinutes,
         },
-      });
+      }).catch(rethrowChurchSlugConflict);
 
       await recordAuditLog({
         tenantId: ctx.tenantId,

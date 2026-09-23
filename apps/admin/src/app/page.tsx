@@ -32,6 +32,17 @@ function formatWhen(value: string | Date) {
   });
 }
 
+function slugifyChurchName(value: string) {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+    .replace(/-+$/g, '');
+}
+
 export default function AdminHome() {
   const writeGate = useWriteAccess();
   const utils = trpc.useUtils();
@@ -40,7 +51,7 @@ export default function AdminHome() {
   const [orgNameDraft, setOrgNameDraft] = useState<{ id: string; name: string } | null>(null);
   const [churchName, setChurchName] = useState('');
   const [churchSlug, setChurchSlug] = useState('');
-  const [churchCountry, setChurchCountry] = useState('US');
+  const [churchCountry, setChurchCountry] = useState('');
   const [selectedChurchId, setSelectedChurchId] = useState<string | null>(null);
   const [churchDraft, setChurchDraft] = useState<{ id: string; name: string; slug: string; country: string } | null>(null);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
@@ -90,9 +101,10 @@ export default function AdminHome() {
       setChurchError(null);
       setChurchName('');
       setChurchSlug('');
-      setChurchCountry('US');
+      setChurchCountry('');
       await utils.church.list.invalidate();
     },
+    onError: (error) => setChurchError(error.message),
   });
 
   const { mutate: updateChurch, isPending: isUpdatingChurch } = trpc.church.update.useMutation({
@@ -121,6 +133,7 @@ export default function AdminHome() {
   );
 
   const selectedOrg = selectedOrganization?.id ?? null;
+  const suggestedChurchSlug = slugifyChurchName(`${selectedOrganization?.name ?? ''} ${churchForm.name}`);
 
   const financeSummary = useMemo(() => {
     const donationRows = financeDashboard?.donations ?? [];
@@ -189,7 +202,7 @@ export default function AdminHome() {
 
         {writeGate.readOnly ? <ReadOnlyNotice /> : null}
 
-        {(selectedOrganization?.name === 'Default Organization' || selectedChurch?.name === 'Default Church') ? (
+        {(selectedOrganization?.name === 'Default Organization' || selectedChurch?.name === 'Default Church' || (selectedChurch && !selectedChurch.countryCode)) ? (
           <Card className="border-amber-200 bg-amber-50 p-5">
             <h2 className="font-display text-base font-semibold text-amber-900">Finish your church setup</h2>
             <p className="mt-1 text-sm text-amber-800">
@@ -440,12 +453,33 @@ export default function AdminHome() {
           {selectedChurch ? <div className="mt-5 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.5fr)_auto]">
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted">Selected church name *</label>
-              <Input value={churchForm.name} onChange={(event) => { setUpdateError(null); setChurchDraft({ ...churchForm, name: event.target.value }); }} />
+              <Input value={churchForm.name} onChange={(event) => {
+                setUpdateError(null);
+                const previousSuggestion = slugifyChurchName(`${selectedOrganization?.name ?? ''} ${churchForm.name}`);
+                const keepSuggestedSlug = selectedChurch.name === 'Default Church' &&
+                  (churchForm.slug === selectedChurch.slug || churchForm.slug === previousSuggestion);
+                setChurchDraft({
+                  ...churchForm,
+                  name: event.target.value,
+                  slug: keepSuggestedSlug
+                    ? slugifyChurchName(`${selectedOrganization?.name ?? ''} ${event.target.value}`)
+                    : churchForm.slug,
+                });
+              }} />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted">Church slug *</label>
               <Input value={churchForm.slug} onChange={(event) => { setUpdateError(null); setChurchDraft({ ...churchForm, slug: event.target.value.toLowerCase().replace(/\s+/g, '-') }); }} />
-              <p className="text-xs text-muted">Generated once during setup. Choose a readable value such as winners-chapel-ghana-hq; it is used in public links.</p>
+              <p className="text-xs text-muted">Suggested from the organization and church names. This value is used in public links.</p>
+              {suggestedChurchSlug.length >= 2 && churchForm.slug !== suggestedChurchSlug ? (
+                <button
+                  className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+                  onClick={() => { setUpdateError(null); setChurchDraft({ ...churchForm, slug: suggestedChurchSlug }); }}
+                  type="button"
+                >
+                  Use {suggestedChurchSlug}
+                </button>
+              ) : null}
             </div>
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted">Country (ISO 2) *</label>
@@ -506,6 +540,9 @@ export default function AdminHome() {
                 value={churchName}
                 onChange={(event) => {
                   setChurchError(null);
+                  const previousSuggestion = slugifyChurchName(`${selectedOrganization?.name ?? ''} ${churchName}`);
+                  const nextSuggestion = slugifyChurchName(`${selectedOrganization?.name ?? ''} ${event.target.value}`);
+                  if (!churchSlug || churchSlug === previousSuggestion) setChurchSlug(nextSuggestion);
                   setChurchName(event.target.value);
                 }}
               />
@@ -513,7 +550,7 @@ export default function AdminHome() {
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted">Slug *</label>
               <Input
-                placeholder="faith-center-main"
+                placeholder="organisation-branch-name"
                 value={churchSlug}
                 onChange={(event) => {
                   setChurchError(null);
@@ -524,7 +561,7 @@ export default function AdminHome() {
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted">Country (ISO 2) *</label>
               <Input
-                placeholder="US"
+                placeholder="GH, US, CH…"
                 value={churchCountry}
                 onChange={(event) => {
                   setChurchError(null);
@@ -547,7 +584,7 @@ export default function AdminHome() {
                   setChurchError('Slug must use lowercase letters, numbers, and hyphens only.');
                   return;
                 }
-                if (country && !countryRegex.test(country)) {
+                if (!countryRegex.test(country)) {
                   setChurchError('Country must be a valid 2-letter ISO code.');
                   return;
                 }
@@ -555,10 +592,10 @@ export default function AdminHome() {
                   name,
                   slug,
                   organizationId: selectedOrg,
-                  countryCode: country || undefined,
+                  countryCode: country,
                 });
               }}
-              disabled={!canWrite || !churchName || !churchSlug || !selectedOrg || isCreatingChurch}
+              disabled={!canWrite || !churchName || !churchSlug || !churchCountry || !selectedOrg || isCreatingChurch}
             >
               {isCreatingChurch ? 'Creating...' : 'Create church'}
             </Button>

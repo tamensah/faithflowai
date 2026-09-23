@@ -8,7 +8,7 @@ const values = [
   },
   {
     title: 'Built for every scale',
-    body: 'The same data model works for a 50-person congregation and a 50,000-member diaspora network. Org → church → campus scales with you.',
+    body: 'ChurchTrack is designed for congregations worldwide. Separate churches can share an organization; regional oversight needs a tailored rollout today.',
   },
   {
     title: 'AI with accountability',
@@ -16,7 +16,7 @@ const values = [
   },
   {
     title: 'Multi-currency, multi-region',
-    body: 'Stripe for USD giving, Paystack for local African currencies. Both fully integrated — not bolted on — so global churches operate without friction.',
+    body: 'Churches work across countries and currencies. We confirm payment-provider availability and operational requirements for each market before rollout.',
   },
 ];
 
@@ -76,7 +76,7 @@ export default function AboutPage() {
           </div>
           <div className="space-y-4">
             <p className="text-xs uppercase tracking-widest text-muted">What we've built</p>
-            <p className="text-sm text-muted">Twelve fully integrated modules — live today, not on a roadmap:</p>
+            <p className="text-sm text-muted">Explore the ChurchTrack modules in the preview and confirm the capabilities needed for your church:</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {modules.map((mod) => (
                 <div key={mod} className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-sm text-foreground">
@@ -116,7 +116,7 @@ export default function AboutPage() {
             See it for yourself.
           </h4>
           <p className="max-w-lg text-sm text-primary-foreground/80">
-            Start the free trial, explore every module, and bring your team. No credit card required.
+            Explore the 14-day preview trial. The checkout page shows any card requirement before you continue.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Link href="/get-started">

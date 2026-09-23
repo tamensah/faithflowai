@@ -684,8 +684,8 @@ model Church {
   id             String   @id @default(cuid())
   organizationId String
   name           String
-  slug           String
-  countryCode    String?  @default("US")
+  slug           String   @unique
+  countryCode    String?
   timezone       String   @default("UTC")
   quietHoursEnabled           Boolean @default(true)
   quietHoursStartHour         Int     @default(21)
@@ -751,7 +751,6 @@ model Church {
   webhookEvents          WebhookEvent[]
   importBatches          ImportBatch[]
 
-  @@unique([organizationId, slug])
   @@index([organizationId])
 }
 
