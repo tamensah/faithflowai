@@ -14,7 +14,7 @@ function resolveTrpcUrl() {
 
 function TrpcProvider({ children }: { children: React.ReactNode }) {
   const { getToken, orgId } = useAuth();
-  const tokenTemplate = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE;
+  const tokenTemplate = process.env.NEXT_PUBLIC_CLERK_JWT_TEMPLATE?.trim();
   const [queryClient] = useState(
     () =>
       new QueryClient({

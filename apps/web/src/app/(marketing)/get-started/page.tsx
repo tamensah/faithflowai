@@ -98,7 +98,7 @@ export default function GetStartedPage() {
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);
   const adminBaseUrl = (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app').replace(/\/+$/, '');
 
-  const { data: authSelf } = trpc.auth.self.useQuery(undefined, {
+  const { data: authSelf, isError: isAuthError, refetch: refetchAuth } = trpc.auth.self.useQuery(undefined, {
     enabled: Boolean(orgId),
     // Poll every 3s until staff is confirmed — guards against stale-cache race after bootstrap.
     // Once isStaff is true the step transitions and polling becomes a no-op.
@@ -218,6 +218,17 @@ export default function GetStartedPage() {
                 <p className="mt-3 text-xs text-muted">
                   Click the switcher above and choose <strong>Create organisation</strong> — name it after your church.
                 </p>
+              ) : isAuthError ? (
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs text-destructive">We could not verify your church access. Please try again.</p>
+                  <button
+                    type="button"
+                    className="text-xs font-medium underline underline-offset-2 hover:text-foreground"
+                    onClick={() => void refetchAuth()}
+                  >
+                    Retry access check
+                  </button>
+                </div>
               ) : bootstrapError ? (
                 <div className="mt-3 space-y-2">
                   <p className="text-xs text-destructive">{bootstrapError}</p>
