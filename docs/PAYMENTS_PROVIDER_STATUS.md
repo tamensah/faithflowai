@@ -41,6 +41,6 @@ A provider should be replaceable without rewriting church onboarding, permission
 
 The provider secret and organization token must remain in Neon environment storage. Do not copy them into this repository or provider-status documents.
 
-Staging deployment 11 uses a token expiring on 2026-10-21 with only `checkouts:write`, `customer_sessions:write`, `subscriptions:read`, and `subscriptions:write`. An unused duplicate expiring on 2026-12-20 is awaiting approved revocation.
+Staging deployment 12 retains the token expiring on 2026-10-21 with only `checkouts:write`, `customer_sessions:write`, `subscriptions:read`, and `subscriptions:write`. An unused duplicate expiring on 2026-12-20 is awaiting approved revocation.
 
 ChurchTrack stores the tenant ID as Polar's immutable external customer ID and copies `tenantId`, `clerkOrgId`, and `planCode` into checkout metadata. The webhook rejects conflicting tenant identifiers and grants access only through the local `TenantSubscription` and entitlement records.
