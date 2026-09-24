@@ -8,7 +8,8 @@ import { trpc } from '../../lib/trpc';
 import { useWriteAccess } from '../../lib/entitlements';
 import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
-const checkoutProviders = ['POLAR', 'PAYSTACK', 'STRIPE'] as const;
+const checkoutProviders = ['POLAR', 'PAYSTACK'] as const;
+type BillingProvider = (typeof checkoutProviders)[number] | 'STRIPE';
 const changeEffectiveOptions = ['NEXT_CYCLE', 'IMMEDIATE'] as const;
 const billingSectionOptions = [
   { key: 'overview', label: 'Overview' },
@@ -64,7 +65,7 @@ function classifyPlanChange(
 export default function BillingPage() {
   const utils = trpc.useUtils();
   const { canWrite } = useWriteAccess();
-  const [provider, setProvider] = useState<(typeof checkoutProviders)[number]>('POLAR');
+  const [provider, setProvider] = useState<BillingProvider>('POLAR');
   const [selectedPlanCode, setSelectedPlanCode] = useState('');
   const [effective, setEffective] = useState<(typeof changeEffectiveOptions)[number]>('NEXT_CYCLE');
   const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -465,7 +466,7 @@ export default function BillingPage() {
               <select
                 className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
                 value={provider}
-                onChange={(event) => setProvider(event.target.value as (typeof checkoutProviders)[number])}
+                onChange={(event) => setProvider(event.target.value as BillingProvider)}
               >
                 {checkoutProviders.map((entry) => (
                   <option key={entry} value={entry}>
@@ -477,8 +478,12 @@ export default function BillingPage() {
           </div>
           {selectedPlan ? (
             <p className="mt-3 text-sm text-muted">
-              {selectedPlan.description || 'No description'} ·{' '}
-              {formatPlanPrice(selectedPlan.amountMinor, selectedPlan.currency, selectedPlan.interval)}
+              {selectedPlan.code === 'enterprise'
+                ? 'Tailored pricing and rollout for larger church networks.'
+                : selectedPlan.description || 'Plan details available during setup'} ·{' '}
+              {selectedPlan.code === 'enterprise'
+                ? 'Custom pricing · assisted setup'
+                : formatPlanPrice(selectedPlan.amountMinor, selectedPlan.currency, selectedPlan.interval)}
               {getTrialDays(selectedPlan.metadata) ? ` · ${getTrialDays(selectedPlan.metadata)}-day free trial` : ''}
             </p>
           ) : null}
@@ -550,13 +555,14 @@ export default function BillingPage() {
               <select
                 className="h-8 rounded-md border border-border bg-white px-2 text-xs"
                 value={provider}
-                onChange={(event) => setProvider(event.target.value as (typeof checkoutProviders)[number])}
+                onChange={(event) => setProvider(event.target.value as BillingProvider)}
               >
                 {checkoutProviders.map((entry) => (
                   <option key={entry} value={entry}>
                     {entry}
                   </option>
                 ))}
+                {current?.provider === 'STRIPE' ? <option value="STRIPE">STRIPE</option> : null}
               </select>
             </div>
             <Button

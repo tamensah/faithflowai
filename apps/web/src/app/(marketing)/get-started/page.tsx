@@ -12,7 +12,7 @@ import {
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { trpc } from '../../../lib/trpc';
 
-const providers = ['POLAR', 'PAYSTACK', 'STRIPE'] as const;
+type CheckoutProvider = 'POLAR' | 'PAYSTACK';
 
 function formatPlan(amountMinor: number, currency: string, interval: string) {
   return `${currency} ${(amountMinor / 100).toFixed(2)} / ${interval.toLowerCase()}`;
@@ -92,7 +92,7 @@ export default function GetStartedPage() {
   const utils = trpc.useUtils();
   const { isSignedIn, orgId } = useAuth();
   const { user } = useUser();
-  const [provider, setProvider] = useState<(typeof providers)[number]>('POLAR');
+  const [provider, setProvider] = useState<CheckoutProvider>('POLAR');
   const [selectedPlanCode, setSelectedPlanCode] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);
@@ -121,6 +121,7 @@ export default function GetStartedPage() {
     onSuccess: (data) => {
       if (data.checkoutUrl) window.location.href = data.checkoutUrl;
     },
+    onError: (error) => setLocalError(error.message),
   });
 
   // Auto-bootstrap: silently claims admin for the first user in a new org.
@@ -258,7 +259,7 @@ export default function GetStartedPage() {
         <StepRow n={3} state={step3} title="Choose your plan" isLast>
           <Card className="p-5">
             <p className="text-sm text-muted">
-              Your subscription activates all features for your church. Start with a 14-day free trial — upgrade or cancel any time.
+              Starter and Growth include a 14-day free trial. Enterprise requires a tailored pricing and setup conversation.
             </p>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -279,26 +280,31 @@ export default function GetStartedPage() {
                 </select>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted">Payment provider</label>
-                <select
-                  className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
-                  value={provider}
-                  onChange={(e) => setProvider(e.target.value as (typeof providers)[number])}
-                >
-                  <option value="POLAR">Polar — card / international</option>
-                  <option value="PAYSTACK">Paystack — Africa / local currency</option>
-                  <option value="STRIPE">Stripe — available after US setup</option>
-                </select>
-              </div>
+              {selectedPlan?.code !== 'enterprise' ? (
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-muted">Payment provider</label>
+                  <select
+                    className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
+                    value={provider}
+                    onChange={(e) => setProvider(e.target.value as CheckoutProvider)}
+                  >
+                    <option value="POLAR">Polar — card / international</option>
+                    <option value="PAYSTACK">Paystack — supported African markets</option>
+                  </select>
+                </div>
+              ) : null}
             </div>
 
             {selectedPlan ? (
               <div className="mt-3 rounded-lg bg-muted/5 p-3 text-sm">
                 <p className="font-medium text-foreground">{selectedPlan.name}</p>
                 <p className="mt-0.5 text-muted">
-                  {selectedPlan.description || 'Full feature access'} ·{' '}
-                  {formatPlan(selectedPlan.amountMinor, selectedPlan.currency, selectedPlan.interval)}
+                  {selectedPlan.code === 'enterprise'
+                    ? 'Tailored pricing and rollout for larger church networks.'
+                    : selectedPlan.description || 'Plan details available during setup'}{' · '}
+                  {selectedPlan.code === 'enterprise'
+                    ? 'Custom pricing · assisted setup'
+                    : formatPlan(selectedPlan.amountMinor, selectedPlan.currency, selectedPlan.interval)}
                   {trialDays ? (
                     <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
                       {trialDays}-day free trial
@@ -315,30 +321,27 @@ export default function GetStartedPage() {
             ) : null}
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Button
-                disabled={!selectedPlanCode || isStartingCheckout || !plans?.length || selectedPlan?.amountMinor === 0}
-                onClick={() => {
-                  if (!selectedPlanCode) { setLocalError('Select a plan first.'); return; }
-                  setLocalError(null);
-                  startCheckout({
-                    planCode: selectedPlanCode,
-                    provider,
-                    successUrl: `${adminBaseUrl}/billing?checkout=success`,
-                    cancelUrl: `${adminBaseUrl}/billing?checkout=cancelled`,
-                  });
-                }}
-              >
-                {selectedPlan?.amountMinor === 0
-                  ? 'Contact us for Enterprise'
-                  : isStartingCheckout
-                    ? 'Redirecting to checkout…'
-                    : 'Start free trial'}
-              </Button>
-              {selectedPlan?.amountMinor === 0 ? (
-                <Link href="/contact" className="text-sm font-medium text-primary underline underline-offset-4">
-                  Request assisted setup
+              {selectedPlan?.code === 'enterprise' ? (
+                <Link href="/contact" className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90">
+                  Request Enterprise setup
                 </Link>
-              ) : null}
+              ) : (
+                <Button
+                  disabled={!selectedPlanCode || isStartingCheckout || !plans?.length}
+                  onClick={() => {
+                    if (!selectedPlanCode) { setLocalError('Select a plan first.'); return; }
+                    setLocalError(null);
+                    startCheckout({
+                      planCode: selectedPlanCode,
+                      provider,
+                      successUrl: `${window.location.origin}/get-started/complete`,
+                      cancelUrl: `${window.location.origin}/get-started`,
+                    });
+                  }}
+                >
+                  {isStartingCheckout ? 'Redirecting to checkout…' : 'Start free trial'}
+                </Button>
+              )}
             </div>
 
             {localError ? <p className="mt-2 text-xs text-destructive">{localError}</p> : null}
