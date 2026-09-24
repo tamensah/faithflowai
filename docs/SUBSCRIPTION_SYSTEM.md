@@ -169,9 +169,7 @@ Required env placeholders:
 Checkout trial handling:
 
 - Stripe checkout sets `trial_period_days` from `plan.metadata.trialDays` when present.
-- Paystack checkout supports trial plan mapping via metadata:
-  - `paystackPlanCode` (standard recurring plan)
-  - `paystackTrialPlanCode` (optional trial-specific plan code used when `trialDays > 0`)
+- Paystack's older adapter has `paystackPlanCode` and `paystackTrialPlanCode` metadata, but a plan code does not defer the first charge. New Paystack subscription checkout is disabled by default with `PAYSTACK_BILLING_ENABLED=false`, and the API rejects trial plans even if that flag is enabled. See [Payments Provider Status](./PAYMENTS_PROVIDER_STATUS.md) before any activation.
 - Polar checkout uses `polarProductId` from plan metadata and passes `trialDays` to the hosted checkout.
 
 ## Usage Metering + Automation

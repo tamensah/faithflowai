@@ -8,8 +8,8 @@ import { trpc } from '../../lib/trpc';
 import { useWriteAccess } from '../../lib/entitlements';
 import { ReadOnlyNotice } from '../../components/ReadOnlyNotice';
 
-const checkoutProviders = ['POLAR', 'PAYSTACK'] as const;
-type BillingProvider = (typeof checkoutProviders)[number] | 'STRIPE';
+const checkoutProviders = ['POLAR'] as const;
+type BillingProvider = 'POLAR' | 'PAYSTACK' | 'STRIPE';
 const changeEffectiveOptions = ['NEXT_CYCLE', 'IMMEDIATE'] as const;
 const billingSectionOptions = [
   { key: 'overview', label: 'Overview' },
@@ -562,6 +562,7 @@ export default function BillingPage() {
                     {entry}
                   </option>
                 ))}
+                {current?.provider === 'PAYSTACK' ? <option value="PAYSTACK">PAYSTACK</option> : null}
                 {current?.provider === 'STRIPE' ? <option value="STRIPE">STRIPE</option> : null}
               </select>
             </div>

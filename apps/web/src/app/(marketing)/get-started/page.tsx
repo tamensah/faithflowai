@@ -12,8 +12,6 @@ import {
 import { Badge, Button, Card } from '@faithflow-ai/ui';
 import { trpc } from '../../../lib/trpc';
 
-type CheckoutProvider = 'POLAR' | 'PAYSTACK';
-
 function formatPlan(amountMinor: number, currency: string, interval: string) {
   return `${currency} ${(amountMinor / 100).toFixed(2)} / ${interval.toLowerCase()}`;
 }
@@ -92,7 +90,6 @@ export default function GetStartedPage() {
   const utils = trpc.useUtils();
   const { isSignedIn, orgId } = useAuth();
   const { user } = useUser();
-  const [provider, setProvider] = useState<CheckoutProvider>('POLAR');
   const [selectedPlanCode, setSelectedPlanCode] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);
@@ -280,19 +277,6 @@ export default function GetStartedPage() {
                 </select>
               </div>
 
-              {selectedPlan?.code !== 'enterprise' ? (
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-muted">Payment provider</label>
-                  <select
-                    className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm"
-                    value={provider}
-                    onChange={(e) => setProvider(e.target.value as CheckoutProvider)}
-                  >
-                    <option value="POLAR">Polar — card / international</option>
-                    <option value="PAYSTACK">Paystack — supported African markets</option>
-                  </select>
-                </div>
-              ) : null}
             </div>
 
             {selectedPlan ? (
@@ -333,7 +317,7 @@ export default function GetStartedPage() {
                     setLocalError(null);
                     startCheckout({
                       planCode: selectedPlanCode,
-                      provider,
+                      provider: 'POLAR',
                       successUrl: `${window.location.origin}/get-started/complete`,
                       cancelUrl: `${window.location.origin}/get-started`,
                     });
