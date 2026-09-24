@@ -90,3 +90,4 @@ The primary ChurchTrack domain has not been purchased. Staging uses the Vercel a
 - Use the [beta smoke test](./docs/BETA_SMOKE_TEST.md) for browser validation, including the complete onboarding journey and member/admin access.
 - Use the [provider configuration tracker](./docs/THIRDPARTY_CONFIG.md) before enabling an integration.
 - Use the [product surfaces guide](./docs/PRODUCT_SURFACES.md) for audience and route ownership.
+- Use [brand.md](./brand.md), [design-system.md](./design-system.md), and [ui-principles.md](./ui-principles.md) for the current design baseline; [the Claude Design handoff](./docs/DESIGN_HANDOFF.md) defines the branding and key-screen work still to be completed.

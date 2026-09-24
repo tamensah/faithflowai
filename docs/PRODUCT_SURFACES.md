@@ -23,4 +23,4 @@ An operating congregation is a Church even when the customer calls it a branch o
 
 The member portal and church administration dashboard are separate experiences even though they share identity, tenant context, and the Fastify API. ChurchTrack's own operators use the platform routes inside the admin application rather than a separate frontend deployment.
 
-The prior `phase-2-auth-and-core-features` work is a UX donor for these surfaces. See [`UX_BRANCH_RECONCILIATION.md`](./UX_BRANCH_RECONCILIATION.md) for the selective porting rules.
+Design work for these surfaces uses the current `develop` product baseline and the product-local [`brand.md`](../brand.md), [`design-system.md`](../design-system.md), and [`ui-principles.md`](../ui-principles.md).

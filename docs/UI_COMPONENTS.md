@@ -1,5 +1,7 @@
 # ChurchTrack UI Components
 
+> Historical illustrative examples, not the current component API or an approved design system. Inspect `packages/ui/src/components/` and the product-local `brand.md`, `design-system.md`, and `ui-principles.md` before design or implementation work.
+
 ## Design System
 
 Our UI components are built on top of Tailwind CSS and shadcn/ui, following a consistent design system inspired by Stripe's clean and modern aesthetic.
