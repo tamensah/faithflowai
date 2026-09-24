@@ -1,8 +1,13 @@
 # ChurchTrack Feature Tracker
 
-This is the live checklist for product scope, implementation status, and next steps.
+This tracks product scope, implemented foundations, and release work. A listed feature is not proof that its provider integration is enabled or ready for a public pilot.
 
-## Done
+## Payment release status
+- ChurchTrack subscriptions: Polar only. The former Stripe and Paystack SaaS subscription code is legacy, not an active checkout option.
+- Church giving, donations, recurring gifts, and paid events: the existing Stripe and Paystack adapters use server-wide keys and are **not ready for tenant use**. New online checkout is blocked in the `develop` API code until church-owned merchant connections replace the shared-key path; the staging API still needs a safe redeploy. Manual giving records remain available.
+- Next: add verified Organization merchant connections, inherit them at Church/branch level by default, and allow an authorized Church override. Attribute each transaction to the exact connection used; finish tenant-scoped webhook, refund, reconciliation, and two-tenant tests before enabling online giving. See [payment ownership](PAYMENT_OWNERSHIP.md) and [provider status](PAYMENTS_PROVIDER_STATUS.md).
+
+## Implemented foundations (release status varies)
 - Multi‑tenant schema (tenant/org/church/campus)
 - Clerk JWT auth + tenant resolution
 - Deployment security hardening: verified bearer auth, signed receipt access, signed stream tokens, redirect allowlists
@@ -18,23 +23,23 @@ This is the live checklist for product scope, implementation status, and next st
 - Initial Prisma migration + seed data
 - Brand guide v1
 - Giving foundation (funds + campaigns + donations)
-- Stripe + Paystack checkout + webhook processing
+- Legacy Stripe + Paystack checkout + webhook processing (online giving disabled pending tenant-owned connections)
 - Finance ops foundation (pledges, recurring, budgets, expenses, receipts)
 - Finance dashboards (reconciliation, donor insights, tithing statements)
 - Shareable giving links + QR generator (admin)
-- Stripe + Paystack recurring checkout
+- Legacy Stripe + Paystack recurring checkout (online recurring gifts disabled pending tenant-owned connections)
 - Receipt HTML rendering + email send (Resend)
 - Fundraiser (peer-to-peer) pages + public giving URLs
 - Audit log foundations (finance + giving actions)
 - Text-to-give inbound flow (Twilio)
-- Payout reconciliation (Stripe + Paystack)
+- Legacy payout reconciliation paths (Stripe + Paystack; tenant connection scoping pending)
 - Finance CSV exports
 - Communications: outbound email/SMS/WhatsApp (templates + logs)
 - Transactional email templates wired for onboarding welcome + trial-ending reminders (queued through provider pipeline)
 - Communications: audience targeting + delivery analytics
 - Communications: suppression workspace + unsubscribe reporting by channel/reason
 - Communications: STOP keyword unsubscribe handling (Twilio inbound SMS/WhatsApp)
-- Refunds + disputes (Stripe + Paystack + manual)
+- Legacy refund + dispute paths (Stripe + Paystack + manual; online provider paths require tenant connection scoping)
 - OpenAPI external integration routes (API key secured)
 - Dispute evidence workflows + admin upload
 - Comms scheduling + drip campaigns
@@ -93,9 +98,9 @@ This is the live checklist for product scope, implementation status, and next st
 - Subscription system manual (`docs/SUBSCRIPTION_SYSTEM.md`)
 - Subscription hardening + monetization ops:
   - Route-level entitlement enforcement across membership/events/finance/campus/facility/care/content
-  - Stripe + Paystack subscription lifecycle webhook sync into `TenantSubscription`
+  - Legacy Stripe + Paystack subscription lifecycle webhook sync into `TenantSubscription` (not the active SaaS checkout path)
   - Usage metering + quota/suspension automation task
-  - Tenant self-serve billing routes (plan checkout, Stripe portal, invoices)
+  - Tenant self-serve billing routes (Polar is the active subscription provider; older Stripe routes remain legacy)
   - Dunning preview + run workflows (platform + scheduled endpoint)
   - Webhook idempotency + replay-safe event persistence (`WebhookEvent`)
   - Subscription metadata normalization backfill (platform + scheduled task)
@@ -107,7 +112,7 @@ This is the live checklist for product scope, implementation status, and next st
   - Church onboarding flow (org selection, admin claim, plan checkout, admin landing)
   - Trial-aware tier UX (Starter/Growth 14-day, Enterprise 0-day default)
   - Baseline plan catalog auto-bootstrap in API when environments start without seeded plans
-  - Onboarding plan preselect + checkout provider (Stripe/Paystack) continuity
+  - Onboarding plan preselect + Polar checkout continuity
 - Multi-campus operations depth:
   - Campus CRUD with feature and quota enforcement
   - Headquarters and campus performance analytics APIs
@@ -131,7 +136,7 @@ This is the live checklist for product scope, implementation status, and next st
   - Support SLA timers + breach sweeps + queue analytics
   - Admin pages: `/streaming`, `/support`
 - E2E reliability checks:
-  - Webhook idempotency replay tests (platform Stripe + Paystack webhook paths)
+  - Webhook idempotency replay tests (legacy platform Stripe + Paystack paths; tenant-owned paths still require tests)
   - Support SLA breach + transition tests (automation + route transitions)
 - Admin IA + navigation hardening:
   - Focused global navigation groups (single active group expanded)
@@ -204,7 +209,8 @@ This is the live checklist for product scope, implementation status, and next st
   - `docs/BETA_SMOKE_TEST.md` — end-to-end testing checklist for beta
 
 ## Next Up (High Priority)
-- Native mobile apps (member + staff) or PWA wrapper
+- Tenant-owned Paystack and Stripe giving connections, including Organization inheritance and Church override
+- Provider-scoped webhook, refund, and reconciliation paths for online giving
 - Prayer request lifecycle + privacy controls
 
 ## Backlog
@@ -213,18 +219,18 @@ This is the live checklist for product scope, implementation status, and next st
 - Live streaming + social media distribution workflows
 - Church website/landing page builder + template marketplace
 - Support center (ticketing, KB, SLA lanes)
-- Native mobile apps (member + staff)
 - Competitor data migration tooling
 
 ## Next Up (Backlog Promotions)
-- Localised pricing tiers for African continental churches (GHS/NGN/KES)
-- Annual billing checkout flow in Stripe + Paystack
+- Evaluate localized Polar pricing only after validating provider support and market needs
+- Annual billing checkout through Polar
 - Denomination/network licensing model
 
 ## Manuals (Reference)
 - Platform admin: `docs/PLATFORM_ADMIN_MANUAL.md`
 - Pricing strategy + competitive analysis: `docs/PRICING_STRATEGY.md`
 - Finance: `docs/FINANCE_MANUAL.md`
+- Payment ownership: `docs/PAYMENT_OWNERSHIP.md`
 - Membership: `docs/MEMBERSHIP_MANUAL.md`
 - Events: `docs/EVENTS_MANUAL.md`
 - Subscription system: `docs/SUBSCRIPTION_SYSTEM.md`

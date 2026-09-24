@@ -9,6 +9,8 @@ This document separates the provider roadmap from code that exists today. [Payme
 | Stripe | A church's own giving and financial activity through its connected merchant account | Legacy giving adapter uses one server-wide key; new online giving checkout is blocked until tenant-owned connections exist | Connect platform and tenant onboarding remain; ChurchTrack SaaS subscriptions stay on Polar |
 | Resend | Transactional and contact-form email | Implemented | `susubiribi.com` verified and ChurchTrack staging sender deployed; live template delivery tests remain |
 
+The online-giving checkout guard is merged into `develop`; it has not yet been deployed to the Neon staging API. Staging currently has no Stripe or Paystack merchant secrets, but that environment state does not substitute for deploying the guard and completing tenant-owned connections.
+
 ## Integration boundary
 
 Provider-specific API calls and webhook parsing belong in adapters. The following behavior remains in ChurchTrack's server-side domain layer:
