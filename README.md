@@ -1,269 +1,92 @@
 # ChurchTrack
 
-ChurchTrack is a performance-first, security‑first church management platform designed to serve everyone from single‑campus churches to multi‑campus and diaspora ministries. The product focus is operational clarity and AI leverage that demonstrably saves admin time.
+ChurchTrack is a global church management platform for a single congregation or a multi-site church organization. The product has a public website, a member portal, a church administration console, and a separate role-gated platform operations area.
 
-## Principles
-- Tenant isolation by default
-- Auditability everywhere
-- Fast, predictable performance
-- AI with provenance (traceable inputs and outputs)
+**Current state (24 September 2026):** `develop` is the staging branch. The web and admin previews and the Fastify API run against Neon's `develop` branch. The first onboarding and Polar sandbox checkout have been exercised, but a fresh end-to-end onboarding test on the latest deployment and the remaining provider and multi-site checks are still open. `main` has not been promoted with this work. See the [current reconciliation status](./docs/RECONCILIATION_STATUS_2026-09-23.md) for evidence and release gates.
 
-## Stack
-- Frontend: Next.js App Router (Web + Admin)
-- Backend: Fastify + tRPC + OpenAPI
-- Database: Postgres + Prisma (v7, adapter‑pg)
-- Auth: Clerk (JWT)
-- Realtime: SSE (tenant‑filtered)
-- AI: Vercel AI SDK (OpenAI + Anthropic + Gemini)
-- Email: Resend
-- Comms: Twilio (SMS + WhatsApp)
+## Product surfaces
 
-## Repository Structure
-```
+| Surface                       | Audience                           | App          | Staging entry                                                                                                                                                                |
+| ----------------------------- | ---------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Website and guided onboarding | Prospective churches               | `apps/web`   | [Website](https://churchtrack-web-git-develop-tamensahs-projects.vercel.app/) · [Get started](https://churchtrack-web-git-develop-tamensahs-projects.vercel.app/get-started) |
+| Member portal                 | Members of a church                | `apps/web`   | [Portal](https://churchtrack-web-git-develop-tamensahs-projects.vercel.app/portal)                                                                                           |
+| Church administration         | Church admins and staff            | `apps/admin` | [Admin](https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app/)                                                                                                |
+| Platform operations           | ChurchTrack's authorized operators | `apps/admin` | `/platform` within the admin app                                                                                                                                             |
+
+The normal customer path is website → Clerk sign-in → create/select an organization workspace → choose a plan → configured checkout → church admin. The workspace owns the customer account and subscription. ChurchTrack then provisions an in-app Organization, first Church, and Campus. The first Organization uses the workspace name when available; the admin names the operating Church and confirms its public slug and country. The first Church's slug is suggested from its name and must be globally unique.
+
+An independently operated congregation is a **Church**, even if the customer calls it a branch, assembly, or campus church. A **Campus** is a site sharing one Church's members and operating records. Headquarters and regional oversight of child Churches, delegated regional permissions, and a first-run timezone choice are **not yet implemented**. See the [onboarding manual](./docs/ONBOARDING_MANUAL.md) and [church structure review](./docs/CHURCH_STRUCTURE_REVIEW_2026-09-23.md).
+
+## Architecture
+
+- **Web and admin:** Next.js 16 App Router, React 19, Clerk.
+- **API:** Fastify, tRPC, and documented external endpoints. The staging API runs as a Neon Function on Node.js 24.
+- **Database:** Neon Postgres with Prisma 7. Runtime traffic uses a pooled connection; migrations use a direct connection.
+- **Scheduled work:** Neon Function Triggers call protected API handlers.
+- **Integrations:** Clerk for identity, Resend for transactional email, Polar for staging subscription checkout, with Paystack and Stripe activation tracked separately.
+
+The database, API, and scheduled work are on Neon; Vercel hosts the two Next.js apps. The repository still uses `@faithflow-ai/*` package names, the `faithflow_canonical` database name, and the `faithflowapi` Function slug as internal identifiers. Changing those names requires a coordinated migration and is not part of the customer-facing ChurchTrack rename.
+
+```text
 apps/
-  web/        Marketing + member‑facing UX
-  admin/      Admin console
-  api/        Fastify API service (tRPC + OpenAPI)
+  web/        Website, onboarding, and member portal
+  admin/      Church administration and platform operations
+  api/        Fastify API and Neon Function entry
 packages/
-  api/        Shared tRPC router + types
-  ui/         Design system (shadcn‑style)
-  database/   Prisma schema + client + seed
-  ai/         AI orchestration (Vercel AI SDK)
+  api/        Shared tRPC routers and business logic
+  database/   Prisma schema, migrations, and generated client
+  ui/         Shared UI components
+  ai/         AI integration code
   utils/      Shared utilities
 ```
 
-## Branch & Deployment Workflow
+## Run locally
 
-ChurchTrack follows a **dev → staging → production** model. Production (`main`) is protected — no direct commits.
+Use Node.js **24.x** and pnpm **10.28.2**. Start from a feature branch based on `develop`. Use a disposable or local Neon database branch for development; do not point routine local commands at staging or production.
 
-### Branch model
+1. Install dependencies: `pnpm install --frozen-lockfile`.
+2. Use [`.env.example`](./.env.example) as the variable inventory. Create untracked, app-local environment files:
+   - `packages/database/.env`: direct `DIRECT_URL` (or `DATABASE_URL_UNPOOLED`) for Prisma CLI and `DATABASE_URL` for the same disposable database.
+   - `apps/api/.env.local`: pooled `DATABASE_URL`, allowed local origins, Clerk server credentials, and only the integration keys being tested.
+   - `apps/web/.env.local` and `apps/admin/.env.local`: Clerk keys, `NEXT_PUBLIC_API_URL`, the Clerk JWT template, and their web/admin URLs.
+3. Validate and apply the checked-in schema **only to the disposable database**:
 
-```
-feature/<name>  ──PR──►  develop  ──PR──►  main
-hotfix/<name>   ──PR──►  main  (+ backport PR to develop)
-```
+   ```bash
+   pnpm --filter @faithflow-ai/database exec prisma generate
+   pnpm db:validate
+   pnpm db:migrate:deploy
+   ```
 
-| Branch | Purpose | Deploys to |
-|--------|---------|-----------|
-| `feature/*` | New features / fixes | Ephemeral Vercel preview per PR |
-| `develop` | Integration & QA | **Staging** (stable URL, reviewed before prod) |
-| `main` | Production-ready code only | **Production** (auto-deploys on merge) |
+4. Run the three services in separate terminals:
 
-### Environments
+   ```bash
+   pnpm --filter @faithflow-ai/api-server dev
+   pnpm --filter @faithflow-ai/web dev
+   pnpm --filter @faithflow-ai/admin dev
+   ```
 
-| Environment | Admin URL | API |
-|-------------|-----------|-----|
-| Staging | `https://churchtrack-admin-git-develop-tamensahs-projects.vercel.app` | Neon Function on the Neon `develop` branch |
-| Production | Vercel production alias | Neon Function on the Neon default branch after promotion |
+The default local ports are API `4000`, web `3000`, and admin `3001`. Demo seeding is optional and belongs on a disposable database only. Avoid `db:push` for shared environments; use reviewed migrations.
 
-### Day-to-day flow
+## Branches and deployment
 
-```bash
-# 1. Branch off develop for your work
-git checkout develop && git pull
-git checkout -b feature/my-feature
+Changes start on a feature branch and enter `develop` through a PR. Vercel deploys web/admin previews from `develop`, while the matching Neon `develop` branch hosts the canonical database, API Function, and triggers. After staging verification, a separate `develop` → `main` PR promotes a release. Database migrations and backend deployment are deliberate steps; a Vercel Ready status alone does not verify the full product. See the [Git and deployment workflow](./docs/GITFLOW_WORKFLOW.md) and [deployment manual](./docs/DEPLOYMENT_MANUAL.md).
 
-# 2. Commit and push — opens a PR against develop
-git push origin feature/my-feature
+## Integration and release status
 
-# 3. PR merged → develop deploys to staging for review
+| Area                  | Current state                                                                                                                                        |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Subscription checkout | Polar **sandbox** is connected in staging; lifecycle and entitlement testing is still a release gate.                                                |
+| Paystack              | Priority provider for the first release; staging credentials and sandbox checkout/webhook tests remain.                                              |
+| Stripe                | Kept in the codebase, with activation deferred until the US entity and provider setup are complete.                                                  |
+| Email                 | Resend is the transactional provider. The configured sending domain and delivery must be verified for each environment.                              |
+| Multi-site oversight  | Separate operating Churches are supported. Nested regions, headquarters rollups, and delegated regional roles remain design and implementation work. |
 
-# 4. When staging is okayed, open a PR: develop → main
-# 5. Merge → production auto-deploys
-```
+The primary ChurchTrack domain has not been purchased. Staging uses the Vercel aliases above; do not assume a production domain or public launch from those URLs.
 
-### Rules
-- **Never commit directly to `main`** — always via PR from `develop`
-- **Never commit directly to `develop`** — always via PR from a feature branch
-- All PRs require a passing Vercel preview build before merge
-- Database migrations (`pnpm db:migrate`) must be run against staging before the `develop → main` PR is merged
-- Hotfixes to production must be backported to `develop` immediately
+## Checks and documentation
 
-### Neon backend deployments
-The Fastify API, PostgreSQL, and scheduled Function Triggers run on Neon. Vercel hosts the two Next.js applications. Deploy and validate the long-lived Neon `develop` branch before promoting `develop → main`. See [`docs/NEON_MIGRATION_RUNBOOK.md`](./docs/NEON_MIGRATION_RUNBOOK.md).
-
-ChurchTrack exposes four product surfaces through two frontend apps: the marketing website and member portal live in `apps/web`; church administration and the role-gated platform operations console live in `apps/admin`. See [`docs/PRODUCT_SURFACES.md`](./docs/PRODUCT_SURFACES.md).
-
-The current recovery and release-gate evidence is tracked in [`docs/RECONCILIATION_STATUS_2026-09-23.md`](./docs/RECONCILIATION_STATUS_2026-09-23.md).
-
----
-
-## Quick Start
-1. Install dependencies:
-```
-pnpm install
-```
-
-2. Create `.env` from `.env.example`:
-```
-cp .env.example .env
-```
-
-3. Set Clerk keys and DB connection. At minimum:
-- `DATABASE_URL` (pooled Neon URL for runtime traffic)
-- `DATABASE_URL_UNPOOLED` (direct Neon URL for migrations)
-- `CLERK_JWT_KEY`, `CLERK_JWT_ISSUER`, `CLERK_JWT_AUDIENCE`
-- `NEXT_PUBLIC_API_URL`
- - `NEXT_PUBLIC_WEB_URL` (used for QR/share links)
- - Optional: `CLERK_WEBHOOK_SECRET` (for org creation webhook)
- - Payments: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PAYSTACK_SECRET_KEY`, `PAYSTACK_WEBHOOK_SECRET`
- - Storage: `STORAGE_PROVIDER` (`S3` or `GCS`) plus the matching bucket credentials
-
-4. Generate DB tables:
-```
-pnpm db:push
-```
-
-5. Seed demo data:
-```
-pnpm db:seed
-```
-
-6. Start services:
-```
-pnpm --filter @faithflow-ai/api-server dev
-pnpm --filter @faithflow-ai/admin dev
-pnpm --filter @faithflow-ai/web dev
-```
-
-## Auth + Tenant Bootstrapping
-- API verifies Clerk JWTs on every request.
-- Tenant ID is derived from the Clerk Org ID.
-- On first request, the API auto‑creates:
-  - Tenant
-  - Default Organization
-  - Default Church
-  - Main Campus
-
-This makes org setup immediate for new tenants without manual bootstrapping.
-
-## Clerk Webhook (Org Provisioning)
-- Endpoint: `POST /webhooks/clerk`
-- Expects Clerk Svix headers (`svix-id`, `svix-timestamp`, `svix-signature`)
-- When `organization.created` fires, the API provisions:
-  - Tenant
-  - Default Organization
-  - Default Church
-  - Main Campus
-
-## Prisma 7 Notes
-- Prisma config lives at `packages/database/prisma.config.ts`.
-- `DATABASE_URL` is required for the Prisma PG adapter. Prisma CLI migrations prefer `DIRECT_URL`, then `DATABASE_URL_UNPOOLED`, and fall back to `DATABASE_URL` for local compatibility.
-
-## Realtime
-- SSE endpoint: `GET /stream`
-- Requires a short-lived signed stream token issued from the authenticated session.
-- Events are tenant‑filtered server‑side.
-
-Currently emitting:
-- `attendance.checked_in`
-- `donation.created`
-
-## Giving + Payments
-- Admin console: `/giving` for funds, campaigns, and checkout links.
-- Finance console: `/finance` for reconciliation, pledges, recurring, budgets, expenses.
-- Public giving form: `/give` (calls `POST /public/giving/checkout`).
-- Public fundraiser page: `/fundraisers/:churchSlug/:slug` (calls `GET /public/fundraisers/:churchSlug/:slug`).
-- Receipts: `GET /public/receipts/:receiptNumber?token=...` (HTML, signed access required).
-- Shareable links + QR codes generated in admin `/giving` (uses `NEXT_PUBLIC_WEB_URL`).
-- Recurring checkout: Stripe + Paystack via `/finance`.
-- Webhooks:
-  - `POST /webhooks/stripe`
-  - `POST /webhooks/paystack`
-  - `POST /webhooks/stripe/platform`
-  - `POST /webhooks/paystack/platform`
-  - `POST /webhooks/twilio/sms`
-- Webhook deliveries are replay-safe and persisted in `WebhookEvent` for idempotency/audit.
-- Paystack signature verification uses `PAYSTACK_WEBHOOK_SECRET` if set, otherwise `PAYSTACK_SECRET_KEY`.
-- Paystack currencies enforced server-side: NGN, USD, GHS, ZAR, KES, XOF.
-- Currency availability enforced by `Church.countryCode` (NGN=NG, USD=NG/KE, GHS=GH, ZAR=ZA, KES=KE, XOF=CI).
-- Paystack minimums enforced: NGN 50, USD 2, GHS 0.1, ZAR 1, KES 3, XOF 1.
-- USD via Paystack is only available to Kenya/Nigeria businesses; enforced via `Church.countryCode`.
-
-## Text-to-Give
-- Configure numbers in `/giving` → Text-to-give.
-- Incoming SMS syntax: `GIVE 50 USD` (include email for Paystack).
-- Twilio signature verification uses `TWILIO_AUTH_TOKEN` and optional `TWILIO_WEBHOOK_URL`.
-
-## Communications
-- Admin `/communications` for templates and outbound email/SMS/WhatsApp.
-- Messages are logged with delivery status for auditability.
-- Scheduling + drip campaigns supported (use dispatch task endpoint).
-- Task endpoint: `POST /tasks/communications/dispatch` (API key).
-
-## Operations Automation
-- Subscription dunning: `POST /tasks/subscriptions/dunning`
-- Subscription metadata normalization: `POST /tasks/subscriptions/metadata-backfill`
-- Tenant domain + SSL automation: `POST /tasks/tenant-ops/automate`
-- Support SLA evaluation: `POST /tasks/support/sla`
-- All task routes are API key protected via `INTEGRATION_API_KEY`.
-- Recommended cadence:
-  - support SLA: every 5 minutes
-  - tenant ops automation: every 15 minutes
-  - subscription metadata backfill: daily at 02:10 UTC
-- Neon Function and triggers: `neon.ts`
-- The deployed scheduler uses Neon Function Triggers.
-- The in-process scheduler is local-only (`ENABLE_INTERNAL_SCHEDULER=true`) and must stay disabled on Neon.
-- Scheduler profiles guide: `docs/SCHEDULER_PROFILES.md`.
-
-## Membership
-- Member profiles, households, groups, tags, milestones, and volunteer roles.
-- Onboarding workflows, directory privacy, and group events.
-- Admin `/members` for core management workflows.
-- Member self‑service portal: `/portal`.
-- Manual: [`docs/MEMBERSHIP_MANUAL.md`](./docs/MEMBERSHIP_MANUAL.md).
-
-## Refunds + Disputes
-- Refunds supported for Stripe, Paystack, and manual donations.
-- Disputes recorded from provider webhooks.
-- Evidence submission supported for Stripe disputes.
-- Task endpoint: `POST /tasks/disputes/monitor` (API key).
-- Operational playbook: [`docs/DISPUTE_PLAYBOOK.md`](./docs/DISPUTE_PLAYBOOK.md).
-
-## Payout Reconciliation
-- Sync payouts from Stripe and settlements from Paystack in `/finance`.
-- Transactions stored in `Payout` and `PayoutTransaction`.
-
-## External Integrations (OpenAPI)
-- API key–secured endpoints under `/api/v1` for integrations.
-- Headers: `x-api-key` plus `x-clerk-org-id` or `x-tenant-id`.
-
-## AI Insights
-- Finance dashboard includes AI donor insights (uses Vercel AI SDK providers).
-
-## Exports
-- CSV exports for donations, expenses, pledges, recurring, receipts, and payouts in `/finance`.
-
-## Fundraising
-- Fundraiser (peer-to-peer) pages with shareable URLs:
-  - Public route: `/fundraisers/:churchSlug/:slug`
-  - Admin creation: `/giving` → Fundraiser pages
-  - Donations can be marked anonymous
-
-## Audit Logs
-- Router: `audit.list` for recent activity.
-- Logged actions: donations, pledges, recurring, expenses, budgets, receipts, funds, campaigns, fundraisers.
-
-## Development Commands
-- `pnpm dev` – run all packages in parallel
-- `pnpm db:push` – sync Prisma schema to DB
-- `pnpm db:migrate` – create/apply migrations (requires DB)
-- `pnpm db:seed` – seed demo tenant + data
-
-## Brand Guide
-See [`docs/BRAND_GUIDE.md`](./docs/BRAND_GUIDE.md).
-
-## Deployment
-- Full deployment runbook: [`docs/DEPLOYMENT_MANUAL.md`](./docs/DEPLOYMENT_MANUAL.md)
-- Provider setup checklist: [`docs/THIRDPARTY_CONFIG.md`](./docs/THIRDPARTY_CONFIG.md)
-- Scheduler profiles: [`docs/SCHEDULER_PROFILES.md`](./docs/SCHEDULER_PROFILES.md)
-- Onboarding runbook: [`docs/ONBOARDING_MANUAL.md`](./docs/ONBOARDING_MANUAL.md)
-- Demo playbook: [`docs/DEMO_PLAYBOOK.md`](./docs/DEMO_PLAYBOOK.md)
-
-## Next Focus Areas
-- Payments refinements (refunds, disputes, multi-account routing)
-- Communications orchestration (Resend + Twilio/WhatsApp)
-- AI insights + automation flows
-
----
-If you want a specific domain built next (Giving, Comms, or Insights), we can wire it into both API and admin with full flows.
+- `pnpm typecheck` and `pnpm lint` check the workspaces; lint currently reports existing warnings.
+- `pnpm test:e2e:api` writes test data and must run only against an isolated database.
+- Use the [beta smoke test](./docs/BETA_SMOKE_TEST.md) for browser validation, including the complete onboarding journey and member/admin access.
+- Use the [provider configuration tracker](./docs/THIRDPARTY_CONFIG.md) before enabling an integration.
+- Use the [product surfaces guide](./docs/PRODUCT_SURFACES.md) for audience and route ownership.
