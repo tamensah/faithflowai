@@ -76,8 +76,8 @@ Changes start on a feature branch and enter `develop` through a PR. Vercel deplo
 | Area                  | Current state                                                                                                                                        |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Subscription checkout | Polar **sandbox** is connected in staging; lifecycle and entitlement testing is still a release gate.                                                |
-| Paystack              | GHS giving/local payments remain in scope. Self-serve subscriptions use Polar while Paystack pricing, trial, and reconciliation work remains open.     |
-| Stripe                | Kept in the codebase, with activation deferred until the US entity and provider setup are complete.                                                  |
+| Church giving         | Online giving requires each organization or church to connect its own Paystack or Stripe merchant account; checkout is blocked until that flow exists. |
+| Paystack and Stripe   | Church-owned giving providers only. ChurchTrack subscriptions use Polar; the old shared-key giving adapters are not a release-ready merchant flow.    |
 | Email                 | Resend is the transactional provider. The configured sending domain and delivery must be verified for each environment.                              |
 | Multi-site oversight  | Separate operating Churches are supported. Nested regions, headquarters rollups, and delegated regional roles remain design and implementation work. |
 

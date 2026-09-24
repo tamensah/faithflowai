@@ -161,6 +161,15 @@ async function resolveChurch(input: CreateCheckoutInput) {
   return church;
 }
 
+function requireChurchPaymentConnection(_churchId: string, _provider: PaymentProvider): void {
+  // Giving must never fall back to the platform's Stripe or Paystack credentials.
+  // Replace this guard only when the selected church has a verified merchant connection.
+  throw new TRPCError({
+    code: 'PRECONDITION_FAILED',
+    message: 'Online giving is not available until this church connects its own payment provider.',
+  });
+}
+
 async function createStripeCheckout(input: CreateCheckoutInput, paymentIntentId: string) {
   if (!input.successUrl) {
     throw new TRPCError({ code: 'BAD_REQUEST', message: 'successUrl is required for Stripe' });
@@ -439,6 +448,7 @@ export async function createDonationCheckout(input: CreateCheckoutInput): Promis
   }
   assertAllowedCheckoutRedirects(input, input.requestOrigin);
   const church = await resolveChurch(input);
+  requireChurchPaymentConnection(church.id, input.provider);
   const normalizedInput = { ...input, churchId: church.id };
   if (input.provider === PaymentProvider.PAYSTACK) {
     ensurePaystackCurrency(input.amount, input.currency, church.countryCode);
@@ -590,6 +600,7 @@ export async function createTicketCheckout(input: CreateTicketCheckoutInput) {
   if (!event) {
     throw new TRPCError({ code: 'NOT_FOUND', message: 'Event not found' });
   }
+  requireChurchPaymentConnection(event.churchId, input.provider);
 
   const ticketType = await prisma.eventTicketType.findFirst({
     where: { id: input.ticketTypeId, eventId: event.id, isActive: true },
@@ -708,6 +719,7 @@ export async function createRecurringCheckout(input: CreateRecurringCheckoutInpu
   assertAllowedCheckoutRedirects(input, input.requestOrigin);
 
   const church = await resolveChurch(input);
+  requireChurchPaymentConnection(church.id, input.provider);
 
   const recurring = await prisma.recurringDonation.create({
     data: {
