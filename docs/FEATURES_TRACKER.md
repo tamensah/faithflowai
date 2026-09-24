@@ -21,7 +21,7 @@ This tracks product scope, implemented foundations, and release work. A listed f
   - Realtime feed with attendance + donation events
 - SSE realtime (tenant‑filtered)
 - Initial Prisma migration + seed data
-- Brand guide v1
+- ChurchTrack brand brief and design-system baseline (visual system and key screens awaiting design approval)
 - Giving foundation (funds + campaigns + donations)
 - Legacy Stripe + Paystack checkout + webhook processing (online giving disabled pending tenant-owned connections)
 - Finance ops foundation (pledges, recurring, budgets, expenses, receipts)
