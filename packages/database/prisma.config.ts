@@ -18,8 +18,8 @@ export default defineConfig({
     // Prisma migrations need a direct Neon connection. Application traffic
     // continues to use the pooled DATABASE_URL through the runtime adapter.
     url:
-      process.env['DIRECT_URL'] ??
-      process.env['DATABASE_URL_UNPOOLED'] ??
+      process.env['DIRECT_URL']?.trim() ||
+      process.env['DATABASE_URL_UNPOOLED']?.trim() ||
       process.env['DATABASE_URL'],
   },
 });
