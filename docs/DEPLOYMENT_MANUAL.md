@@ -14,7 +14,7 @@ This is the deployment source of truth for the Vercel + Neon topology.
 | PostgreSQL | `faithflow_canonical` on Neon `develop` | `faithflow_canonical` on the Neon default branch |
 | Scheduled jobs | Neon Function Triggers declared in `neon.ts` | Neon Function Triggers declared in `neon.ts` |
 
-Clerk remains the identity provider. Resend handles email. Paystack and Polar are the priority payment providers for the first release; Stripe remains supported for later activation after the US LLC setup.
+Clerk remains the identity provider. Resend handles email. Polar handles ChurchTrack subscriptions. Churches may later connect their own Paystack or Stripe merchant accounts for giving; online church checkout stays blocked until those tenant-owned connections are implemented and verified. See [Payment ownership](./PAYMENT_OWNERSHIP.md).
 
 ## Repository deployment contract
 
@@ -62,9 +62,9 @@ Use a dedicated sending-only Resend API key restricted to the configured sending
 Required when each integration is enabled:
 
 - Clerk webhooks: `CLERK_WEBHOOK_SECRET`
-- Paystack: `PAYSTACK_SECRET_KEY`, `PAYSTACK_WEBHOOK_SECRET`, `PLATFORM_PAYSTACK_WEBHOOK_SECRET`
+- Church giving providers: per-tenant merchant connections are not implemented; do not add a shared Paystack or Stripe secret to enable giving checkout
 - Polar: `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER`; each plan also needs `metadata.polarProductId`
-- Stripe: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `PLATFORM_STRIPE_WEBHOOK_SECRET`
+- Legacy Stripe and Paystack provider secrets, if needed for historical reconciliation, must be handled separately from new church-owned checkout
 - Twilio, AI, storage, and streaming provider variables listed in [`ENV_CHECKLIST.md`](./ENV_CHECKLIST.md)
 
 Never print or commit the environment file. When a provider key changes, deploy a complete reviewed environment file so a partial update does not remove another integration.

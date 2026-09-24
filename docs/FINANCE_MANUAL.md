@@ -2,6 +2,8 @@
 
 This guide explains how the finance domain works across donations, budgeting, reconciliation, and reporting. It is written for both developers and early adopters who need to operate the platform confidently.
 
+**Current release status:** Online giving, recurring gifts, and paid-event checkout are blocked until each organization or church can connect and verify its own merchant account. The provider flows below describe the intended behavior and existing adapter code, not an active church-owned checkout. Manual giving records remain available. See [Payment ownership](./PAYMENT_OWNERSHIP.md).
+
 ## 1. Core Concepts
 
 - **Fund**: A designated bucket for giving (e.g., General Fund, Missions). One fund can be set as the default.

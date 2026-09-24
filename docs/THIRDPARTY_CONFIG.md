@@ -30,8 +30,8 @@ Optional guardrail env:
 
 ## Payment provider release order
 
-- **First production release:** Polar for ChurchTrack SaaS billing and Paystack for Ghana/African payment flows.
-- **Retained adapter:** Stripe is already implemented in the codebase but live use is deferred until the US LLC and Stripe account setup are complete.
+- **ChurchTrack subscriptions:** Polar only.
+- **Church giving:** Each organization or church connects its own eligible Paystack or Stripe merchant account. The legacy shared-key adapters are blocked for new online checkout until tenant-owned connections are implemented. See [Payment ownership](./PAYMENT_OWNERSHIP.md).
 - Keep provider SDKs and webhook payloads behind billing/payment adapters. Entitlements, subscription state, pricing, reconciliation, webhook idempotency, and tenant business rules remain server-side and provider-neutral.
 
 Polar is the first-release SaaS subscription provider. The adapter uses the official `@polar-sh/sdk` and keeps provider payloads behind ChurchTrack's subscription boundary.
@@ -40,31 +40,27 @@ Polar is the first-release SaaS subscription provider. The adapter uses the offi
 - Starter (`46305a55-da31-495f-98b0-e763a0ccc926`) and Growth (`9db3247e-2ecb-4deb-b6ee-d9887e790b47`) are configured as private monthly products with 14-day trials and are mapped to the matching ChurchTrack plans through `metadata.polarProductId`.
 - The enabled webhook (`41e4ae0e-91c6-472f-86f1-e80b7e8fef34`) sends the required subscription lifecycle events to `POST /webhooks/polar/platform` on the Neon staging Function.
 - Required env: `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER=sandbox`.
-- Neon staging deployment 12 retains these variables. Runtime checks confirm that the token can read subscriptions, denied ungranted product access, and the webhook rejects unsigned payloads.
+- Neon staging has these variables. Runtime checks confirm that the token can read subscriptions, denied ungranted product access, and the webhook rejects unsigned payloads.
 - Complete hosted checkout, signed webhook, customer portal, cancellation, and recovery tests before enabling production.
 
-## 2. Stripe (implemented, live activation deferred)
+## 2. Stripe for church-owned giving (connection work pending)
 
-**Goal**: enable card giving, recurring donations, and payout reconciliation.
+**Goal**: let an eligible church connect its own Stripe account for card giving, recurring donations, and payout reconciliation.
 
-- Create a Stripe account and enable Checkout.
-- Create a webhook endpoint:
+- Build Stripe Connect onboarding, account-status checks, connected-account checkout, and tenant-scoped webhook reconciliation. The existing shared-key adapter does not provide this boundary.
+- The older webhook endpoint is:
   - `POST /webhooks/stripe`
   - Events used: `checkout.session.completed`, `payment_intent.succeeded`, `payment_intent.payment_failed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`, `checkout.session.async_payment_failed`, `charge.refunded`, `refund.created`, `refund.updated`, `refund.failed`, `charge.dispute.created`, `charge.dispute.updated`, `charge.dispute.closed`.
-- Required env:
-  - `STRIPE_SECRET_KEY`
-  - `STRIPE_WEBHOOK_SECRET`
+- A future Connect platform will need its own server-side credentials and signed Connect webhook. Do not set a platform `STRIPE_SECRET_KEY` to receive church donations.
 
-## 3. Paystack (implemented, first-release priority)
+## 3. Paystack for church-owned giving (connection work pending)
 
-**Goal**: enable NGN/GHS/KES/ZAR/USD/XOF giving and settlement reconciliation.
+**Goal**: let an eligible church use its own Paystack merchant integration for local giving and settlement reconciliation.
 
-- Create a Paystack account.
-- Configure webhook:
+- The church needs its own Paystack merchant account and supported currency. Build a secure per-merchant secret connection and route checkout, webhook, refund, and settlement operations through it. A QRVIBE subaccount or a shared key is not a substitute for that merchant ownership.
+- The older webhook endpoint is:
   - `POST /webhooks/paystack`
-- Required env:
-  - `PAYSTACK_SECRET_KEY`
-  - `PAYSTACK_WEBHOOK_SECRET` (falls back to secret key if not set)
+- Do not set a platform `PAYSTACK_SECRET_KEY` to receive church donations.
 - Dispute evidence API requires customer email, name, phone, and service details for each dispute.
 
 ## 4. Twilio (SMS + WhatsApp + Text‑to‑Give)
