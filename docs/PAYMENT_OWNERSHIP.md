@@ -26,7 +26,7 @@ The Church chooses which of its verified providers to offer. Where both are enab
 
 ## Current implementation and release gate
 
-The existing giving code uses server-wide Stripe and Paystack secrets and has no tenant merchant-connection model. That is incompatible with the ownership rule above. New online donation, recurring-gift, and paid-event checkout is therefore blocked at the API until verified church-owned connections replace the guard. Manual donation records remain possible. The existing UI and older finance documentation may show provider choices; those choices are not evidence of an active connection. Do not set a shared platform secret to make giving appear to work.
+The existing giving code uses server-wide Stripe and Paystack secrets and has no tenant merchant-connection model. That is incompatible with the ownership rule above. New online donation, recurring-gift, and paid-event checkout is blocked in the `develop` API code until verified church-owned connections replace the guard; the staging API still needs a safe redeploy. Manual donation records remain possible. The existing UI and older finance documentation may show provider choices; those choices are not evidence of an active connection. Do not set a shared platform secret to make giving appear to work.
 
 Before a public pilot, test at least two separate church organizations and verify that each checkout, webhook, refund, and settlement maps only to its own account and ledger. Also test a branch inheriting the parent connection and one with an explicit override, failed/disconnected accounts, wrong-currency attempts, duplicate webhooks, delayed payments, and cancellation of recurring gifts. This is separate from Polar subscription testing.
 
