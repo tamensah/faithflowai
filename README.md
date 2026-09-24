@@ -76,7 +76,7 @@ Changes start on a feature branch and enter `develop` through a PR. Vercel deplo
 | Area                  | Current state                                                                                                                                        |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Subscription checkout | Polar **sandbox** is connected in staging; lifecycle and entitlement testing is still a release gate.                                                |
-| Paystack              | Priority provider for the first release; staging credentials and sandbox checkout/webhook tests remain.                                              |
+| Paystack              | GHS giving/local payments remain in scope. Self-serve subscriptions use Polar while Paystack pricing, trial, and reconciliation work remains open.     |
 | Stripe                | Kept in the codebase, with activation deferred until the US entity and provider setup are complete.                                                  |
 | Email                 | Resend is the transactional provider. The configured sending domain and delivery must be verified for each environment.                              |
 | Multi-site oversight  | Separate operating Churches are supported. Nested regions, headquarters rollups, and delegated regional roles remain design and implementation work. |

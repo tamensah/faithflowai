@@ -766,6 +766,12 @@ export const billingRouter = router({
   verifyPaystackCheckout: protectedProcedure
     .input(verifyPaystackCheckoutInput)
     .mutation(async ({ ctx, input }) => {
+      if (process.env.PAYSTACK_BILLING_ENABLED !== 'true') {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Paystack subscriptions are not available. Use Polar for ChurchTrack billing.',
+        });
+      }
       await requireTenantAdmin(ctx.tenantId!, ctx.userId!);
       await ensureBaselinePlans();
 
@@ -1105,6 +1111,12 @@ export const billingRouter = router({
     }
 
     if (active.provider === SubscriptionProvider.PAYSTACK) {
+      if (process.env.PAYSTACK_BILLING_ENABLED !== 'true') {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Paystack subscription changes are not available. Contact the platform team.',
+        });
+      }
       const paystackSecret = requirePaystackSecret();
       const email = await getClerkPrimaryEmail(ctx.userId!);
       if (!email) {
@@ -1113,6 +1125,12 @@ export const billingRouter = router({
 
       const planMeta = (targetPlan.metadata ?? {}) as Record<string, unknown>;
       const trialDays = readPlanMetaInt(planMeta, 'trialDays');
+      if (trialDays) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Paystack does not support this free trial at checkout. Contact the platform team.',
+        });
+      }
       const disablePreviousReady = hasPaystackDisablePath(active.metadata, active.providerRef);
       const currentPeriodEnd = active.currentPeriodEnd ? new Date(active.currentPeriodEnd).toISOString() : null;
       const paystackPlanCode =
@@ -1636,6 +1654,18 @@ export const billingRouter = router({
       };
     }
 
+    if (process.env.PAYSTACK_BILLING_ENABLED !== 'true') {
+      throw new TRPCError({
+        code: 'PRECONDITION_FAILED',
+        message: 'Paystack subscriptions are not available. Use Polar for ChurchTrack billing.',
+      });
+    }
+    if (trialDays) {
+      throw new TRPCError({
+        code: 'PRECONDITION_FAILED',
+        message: 'Paystack does not support this free trial at checkout. Use Polar for ChurchTrack billing.',
+      });
+    }
     const paystackSecret = requirePaystackSecret();
     if (!email) {
       throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Primary email is required for Paystack checkout' });

@@ -5,7 +5,7 @@ This document separates the provider roadmap from code that exists today.
 | Provider | Intended use | Code status | Release status |
 | --- | --- | --- | --- |
 | Polar | ChurchTrack SaaS plans and subscriptions | Adapter implemented: hosted checkout, customer portal, signed/idempotent lifecycle webhook, refresh, plan change, cancellation, and resume | Sandbox organization, Starter/Growth products, plan mappings, signed webhook, and least-privilege Neon credentials configured; authenticated lifecycle verification remains a release gate |
-| Paystack | Ghana/African checkout, giving, recurring payments, and settlement workflows | Implemented | First-production priority; provider onboarding and live end-to-end verification remain |
+| Paystack | GHS giving and other local payments; possible later subscription option | Giving adapter exists; legacy subscription paths are disabled for new self-serve billing | QRVIBE account ownership/KYC, Ghana payment verification, and ChurchTrack fit remain; no ChurchTrack subscription plans should be sold through Paystack yet |
 | Stripe | Future USD/international checkout, billing portal, giving, payouts, and disputes | Adapter retained; new self-serve subscription checkout defaults off | Activation deferred until US LLC and Stripe account setup are complete |
 | Resend | Transactional and contact-form email | Implemented | `susubiribi.com` verified and ChurchTrack staging sender deployed; live template delivery tests remain |
 
@@ -22,7 +22,17 @@ Provider-specific API calls and webhook parsing belong in adapters. The followin
 
 A provider should be replaceable without rewriting church onboarding, permissions, or feature-access logic. Provider onboarding, KYC approval, live keys, and a successful sandbox test are separate release gates; their existence in documentation or code does not prove production readiness.
 
-Starter and Growth onboarding currently offers Polar and Paystack. Stripe is hidden from new subscription choices and the API rejects new Stripe subscription checkout unless `STRIPE_BILLING_ENABLED=true` is explicitly set after setup and verification. Existing Stripe subscription management code remains for future activation.
+Starter and Growth self-serve subscriptions use Polar. Paystack and Stripe are hidden from new subscription choices. The API rejects new Paystack subscription checkout and checkout verification unless `PAYSTACK_BILLING_ENABLED=true`; it rejects new Stripe checkout unless `STRIPE_BILLING_ENABLED=true`. Both flags default to `false`. Do not enable Paystack merely because test keys or recurring plan codes exist: the existing plan-code checkout would charge immediately and cannot honor the advertised 14-day trial. Paystack donation/giving flows are separate from this subscription decision.
+
+### Why ManuTrack's Paystack setup does not transfer directly
+
+ManuTrack used fixed GHS recurring plan amounts in Paystack and treated USD marketing prices as reference values. Its checkout used GHS pesewas and card-only recurring payment; its application stored the plan codes and reconciled verified payments and signed webhooks. ChurchTrack has USD 49/month Starter and USD 149/month Growth products in Polar, but no approved fixed GHS prices or corresponding Paystack plans. Copying ManuTrack's prices or converting the ChurchTrack USD price at each checkout would create a different subscription price and renewal contract from the one currently shown to customers.
+
+Paystack's subscription-plan checkout charges the plan amount immediately. Paystack has no native 14-day subscription trial; its documented workaround requires a disclosed small card-tokenization charge, transaction verification, and subscription creation after the trial. ChurchTrack has not implemented that sequence. The `paystackTrialPlanCode` and `trialDays` metadata in the older adapter do not defer a charge. The API therefore also refuses Paystack checkout when a plan has trial days, even if the billing flag is enabled.
+
+If we later choose Paystack subscriptions, first agree on stable GHS prices and a pricing-review policy; implement and test the trial/tokenization or an explicitly disclosed pay-now flow; create and map GHS recurring plans for each offered billing cycle; restrict recurring checkout to cards; verify tenant, plan, amount, currency, and subscription identity before granting entitlements; then test signed webhooks, renewals, cancellation, refunds, and reconciliation. Creating a QRVIBE Paystack organization is discovery, not proof that it is approved to sell ChurchTrack or pay out. The ManuTrack `paystack-dashboard-manual-setup.md`, `paystack-integration.md`, `paystack-saas-subscriptions-playbook.md`, and `paystack-go-live-checklist.md` are historical setup references, not ChurchTrack pricing.
+
+Provider references: [Paystack subscriptions](https://paystack.com/docs/payments/subscriptions/), [Paystack free-trial workaround](https://support.paystack.com/en/articles/2125186), [Paystack currency support](https://paystack.com/docs/api/), and [Polar supported countries](https://docs.polar.sh/documentation/polar-as-merchant-of-record/supported-countries). Polar lists Ghana for payouts and supports customer payments globally except sanctioned countries; activation and first-payout verification remain separate gates.
 
 ## Polar configuration contract
 
