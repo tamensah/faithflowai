@@ -1566,6 +1566,12 @@ export const billingRouter = router({
     }
 
     if (input.provider === 'STRIPE') {
+      if (process.env.STRIPE_BILLING_ENABLED !== 'true') {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'Stripe subscriptions are not available yet. Choose Polar or Paystack.',
+        });
+      }
       const stripe = new Stripe(requireStripeSecret());
       const stripePriceId = typeof planMeta.stripePriceId === 'string' ? planMeta.stripePriceId : null;
 

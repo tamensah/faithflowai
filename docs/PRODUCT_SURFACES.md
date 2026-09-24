@@ -14,9 +14,10 @@ The platform operations routes are role-gated. A newly registered church user mu
 1. Visit the marketing website.
 2. Create an account.
 3. Create or select a Clerk organization workspace, which owns the customer account and subscription.
-4. Choose a plan and complete the configured checkout (Polar sandbox in staging).
-5. Land in church administration with the organization context active. Confirm the already provisioned in-app Organization and first Church; name the Church and set its slug and country.
-6. Invite staff and members from the church workspace.
+4. Choose Starter or Growth and complete checkout (Polar sandbox in staging), then return to the signed-in web site to confirm activation. Enterprise uses assisted setup and custom pricing.
+5. Open the admin workspace. The separate Vercel preview address may ask for a second sign-in until ChurchTrack has configured shared authentication on its own domains.
+6. Confirm the already provisioned Organization and first Church; name the Church and set its slug and country.
+7. Invite staff and members from the church workspace.
 
 An operating congregation is a Church even when the customer calls it a branch or campus church. A Campus is a site that shares a Church's operating records. Regional and headquarters oversight of child Churches is not yet implemented; see [`CHURCH_STRUCTURE_REVIEW_2026-09-23.md`](./CHURCH_STRUCTURE_REVIEW_2026-09-23.md).
 
