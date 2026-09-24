@@ -55,6 +55,8 @@ The branch/campus/assembly terminology should be configurable **display language
 
 ## Release evidence needed
 
+The 24 September staging deployment applied the global slug and country-default migrations and served the updated web guide, home, and admin sign-in pages. The checks below still require real customer-flow and authorization testing; a 200 response does not complete them.
+
 - A fresh single-congregation account completes checkout, names its Church, and reaches the admin without duplicate Organization/Church creation.
 - A multi-site test account adds two Churches with different countries; staff, members, events, and giving stay in the correct Church.
 - Two separate customers cannot claim the same public Church slug; the second receives a useful error and can choose another.
